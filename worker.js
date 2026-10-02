@@ -3,7 +3,8 @@ export default {
     const response = await env.ASSETS.fetch(request);
     const contentType = response.headers.get("content-type") || "";
     const pathname = new URL(request.url).pathname;
-    const isLanguageTocPage = pathname === "/English/" || pathname === "/Japanese/" || pathname === "/Chinese/";
+    const decodedPathname = decodeURIComponent(pathname);
+    const isLanguageTocPage = decodedPathname === "/English/" || decodedPathname === "/Japanese/" || decodedPathname === "/Chinese/";
     const legacyDarkPages = [
       "/What-Is-Hypnosis/",
       "/What-Is-Hypnotic-Reincarnation/",
@@ -23,7 +24,7 @@ export default {
       "/人の多次元複合体構造2-二重複合体霊-体/",
       "/伝統修行の五段階/"
     ];
-    const isLegacyDarkPage = legacyDarkPages.includes(pathname);
+    const isLegacyDarkPage = legacyDarkPages.includes(decodedPathname);
     if (!contentType.toLowerCase().includes("text/html")) return response;
 
     const theme = `<style id="awakenology-theme-style">
