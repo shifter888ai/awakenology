@@ -27,28 +27,32 @@
 	<link href="/css/a188dda4144400642da9cde5cee178f4-bundle.css" rel="stylesheet" type="text/css" />
 
 	<style id="awakenology-home-search-link">
-		/* 6B: simple homepage entry point for Search + AI RAG Chat. */
+		/* 6B: quiet homepage entry point for Search + AI RAG Chat. */
 		#awakenology-home-search-link {
-			margin: 8px 0 0 !important;
+			margin: 4px 0 0 !important;
+			width: 100% !important;
 			text-align: center !important;
 		}
-		#awakenology-home-search-link a {
-			color: #fff !important;
-			font-size: 17px !important;
+		#awakenology-home-search-link p {
+			margin: 0 !important;
 			line-height: 1.2 !important;
+		}
+		#awakenology-home-search-link a {
+			color: rgba(255,255,255,.88) !important;
+			font-size: 15px !important;
 			text-decoration: none !important;
-			border-bottom: 1px solid rgba(255,255,255,.55);
-			padding-bottom: 2px;
 		}
 		#awakenology-home-search-link a:hover {
-			border-bottom-color: #fff;
+			color: #fff !important;
+			text-decoration: underline !important;
+			text-underline-offset: 3px;
 		}
 		@media (max-width: 700px) {
 			#awakenology-home-search-link {
-				margin-top: 4px !important;
+				margin-top: 2px !important;
 			}
 			#awakenology-home-search-link a {
-				font-size: 16px !important;
+				font-size: 14px !important;
 			}
 		}
 	</style>
