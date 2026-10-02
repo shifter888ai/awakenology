@@ -8,7 +8,7 @@ export default {
     const isLanguageTocPage = decodedPathname === "/English/" || decodedPathname === "/Japanese/" || decodedPathname === "/Chinese/";
     const isChinesePage = decodedPathname === "/Chinese/" || decodedPathname === "/Coach_cn/" || (/[^\x00-\x7f]/.test(decodedPathname) && /[\u3400-\u9fff]/.test(decodedPathname) && !/[\u3040-\u30ff]/.test(decodedPathname));
     const legacyDarkPages = [
-      "/What-Is-Hypnosis/","/What-Is-Hypnotic-Reincarnation/","/The-History-of-Reincarnation/","/Multidimensional-Body-Complex-1-Single-Complex/","/Multidimensional-Body-Complex-3-Multi-Complex/","/What-is-The-Ultimate-Source/","/What-does-The-Ultimate-Source-like/","/What-is-Multidimensional-Space-Time/","/What-is-Zero-Energy-Space/","/アインシュタイン協議百年催眠実験/","/意識強度とは/","/意識強度検測点1自動意識制御領域/","/意識強度検測点2自主意識領域/","/意識強度検測点抽出検測データサンプル20190317/","/人の多次元複合体構造1-単重複合体/","/人の多次元複合体構造2-二重複合体霊-体/","/伝統修行の五段階/"
+      "/What-Is-Hypnosis/","/What-Is-Hypnotic-Reincarnation/","/The-History-of-Reincarnation/","/Multidimensional-Body-Complex-1-Single-Complex/","/Multidimensional-Body-Complex-3-Multi-Complex/","/What-is-The-Ultimate-Source/","/What-does-The-Ultimate-Source-like/","/What-is-Multidimensional-Space-Time/","/What-is-Zero-Energy-Space/","/Energy-Consumption-and-Transformation/","/アインシュタイン協議百年催眠実験/","/意識強度とは/","/意識強度検測点1自動意識制御領域/","/意識強度検測点2自主意識領域/","/意識強度検測点抽出検測データサンプル20190317/","/人の多次元複合体構造1-単重複合体/","/人の多次元複合体構造2-二重複合体霊-体/","/伝統修行の五段階/"
     ];
     const isLegacyDarkPage = legacyDarkPages.includes(decodedPathname);
     if (!contentType.toLowerCase().includes("text/html")) return response;
@@ -43,7 +43,7 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle{background:#222;color:#eee;bor
 </style>`;
 
     const script = `<script>
-(function(){var KEY="awakenology-theme";var saved=localStorage.getItem(KEY);var dark=saved==="dark";document.documentElement.setAttribute("data-aw-theme",dark?"dark":"light");document.addEventListener("DOMContentLoaded",function(){if(document.getElementById("awakenology-theme-toggle"))return;var button=document.createElement("button");button.id="awakenology-theme-toggle";button.type="button";button.setAttribute("aria-label","Switch background theme");button.textContent=dark?"☀":"☾";button.addEventListener("click",function(){dark=document.documentElement.getAttribute("data-aw-theme")!=="dark";document.documentElement.setAttribute("data-aw-theme",dark?"dark":"light");localStorage.setItem(KEY,dark?"dark":"light");button.textContent=dark?"☀":"☾"});document.body.appendChild(button)})}());
+(function(){var KEY="awakenology-theme";var saved=localStorage.getItem(KEY);var dark=saved!=="light";document.documentElement.setAttribute("data-aw-theme",dark?"dark":"light");document.addEventListener("DOMContentLoaded",function(){if(document.getElementById("awakenology-theme-toggle"))return;var button=document.createElement("button");button.id="awakenology-theme-toggle";button.type="button";button.setAttribute("aria-label","Switch background theme");button.textContent=dark?"☀":"☾";button.addEventListener("click",function(){dark=document.documentElement.getAttribute("data-aw-theme")!=="dark";document.documentElement.setAttribute("data-aw-theme",dark?"dark":"light");localStorage.setItem(KEY,dark?"dark":"light");button.textContent=dark?"☀":"☾"});document.body.appendChild(button)})}());
 </script>`;
 
     const chineseScript = `<script type="module">
