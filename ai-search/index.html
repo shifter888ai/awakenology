@@ -4,17 +4,104 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Ask Awakenology</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --page: #f5f5f3;
+      --panel: rgba(255,255,255,.92);
+      --text: #171717;
+      --muted: #666;
+      --line: rgba(0,0,0,.12);
+    }
+    html[data-aw-theme="dark"] {
+      --page: #111;
+      --panel: #1b1b1b;
+      --text: #f2f2f2;
+      --muted: #aaa;
+      --line: rgba(255,255,255,.14);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      background: var(--page);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .ask-page {
+      width: min(900px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 92px 0 100px;
+    }
+    .ask-header {
+      text-align: center;
+      margin-bottom: 34px;
+    }
+    .ask-header h1 {
+      margin: 0 0 10px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(30px, 5vw, 44px);
+      font-weight: 400;
+      letter-spacing: .01em;
+    }
+    .ask-header p {
+      max-width: 650px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .ask-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.06);
+    }
+    .ask-label {
+      margin: 0 0 12px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    search-bar-snippet {
+      display: block;
+      min-height: 52px;
+    }
+    .ask-note {
+      margin: 18px 4px 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    @media (max-width: 700px) {
+      .ask-page { width: min(100% - 24px, 900px); padding: 72px 0 80px; }
+      .ask-header { margin-bottom: 24px; }
+      .ask-header h1 { font-size: 32px; }
+      .ask-header p { font-size: 15px; }
+      .ask-panel { padding: 16px; border-radius: 10px; }
+    }
+  </style>
 </head>
 <body>
-  <main>
-    <h1>Ask Awakenology</h1>
-    <p>AI Search test. Search Awakenology content or ask questions in English, Japanese, or Chinese.</p>
-    <search-bar-snippet
-      api-url="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/"
-      placeholder="Search Awakenology..."
-      max-results="10"
-    ></search-bar-snippet>
+  <main class="ask-page">
+    <header class="ask-header">
+      <h1>Ask Awakenology</h1>
+      <p>Search Awakenology content or ask questions about the site's material.</p>
+    </header>
+
+    <section class="ask-panel" aria-label="Awakenology AI Search">
+      <p class="ask-label">Search Awakenology</p>
+      <search-bar-snippet
+        api-url="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/"
+        placeholder="Search Awakenology..."
+        max-results="10"
+      ></search-bar-snippet>
+      <p class="ask-note">You can also use the AI chat button to ask a question in English, Japanese, or Chinese.</p>
+    </section>
   </main>
+
   <script type="module" src="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/assets/v0.0.25/search-snippet.es.js"></script>
   <chat-bubble-snippet api-url="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/"></chat-bubble-snippet>
 </body>
