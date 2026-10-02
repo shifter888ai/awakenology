@@ -1,5 +1,21 @@
 export default {
   async fetch(request, env) {
+    const url = new URL(request.url);
+    if (url.pathname === "/api/translate" && request.method === "POST") {
+      try {
+        const body = await request.json();
+        const text = typeof body.text === "string" ? body.text.trim() : "";
+        const source_lang = typeof body.source_lang === "string" ? body.source_lang : "english";
+        const target_lang = typeof body.target_lang === "string" ? body.target_lang : "japanese";
+        if (!text) return Response.json({ error: "Text is required." }, { status: 400 });
+        if (text.length > 5000) return Response.json({ error: "Text is limited to 5,000 characters for this test." }, { status: 400 });
+        const result = await env.AI.run("@cf/meta/m2m100-1.2b", { text, source_lang, target_lang });
+        return Response.json(result);
+      } catch (error) {
+        return Response.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
+      }
+    }
+
     const response = await env.ASSETS.fetch(request);
     const contentType = response.headers.get("content-type") || "";
     const pathname = new URL(request.url).pathname;
