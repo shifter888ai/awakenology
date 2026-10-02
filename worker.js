@@ -125,7 +125,7 @@ html[data-aw-theme="dark"] #awakenology-theme-toggle {
 </style>
 <style id="awakenology-cn-style">
 #awakenology-cn-toggle {
-  position: fixed; top: 10px; right: 48px; z-index: 2147483647;
+  position: fixed; top: 10px; right: 86px; z-index: 2147483647;
   border: 1px solid #888; border-radius: 14px; min-width: 30px; height: 30px; padding: 4px 7px;
   font: 14px/20px Arial, sans-serif; cursor: pointer;
   background: #fff; color: #222; box-shadow: 0 1px 4px #0004;
@@ -161,7 +161,7 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle {
 
     const translateStyle = `<style id="awakenology-translate-style">
 #awakenology-ai-translate {
-  position: fixed; top: 10px; right: 86px; z-index: 2147483647;
+  position: fixed; top: 10px; right: 48px; z-index: 2147483647;
   border: 1px solid #888; border-radius: 14px; width: 30px; height: 30px; padding: 4px;
   font: 12px/20px Arial, sans-serif; font-weight: 700; cursor: pointer;
   background: #fff; color: #222; box-shadow: 0 1px 4px #0004;
@@ -170,7 +170,7 @@ html[data-aw-theme="dark"] #awakenology-ai-translate {
   background: #222; color: #eee; border-color: #777;
 }
 #awakenology-ai-translate-menu {
-  position: fixed; top: 46px; right: 86px; z-index: 2147483647;
+  position: fixed; top: 46px; right: 48px; z-index: 2147483647;
   display: none; min-width: 150px; padding: 6px;
   border: 1px solid #888; border-radius: 8px;
   background: #fff; color: #222; box-shadow: 0 2px 10px #0004;
