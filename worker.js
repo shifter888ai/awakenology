@@ -5,7 +5,7 @@ export default {
     const pathname = new URL(request.url).pathname;
     const decodedPathname = decodeURIComponent(pathname);
     const isLanguageTocPage = decodedPathname === "/English/" || decodedPathname === "/Japanese/" || decodedPathname === "/Chinese/";
-    const isChinesePage = decodedPathname === "/Chinese/" || (/[^\x00-\x7f]/.test(decodedPathname) && /[\u3400-\u9fff]/.test(decodedPathname) && !/[\u3040-\u30ff]/.test(decodedPathname));
+    const isChinesePage = decodedPathname === "/Chinese/" || decodedPathname === "/Coach_cn/" || (/[^\x00-\x7f]/.test(decodedPathname) && /[\u3400-\u9fff]/.test(decodedPathname) && !/[\u3040-\u30ff]/.test(decodedPathname));
     const legacyDarkPages = [
       "/What-Is-Hypnosis/",
       "/What-Is-Hypnotic-Reincarnation/",
@@ -49,7 +49,7 @@ html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color:rgb(
 html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color: rgb(39, 38, 38)"] {
   color: #e8e8e8 !important;
 }
-html[data-aw-theme="dark"] body.awakenology-chinese-page #a19c93e79d1100245860cc6f0d48686a > .wb_content { background: #2b2514 !important; background-color: #2b2514 !important; }
+html[data-aw-theme="dark"] body.awakenology-chinese-page #a19c93e79d1100245860cc6f0d48686a, html[data-aw-theme="dark"] body.awakenology-chinese-page #a19c93e79d1100245860cc6f0d48686a > .wb_content { background: #2b2514 !important; background-color: #2b2514 !important; }
 html[data-aw-theme="dark"] body.awakenology-chinese-page .wb_content {
   background-color: #121212 !important;
   color: #e8e8e8 !important;
