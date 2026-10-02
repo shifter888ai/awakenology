@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Awakenology AI Translate Test</title>
+  <style>
+    :root { color-scheme: light; font-family: Arial, sans-serif; }
+    body { margin: 0; padding: 32px 20px; background: #f5f5f5; color: #222; }
+    main { max-width: 900px; margin: 0 auto; }
+    h1 { margin-bottom: 8px; }
+    .note { color: #555; margin-bottom: 24px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    label { display: block; font-weight: 600; margin-bottom: 7px; }
+    select, textarea, button { width: 100%; box-sizing: border-box; font: inherit; }
+    select, textarea { border: 1px solid #bbb; border-radius: 6px; background: #fff; padding: 10px; }
+    textarea { min-height: 230px; resize: vertical; }
+    .controls { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; margin: 16px 0; }
+    button { width: auto; padding: 10px 18px; border: 0; border-radius: 6px; cursor: pointer; background: #222; color: #fff; }
+    button:disabled { opacity: .5; cursor: wait; }
+    #status { min-height: 22px; margin: 10px 0; }
+    @media (max-width: 700px) {
+      .grid, .controls { grid-template-columns: 1fr; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Awakenology AI Translate Test</h1>
+    <p class="note">Standalone test using Cloudflare Workers AI. Nothing on the existing Awakenology pages is translated by this test.</p>
+
+    <div class="grid">
+      <div>
+        <label for="source">Source text</label>
+        <textarea id="source">Awakenology explores consciousness, hypnosis, reincarnation, multidimensional existence, and the relationship between human consciousness and the Ultimate Source.</textarea>
+      </div>
+      <div>
+        <label for="result">Translation</label>
+        <textarea id="result" readonly placeholder="Translation will appear here..."></textarea>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div>
+        <label for="source-lang">Source language</label>
+        <select id="source-lang">
+          <option value="english">English</option>
+          <option value="japanese">Japanese</option>
+          <option value="chinese">Chinese</option>
+        </select>
+      </div>
+      <div>
+        <label for="target-lang">Target language</label>
+        <select id="target-lang">
+          <option value="japanese">Japanese</option>
+          <option value="chinese">Chinese</option>
+          <option value="english">English</option>
+          <option value="french">French</option>
+          <option value="german">German</option>
+          <option value="spanish">Spanish</option>
+          <option value="portuguese">Portuguese</option>
+          <option value="korean">Korean</option>
+          <option value="russian">Russian</option>
+          <option value="arabic">Arabic</option>
+        </select>
+      </div>
+      <button id="translate" type="button">Translate</button>
+    </div>
+
+    <div id="status" role="status"></div>
+  </main>
+
+  <script>
+    const source = document.getElementById("source");
+    const result = document.getElementById("result");
+    const sourceLang = document.getElementById("source-lang");
+    const targetLang = document.getElementById("target-lang");
+    const button = document.getElementById("translate");
+    const status = document.getElementById("status");
+
+    button.addEventListener("click", async () => {
+      const text = source.value.trim();
+      if (!text) {
+        status.textContent = "Please enter some text.";
+        return;
+      }
+      if (sourceLang.value === targetLang.value) {
+        result.value = text;
+        status.textContent = "Source and target languages are the same.";
+        return;
+      }
+
+      button.disabled = true;
+      result.value = "";
+      status.textContent = "Translating...";
+
+      try {
+        const response = await fetch("/api/translate", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            text,
+            source_lang: sourceLang.value,
+            target_lang: targetLang.value
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Translation failed.");
+        result.value = data.translated_text || data.translation || data.response || JSON.stringify(data);
+        status.textContent = "Translation complete.";
+      } catch (error) {
+        status.textContent = "Error: " + error.message;
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
