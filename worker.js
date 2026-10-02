@@ -13,7 +13,15 @@ export default {
       "/What-is-The-Ultimate-Source/",
       "/What-does-The-Ultimate-Source-like/",
       "/What-is-Multidimensional-Space-Time/",
-      "/What-is-Zero-Energy-Space/"
+      "/What-is-Zero-Energy-Space/",
+      "/アインシュタイン協議百年催眠実験/",
+      "/意識強度とは/",
+      "/意識強度検測点1自動意識制御領域/",
+      "/意識強度検測点2自主意識領域/",
+      "/意識強度検測点抽出検測データサンプル20190317/",
+      "/人の多次元複合体構造1-単重複合体/",
+      "/人の多次元複合体構造2-二重複合体霊-体/",
+      "/伝統修行の五段階/"
     ];
     const isLegacyDarkPage = legacyDarkPages.includes(pathname);
     if (!contentType.toLowerCase().includes("text/html")) return response;
