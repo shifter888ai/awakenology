@@ -40,6 +40,42 @@ html[data-aw-theme="dark"] body.awakenology-toc-page .wb_content {
   background-color: #121212 !important;
   color: #e8e8e8 !important;
 }
+/* 6C: give the three language TOC pages a cleaner shared introduction. */
+body.awakenology-toc-page #wb_main_a188dda41444018c179704becd58d6e8,
+body.awakenology-toc-page #wb_main_a188dda414440213c8768efbfc4fa4d8,
+body.awakenology-toc-page #wb_main_a188dda4144403b540310ab683472666 {
+  padding-top: 18px !important;
+}
+body.awakenology-toc-page h2.wb-stl-heading2 {
+  margin: 0 0 12px !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-size: 34px !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+}
+body.awakenology-toc-page .wb-stl-heading2 + p {
+  margin-top: 0 !important;
+  margin-bottom: 26px !important;
+  color: #666 !important;
+  letter-spacing: .03em;
+}
+html[data-aw-theme="dark"] body.awakenology-toc-page .wb-stl-heading2 + p {
+  color: #aaa !important;
+}
+@media (max-width: 700px) {
+  body.awakenology-toc-page #wb_main_a188dda41444018c179704becd58d6e8,
+  body.awakenology-toc-page #wb_main_a188dda414440213c8768efbfc4fa4d8,
+  body.awakenology-toc-page #wb_main_a188dda4144403b540310ab683472666 {
+    padding-top: 10px !important;
+  }
+  body.awakenology-toc-page h2.wb-stl-heading2 {
+    font-size: 29px !important;
+    margin-bottom: 10px !important;
+  }
+  body.awakenology-toc-page .wb-stl-heading2 + p {
+    margin-bottom: 20px !important;
+  }
+}
 html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color:#333333"],
 html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color: #333333"],
 html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color:#000000"],
