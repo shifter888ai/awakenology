@@ -325,6 +325,29 @@
 			}
 		}
 	</style>
+	<style id="awakenology-home-header-width-fix">
+		/* Keep the header compact and prevent horizontal overflow. */
+		#wb_header_a188dda4144400642da9cde5cee178f4 {
+			width: 100% !important;
+			max-width: 100% !important;
+			overflow: hidden !important;
+		}
+		#wb_header_a188dda4144400642da9cde5cee178f4 #a1912b6e909c0001619736f255cd2f4e p {
+			font-size: 15px !important;
+		}
+		@media (max-width: 700px) {
+			#wb_header_a188dda4144400642da9cde5cee178f4 #a1912b6e909c0001619736f255cd2f4e p {
+				font-size: 14px !important;
+			}
+			#wb_header_a188dda4144400642da9cde5cee178f4 #a1912b6e909c0001619736f255cd2f4e {
+				right: 10px !important;
+				max-width: calc(100% - 30px) !important;
+			}
+			#wb_header_a188dda4144400642da9cde5cee178f4 #a1912b6e909c0001619736f255cd2f4e .wb_content {
+				gap: 14px !important;
+			}
+		}
+	</style>
 	<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="/gallery/favicons/favicon-60x60.png"><link rel="icon" type="image/png" sizes="60x60" href="/gallery/favicons/favicon-60x60.png"><link rel="apple-touch-icon" type="image/png" sizes="76x76" href="/gallery/favicons/favicon-76x76.png"><link rel="icon" type="image/png" sizes="76x76" href="/gallery/favicons/favicon-76x76.png"><link rel="icon" type="image/png" href="/gallery/favicons/favicon.png">
 	<script type="text/javascript">
 	window.useTrailingSlashes = true;
