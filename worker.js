@@ -249,7 +249,16 @@ html[data-aw-theme="dark"] #awakenology-ai-translate-menu button:hover { backgro
   }
 
   async function translatePage(target) {
-    if (translating || getSourceLanguage() === target) return;
+    if (translating) return;
+    if (getSourceLanguage() === target) {
+      for (var k = 0; k < originalNodes.length; k++) {
+        if (originalNodes[k].node.isConnected) originalNodes[k].node.nodeValue = originalNodes[k].text;
+      }
+      setLanguage(getSourceLanguage());
+      menu.classList.remove("open");
+      button.textContent = "文A";
+      return;
+    }
     var nodes = originalNodes.length ? originalNodes : collectNodes();
     if (!nodes.length) return;
 
@@ -297,7 +306,6 @@ html[data-aw-theme="dark"] #awakenology-ai-translate-menu button:hover { backgro
 
   function init() {
     if (document.getElementById("awakenology-ai-translate")) return;
-    getSourceLanguage();
 
     button = document.createElement("button");
     button.id = "awakenology-ai-translate";
@@ -413,8 +421,9 @@ html[data-aw-theme="dark"] #awakenology-ai-translate-menu button:hover { backgro
         if (isLegacyDarkPage) current += " awakenology-legacy-dark-page";
         if (isChinesePage) current += " awakenology-chinese-page";
         el.setAttribute("class", current);
+        el.append(translateScript, { html: true });
       } })
-      .on("head", { element(el) { el.append(theme + script + translateStyle + translateScript + chineseScript, { html: true }); } })
+      .on("head", { element(el) { el.append(theme + script + translateStyle + chineseScript, { html: true }); } })
       .transform(response);
   }
 };
