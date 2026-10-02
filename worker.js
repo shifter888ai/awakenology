@@ -89,6 +89,10 @@ html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="background
   background: #121212 !important;
   background-color: #121212 !important;
 }
+html[data-aw-theme="dark"] body.site-lang-en #a19e7e93bc1d0a3dd101e0022a644444 > .wb_content {
+  background: #2b2514 !important;
+  background-color: #2b2514 !important;
+}
 html[data-aw-theme="dark"] p,
 html[data-aw-theme="dark"] li,
 html[data-aw-theme="dark"] h1,
