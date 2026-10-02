@@ -34,6 +34,7 @@ html[data-aw-theme="dark"] #awakenology-theme-toggle {
   background: #222; color: #eee; border-color: #777;
 }
 </style>
+<style id="awakenology-cn-style">
 #awakenology-cn-toggle {
   position: fixed; top: 10px; right: 48px; z-index: 2147483647;
   border: 1px solid #888; border-radius: 14px; min-width: 30px; height: 30px; padding: 4px 7px;
@@ -43,7 +44,7 @@ html[data-aw-theme="dark"] #awakenology-theme-toggle {
 html[data-aw-theme="dark"] #awakenology-cn-toggle {
   background: #222; color: #eee; border-color: #777;
 }
-`;
+</style>`;
 
     const script = `<script>
 (function () {
