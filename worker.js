@@ -4,6 +4,18 @@ export default {
     const contentType = response.headers.get("content-type") || "";
     const pathname = new URL(request.url).pathname;
     const isLanguageTocPage = pathname === "/English/" || pathname === "/Japanese/" || pathname === "/Chinese/";
+    const legacyDarkPages = [
+      "/What-Is-Hypnosis/",
+      "/What-Is-Hypnotic-Reincarnation/",
+      "/The-History-of-Reincarnation/",
+      "/Multidimensional-Body-Complex-1-Single-Complex/",
+      "/Multidimensional-Body-Complex-3-Multi-Complex/",
+      "/What-is-The-Ultimate-Source/",
+      "/What-does-The-Ultimate-Source-like/",
+      "/What-is-Multidimensional-Space-Time/",
+      "/What-is-Zero-Energy-Space/"
+    ];
+    const isLegacyDarkPage = legacyDarkPages.includes(pathname);
     if (!contentType.toLowerCase().includes("text/html")) return response;
 
     const theme = `<style id="awakenology-theme-style">
@@ -16,6 +28,25 @@ html[data-aw-theme="dark"] .wb_sbg {
 html[data-aw-theme="dark"] body.awakenology-toc-page .wb_content {
   background-color: #121212 !important;
   color: #e8e8e8 !important;
+}
+html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color:#333333"],
+html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color: #333333"],
+html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color:#000000"],
+html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color: #000000"],
+html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color:#272626"],
+html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color: #272626"],
+html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color:rgb(39, 38, 38)"],
+html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color: rgb(39, 38, 38)"] {
+  color: #e8e8e8 !important;
+}
+html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="background:#ffffff"],
+html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="background: #ffffff"],
+html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="background-color:#ffffff"],
+html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="background-color: #ffffff"],
+html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="background:rgb(255, 255, 255)"],
+html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="background: rgb(255, 255, 255)"] {
+  background: #121212 !important;
+  background-color: #121212 !important;
 }
 html[data-aw-theme="dark"] p,
 html[data-aw-theme="dark"] li,
@@ -145,9 +176,10 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle {
 
     return new HTMLRewriter()
       .on("body", { element(el) {
-        if (!isLanguageTocPage) return;
         var current = el.getAttribute("class") || "";
-        el.setAttribute("class", current + " awakenology-toc-page");
+        if (isLanguageTocPage) current += " awakenology-toc-page";
+        if (isLegacyDarkPage) current += " awakenology-legacy-dark-page";
+        el.setAttribute("class", current);
       } })
       .on("head", { element(el) { el.append(theme + script + chineseScript, { html: true }); } })
       .transform(response);
