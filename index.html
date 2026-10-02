@@ -195,6 +195,46 @@
 			}
 		}
 	</style>
+	<style id="awakenology-home-mobile-final">
+		/* Mobile: keep the brand in the header's own stacking context. */
+		@media (max-width: 700px) {
+			#wb_header_a188dda4144400642da9cde5cee178f4 {
+				position: relative !important;
+				overflow: visible !important;
+				isolation: isolate;
+			}
+			#wb_header_a188dda4144400642da9cde5cee178f4 > .wb_content {
+				position: relative !important;
+				overflow: visible !important;
+			}
+			#wb_header_a188dda4144400642da9cde5cee178f4 #a188dda404b6335c01044fe915feab85 {
+				position: absolute !important;
+				left: 18px !important;
+				top: 12px !important;
+				bottom: auto !important;
+				transform: none !important;
+				z-index: 99999 !important;
+				display: block !important;
+				visibility: visible !important;
+				opacity: 1 !important;
+			}
+			#wb_header_a188dda4144400642da9cde5cee178f4 #a188dda404b6335c01044fe915feab85 > .wb_content {
+				position: relative !important;
+				height: auto !important;
+				min-height: 0 !important;
+				transform: none !important;
+				display: block !important;
+			}
+			#wb_header_a188dda4144400642da9cde5cee178f4 #a188dda404b6335c01044fe915feab85 h1 {
+				position: static !important;
+				display: block !important;
+				margin: 0 !important;
+				padding: 0 !important;
+				line-height: 1 !important;
+				transform: none !important;
+			}
+		}
+	</style>
 	<style id="awakenology-home-main">
 		/* Homepage main redesign: give the central message more space and a clearer hierarchy. */
 		#wb_main_a188dda4144400642da9cde5cee178f4 {
