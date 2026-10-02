@@ -59,6 +59,12 @@ body.awakenology-toc-page .wb-stl-heading2 + p {
   color: #666 !important;
   letter-spacing: .03em;
 }
+/* 6C-1: show the current language in the top navigation. English prototype only. */
+body.awakenology-lang-en #a1912b6e909c0001619736f255cd2f4e a[href="/English/"] {
+  text-decoration: underline !important;
+  text-decoration-thickness: 2px !important;
+  text-underline-offset: 5px !important;
+}
 html[data-aw-theme="dark"] body.awakenology-toc-page .wb-stl-heading2 + p {
   color: #aaa !important;
 }
@@ -260,6 +266,7 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle {
       .on("body", { element(el) {
         var current = el.getAttribute("class") || "";
         if (isLanguageTocPage) current += " awakenology-toc-page";
+        if (decodedPathname === "/English/") current += " awakenology-lang-en";
         if (isLegacyDarkPage) current += " awakenology-legacy-dark-page";
         if (isChinesePage) current += " awakenology-chinese-page";
         el.setAttribute("class", current);
