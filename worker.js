@@ -159,6 +159,165 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle {
 }());
 </script>`;
 
+    const translateStyle = decodedPathname === "/ai-translate/" ? `<style id="awakenology-translate-style">
+#awakenology-ai-translate {
+  position: fixed; top: 10px; right: 86px; z-index: 2147483647;
+  border: 1px solid #888; border-radius: 14px; width: 30px; height: 30px; padding: 4px;
+  font: 12px/20px Arial, sans-serif; font-weight: 700; cursor: pointer;
+  background: #fff; color: #222; box-shadow: 0 1px 4px #0004;
+}
+html[data-aw-theme="dark"] #awakenology-ai-translate {
+  background: #222; color: #eee; border-color: #777;
+}
+#awakenology-ai-translate-menu {
+  position: fixed; top: 46px; right: 86px; z-index: 2147483647;
+  display: none; min-width: 150px; padding: 6px;
+  border: 1px solid #888; border-radius: 8px;
+  background: #fff; color: #222; box-shadow: 0 2px 10px #0004;
+  font: 14px/1.4 Arial, sans-serif;
+}
+#awakenology-ai-translate-menu.open { display: block; }
+#awakenology-ai-translate-menu button {
+  display: block; width: 100%; padding: 7px 9px; border: 0; border-radius: 5px;
+  background: transparent; color: inherit; text-align: left; cursor: pointer;
+  font: inherit;
+}
+#awakenology-ai-translate-menu button:hover { background: #eee; }
+html[data-aw-theme="dark"] #awakenology-ai-translate-menu {
+  background: #222; color: #eee; border-color: #777;
+}
+html[data-aw-theme="dark"] #awakenology-ai-translate-menu button:hover { background: #333; }
+</style>` : "";
+
+    const translateScript = decodedPathname === "/ai-translate/" ? `
+<script>
+(function () {
+  var languages = [
+    ["english", "English"],
+    ["japanese", "日本語"],
+    ["chinese", "简体中文"],
+    ["french", "Français"],
+    ["german", "Deutsch"],
+    ["spanish", "Español"],
+    ["portuguese", "Português"],
+    ["korean", "한국어"],
+    ["russian", "Русский"],
+    ["arabic", "العربية"]
+  ];
+  var button, menu, originalNodes = [], translating = false;
+
+  function getSourceLanguage() {
+    var lang = (document.documentElement.getAttribute("lang") || "en").toLowerCase();
+    if (lang.indexOf("ja") === 0) return "japanese";
+    if (lang.indexOf("zh") === 0) return "chinese";
+    return "english";
+  }
+
+  function collectNodes() {
+    var root = document.querySelector("#translation-content");
+    if (!root) return [];
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    var nodes = [], node;
+    while (node = walker.nextNode()) {
+      if (!node.nodeValue.trim()) continue;
+      if (node.parentElement && node.parentElement.closest(".ignore-translate")) continue;
+      nodes.push(node);
+    }
+    return nodes;
+  }
+
+  async function translatePage(target) {
+    if (translating) return;
+    var source = getSourceLanguage();
+    if (source === target) return;
+    var nodes = collectNodes();
+    if (!nodes.length) return;
+
+    translating = true;
+    button.disabled = true;
+    button.textContent = "…";
+    menu.classList.remove("open");
+
+    if (!originalNodes.length) {
+      originalNodes = nodes.map(function (node) {
+        return { node: node, text: node.nodeValue };
+      });
+    }
+
+    try {
+      for (var i = 0; i < originalNodes.length; i++) {
+        var item = originalNodes[i];
+        if (!item.node.isConnected) continue;
+        var response = await fetch("/api/translate", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            text: item.text,
+            source_lang: source,
+            target_lang: target
+          })
+        });
+        var data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Translation failed.");
+        item.node.nodeValue = data.translated_text || data.translation || data.response || item.text;
+      }
+      document.documentElement.setAttribute("lang", target === "japanese" ? "ja" : target === "chinese" ? "zh-CN" : target === "korean" ? "ko" : target === "french" ? "fr" : target === "german" ? "de" : target === "spanish" ? "es" : target === "portuguese" ? "pt" : target === "russian" ? "ru" : target === "arabic" ? "ar" : "en");
+      button.textContent = "文A";
+    } catch (error) {
+      alert("AI Translate error: " + error.message);
+    } finally {
+      translating = false;
+      button.disabled = false;
+    }
+  }
+
+  function init() {
+    if (document.getElementById("awakenology-ai-translate")) return;
+
+    button = document.createElement("button");
+    button.id = "awakenology-ai-translate";
+    button.type = "button";
+    button.textContent = "文A";
+    button.setAttribute("aria-label", "AI Translate");
+    button.title = "AI Translate";
+
+    menu = document.createElement("div");
+    menu.id = "awakenology-ai-translate-menu";
+    menu.setAttribute("role", "menu");
+
+    languages.forEach(function (item) {
+      var option = document.createElement("button");
+      option.type = "button";
+      option.textContent = item[1];
+      option.addEventListener("click", function () {
+        translatePage(item[0]);
+      });
+      menu.appendChild(option);
+    });
+
+    button.addEventListener("click", function (event) {
+      event.stopPropagation();
+      menu.classList.toggle("open");
+    });
+    menu.addEventListener("click", function (event) {
+      event.stopPropagation();
+    });
+    document.addEventListener("click", function () {
+      menu.classList.remove("open");
+    });
+
+    document.body.appendChild(button);
+    document.body.appendChild(menu);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+}());
+</script>` : "";
+
     const chineseScript = `
 <script type="module">
 (function () {
@@ -234,7 +393,7 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle {
         if (isChinesePage) current += " awakenology-chinese-page";
         el.setAttribute("class", current);
       } })
-      .on("head", { element(el) { el.append(theme + script + chineseScript, { html: true }); } })
+      .on("head", { element(el) { el.append(theme + script + translateStyle + translateScript + chineseScript, { html: true }); } })
       .transform(response);
   }
 };
