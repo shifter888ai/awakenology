@@ -1,38 +1,6 @@
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (url.pathname === "/api/translate" && request.method === "POST") {
-      try {
-        const body = await request.json();
-        const text = typeof body.text === "string" ? body.text.trim() : "";
-        const source_lang = typeof body.source_lang === "string" ? body.source_lang : "english";
-        const target_lang = typeof body.target_lang === "string" ? body.target_lang : "japanese";
-        if (!text) return Response.json({ error: "Text is required." }, { status: 400 });
-        if (text.length > 5000) return Response.json({ error: "Text is limited to 5,000 characters for this test." }, { status: 400 });
-        const result = await env.AI.run("@cf/google/gemma-4-26b-a4b-it", {
-          messages: [
-            {
-              role: "system",
-              content: "You are a professional translator. Translate the user's text accurately from the specified source language into the specified target language. Preserve the original meaning, tone, terminology, punctuation, and formatting. Output only the translation, with no explanation, notes, quotation marks, or extra text."
-            },
-            {
-              role: "user",
-              content: "Source language: " + source_lang + "\nTarget language: " + target_lang + "\n\nText to translate:\n" + text
-            }
-          ],
-          chat_template_kwargs: { enable_thinking: false }
-        });
-        const translated = result && result.response
-          ? result.response
-          : result && result.choices && result.choices[0] && result.choices[0].message
-            ? result.choices[0].message.content
-            : "";
-        return Response.json({ translated_text: translated });
-      } catch (error) {
-        return Response.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
-      }
-    }
-
     const response = await env.ASSETS.fetch(request);
     const contentType = response.headers.get("content-type") || "";
     const pathname = new URL(request.url).pathname;
@@ -181,38 +149,6 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle {
 }());
 </script>`;
 
-    const translateStyle = `<style id="awakenology-translate-style">
-#awakenology-ai-translate {
-  position: fixed; top: 10px; right: 48px; z-index: 2147483647;
-  border: 1px solid #888; border-radius: 14px; width: 30px; height: 30px; padding: 4px;
-  font: 12px/20px Arial, sans-serif; font-weight: 700; cursor: pointer;
-  background: #fff; color: #222; box-shadow: 0 1px 4px #0004;
-}
-html[data-aw-theme="dark"] #awakenology-ai-translate {
-  background: #222; color: #eee; border-color: #777;
-}
-#awakenology-ai-translate-menu {
-  position: fixed; top: 46px; right: 48px; z-index: 2147483647;
-  display: none; min-width: 150px; padding: 6px;
-  border: 1px solid #888; border-radius: 8px;
-  background: #fff; color: #222; box-shadow: 0 2px 10px #0004;
-  font: 14px/1.4 Arial, sans-serif;
-}
-#awakenology-ai-translate-menu.open { display: block; }
-#awakenology-ai-translate-menu button {
-  display: block; width: 100%; padding: 7px 9px; border: 0; border-radius: 5px;
-  background: transparent; color: inherit; text-align: left; cursor: pointer;
-  font: inherit;
-}
-#awakenology-ai-translate-menu button:hover { background: #eee; }
-html[data-aw-theme="dark"] #awakenology-ai-translate-menu {
-  background: #222; color: #eee; border-color: #777;
-}
-html[data-aw-theme="dark"] #awakenology-ai-translate-menu button:hover { background: #333; }
-</style>`;
-
-    const translateScript = '<script src="/ai-translate/translate.js"></script>';
-
     const chineseScript = `<script type="module">
 (function () {
   function looksChinesePage() {
@@ -284,7 +220,7 @@ html[data-aw-theme="dark"] #awakenology-ai-translate-menu button:hover { backgro
         if (isChinesePage) current += " awakenology-chinese-page";
         el.setAttribute("class", current);
       } })
-      .on("head", { element(el) { el.append(theme + script + translateStyle + translateScript + chineseScript, { html: true }); } })
+      .on("head", { element(el) { el.append(theme + script + chineseScript, { html: true }); } })
       .transform(response);
   }
 };
