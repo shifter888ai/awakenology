@@ -61,9 +61,15 @@ body.awakenology-toc-page .wb-stl-heading2 + p {
 }
 /* 6C-1: show the current language in the top navigation. English prototype only. */
 body.awakenology-lang-en #a1912b6e909c0001619736f255cd2f4e a[href="/English/"] {
+  color: #222 !important;
   text-decoration: underline !important;
+  text-decoration-color: #222 !important;
   text-decoration-thickness: 2px !important;
   text-underline-offset: 5px !important;
+}
+html[data-aw-theme="dark"] body.awakenology-lang-en #a1912b6e909c0001619736f255cd2f4e a[href="/English/"] {
+  color: #fff !important;
+  text-decoration-color: #fff !important;
 }
 html[data-aw-theme="dark"] body.awakenology-toc-page .wb-stl-heading2 + p {
   color: #aaa !important;
