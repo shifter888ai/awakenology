@@ -26,49 +26,24 @@
   </style>
 </head>
 <body>
-  <main>
-    <h1>Awakenology AI Translate Test</h1>
-    <p class="note">Standalone test using Cloudflare Workers AI. Nothing on the existing Awakenology pages is translated by this test.</p>
+  <main id="translation-content">
+    <h1>Awakenology AI Translation</h1>
+    <p class="note">This page is a test of the compact AI Translate button. Click the <strong>文A</strong> button in the upper-right corner and choose a language.</p>
 
-    <div class="grid">
-      <div>
-        <label for="source">Source text</label>
-        <textarea id="source">Awakenology explores consciousness, hypnosis, reincarnation, multidimensional existence, and the relationship between human consciousness and the Ultimate Source.</textarea>
-      </div>
-      <div>
-        <label for="result">Translation</label>
-        <textarea id="result" readonly placeholder="Translation will appear here..."></textarea>
-      </div>
-    </div>
+    <h2>About Awakenology</h2>
+    <p>Awakenology explores consciousness, hypnosis, reincarnation, multidimensional existence, and the relationship between human consciousness and the Ultimate Source.</p>
+    <p>The purpose of this test is to translate the current page while preserving its existing HTML structure, images, links, and overall layout.</p>
 
-    <div class="controls">
-      <div>
-        <label for="source-lang">Source language</label>
-        <select id="source-lang">
-          <option value="english">English</option>
-          <option value="japanese">Japanese</option>
-          <option value="chinese">Chinese</option>
-        </select>
-      </div>
-      <div>
-        <label for="target-lang">Target language</label>
-        <select id="target-lang">
-          <option value="japanese">Japanese</option>
-          <option value="chinese">Chinese</option>
-          <option value="english">English</option>
-          <option value="french">French</option>
-          <option value="german">German</option>
-          <option value="spanish">Spanish</option>
-          <option value="portuguese">Portuguese</option>
-          <option value="korean">Korean</option>
-          <option value="russian">Russian</option>
-          <option value="arabic">Arabic</option>
-        </select>
-      </div>
-      <button id="translate" type="button">Translate</button>
-    </div>
+    <h2>Example Content</h2>
+    <p>Consciousness can be described in many different ways. Awakenology examines questions about freedom, perception, imagination, and the possibility of consciousness beyond familiar human assumptions.</p>
+    <ul>
+      <li>Consciousness and freedom</li>
+      <li>Hypnosis and awakening</li>
+      <li>Reincarnation and multidimensional existence</li>
+      <li>The Ultimate Source of All Things</li>
+    </ul>
 
-    <div id="status" role="status"></div>
+    <p><a href="https://awakenology.space/">Return to Awakenology</a></p>
   </main>
 
   <script>
