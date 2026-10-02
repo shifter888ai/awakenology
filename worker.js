@@ -2,12 +2,18 @@ export default {
   async fetch(request, env) {
     const response = await env.ASSETS.fetch(request);
     const contentType = response.headers.get("content-type") || "";
+    const pathname = new URL(request.url).pathname;
+    const isLanguageTocPage = pathname === "/English/" || pathname === "/Japanese/" || pathname === "/Chinese/";
     if (!contentType.toLowerCase().includes("text/html")) return response;
 
     const theme = `<style id="awakenology-theme-style">
 html[data-aw-theme="dark"] body,
 html[data-aw-theme="dark"] #wb_root,
 html[data-aw-theme="dark"] .wb_sbg {
+  background-color: #121212 !important;
+  color: #e8e8e8 !important;
+}
+html[data-aw-theme="dark"] body.awakenology-toc-page .wb_content {
   background-color: #121212 !important;
   color: #e8e8e8 !important;
 }
@@ -138,6 +144,11 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle {
 </script>`;
 
     return new HTMLRewriter()
+      .on("body", { element(el) {
+        if (!isLanguageTocPage) return;
+        var current = el.getAttribute("class") || "";
+        el.setAttribute("class", current + " awakenology-toc-page");
+      } })
       .on("head", { element(el) { el.append(theme + script + chineseScript, { html: true }); } })
       .transform(response);
   }
