@@ -46,6 +46,8 @@ html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color:#000
 html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color: #000000"],
 html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color:#272626"],
 html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color: #272626"],
+html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color:#1f3864"],
+html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color: #1f3864"],
 html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color:rgb(39, 38, 38)"],
 html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color: rgb(39, 38, 38)"] {
   color: #e8e8e8 !important;
