@@ -20,10 +20,14 @@ export default {
               content: "Source language: " + source_lang + "\nTarget language: " + target_lang + "\n\nText to translate:\n" + text
             }
           ],
-          chat_template_kwargs: { enable_thinking: false },
-          temperature: 0.1
+          chat_template_kwargs: { enable_thinking: false }
         });
-        return Response.json({ translated_text: result.response || result.translation || "" });
+        const translated = result && result.response
+          ? result.response
+          : result && result.choices && result.choices[0] && result.choices[0].message
+            ? result.choices[0].message.content
+            : "";
+        return Response.json({ translated_text: translated });
       } catch (error) {
         return Response.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
       }
