@@ -159,7 +159,7 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle {
 }());
 </script>`;
 
-    const translateStyle = decodedPathname === "/ai-translate/" ? `<style id="awakenology-translate-style">
+    const translateStyle = `<style id="awakenology-translate-style">
 #awakenology-ai-translate {
   position: fixed; top: 10px; right: 86px; z-index: 2147483647;
   border: 1px solid #888; border-radius: 14px; width: 30px; height: 30px; padding: 4px;
@@ -187,10 +187,9 @@ html[data-aw-theme="dark"] #awakenology-ai-translate-menu {
   background: #222; color: #eee; border-color: #777;
 }
 html[data-aw-theme="dark"] #awakenology-ai-translate-menu button:hover { background: #333; }
-</style>` : "";
+</style>`;
 
-    const translateScript = decodedPathname === "/ai-translate/" ? `
-<script>
+    const translateScript = `<script>
 (function () {
   var languages = [
     ["english", "English"],
@@ -205,32 +204,53 @@ html[data-aw-theme="dark"] #awakenology-ai-translate-menu button:hover { backgro
     ["arabic", "العربية"]
   ];
   var button, menu, originalNodes = [], translating = false;
+  var sourceLanguage = null;
 
   function getSourceLanguage() {
-    var lang = (document.documentElement.getAttribute("lang") || "en").toLowerCase();
-    if (lang.indexOf("ja") === 0) return "japanese";
-    if (lang.indexOf("zh") === 0) return "chinese";
-    return "english";
+    if (sourceLanguage) return sourceLanguage;
+    var lang = (document.documentElement.getAttribute("lang") || "").toLowerCase();
+    if (lang.indexOf("ja") === 0) sourceLanguage = "japanese";
+    else if (lang.indexOf("zh") === 0) sourceLanguage = "chinese";
+    else if (lang.indexOf("ko") === 0) sourceLanguage = "korean";
+    else if (lang.indexOf("fr") === 0) sourceLanguage = "french";
+    else if (lang.indexOf("de") === 0) sourceLanguage = "german";
+    else if (lang.indexOf("es") === 0) sourceLanguage = "spanish";
+    else if (lang.indexOf("pt") === 0) sourceLanguage = "portuguese";
+    else if (lang.indexOf("ru") === 0) sourceLanguage = "russian";
+    else if (lang.indexOf("ar") === 0) sourceLanguage = "arabic";
+    else {
+      var path = decodeURIComponent(location.pathname);
+      if (path === "/Japanese/" || /[\u3040-\u30ff]/.test(path)) sourceLanguage = "japanese";
+      else if (path === "/Chinese/" || path === "/Coach_cn/" || (/[^\x00-\x7f]/.test(path) && /[\u3400-\u9fff]/.test(path) && !/[\u3040-\u30ff]/.test(path))) sourceLanguage = "chinese";
+      else sourceLanguage = "english";
+    }
+    return sourceLanguage;
   }
 
   function collectNodes() {
-    var root = document.querySelector("#translation-content");
-    if (!root) return [];
-    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     var nodes = [], node;
     while (node = walker.nextNode()) {
-      if (!node.nodeValue.trim()) continue;
-      if (node.parentElement && node.parentElement.closest(".ignore-translate")) continue;
+      var parent = node.parentElement;
+      if (!node.nodeValue.trim() || !parent) continue;
+      if (parent.closest("script, style, noscript, textarea, input, select, option, #awakenology-theme-toggle, #awakenology-cn-toggle, #awakenology-ai-translate, #awakenology-ai-translate-menu, .ignore-translate")) continue;
       nodes.push(node);
     }
     return nodes;
   }
 
+  function setLanguage(target) {
+    var map = {
+      english: "en", japanese: "ja", chinese: "zh-CN", french: "fr",
+      german: "de", spanish: "es", portuguese: "pt", korean: "ko",
+      russian: "ru", arabic: "ar"
+    };
+    document.documentElement.setAttribute("lang", map[target] || "en");
+  }
+
   async function translatePage(target) {
-    if (translating) return;
-    var source = getSourceLanguage();
-    if (source === target) return;
-    var nodes = collectNodes();
+    if (translating || getSourceLanguage() === target) return;
+    var nodes = originalNodes.length ? originalNodes : collectNodes();
     if (!nodes.length) return;
 
     translating = true;
@@ -253,7 +273,7 @@ html[data-aw-theme="dark"] #awakenology-ai-translate-menu button:hover { backgro
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
             text: item.text,
-            source_lang: source,
+            source_lang: getSourceLanguage(),
             target_lang: target
           })
         });
@@ -261,9 +281,13 @@ html[data-aw-theme="dark"] #awakenology-ai-translate-menu button:hover { backgro
         if (!response.ok) throw new Error(data.error || "Translation failed.");
         item.node.nodeValue = data.translated_text || data.translation || data.response || item.text;
       }
-      document.documentElement.setAttribute("lang", target === "japanese" ? "ja" : target === "chinese" ? "zh-CN" : target === "korean" ? "ko" : target === "french" ? "fr" : target === "german" ? "de" : target === "spanish" ? "es" : target === "portuguese" ? "pt" : target === "russian" ? "ru" : target === "arabic" ? "ar" : "en");
+      setLanguage(target);
       button.textContent = "文A";
     } catch (error) {
+      for (var j = 0; j < originalNodes.length; j++) {
+        if (originalNodes[j].node.isConnected) originalNodes[j].node.nodeValue = originalNodes[j].text;
+      }
+      setLanguage(getSourceLanguage());
       alert("AI Translate error: " + error.message);
     } finally {
       translating = false;
@@ -273,6 +297,7 @@ html[data-aw-theme="dark"] #awakenology-ai-translate-menu button:hover { backgro
 
   function init() {
     if (document.getElementById("awakenology-ai-translate")) return;
+    getSourceLanguage();
 
     button = document.createElement("button");
     button.id = "awakenology-ai-translate";
@@ -283,12 +308,14 @@ html[data-aw-theme="dark"] #awakenology-ai-translate-menu button:hover { backgro
 
     menu = document.createElement("div");
     menu.id = "awakenology-ai-translate-menu";
+    menu.className = "ignore-translate";
     menu.setAttribute("role", "menu");
 
     languages.forEach(function (item) {
       var option = document.createElement("button");
       option.type = "button";
       option.textContent = item[1];
+      option.className = "ignore-translate";
       option.addEventListener("click", function () {
         translatePage(item[0]);
       });
@@ -306,20 +333,17 @@ html[data-aw-theme="dark"] #awakenology-ai-translate-menu button:hover { backgro
       menu.classList.remove("open");
     });
 
+    button.className = "ignore-translate";
     document.body.appendChild(button);
     document.body.appendChild(menu);
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
 }());
-</script>` : "";
+</script>`;
 
-    const chineseScript = `
-<script type="module">
+    const chineseScript = `<script type="module">
 (function () {
   function looksChinesePage() {
     var text = document.body ? (document.body.innerText || "") : "";
@@ -362,7 +386,7 @@ html[data-aw-theme="dark"] #awakenology-ai-translate-menu button:hover { backgro
 
       var button = document.createElement("button");
       button.id = "awakenology-cn-toggle";
-      button.className = "ignore-opencc";
+      button.className = "ignore-opencc ignore-translate";
       button.type = "button";
       button.textContent = target === "tw" ? "简" : "繁";
       button.setAttribute("aria-label", target === "tw" ? "Convert to Simplified Chinese" : "Convert to Traditional Chinese");
@@ -377,11 +401,8 @@ html[data-aw-theme="dark"] #awakenology-ai-translate-menu button:hover { backgro
     }).catch(function () {});
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
 }());
 </script>`;
 
