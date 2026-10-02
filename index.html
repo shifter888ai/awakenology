@@ -151,6 +151,50 @@
 			}
 		}
 	</style>
+	<style id="awakenology-home-header-fix">
+		/* Keep the header visually unified and keep the brand above the mobile layout layers. */
+		#wb_header_a188dda4144400642da9cde5cee178f4,
+		#wb_header_a188dda4144400642da9cde5cee178f4 > .wb_content,
+		#wb_header_a188dda4144400642da9cde5cee178f4 .wb_content {
+			background: #000 !important;
+			background-color: #000 !important;
+		}
+		#wb_header_a188dda4144400642da9cde5cee178f4 #a188dda404b6335c01044fe915feab85 {
+			z-index: 100 !important;
+			background: transparent !important;
+			background-color: transparent !important;
+		}
+		@media (max-width: 700px) {
+			#wb_header_a188dda4144400642da9cde5cee178f4 {
+				min-height: 104px !important;
+				height: 104px !important;
+			}
+			#wb_header_a188dda4144400642da9cde5cee178f4 > .wb_content {
+				min-height: 104px !important;
+				height: 104px !important;
+				position: relative !important;
+			}
+			#wb_header_a188dda4144400642da9cde5cee178f4 #a188dda404b6335c01044fe915feab85 {
+				left: 18px !important;
+				top: 14px !important;
+				transform: none !important;
+				z-index: 1000 !important;
+				width: auto !important;
+				height: auto !important;
+			}
+			#wb_header_a188dda4144400642da9cde5cee178f4 #a188dda404b6335c01044fe915feab85 h1 {
+				position: relative !important;
+				z-index: 1001 !important;
+				margin: 0 !important;
+				line-height: 1 !important;
+				color: #fff !important;
+			}
+			#wb_header_a188dda4144400642da9cde5cee178f4 #a1912b6e909c0001619736f255cd2f4e {
+				top: 62px !important;
+				z-index: 100 !important;
+			}
+		}
+	</style>
 	<style id="awakenology-home-main">
 		/* Homepage main redesign: give the central message more space and a clearer hierarchy. */
 		#wb_main_a188dda4144400642da9cde5cee178f4 {
