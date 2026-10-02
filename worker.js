@@ -26,8 +26,8 @@ html[data-aw-theme="dark"] .wb-stl-footer {
 html[data-aw-theme="dark"] a { color: #9ecbff !important; }
 #awakenology-theme-toggle {
   position: fixed; top: 10px; right: 10px; z-index: 2147483647;
-  border: 1px solid #888; border-radius: 14px; padding: 4px 9px;
-  font: 12px/1.2 Arial, sans-serif; cursor: pointer;
+  border: 1px solid #888; border-radius: 14px; width: 30px; height: 30px; padding: 4px;
+  font: 18px/20px Arial, sans-serif; cursor: pointer;
   background: #fff; color: #222; box-shadow: 0 1px 4px #0004;
 }
 html[data-aw-theme="dark"] #awakenology-theme-toggle {
@@ -47,12 +47,12 @@ html[data-aw-theme="dark"] #awakenology-theme-toggle {
     button.id = "awakenology-theme-toggle";
     button.type = "button";
     button.setAttribute("aria-label", "Switch background theme");
-    button.textContent = dark ? "LIGHT" : "DARK";
+    button.textContent = dark ? "☀" : "☾";
     button.addEventListener("click", function () {
       dark = document.documentElement.getAttribute("data-aw-theme") !== "dark";
       document.documentElement.setAttribute("data-aw-theme", dark ? "dark" : "light");
       localStorage.setItem(KEY, dark ? "dark" : "light");
-      button.textContent = dark ? "LIGHT" : "DARK";
+      button.textContent = dark ? "☀" : "☾";
     });
     document.body.appendChild(button);
   });
