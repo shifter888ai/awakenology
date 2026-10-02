@@ -103,6 +103,7 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle {
         var fromLang = variant === "tw" ? "zh-CN" : "zh-TW";
         var toLang = variant === "tw" ? "zh-TW" : "zh-CN";
         document.documentElement.setAttribute("lang", fromLang);
+        document.body.setAttribute("lang", fromLang);
         handler = OpenCC.HTMLConverter(converter, document.body, fromLang, toLang);
         handler.convert();
         activeVariant = variant;
