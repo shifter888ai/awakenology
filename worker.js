@@ -9,8 +9,21 @@ export default {
         const target_lang = typeof body.target_lang === "string" ? body.target_lang : "japanese";
         if (!text) return Response.json({ error: "Text is required." }, { status: 400 });
         if (text.length > 5000) return Response.json({ error: "Text is limited to 5,000 characters for this test." }, { status: 400 });
-        const result = await env.AI.run("@cf/meta/m2m100-1.2b", { text, source_lang, target_lang });
-        return Response.json(result);
+        const result = await env.AI.run("@cf/google/gemma-4-26b-a4b-it", {
+          messages: [
+            {
+              role: "system",
+              content: "You are a professional translator. Translate the user's text accurately from the specified source language into the specified target language. Preserve the original meaning, tone, terminology, punctuation, and formatting. Output only the translation, with no explanation, notes, quotation marks, or extra text."
+            },
+            {
+              role: "user",
+              content: "Source language: " + source_lang + "\nTarget language: " + target_lang + "\n\nText to translate:\n" + text
+            }
+          ],
+          chat_template_kwargs: { enable_thinking: false },
+          temperature: 0.1
+        });
+        return Response.json({ translated_text: result.response || result.translation || "" });
       } catch (error) {
         return Response.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
       }
