@@ -49,6 +49,7 @@ html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color:rgb(
 html[data-aw-theme="dark"] body.awakenology-legacy-dark-page [style*="color: rgb(39, 38, 38)"] {
   color: #e8e8e8 !important;
 }
+html[data-aw-theme="dark"] body.awakenology-chinese-page #a19c93e79d1100245860cc6f0d48686a > .wb_content { background: #2b2514 !important; background-color: #2b2514 !important; }
 html[data-aw-theme="dark"] body.awakenology-chinese-page .wb_content {
   background-color: #121212 !important;
   color: #e8e8e8 !important;
