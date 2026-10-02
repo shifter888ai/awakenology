@@ -83,12 +83,13 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle {
   function init() {
     if (!looksChinesePage() || document.getElementById("awakenology-cn-toggle")) return;
 
-    import("https://cdn.jsdelivr.net/npm/opencc-js@1.4.2/dist/esm/full.js").then(function (OpenCC) {
+    import("https://cdn.jsdelivr.net/npm/opencc-js@1.4.1/dist/esm/full.js").then(function (OpenCC) {
       var saved = localStorage.getItem("awakenology-cn-variant");
       var bodyText = document.body.innerText || "";
       var simplifiedSignals = (bodyText.match(/[汉马龙门国东来后时这说还没为与个们]/g) || []).length;
       var traditionalSignals = (bodyText.match(/[漢馬龍門國東來後時這說還沒為與個們]/g) || []).length;
       var current = simplifiedSignals > traditionalSignals ? "cn" : "tw";
+      var activeVariant = current;
       var target = saved === "cn" || saved === "tw" ? saved : current;
 
       var toTraditional = OpenCC.Converter({ from: "cn", to: "tw" });
@@ -100,8 +101,10 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle {
         var converter = variant === "tw" ? toTraditional : toSimplified;
         var fromLang = variant === "tw" ? "zh-CN" : "zh-TW";
         var toLang = variant === "tw" ? "zh-TW" : "zh-CN";
+        document.documentElement.setAttribute("lang", fromLang);
         handler = OpenCC.HTMLConverter(converter, document.body, fromLang, toLang);
         handler.convert();
+        activeVariant = variant;
         localStorage.setItem("awakenology-cn-variant", variant);
         button.textContent = variant === "tw" ? "简" : "繁";
         button.setAttribute("aria-label", variant === "tw" ? "Convert to Simplified Chinese" : "Convert to Traditional Chinese");
@@ -115,7 +118,7 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle {
       button.setAttribute("aria-label", target === "tw" ? "Convert to Simplified Chinese" : "Convert to Traditional Chinese");
       button.title = "繁 / 简";
       button.addEventListener("click", function () {
-        var next = document.documentElement.lang.toLowerCase().indexOf("zh-cn") >= 0 ? "tw" : "cn";
+        var next = activeVariant === "tw" ? "cn" : "tw";
         convertTo(next);
       });
       document.body.appendChild(button);
