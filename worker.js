@@ -129,6 +129,11 @@ html[data-aw-theme="dark"] .wb-stl-normal,
 html[data-aw-theme="dark"] .wb-stl-footer {
   color: #e8e8e8 !important;
 }
+html[data-aw-theme="dark"] body.site-lang-en #a188dda404b603086d7b3027a1d90739 span[style*="background-color:#ffffff"],
+html[data-aw-theme="dark"] body.site-lang-en #a188dda404b603086d7b3027a1d90739 span[style*="background-color: #ffffff"] {
+  background-color: transparent !important;
+  color: #e8e8e8 !important;
+}
 html[data-aw-theme="dark"] a { color: #9ecbff !important; }
 #awakenology-theme-toggle {
   position: fixed; top: 10px; right: 10px; z-index: 2147483647;
