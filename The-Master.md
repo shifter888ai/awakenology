@@ -90,6 +90,7 @@
     - A Worker-injected component is considered present and compliant even though it is not physically present in the committed page HTML.
     - Determine whether each component is already injected or controlled globally by the Cloudflare Worker before adding any page-local implementation.
     - Every global component must have **one source of truth**. Never create a second page-local implementation of a component already provided by `worker.js`.
+    - Duplication Check must be performed on every rebuilt page before commit, not only when a global component is being modified.
     - The Worker-provided **Dark/Light floating button** is the global theme control and single source of truth. Rebuilt pages must not recreate it with their own button, CSS, JavaScript, or local theme system.
     - The global **↑ Return-to-top floating button** must likewise have one site-wide implementation. Rebuilt pages must not recreate it locally once it is provided by `worker.js`.
     - The Worker-owned **Chinese 简/繁 floating toggle** likewise has one site-wide implementation. Rebuilt pages must not recreate its button, CSS, JavaScript, or local conversion system.
