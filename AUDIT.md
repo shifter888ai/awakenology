@@ -18,6 +18,7 @@ Use the applicable language-specific section for English, Japanese, or Chinese p
 - [ ] No nested or duplicated document structure.
 - [ ] No legacy WebsiteBuilder wrappers or obsolete page-builder markup.
 - [ ] No duplicated header, navigation, article, or footer.
+- [ ] Inspect the actual DOM tree to confirm document structure and component nesting, not only extracted text.
 
 ## 3. Standard Page Format
 
@@ -54,17 +55,49 @@ Inspect the actual DOM, not only extracted text or CSS.
 - [ ] No duplicate theme toggle.
 - [ ] No duplicate Chinese Simplified/Traditional toggle.
 - [ ] Worker-owned components render exactly once.
+- [ ] Perform this duplication check on every rebuilt page before commit, not only when a global component is being modified.
 
 ## 6. Global Components
 
 - [ ] Global navigation: English / 日本語 / 中文 / Search / Ask.
+- [ ] Global navigation appears only in the header; it is not duplicated inside the article body or TOC.
 - [ ] Footer order is exactly:
   Contact → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer → © 2024 Awakenology.org
-- [ ] Exactly three Reddit anchors, in the required order.
-- [ ] Each Reddit anchor contains exactly one internal image asset.
-- [ ] Reddit destinations and aria labels are correct.
+- [ ] Exactly three Reddit anchors exist in the footer, in the required order:
+  1. https://www.reddit.com/r/EscapeReincarnation/
+  2. https://www.reddit.com/r/EscapePrisonPlanet/
+  3. https://www.reddit.com/user/Lower-Lingonberry-40/
+- [ ] Each Reddit anchor contains exactly one <img>.
+- [ ] Each Reddit image uses an internal repository asset; no external Reddit image asset is used.
+- [ ] Reddit icon colors match the approved set: orange, blue, and purple/blue.
+- [ ] Reddit aria labels match the approved labels.
+- [ ] Inspect the actual DOM to verify destinations, anchor/image nesting, image src, and relevant attributes.
 - [ ] Disclaimer link is present.
 - [ ] Copyright is present.
+
+## Completion Gates
+
+All four gates below are independent and mandatory. Passing one does not compensate for failure of another.
+
+- [ ] Gate A — Original Content Match: all original content and content-bearing elements are preserved.
+- [ ] Gate B — Standard Components: all required global/page components are present, correctly owned, and rendered once.
+- [ ] Gate C — HTML Structure: document structure and DOM nesting are valid and free of legacy wrappers/duplication.
+- [ ] Gate D — Reddit Footer Integrity: the complete Reddit footer structure passes the exact destination, image, asset, color, aria-label, and DOM checks above.
+
+## Formatting Isolation
+
+- [ ] Formatting remains confined to the intended region.
+- [ ] Check bold, italic, underline, links, font, color, alignment, spacing, and other inline/block formatting for unintended leakage.
+- [ ] Confirm TOC formatting does not leak into the article body.
+- [ ] Confirm article formatting does not alter global navigation or footer formatting.
+- [ ] Inspect the DOM/classes/styles when visual behavior cannot be explained by extracted text.
+
+## Language Navigation Isolation
+
+- [ ] Global EN / JP / CN navigation is present only in the global header.
+- [ ] Search / Ask controls are not duplicated inside article content or TOC.
+- [ ] Language-navigation elements are not accidentally included in article text extraction or TOC content.
+- [ ] Page-local language links remain only where they are intentionally part of the original article content.
 
 ## 7. Assets and Links
 
