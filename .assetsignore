@@ -3,5 +3,6 @@
 .gitignore
 .assetsignore
 wrangler.jsonc
+node_modules/
 
 worker.js
