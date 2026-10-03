@@ -10,53 +10,28 @@
 <style>
 :root{--bg:#fff;--text:#202020;--muted:#666;--line:#ddd;--link:#111}
 html[data-aw-theme="dark"]{--bg:#111;--text:#eee;--muted:#aaa;--line:#333;--link:#fff}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
+*{box-sizing:border-box} html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;line-height:1.7}
-a{color:var(--link)}
-.site-header{border-bottom:1px solid var(--line)}
+a{color:var(--link)} .site-header{border-bottom:1px solid var(--line)}
 .header-inner{max-width:1000px;margin:auto;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:20px}
-.brand{font-size:20px;font-weight:600;text-decoration:none}
-.nav{display:flex;gap:18px;flex-wrap:wrap;font-size:14px}
-.nav a{text-decoration:none}.nav a:hover{text-decoration:underline}
-.article{max-width:760px;margin:0 auto;padding:52px 20px 70px}
-.article-header{text-align:center;margin-bottom:42px}
+.brand{font-size:20px;font-weight:600;text-decoration:none}.nav{display:flex;gap:18px;flex-wrap:wrap;font-size:14px}.nav a{text-decoration:none}.nav a:hover{text-decoration:underline}
+.article{max-width:760px;margin:0 auto;padding:52px 20px 70px}.article-header{text-align:center;margin-bottom:42px}
 .article-header h1{margin:0 0 12px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(22px,2.5vw,25px);font-weight:600;line-height:1.15}
-.meta{margin:3px 0;color:var(--muted);font-size:14px}
-.article h2,.article h3,.article h4{font-family:Georgia,"Times New Roman",serif}
-.article h2{margin:46px 0 18px;padding-bottom:8px;border-bottom:1px solid var(--line);font-size:25px;font-weight:400;line-height:1.25}
-.article h3{margin:38px 0 14px;font-size:21px;font-weight:600}
-.article h4{margin:30px 0 12px;font-size:18px;font-weight:600}
-.article p{margin:0 0 10px;font-size:16px}
-.article p.aw-spacer{height:10px;margin:0;padding:0;font-size:0;line-height:0}
-.article .aw-image{text-align:center;margin:22px 0}
-.article .aw-image img{max-width:100%;height:auto;display:inline-block}
-.article strong{font-weight:650}.article u{text-underline-offset:2px}
-.article ol,.article ul{margin:0 0 20px;padding-left:28px}
-.article li{margin:0 0 10px;font-size:16px}
-.article hr{border:0;border-top:1px solid var(--line);margin:28px 0}
-.site-footer{border-top:1px solid var(--line);padding:20px;font-size:13px;text-align:center;color:var(--muted)}
-.site-footer .links{display:flex;justify-content:center;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:8px}
-.site-footer .reddit-icon{display:inline-flex;width:24px;height:24px;align-items:center;justify-content:center;text-decoration:none;overflow:hidden}
-.site-footer .reddit-icon img{display:block;width:24px;height:22px;object-fit:contain;transform:translateX(1px)}
-.site-footer .reddit-one img{transform:translateX(1px) scale(1.08)}
-.site-footer .reddit-two img{transform:translateX(1px) scale(1.08);filter:brightness(0) saturate(100%) invert(39%) sepia(82%) saturate(1030%) hue-rotate(178deg) brightness(92%) contrast(94%)}
-.site-footer .reddit-three img{transform:translateX(1px) scale(.94);filter:brightness(0) saturate(100%) invert(32%) sepia(42%) saturate(1537%) hue-rotate(238deg) brightness(91%) contrast(92%)}
+.meta{margin:3px 0;color:var(--muted);font-size:14px}.article p{margin:0 0 10px;font-size:16px}.article p.aw-spacer{height:10px;margin:0;padding:0;font-size:0;line-height:0}
+.article .aw-image{text-align:center;margin:22px 0}.article .aw-image img{max-width:100%;height:auto;display:inline-block}
+.article strong{font-weight:650}.article u{text-underline-offset:2px}.article ol,.article ul{margin:0 0 20px;padding-left:28px}.article li{margin:0 0 10px;font-size:16px}
+.article h2,.article h3,.article h4{font-family:Georgia,"Times New Roman",serif}.article h2{margin:46px 0 18px;padding-bottom:8px;border-bottom:1px solid var(--line);font-size:25px;font-weight:400;line-height:1.25}.article h3{margin:38px 0 14px;font-size:21px;font-weight:600}.article h4{margin:30px 0 12px;font-size:18px;font-weight:600}.article hr{border:0;border-top:1px solid var(--line);margin:28px 0}
+.site-footer{border-top:1px solid var(--line);padding:20px;font-size:13px;text-align:center;color:var(--muted)}.site-footer .links{display:flex;justify-content:center;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+.site-footer .reddit-icon{display:inline-flex;width:24px;height:24px;align-items:center;justify-content:center;text-decoration:none;overflow:hidden}.site-footer .reddit-icon img{display:block;width:24px;height:22px;object-fit:contain;transform:translateX(1px)}
+.site-footer .reddit-one img{transform:translateX(1px) scale(1.08)}.site-footer .reddit-two img{transform:translateX(1px) scale(1.08);filter:brightness(0) saturate(100%) invert(39%) sepia(82%) saturate(1030%) hue-rotate(178deg) brightness(92%) contrast(94%)}.site-footer .reddit-three img{transform:translateX(1px) scale(.94);filter:brightness(0) saturate(100%) invert(32%) sepia(42%) saturate(1537%) hue-rotate(238deg) brightness(91%) contrast(92%)}
 html[data-aw-theme="dark"] .site-footer .reddit-three img{filter:brightness(0) saturate(100%) invert(76%) sepia(33%) saturate(1140%) hue-rotate(218deg) brightness(103%) contrast(94%)}
 @media(max-width:600px){.header-inner{display:block;padding:14px 16px}.brand{display:block;margin-bottom:10px}.nav{gap:12px}.article{padding:34px 16px 54px}.article p{font-size:16px;line-height:1.72}.article h2{font-size:22px;margin-top:38px}}
 </style>
 </head>
-<body>
-<header class="site-header"><div class="header-inner">
-<a class="brand" href="/">Awakenology</a>
-<nav class="nav" aria-label="Language navigation">
-<a href="/English/">English</a><a href="/Japanese/">日本語</a><a href="/Chinese/">中文</a><a href="/ai-search/">Search / Ask</a>
-</nav>
-</div></header>
-<main class="article"><article>
-<header class="article-header"><h1><strong>Traditional Soul Awakening: Astral Projection 5-Steps</strong></h1><p class="meta">YWS</p><p class="meta">Second Edition: 2004–2024</p></header>
-<p><a><img src="/gallery_gen/d622fb0068faf0f8212ddee43f5c74fc_fit.png?ts=1790408806" alt=""></a></p>
-<p><a><img src="/gallery/tradition_02.png?ts=1790408806" alt=""></a></p>
+<body><header class="site-header"><div class="header-inner"><a class="brand" href="/">Awakenology</a><nav class="nav" aria-label="Language navigation"><a href="/English/">English</a><a href="/Japanese/">日本語</a><a href="/Chinese/">中文</a><a href="/ai-search/">Search / Ask</a></nav></div></header>
+<main class="article"><article><header class="article-header"><h1><strong>Traditional Soul Awakening: Astral Projection 5-Steps</strong></h1><p class="meta">YWS</p><p class="meta">Second Edition: 2004–2024</p></header>
+<p class="aw-image"><img src="/gallery_gen/d622fb0068faf0f8212ddee43f5c74fc_fit.png?ts=1790408806" alt=""></p>
+<p class="aw-image"><img src="/gallery/tradition_02.png?ts=1790408806" alt=""></p>
 <p>Step 1: Concentrate on Inner Light (Observe Inward)</p>
 
 <ul>
@@ -66,11 +41,11 @@ html[data-aw-theme="dark"] .site-footer .reddit-three img{filter:brightness(0) s
 <li>This practice is similar to what is called <em>meditation</em> in the West.</li>
 </ul>
 
-<p> </p>
+<p class="aw-spacer"> </p>
 
 <h4><strong>2. </strong><strong>Observing the Soul</strong><strong> (</strong><strong><em>Red</em></strong><em>iscover Soul</em><strong>)</strong></h4>
 
-<p><a><img src="/gallery/tradition_03.png?ts=1790408806" alt=""></a></p>
+<p class="aw-image"><img src="/gallery/tradition_03.png?ts=1790408806" alt=""></p>
 <p>Step 2: Rebirth (Rediscover Soul)</p>
 
 <ul>
@@ -78,12 +53,12 @@ html[data-aw-theme="dark"] .site-footer .reddit-three img{filter:brightness(0) s
 <li>This practice requires closing the eyes and nurturing the soul (the "inner infant") daily, strengthening it for astral projection. This step takes about ten months.</li>
 </ul>
 
-<p> </p>
+<p class="aw-spacer"> </p>
 
 <h4><strong>3. </strong><strong>Soul Projection</strong><strong> (</strong><em>Astral Projection</em><em> / </em><em>Soul Travel</em><strong>)</strong></h4>
 
-<p><a><img src="/gallery_gen/473c6019df3973124ac0c002a613f7f7_fit.png?ts=1790408806" alt=""></a></p>
-<p><a><img src="/gallery/tradition_05.png?ts=1790408806" alt=""></a></p>
+<p class="aw-image"><img src="/gallery_gen/473c6019df3973124ac0c002a613f7f7_fit.png?ts=1790408806" alt=""></p>
+<p class="aw-image"><img src="/gallery/tradition_05.png?ts=1790408806" alt=""></p>
 <p>Step 3: Astral Projection (Spiritual Travel)</p>
 
 <ul>
@@ -93,11 +68,11 @@ html[data-aw-theme="dark"] .site-footer .reddit-three img{filter:brightness(0) s
 <li>This practice is similar to what is called <em>astral projection</em> or <em>out-of-body experience</em> (OBE) in the West.</li>
 </ul>
 
-<p> </p>
+<p class="aw-spacer"> </p>
 
 <h4><strong>4. </strong><strong>Transformation of the Soul</strong><strong> (</strong><em>Soul Split</em><strong>)</strong></h4>
 
-<p><a><img src="/gallery/tradition_06.png?ts=1790408806" alt=""></a></p>
+<p class="aw-image"><img src="/gallery/tradition_06.png?ts=1790408806" alt=""></p>
 <p>Step 4: Transformation (Spiritual Split)</p>
 
 <ul>
@@ -106,11 +81,11 @@ html[data-aw-theme="dark"] .site-footer .reddit-three img{filter:brightness(0) s
 <li>Daily exploration of the soul’s transformations and journeys through parallel worlds is required for about five to ten years.</li>
 </ul>
 
-<p> </p>
+<p class="aw-spacer"> </p>
 
 <h4><strong>5. </strong><strong>Liberation from Reincarnation</strong><strong> (</strong><em>Exit Reincarnation</em><strong>)</strong></h4>
 
-<p><a><img src="/gallery/tradition_07.png?ts=1790408806" alt=""></a></p>
+<p class="aw-image"><img src="/gallery/tradition_07.png?ts=1790408806" alt=""></p>
 <p>Step 5: Breaking Free (Exit Reincarnation)</p>
 
 <ul>
@@ -121,7 +96,7 @@ html[data-aw-theme="dark"] .site-footer .reddit-three img{filter:brightness(0) s
 <li>Daily practice to achieve the freedom of consciousness and unity with The Ultimate Source typically requires five to ten years.</li>
 </ul>
 
-<p> </p>
+<p class="aw-spacer"> </p>
 
 <p><strong>Verse</strong><strong> from the book:</strong></p>
 
@@ -130,16 +105,16 @@ html[data-aw-theme="dark"] .site-footer .reddit-three img{filter:brightness(0) s
 <em>You've read the words, but none reveal;</em><br>
 <em>The final truth is yours to feel.</em></p>
 
-<hr>
-<p> </p>
+<hr size="2" width="100%">
+<p class="aw-spacer"> </p>
 
 <h3><strong><u>Illustrations</u></strong><strong><u> from </u></strong><a href="https://zh.wikisource.org/wiki/%E6%85%A7%E5%91%BD%E7%B6%93"><strong><u>“</u></strong><em><u>The Sutra of Wisdom and Life</u></em><em><u>”</u></em></a></h3>
 
-<p> </p>
+<p class="aw-spacer"> </p>
 
 <h4><strong>1. </strong><strong>Inner Observation</strong><strong> (</strong><em>Observe Inward</em><strong>)</strong></h4>
 
-<p><a><img src="/gallery/tradition_08.png?ts=1790408806" alt=""></a></p>
+<p class="aw-image"><img src="/gallery/tradition_08.png?ts=1790408806" alt=""></p>
 <p>The first step is to observe inward, which not only improves health, but also helps uncover the true self.</p>
 
 <ul>
@@ -148,11 +123,11 @@ html[data-aw-theme="dark"] .site-footer .reddit-three img{filter:brightness(0) s
 <li>This is called <em>meditation</em> in the West.</li>
 </ul>
 
-<p> </p>
+<p class="aw-spacer"> </p>
 
 <h4><strong>2. </strong><strong>Nurturing the Soul</strong><strong> (</strong><strong><em>Red</em></strong><em>iscover Soul</em><strong>)</strong></h4>
 
-<p><a><img src="/gallery/tradition_09.png?ts=1790408806" alt=""></a></p>
+<p class="aw-image"><img src="/gallery/tradition_09.png?ts=1790408806" alt=""></p>
 <p>The second step is rediscovering the true self and spirit, signifying the natural existence of the soul.</p>
 
 <ul>
@@ -160,11 +135,11 @@ html[data-aw-theme="dark"] .site-footer .reddit-three img{filter:brightness(0) s
 <li>Daily practice of nurturing the soul in preparation for astral projection is required for about ten months.</li>
 </ul>
 
-<p> </p>
+<p class="aw-spacer"> </p>
 
 <h4><strong>3. </strong><strong>Soul Projection</strong><strong> (</strong><em>Astral Projection</em><em> / </em><em>Soul Travel</em><strong>)</strong></h4>
 
-<p><a><img src="/gallery/tradition_10.png?ts=1790408806" alt=""></a></p>
+<p class="aw-image"><img src="/gallery/tradition_10.png?ts=1790408806" alt=""></p>
 <p>The third step is soul projection, where the soul separates from the body.</p>
 
 <ul>
@@ -173,11 +148,11 @@ html[data-aw-theme="dark"] .site-footer .reddit-three img{filter:brightness(0) s
 <li>This practice is similar to what is called <em>astral projection</em> or <em>out-of-body experience</em> (OBE) in the West.</li>
 </ul>
 
-<p> </p>
+<p class="aw-spacer"> </p>
 
 <h4><strong>4. </strong><strong>Transformation of the Soul</strong><strong> (</strong><em>Soul Split</em><strong>)</strong></h4>
 
-<p><a><img src="/gallery/tradition_11.png?ts=1790408806" alt=""></a></p>
+<p class="aw-image"><img src="/gallery/tradition_11.png?ts=1790408806" alt=""></p>
 <p>In this step, the soul transforms infinitely, creating countless versions of itself and existing simultaneously across numerous parallel worlds.</p>
 
 <ul>
@@ -186,11 +161,11 @@ html[data-aw-theme="dark"] .site-footer .reddit-three img{filter:brightness(0) s
 <li>Daily practice of exploring the soul’s transformations and journeys through parallel worlds is required, taking five to ten years.</li>
 </ul>
 
-<p> </p>
+<p class="aw-spacer"> </p>
 
 <h4><strong>5. </strong><strong>Unity with the Ultimate Source</strong><strong> (</strong><em>Beyond Reincarnation</em><strong>)</strong></h4>
 
-<p><a><img src="/gallery/tradition_12.png?ts=1790408806" alt=""></a></p>
+<p class="aw-image"><img src="/gallery/tradition_12.png?ts=1790408806" alt=""></p>
 <p>The final step is uniting with The Ultimate Source and breaking free from all cycles of reincarnation.</p>
 
 <ul>
@@ -213,14 +188,8 @@ html[data-aw-theme="dark"] .site-footer .reddit-three img{filter:brightness(0) s
 <li>This requires daily practice to enhance the freedom of consciousness and unite with The Ultimate Source, typically taking five to ten years.</li>
 </ul>
 
-<p> </p>
+<p class="aw-spacer"> </p>
 
 </article></main>
-<footer class="site-footer"><div class="links">
-<a href="mailto:contact@awakenology.org">Contact</a>
-<a class="reddit-icon reddit-one" href="https://www.reddit.com/r/EscapeReincarnation/" aria-label="Reddit: Escape Reincarnation"><img src="/assets/reddit-one.svg" alt=""></a>
-<a class="reddit-icon reddit-two" href="https://www.reddit.com/r/EscapePrisonPlanet/" aria-label="Reddit: Escape Prison Planet"><img src="/assets/reddit-two.svg" alt=""></a>
-<a class="reddit-icon reddit-three" href="https://www.reddit.com/user/Lower-Lingonberry-40/" aria-label="Reddit: Lower-Lingonberry-40"><img src="/assets/reddit-three.svg" alt=""></a>
-<a href="/Disclaimer/">Disclaimer</a>
-</div><div>© 2024 Awakenology.org</div></footer>
+<footer class="site-footer"><div class="links"><a href="mailto:contact@awakenology.org">Contact</a><a class="reddit-icon reddit-one" href="https://www.reddit.com/r/EscapeReincarnation/" aria-label="Reddit: Escape Reincarnation"><img src="/assets/reddit-one.svg" alt=""></a><a class="reddit-icon reddit-two" href="https://www.reddit.com/r/EscapePrisonPlanet/" aria-label="Reddit: Escape Prison Planet"><img src="/assets/reddit-two.svg" alt=""></a><a class="reddit-icon reddit-three" href="https://www.reddit.com/user/Lower-Lingonberry-40/" aria-label="Reddit: Lower-Lingonberry-40"><img src="/assets/reddit-three.svg" alt=""></a><a href="/Disclaimer/">Disclaimer</a></div><div>© 2024 Awakenology.org</div></footer>
 </body></html>
