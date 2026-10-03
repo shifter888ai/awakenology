@@ -79,18 +79,24 @@
 29. **Global Components / Single Source of Truth / Duplication Check**
     - Before adding, rebuilding, or modifying any global site component, inspect `worker.js` first.
     - The approved global components are:
-      1. **Dark/Light floating button**
-      2. **↑ Return-to-top floating button**
-      3. **Global navigation menu:** English / 日本語 / 中文 / Search / Ask
-      4. **Global footer:** Contact → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer → © 2024 Awakenology.org
-    - Determine whether each component is already injected or controlled globally by the Cloudflare Worker.
+      1. **Dark/Light floating button** — Worker-owned
+      2. **↑ Return-to-top floating button** — Worker-owned
+      3. **Chinese 简/繁 floating toggle** — Worker-owned
+      4. **Global navigation menu:** English / 日本語 / 中文 / Search / Ask — page-template-owned
+      5. **Global footer:** Contact → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer → © 2024 Awakenology.org — page-template-owned
+    - Global component ownership is explicit:
+      - **Cloudflare Worker:** global floating/behavioral components: Dark/Light, ↑ Return-to-top, and Chinese 简/繁 switching.
+      - **Rebuilt page template:** global structural components: English / 日本語 / 中文 / Search / Ask navigation and the standard footer.
+    - A Worker-injected component is considered present and compliant even though it is not physically present in the committed page HTML.
+    - Determine whether each component is already injected or controlled globally by the Cloudflare Worker before adding any page-local implementation.
     - Every global component must have **one source of truth**. Never create a second page-local implementation of a component already provided by `worker.js`.
     - The Worker-provided **Dark/Light floating button** is the global theme control and single source of truth. Rebuilt pages must not recreate it with their own button, CSS, JavaScript, or local theme system.
     - The global **↑ Return-to-top floating button** must likewise have one site-wide implementation. Rebuilt pages must not recreate it locally once it is provided by `worker.js`.
-    - The global navigation menu and footer must likewise have one approved implementation and must not be duplicated inside article or TOC content.
+    - The Worker-owned **Chinese 简/繁 floating toggle** likewise has one site-wide implementation. Rebuilt pages must not recreate its button, CSS, JavaScript, or local conversion system.
+    - The page-template-owned global navigation menu and footer must likewise have one approved implementation and must not be duplicated inside article or TOC content.
     - **Duplication must be explicitly checked.** Validation must verify that each global component has exactly one active/visible instance and that no page-local implementation conflicts with the Worker-provided implementation.
     - Validation must inspect both the rebuilt page source and `worker.js`, because duplicate or conflicting components may not be visible from the page source alone.
-    - If a component is intentionally moved from Worker control to page-local control, make that an explicit site-wide design decision rather than an accidental duplicate implementation.
+    - If a component is intentionally moved between Worker control and page-template control, make that an explicit site-wide design decision rather than an accidental duplicate implementation.
     - This check is independent of Standard Component Match, HTML Structure Sanity, and Content Match.
 
 28. **Reddit Footer Component Structural Integrity Check**
@@ -168,7 +174,7 @@ Copyright:
 
 ## Completion Gate
 
-Every rebuilt page must pass **all four independent gates** before being reported as complete:
+Every rebuilt page must pass **all four independent gates** before being reported as complete. Global Worker-injected components are validated at runtime/source-injection level rather than being required to appear literally in the committed page HTML:
 
 1. **100% Original Content Match**
 2. **100% Standard Component Match**
