@@ -44,6 +44,8 @@ Inspect the actual DOM, not only extracted text or CSS.
   - empty `<div>`
   - legacy spacer elements
 - [ ] Confirm no legacy blank paragraphs create unintended visual gaps.
+- [ ] Whitespace-only original paragraphs are either preserved intentionally or converted to the approved `.aw-spacer` representation; do not leave arbitrary blank `<p>` elements.
+- [ ] Confirm approved `.aw-spacer` elements are used only where they represent original whitespace and do not create unintended gaps.
 
 ## 5. Duplication Check
 
