@@ -55,6 +55,18 @@
     - A page is not complete if content is correct but formatting has leaked across structural boundaries.
 
 
+25. **Language Navigation Isolation Check**
+    - The global English / 日本語 / 中文 navigation belongs only in the global header.
+    - Never copy or extract legacy WebsiteBuilder language navigation into article or TOC content.
+    - Automatically inspect article and TOC regions for the global language-menu labels/links and fail the build if they appear there.
+    - This check is independent of Standard Component Match and Formatting Isolation.
+
+26. **Post-Commit Verification**
+    - After every page change, do not assume the intended edit reached GitHub.
+    - The required sequence is: fetch current file → modify → commit → fetch the committed file again → verify the exact changed markup/content in the committed version.
+    - Only after post-commit verification passes may the page be reported as fixed and sent for user visual testing.
+    - If the committed file does not contain the intended change, correct it before reporting completion.
+
 ## Global Article Baseline
 
 ### Title
