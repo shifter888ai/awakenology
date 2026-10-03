@@ -36,6 +36,9 @@ html[data-aw-theme="dark"] body.site-lang-en #a188dda404b603086d7b3027a1d90739 s
 html[data-aw-theme="dark"] a{color:#9ecbff!important}
 #awakenology-theme-toggle{position:fixed;top:10px;right:10px;z-index:2147483647;border:1px solid #888;border-radius:14px;width:30px;height:30px;padding:4px;font:18px/20px Arial,sans-serif;cursor:pointer;background:#fff;color:#222;box-shadow:0 1px 4px #0004}
 html[data-aw-theme="dark"] #awakenology-theme-toggle{background:#222;color:#eee;border-color:#777}
+
+#awakenology-return-top{position:fixed;right:10px;bottom:10px;z-index:2147483647;border:1px solid #888;border-radius:14px;width:30px;height:30px;padding:4px;font:18px/20px Arial,sans-serif;cursor:pointer;background:#fff;color:#222;box-shadow:0 1px 4px #0004;display:none}
+html[data-aw-theme="dark"] #awakenology-return-top{background:#222;color:#eee;border-color:#777}
 </style>
 <style id="awakenology-cn-style">
 #awakenology-cn-toggle{position:fixed;top:10px;right:54px;z-index:2147483647;border:1px solid #888;border-radius:14px;min-width:30px;height:30px;padding:4px 7px;font:14px/20px Arial,sans-serif;cursor:pointer;background:#fff;color:#222;box-shadow:0 1px 4px #0004}
@@ -43,7 +46,7 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle{background:#222;color:#eee;bor
 </style>`;
 
     const script = `<script>
-(function(){var KEY="awakenology-theme";var saved=localStorage.getItem(KEY);var dark=saved!=="light";document.documentElement.setAttribute("data-aw-theme",dark?"dark":"light");document.addEventListener("DOMContentLoaded",function(){if(document.getElementById("awakenology-theme-toggle")||document.getElementById("theme-toggle")||document.querySelector(".theme-toggle"))return;var button=document.createElement("button");button.id="awakenology-theme-toggle";button.type="button";button.setAttribute("aria-label","Switch background theme");button.textContent=dark?"☀":"☾";button.addEventListener("click",function(){dark=document.documentElement.getAttribute("data-aw-theme")!=="dark";document.documentElement.setAttribute("data-aw-theme",dark?"dark":"light");localStorage.setItem(KEY,dark?"dark":"light");button.textContent=dark?"☀":"☾"});document.body.appendChild(button)})}());
+(function(){var KEY="awakenology-theme";var saved=localStorage.getItem(KEY);var dark=saved!=="light";document.documentElement.setAttribute("data-aw-theme",dark?"dark":"light");document.addEventListener("DOMContentLoaded",function(){if(document.getElementById("awakenology-theme-toggle")||document.getElementById("theme-toggle")||document.querySelector(".theme-toggle"))return;var button=document.createElement("button");button.id="awakenology-theme-toggle";button.type="button";button.setAttribute("aria-label","Switch background theme");button.textContent=dark?"☀":"☾";button.addEventListener("click",function(){dark=document.documentElement.getAttribute("data-aw-theme")!=="dark";document.documentElement.setAttribute("data-aw-theme",dark?"dark":"light");localStorage.setItem(KEY,dark?"dark":"light");button.textContent=dark?"☀":"☾"});document.body.appendChild(button);var topButton=document.createElement("button");topButton.id="awakenology-return-top";topButton.type="button";topButton.setAttribute("aria-label","Return to top");topButton.title="Return to top";topButton.textContent="↑";function updateTop(){topButton.style.display=window.scrollY>300?"block":"none"}topButton.addEventListener("click",function(){window.scrollTo({top:0,behavior:"smooth"})});window.addEventListener("scroll",updateTop,{passive:true});updateTop();document.body.appendChild(topButton)})}());
 </script>`;
 
     const chineseScript = `<script type="module">
