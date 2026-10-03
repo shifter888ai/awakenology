@@ -76,6 +76,15 @@
     - A page is not complete if an asset exists in the HTML but is broken because its URL resolves incorrectly.
     - This check is independent of Content Match, Standard Component Match, HTML Structure Sanity, Formatting Isolation, and Language Navigation Isolation.
 
+29. **Global Component / Single Source of Truth Check**
+    - Before adding, rebuilding, or modifying any global site component, inspect `worker.js` first.
+    - Determine whether the component is already injected or controlled globally by the Cloudflare Worker.
+    - A global component must have **one source of truth**. Never create a second page-local implementation of a component already provided by `worker.js`.
+    - In particular, the Worker-provided **Dark/Light mode control is the global component and single source of truth**. Rebuilt pages must not recreate it with their own button, CSS, JavaScript, or local theme system.
+    - If a component is intentionally moved from Worker control to page-local control, make that an explicit site-wide design decision rather than an accidental duplicate implementation.
+    - Validation must inspect both the rebuilt page source and `worker.js`, because duplicate or conflicting components may not be visible from the page source alone.
+    - This check is independent of Standard Component Match and HTML Structure Sanity.
+
 28. **Reddit Footer Component Structural Integrity Check**
     - The approved footer must contain exactly three Reddit icon anchors, in this order:
       1. `https://www.reddit.com/r/EscapeReincarnation/`
