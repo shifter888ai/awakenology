@@ -101,11 +101,14 @@ Article title/author/date block is centered.
 Whitespace-only original paragraphs must be preserved and handled consistently.
 
 ### Return to top
-Exact approved wording:
+Use a small **floating ↑ button** fixed at the bottom-right corner.
 
-**↑ Return to top**
-
-Do not replace it with “Return to top” or another variation unless explicitly approved.
+- Same simple visual style as the Dark/Light mode control.
+- Appears after the user scrolls down; hidden near the top.
+- Clicking it smoothly returns to the top of the page.
+- Works in both dark and light modes.
+- No text label is displayed.
+- This floating button is the approved global replacement for the previous **↑ Return to top** text link.
 
 ### Footer
 Order:
