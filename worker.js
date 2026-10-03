@@ -59,3 +59,4 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
       .transform(response);
   }
 };
+/* Cloudflare rebuild trigger 2026-10-03 */
