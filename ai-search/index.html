@@ -1,108 +1,98 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ask Awakenology</title>
-  <style>
-    :root {
-      color-scheme: light dark;
-      --page: #f5f5f3;
-      --panel: rgba(255,255,255,.92);
-      --text: #171717;
-      --muted: #666;
-      --line: rgba(0,0,0,.12);
-    }
-    html[data-aw-theme="dark"] {
-      --page: #111;
-      --panel: #1b1b1b;
-      --text: #f2f2f2;
-      --muted: #aaa;
-      --line: rgba(255,255,255,.14);
-    }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; min-height: 100%; }
-    body {
-      background: var(--page);
-      color: var(--text);
-      font-family: Arial, Helvetica, sans-serif;
-    }
-    .ask-page {
-      width: min(900px, calc(100% - 32px));
-      margin: 0 auto;
-      padding: 92px 0 100px;
-    }
-    .ask-header {
-      text-align: center;
-      margin-bottom: 34px;
-    }
-    .ask-header h1 {
-      margin: 0 0 10px;
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: clamp(30px, 5vw, 44px);
-      font-weight: 400;
-      letter-spacing: .01em;
-    }
-    .ask-header p {
-      max-width: 650px;
-      margin: 0 auto;
-      color: var(--muted);
-      font-size: 16px;
-      line-height: 1.6;
-    }
-    .ask-panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: 0 8px 30px rgba(0,0,0,.06);
-    }
-    .ask-label {
-      margin: 0 0 12px;
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: .04em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-    search-bar-snippet {
-      display: block;
-      min-height: 52px;
-    }
-    .ask-note {
-      margin: 18px 4px 0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
-    }
-    @media (max-width: 700px) {
-      .ask-page { width: min(100% - 24px, 900px); padding: 72px 0 80px; }
-      .ask-header { margin-bottom: 24px; }
-      .ask-header h1 { font-size: 32px; }
-      .ask-header p { font-size: 15px; }
-      .ask-panel { padding: 16px; border-radius: 10px; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ask Awakenology</title>
+<style>
+:root{color-scheme:light;--bg:#fff;--fg:#111;--muted:#666;--line:#ddd;--link:#111;--soft:#f6f6f6}
+html[data-aw-theme="dark"]{color-scheme:dark;--bg:#111;--fg:#eee;--muted:#aaa;--line:#333;--link:#fff;--soft:#1a1a1a}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;line-height:1.6}
+a{color:var(--link);text-decoration:none}
+a:hover{text-decoration:underline}
+.site-header{border-bottom:1px solid var(--line)}
+.header-inner{max-width:900px;margin:0 auto;padding:22px 24px 18px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand{font-family:Georgia,"Times New Roman",serif;font-size:25px;font-weight:700}
+.nav{display:flex;flex-wrap:wrap;gap:18px;font-size:14px}
+.nav a{padding-bottom:2px}
+.nav a.active{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:5px}
+main{max-width:760px;margin:0 auto;padding:58px 24px 70px}
+.ask-header{text-align:center;margin-bottom:34px}
+.ask-header h1{margin:0 0 12px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(28px,4vw,36px);font-weight:600;line-height:1.2}
+.ask-header p{max-width:650px;margin:0 auto;color:var(--muted);font-size:16px;line-height:1.6}
+.ask-panel{border:1px solid var(--line);padding:24px;background:var(--soft)}
+.ask-label{margin:0 0 12px;font-size:14px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+search-bar-snippet{display:block;min-height:52px}
+.ask-note{margin:18px 4px 0;color:var(--muted);font-size:13px;line-height:1.5}
+.footer{border-top:1px solid var(--line);padding:24px}
+.footer-inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;color:var(--muted);font-size:13px}
+.footer-links{display:flex;align-items:center;gap:12px}
+.footer-links a{color:var(--muted)}
+.reddit-icon{display:inline-flex;width:24px;height:24px;align-items:center;justify-content:center;overflow:hidden}
+.reddit-icon img{display:block;width:24px;height:22px;object-fit:contain;transform:translateX(1px)}
+.reddit-one img{transform:translateX(1px) scale(1.08)}
+.reddit-two img{transform:translateX(1px) scale(1.08);filter:brightness(0) saturate(100%) invert(39%) sepia(82%) saturate(1030%) hue-rotate(178deg) brightness(92%) contrast(94%)}
+.reddit-three img{transform:translateX(1px) scale(.94);filter:brightness(0) saturate(100%) invert(32%) sepia(42%) saturate(1537%) hue-rotate(238deg) brightness(91%) contrast(92%)}
+html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%) invert(76%) sepia(33%) saturate(1140%) hue-rotate(218deg) brightness(103%) contrast(94%)}
+@media(max-width:700px){
+.header-inner{display:block;padding:18px 18px 14px}
+.brand{display:block;margin-bottom:12px}
+.nav{gap:14px}
+main{padding:44px 18px 55px}
+.ask-header{margin-bottom:24px}
+.ask-header h1{font-size:30px}
+.ask-header p{font-size:15px}
+.ask-panel{padding:17px}
+.footer{padding:20px 14px}
+}
+</style>
 </head>
 <body>
-  <main class="ask-page">
-    <header class="ask-header">
-      <h1>Ask Awakenology</h1>
-      <p>Search the Awakenology site, or use AI to ask questions about its material.</p>
-    </header>
+<header class="site-header">
+<div class="header-inner">
+<a class="brand" href="/" title="Home">Awakenology</a>
+<nav class="nav" aria-label="Site navigation">
+<a href="/English/">English</a>
+<a href="/Japanese/">日本語</a>
+<a href="/Chinese/">中文</a>
+<a class="active" href="/ai-search/" aria-current="page">Search / Ask</a>
+</nav>
+</div>
+</header>
 
-    <section class="ask-panel" aria-label="Awakenology Search and AI Chat">
-      <p class="ask-label">Search the site</p>
-      <search-bar-snippet
-        api-url="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/"
-        placeholder="Search Awakenology..."
-        max-results="10"
-      ></search-bar-snippet>
-      <p class="ask-note"><strong>AI Chat</strong> is available from the floating button. Ask questions about Awakenology content in English, Japanese, or Chinese.</p>
-    </section>
-  </main>
+<main>
+<header class="ask-header">
+<h1>Ask Awakenology</h1>
+<p>Search the Awakenology site, or use AI to ask questions about its material.</p>
+</header>
 
-  <script type="module" src="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/assets/v0.0.25/search-snippet.es.js"></script>
-  <chat-bubble-snippet api-url="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/"></chat-bubble-snippet>
+<section class="ask-panel" aria-label="Awakenology Search and AI Chat">
+<p class="ask-label">Search the site</p>
+<search-bar-snippet
+api-url="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/"
+placeholder="Search Awakenology..."
+max-results="10"
+></search-bar-snippet>
+<p class="ask-note"><strong>AI Chat</strong> is available from the floating button. Ask questions about Awakenology content in English, Japanese, or Chinese.</p>
+</section>
+</main>
+
+<footer class="footer">
+<div class="footer-inner">
+<span class="footer-links">
+<a href="mailto:contact@awakenology.org">Contact</a>
+<a class="reddit-icon reddit-one" href="https://www.reddit.com/r/EscapeReincarnation/" aria-label="Reddit: Escape Reincarnation"><img src="/assets/reddit-one.svg" alt=""></a>
+<a class="reddit-icon reddit-two" href="https://www.reddit.com/r/EscapePrisonPlanet/" aria-label="Reddit: Escape Prison Planet"><img src="/assets/reddit-two.svg" alt=""></a>
+<a class="reddit-icon reddit-three" href="https://www.reddit.com/user/Lower-Lingonberry-40/" aria-label="Reddit: Lower-Lingonberry-40"><img src="/assets/reddit-three.svg" alt=""></a>
+<a href="/Disclaimer/">Disclaimer</a>
+</span>
+<span>© 2024 Awakenology.org</span>
+</div>
+</footer>
+
+<script type="module" src="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/assets/v0.0.25/search-snippet.es.js"></script>
+<chat-bubble-snippet api-url="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/"></chat-bubble-snippet>
 </body>
 </html>
