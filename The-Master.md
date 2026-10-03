@@ -46,6 +46,14 @@
     - **Content Match, Standard Component Match, and HTML Structure Sanity are three independent checks.**
     - Passing one check can never substitute for another.
     - **Never trust a successful text comparison alone.**
+24. **Formatting Isolation Check**
+    - Formatting intended for one content region must never leak into another region.
+    - Especially verify italic, bold, underline, link, font, and color inheritance.
+    - TOC-specific formatting must remain confined to the TOC.
+    - Main article text must retain intended normal formatting unless the original content explicitly specifies otherwise.
+    - Automated validation must check DOM structure and formatting boundaries, not merely extracted text.
+    - A page is not complete if content is correct but formatting has leaked across structural boundaries.
+
 
 ## Global Article Baseline
 
