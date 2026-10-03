@@ -76,6 +76,19 @@
     - A page is not complete if an asset exists in the HTML but is broken because its URL resolves incorrectly.
     - This check is independent of Content Match, Standard Component Match, HTML Structure Sanity, Formatting Isolation, and Language Navigation Isolation.
 
+28. **Reddit Footer Component Structural Integrity Check**
+    - The approved footer must contain exactly three Reddit icon anchors, in this order:
+      1. `https://www.reddit.com/r/EscapeReincarnation/`
+      2. `https://www.reddit.com/r/EscapePrisonPlanet/`
+      3. `https://www.reddit.com/user/Lower-Lingonberry-40/`
+    - Each Reddit anchor must contain exactly one `<img>`.
+    - All three Reddit icon image files must be stored **internally in the Awakenology repository**. New or rebuilt pages must reference internal assets, not external Wikimedia or other third-party image URLs.
+    - Each icon must retain its approved color treatment: Reddit 1 orange, Reddit 2 blue, Reddit 3 purple/blue, including visibility in dark mode.
+    - Each icon must have the correct `aria-label`.
+    - No malformed or nested closing tags are allowed.
+    - Validation must inspect actual DOM structure, destinations, image nesting, image sources, and attributes. String-presence checks such as `reddit-three` or `Snoo_black.svg` are not sufficient.
+    - A page is not complete if any Reddit footer component is structurally malformed or uses an external image asset.
+
 ## Global Article Baseline
 
 ### Title
@@ -83,7 +96,7 @@
 .article-header h1{
   margin:0 0 12px;
   font-family:Georgia,"Times New Roman",serif;
-  font-size:clamp(24px,3vw,28px);
+  font-size:clamp(22px,2.5vw,25px);
   font-weight:400;
   line-height:1.15
 }
@@ -120,6 +133,7 @@ Reddit icons:
 - Reddit 2: blue
 - Reddit 3: purple/blue
 - All remain visible in dark mode.
+- **All three icon image files are internal repository assets. External third-party image URLs must not be used.**
 
 Copyright:
 
@@ -137,10 +151,11 @@ Copyright:
 
 ## Completion Gate
 
-Every rebuilt page must pass **all three independent gates** before being reported as complete:
+Every rebuilt page must pass **all four independent gates** before being reported as complete:
 
 1. **100% Original Content Match**
 2. **100% Standard Component Match**
 3. **HTML Structure Sanity Check**
+4. **Reddit Footer Component Structural Integrity Check**
 
 Only then should the page be committed for user visual testing.
