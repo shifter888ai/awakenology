@@ -120,7 +120,7 @@
   margin:0 0 12px;
   font-family:Georgia,"Times New Roman",serif;
   font-size:clamp(22px,2.5vw,25px);
-  font-weight:400;
+  font-weight:600;
   line-height:1.15
 }
 .article strong{font-weight:650}
