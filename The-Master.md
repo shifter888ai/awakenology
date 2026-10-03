@@ -76,14 +76,22 @@
     - A page is not complete if an asset exists in the HTML but is broken because its URL resolves incorrectly.
     - This check is independent of Content Match, Standard Component Match, HTML Structure Sanity, Formatting Isolation, and Language Navigation Isolation.
 
-29. **Global Component / Single Source of Truth Check**
+29. **Global Components / Single Source of Truth / Duplication Check**
     - Before adding, rebuilding, or modifying any global site component, inspect `worker.js` first.
-    - Determine whether the component is already injected or controlled globally by the Cloudflare Worker.
-    - A global component must have **one source of truth**. Never create a second page-local implementation of a component already provided by `worker.js`.
-    - In particular, the Worker-provided **Dark/Light mode control is the global component and single source of truth**. Rebuilt pages must not recreate it with their own button, CSS, JavaScript, or local theme system.
-    - If a component is intentionally moved from Worker control to page-local control, make that an explicit site-wide design decision rather than an accidental duplicate implementation.
+    - The approved global components are:
+      1. **Dark/Light floating button**
+      2. **↑ Return-to-top floating button**
+      3. **Global navigation menu:** English / 日本語 / 中文 / Search / Ask
+      4. **Global footer:** Contact → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer → © 2024 Awakenology.org
+    - Determine whether each component is already injected or controlled globally by the Cloudflare Worker.
+    - Every global component must have **one source of truth**. Never create a second page-local implementation of a component already provided by `worker.js`.
+    - The Worker-provided **Dark/Light floating button** is the global theme control and single source of truth. Rebuilt pages must not recreate it with their own button, CSS, JavaScript, or local theme system.
+    - The global **↑ Return-to-top floating button** must likewise have one site-wide implementation. Rebuilt pages must not recreate it locally once it is provided by `worker.js`.
+    - The global navigation menu and footer must likewise have one approved implementation and must not be duplicated inside article or TOC content.
+    - **Duplication must be explicitly checked.** Validation must verify that each global component has exactly one active/visible instance and that no page-local implementation conflicts with the Worker-provided implementation.
     - Validation must inspect both the rebuilt page source and `worker.js`, because duplicate or conflicting components may not be visible from the page source alone.
-    - This check is independent of Standard Component Match and HTML Structure Sanity.
+    - If a component is intentionally moved from Worker control to page-local control, make that an explicit site-wide design decision rather than an accidental duplicate implementation.
+    - This check is independent of Standard Component Match, HTML Structure Sanity, and Content Match.
 
 28. **Reddit Footer Component Structural Integrity Check**
     - The approved footer must contain exactly three Reddit icon anchors, in this order:
