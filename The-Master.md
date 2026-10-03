@@ -67,6 +67,15 @@
     - Only after post-commit verification passes may the page be reported as fixed and sent for user visual testing.
     - If the committed file does not contain the intended change, correct it before reporting completion.
 
+
+27. **Asset Path / Image Integrity Check**
+    - Every preserved image, download, and other content-bearing asset must retain its intended target and resolve correctly from the rebuilt page.
+    - Relative legacy asset paths must be converted appropriately for the new route structure; never assume a legacy relative path will work unchanged.
+    - Automatically inspect every `<img src>` and other asset-bearing URL.
+    - Verify that each referenced asset resolves to an existing intended asset; image-tag count alone is not sufficient.
+    - A page is not complete if an asset exists in the HTML but is broken because its URL resolves incorrectly.
+    - This check is independent of Content Match, Standard Component Match, HTML Structure Sanity, Formatting Isolation, and Language Navigation Isolation.
+
 ## Global Article Baseline
 
 ### Title
