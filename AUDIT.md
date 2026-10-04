@@ -308,3 +308,11 @@ After deployment:
 - [ ] Confirm no visible spacing, duplication, or formatting problems remain.
 
 **Completion standard:** A page is considered verified only when all applicable checks above pass.
+
+## Cross-Page Standard Component Consistency
+- [ ] Compare standardized components against the approved design baseline and already-approved pages in the same language/section.
+- [ ] Compare title/H1 size, font family, weight, line height, alignment, spacing, and other shared component properties.
+- [ ] Confirm no page-specific original CSS value unintentionally overrides a standardized component.
+- [ ] Explicit exceptions are documented and re-audited; differences are not treated as intentional by assumption.
+- [ ] Treat cross-page consistency as a separate hard gate from page-specific content preservation.
+- [ ] Perform this comparison on the final committed CSS/DOM before requesting live testing.
