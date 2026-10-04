@@ -141,6 +141,13 @@ The inventory is the **page-specific evidence of what was there**; the Audit che
 - Promoting the title to the standardized H1/header must not normalize, collapse, or otherwise alter those line-specific properties unless the user explicitly requests that visual change.
 - A multi-line original title is one content-bearing title with independently auditable line-level formatting; do not treat it as a single uniform H1 style by assumption.
 
+
+### Heading / Paragraph Title Alignment Preservation
+- Every original content heading/paragraph title must be inventoried individually for horizontal alignment: left, center, right, or justified.
+- Preserve the original alignment when rebuilding, even if the element is promoted to a standardized H1/H2/H3 or otherwise restyled.
+- Original alignment must be derived from the original HTML/CSS/container behavior, not assumed from the new template.
+- Any intentional alignment change must be explicitly requested and audited as a targeted visual change.
+
 ### Per-Image Rendering Inventory
 - Every page-specific content image must have an individual rendering record in the page inventory.
 - The record must include: source asset/path, original source position/order, containing element, container width, image width, min/max-width, height/auto behavior, min/max-height, margins, alignment, object-fit/object-position, and responsive overrides where present.
