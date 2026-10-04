@@ -6,6 +6,45 @@ Use the applicable language-specific section for English, Japanese, or Chinese p
 
 ## 1. Original Content Match
 
+
+## Original-to-Rebuilt Content Inventory Gate
+
+Create and complete a page-specific inventory **before user testing**. The inventory must be derived from the original source, original CSS where relevant, and the rebuilt DOM.
+
+### Required inventory categories
+- [ ] Text/content blocks
+- [ ] Headings and paragraph titles
+- [ ] TOCs
+- [ ] Metadata
+- [ ] Internal and external links
+- [ ] **Every content image individually**
+- [ ] Image source/path and actual asset
+- [ ] Image position/order
+- [ ] Image and containing-element dimensions/CSS constraints
+- [ ] Bold/strong, underline, italic, color, alignment, and other intentional formatting
+- [ ] Intentional whitespace/spacers
+- [ ] Other content-bearing elements inside legacy WebsiteBuilder wrappers
+
+### Image 1:1 mapping — mandatory
+- [ ] Record the original content-image count.
+- [ ] Record the rebuilt article/content-image count.
+- [ ] Confirm the counts are identical.
+- [ ] Map every original content image to exactly one rebuilt image.
+- [ ] Verify each mapped image uses the intended asset/path.
+- [ ] Verify each mapped image appears in the correct content position/order.
+- [ ] Compare each image's original HTML and CSS, including its containing element.
+- [ ] Preserve explicit width, height, min/max-width, min/max-height, margins, alignment, object-fit/object-position, and responsive rules where applicable.
+- [ ] Do not replace distinct original image rules with a generic max-width:100%;height:auto assumption.
+- [ ] Do not classify an image as a legacy artifact merely because it is embedded in an old WebsiteBuilder wrapper if it is content-bearing.
+- [ ] Any image inventory mismatch is a hard failure.
+
+### Inventory completion
+- [ ] Every original content-bearing element has a rebuilt counterpart or an explicitly documented approved transformation (for example, promotion into the standardized H1/header).
+- [ ] No original content-bearing element is unaccounted for.
+- [ ] No new article content was invented.
+- [ ] Resolve every inventory mismatch before commit/testing.
+- [ ] Keep the inventory as the evidence for the page-specific Original Content Match gate; do not rely on visual inspection or text extraction alone.
+
 - [ ] Compare the rebuilt page against the original page.
 - [ ] Confirm 100% of original content is preserved.
 - [ ] Preserve all text, headings, TOCs, metadata, links, images, unusual wording, intentional formatting, spaces, NBSPs, and content-bearing elements.
