@@ -85,6 +85,19 @@ For every original title, subtitle, author/date/meta line, and title-associated 
 
 This gate prevents duplicate titles and prevents title-like content from silently inheriting generic article styling.
 
+## 4b. Page Language / Title Consistency Gate
+
+Before constructing or replacing the standard title/meta block, determine the page language from the original source/content and intended route.
+
+- Inspect the original article content and language-specific source/version.
+- Do not infer title language from the folder name alone.
+- Verify the original `<html lang>`, `<title>`, H1/title block, meta description, and intended language navigation.
+- For multilingual parallel pages, explicitly identify the correct language source before copying or reconstructing title/meta content.
+- Map the original title/meta lines only after confirming they belong to the current page language.
+- If the original source contains a title/meta language mismatch, treat the mismatch as a source issue to resolve from the correct language version rather than blindly preserving it.
+
+**Hard rule: an unexplained mismatch between the page language and its title/meta language is a hard failure before commit/user testing.**
+
 ## 5. Image Asset Integrity Gate
 
 This is a mandatory gate because a page can pass source/content checks while still rendering with missing images.
