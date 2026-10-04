@@ -206,6 +206,14 @@ The inventory is the **page-specific evidence of what was there**; the Audit che
 - Do not recreate source-credit elements separately after extracting the original article content unless the original inventory shows that they were omitted and need restoration.
 - Distinguish page-specific source/credit content from standardized global footer copyright and other global components before reconstruction.
 
+### Context-Specific Original Style Preservation / Duplicate-Text Context Isolation
+- Every content-bearing element must be matched to its original DOM context, structural region, position/order, and role, not by text content alone.
+- Identical text appearing in different contexts—such as a TOC, article body, caption, source-credit block, navigation, or footer—must be treated as separate original elements with separate formatting requirements.
+- Preserve the original style of each occurrence independently, including bold/strong, italic/emphasis, underline, font size, font family, color, alignment, line height, spacing/margins, and other intentional formatting.
+- Never use a global text search/replace or first-match operation to modify formatting when the same text can occur in multiple DOM contexts.
+- When patching a duplicate-text element, target the exact DOM context/region and occurrence; verify that the intended occurrence changed and all other occurrences retained their original formatting.
+- Any duplicate-text context mismatch is a hard failure before user testing.
+
 ### Governing Reconstruction Principle
 > **Do not rebuild from assumptions when the original has explicit HTML or CSS. Extract, inventory, map, and reproduce the original content-bearing rendering rules first; only then apply the approved new design or an explicitly requested visual change.**
 
