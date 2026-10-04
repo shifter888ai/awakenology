@@ -108,6 +108,8 @@ All four gates below are independent and mandatory. Passing one does not compens
 - [ ] Inspect every `<img src>`.
 - [ ] Confirm every image resolves.
 - [ ] Confirm internal asset paths are correct.
+- [ ] Preserve the original display scale/size of every content image, including intentional per-image width, max-width, height behavior, and responsive scaling.
+- [ ] Compare rebuilt image sizing against the original HTML/CSS; do not assume all images use the same scale.
 - [ ] Confirm article links and external links are preserved.
 - [ ] No unintended legacy external assets remain.
 
