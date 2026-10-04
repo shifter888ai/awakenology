@@ -11,7 +11,7 @@
 7. **System fonts only** — No external fonts. Serif may be used selectively for major headings.
 8. **Responsive by default** — Desktop and mobile must work properly.
 9. **Consistent navigation** — English / 日本語 / 中文 / Search / Ask, with the active language clear.
-10. **Consistent footer** — Contact → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer, then © 2024 Awakenology.org.
+10. **Consistent footer** — Contact email icon → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer, then © 2024 Awakenology.org. The Contact icon links to `mailto:contact@awakenology.org` and is a standardized global footer component, not article content.
 11. **Common lightweight article template** — All articles use the approved global structure.
 12. **Preserve intentional wording** — Never silently correct unusual English or intentional formatting.
 13. **Accessibility and readability** — Maintain readable typography, spacing, contrast, links, and responsive behavior.
