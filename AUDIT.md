@@ -316,3 +316,10 @@ After deployment:
 - [ ] Explicit exceptions are documented and re-audited; differences are not treated as intentional by assumption.
 - [ ] Treat cross-page consistency as a separate hard gate from page-specific content preservation.
 - [ ] Perform this comparison on the final committed CSS/DOM before requesting live testing.
+
+
+## Paragraph-Title Formatting Gate
+- [ ] Inventory every original paragraph title/title-like line individually, including titles that remain ordinary paragraph elements.
+- [ ] Record and compare bold/strong, italic/emphasis, underline, font size, font family, color, line breaks, alignment, line height, spacing/margins, and other intentional formatting.
+- [ ] Verify each rebuilt paragraph title preserves the original formatting state; text-content matching alone does not pass.
+- [ ] Treat any unexplained paragraph-title formatting mismatch as a hard failure before live testing.
