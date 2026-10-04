@@ -331,3 +331,7 @@ After deployment:
 - [ ] Record and compare bold/strong, italic/emphasis, underline, font size, font family, color, line breaks, alignment, line height, spacing/margins, and other intentional formatting.
 - [ ] Verify each rebuilt paragraph title preserves the original formatting state; text-content matching alone does not pass.
 - [ ] Treat any unexplained paragraph-title formatting mismatch as a hard failure before live testing.
+
+## Semantic Element Conversion / Formatting Preservation Audit Gate
+
+For every content element whose HTML element type changes during reconstruction, inventory its original visual formatting and map it to the rebuilt element. Verify the new semantic element's CSS does not override original intentional font weight, size, decoration, alignment, line height, spacing, or other formatting. A formatting mismatch introduced by semantic conversion is a hard failure before live testing.
