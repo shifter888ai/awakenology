@@ -140,6 +140,16 @@ All four gates below are independent and mandatory. Passing one does not compens
 - [ ] Confirm article formatting does not alter global navigation or footer formatting.
 - [ ] Inspect the DOM/classes/styles when visual behavior cannot be explained by extracted text.
 
+## Page Language / Title Consistency Audit
+
+- [ ] Determine the page language from the original source/content and intended route; do not infer it from the filename alone.
+- [ ] Verify the original page's language before rebuilding its title/meta block.
+- [ ] Confirm `<html lang>`, `<title>`, H1/title block, meta description, and intended page-language navigation are consistent with the page language.
+- [ ] For multilingual parallel pages, compare against the correct language source/version rather than assuming a title or metadata block from another language is correct.
+- [ ] Confirm the rebuilt title, subtitle, author/date/meta lines use the correct language for the page unless the original explicitly requires a different language.
+- [ ] Do not introduce a translated or parallel-language title merely because similar content exists in another language version.
+- [ ] Any unexplained mismatch between page language and title/meta language is a hard failure before live testing.
+
 ## Language Navigation Isolation
 
 - [ ] Global EN / JP / CN navigation is present only in the global header.
