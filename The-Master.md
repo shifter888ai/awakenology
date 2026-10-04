@@ -322,3 +322,11 @@ Every rebuilt page must pass **all four independent gates** before being reporte
 4. **Reddit Footer Component Structural Integrity Check**
 
 Only then should the page be committed for user visual testing.
+
+### Cross-Page Standard Component Consistency
+- Standardized components must be compared against the approved design baseline and already-approved pages in the same language/section before live testing.
+- Compare title/H1 sizing, font family, font weight, line height, alignment, spacing, header, footer, navigation, article container, image behavior, and other shared components.
+- A page-specific original CSS value must not unintentionally override an approved standardized component.
+- Any intentional exception must be explicitly classified and documented; never infer an exception merely because the original page used a different value.
+- Cross-page consistency is a separate hard gate from page-specific content preservation.
+- On the final committed CSS/DOM, flag every unexplained difference from the approved baseline or representative approved pages as a hard failure.
