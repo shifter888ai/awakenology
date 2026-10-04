@@ -348,3 +348,7 @@ Only then should the page be committed for user visual testing.
 - If an original paragraph title is bold/strong, the rebuilt title must remain explicitly bold/strong unless an intentional design change is separately requested and audited.
 - The formatting inventory must compare the original DOM/CSS against the final rebuilt DOM/CSS for every paragraph title before live testing.
 - Any formatting mismatch is a hard failure, even when the text content matches exactly.
+
+## Semantic Element Conversion / Formatting Preservation
+
+When an original content element is converted to a different HTML element, its original visual formatting must be inventoried and reproduced independently. The new semantic element's default or standardized CSS must not override the original font weight, size, decoration, alignment, line height, spacing, or other intentional formatting unless an intentional design change is explicitly approved. Any mismatch introduced by semantic conversion is a hard failure before live testing.
