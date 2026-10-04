@@ -163,6 +163,35 @@ All four gates below are independent and mandatory. Passing one does not compens
 - [ ] For URL-encoded Japanese/Chinese paths, decode and verify the link against the actual repository path as well as the deployed route.
 - [ ] No unintended legacy external assets remain.
 
+
+## Title Line Preservation Audit
+- [ ] If the original title has multiple lines, inventory each line separately.
+- [ ] Record each line's original font size, weight, decoration, font, spacing, and line-height where applicable.
+- [ ] Confirm promotion to the standardized H1/header did not normalize or alter those line-specific properties unless explicitly requested.
+- [ ] Do not treat a multi-line original title as a uniform H1 by assumption.
+
+## Per-Image Rendering Inventory Audit
+- [ ] Create an individual rendering record for every page-specific content image.
+- [ ] Record source asset/path and original source position/order.
+- [ ] Record containing element/container and its width, min/max-width, height/auto behavior, min/max-height, margins, and alignment.
+- [ ] Record image width, height/auto behavior, object-fit/object-position, and responsive overrides where present.
+- [ ] Verify every rebuilt image against its individual rendering record before live testing.
+
+## Container vs. Image Rendering Audit
+- [ ] Audit container alignment separately from image rendered dimensions.
+- [ ] A centered image does not pass unless its rendered dimensions also match the original rules.
+- [ ] A correctly sized image does not pass unless its container alignment and margins also match the original rules.
+
+## Generic Image CSS Restriction
+- [ ] Confirm generic rules such as `width:100%; max-width:100%; height:auto` do not override an original page-specific image/container rule.
+- [ ] Confirm page-specific image rules take precedence whenever the original source contains explicit sizing or alignment rules.
+- [ ] Confirm no generic image rule silently changes the rendered scale of an individually audited image.
+
+## Intentional Post-Rebuild Visual Change Audit
+- [ ] If a user requested a targeted visual change after the page passed audit, identify the exact element/property changed.
+- [ ] Confirm no unrelated audited content, image mapping, title-line property, layout relationship, or rendering property changed.
+- [ ] Re-run the relevant audit after the targeted change and verify the committed file before live testing.
+
 ## 8. Worker.js Consistency
 
 - [ ] Inspect `worker.js` before modifying any global component.
