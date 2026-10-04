@@ -85,7 +85,60 @@ For every original title, subtitle, author/date/meta line, and title-associated 
 
 This gate prevents duplicate titles and prevents title-like content from silently inheriting generic article styling.
 
-## 5. Rebuild
+## 5. Image Asset Integrity Gate
+
+This is a mandatory gate because a page can pass source/content checks while still rendering with missing images.
+
+For **every page-specific content image**, verify the complete chain:
+
+**original HTML image element → original wrapper/container → original CSS rule → rebuilt image element → rebuilt asset path → repository asset → deployed URL**
+
+For each image, record and verify:
+
+- original `src`
+- decoded/normalized asset path
+- whether the original path is relative, root-relative, absolute, or external
+- the page canonical URL used as the base for resolving relative URLs
+- rebuilt `src`
+- exact repository asset path
+- exact original rendering rules
+- expected deployed asset URL
+
+### Non-negotiable path rule
+
+A page-specific image must **not** use a bare relative path such as:
+
+`gallery/foo.jpg`
+
+when the rebuilt page is at a root-level route such as:
+
+`/some-page/`
+
+unless the deployed structure has been explicitly verified to resolve that relative path to the intended asset.
+
+For Awakenology's rebuilt root-level routes, the default required form for local page assets is:
+
+`/gallery/...`
+
+or
+
+`/gallery_gen/...`
+
+or another verified root-relative asset path.
+
+Do not rely on the browser, Cloudflare, or the current page URL to "probably" resolve a relative asset correctly.
+
+### Repository + deployment verification
+
+Before a page can pass:
+
+1. Confirm every rebuilt local image path maps to an actual repository asset.
+2. Confirm the resolved URL is the intended asset URL, not merely a syntactically valid URL.
+3. After commit, fetch/check every page-specific image URL against the canonical deployed page route.
+4. A missing asset, wrong asset, wrong path base, redirect to the wrong resource, or unresolved image is a **hard failure**.
+5. Do not send the page to the user for testing until every page-specific image has passed this chain.
+
+## 6. Rebuild
 
 Rebuild the page using the approved site design baseline while preserving the original page-specific content and explicit rendering properties.
 
@@ -95,13 +148,12 @@ Rules:
 - Preserve original title/meta line structure.
 - Preserve individual heading/paragraph-title formatting and alignment.
 - Preserve every page-specific image individually, using the rules extracted from the CSS files actually linked by the original page.
-- Use root-relative asset paths where required by the deployed structure.
 - Do not let generic article CSS override explicit original page-specific image or heading rules.
 - Remove obsolete in-body Disclaimer content while retaining the approved global footer Disclaimer.
 - Preserve intentional wording; do not silently normalize unusual language.
 - When converting an original content element to a semantic element, reproduce its original explicit visual properties independently of the new semantic element's default or standard CSS.
 
-## 6. Pre-test verification
+## 7. Pre-test verification
 
 Run the relevant gates in `AUDIT.md` before any user testing.
 
@@ -114,6 +166,7 @@ At minimum verify:
 - paragraph-title formatting
 - image count and 1:1 image mapping
 - image source/path integrity
+- **every page-specific image resolves to the intended repository asset and deployed URL**
 - exact page-specific image rendering rules
 - internal links
 - HTML structure
