@@ -135,6 +135,35 @@ The inventory is the **page-specific evidence of what was there**; the Audit che
     - A page is not complete if an asset exists in the HTML but is broken because its URL resolves incorrectly.
     - This check is independent of Content Match, Standard Component Match, HTML Structure Sanity, Formatting Isolation, and Language Navigation Isolation.
 
+
+### Title Line Preservation
+- When an original page title contains multiple lines with different font sizes, weights, decorations, fonts, spacing, or line heights, each line must be inventoried and preserved individually.
+- Promoting the title to the standardized H1/header must not normalize, collapse, or otherwise alter those line-specific properties unless the user explicitly requests that visual change.
+- A multi-line original title is one content-bearing title with independently auditable line-level formatting; do not treat it as a single uniform H1 style by assumption.
+
+### Per-Image Rendering Inventory
+- Every page-specific content image must have an individual rendering record in the page inventory.
+- The record must include: source asset/path, original source position/order, containing element, container width, image width, min/max-width, height/auto behavior, min/max-height, margins, alignment, object-fit/object-position, and responsive overrides where present.
+- Verify the rebuilt image against that individual record before user testing.
+
+### Container vs. Image Rendering
+- Audit container alignment and image rendered size as separate properties.
+- A centered image does not pass the image-scale audit unless its rendered dimensions also match the original rules.
+- Conversely, a correctly sized image does not pass if its container alignment or margins are wrong.
+
+### Generic Image CSS Restriction
+- Generic rules such as `width:100%; max-width:100%; height:auto` must not override an original page-specific image rule.
+- Page-specific image and container rules take precedence over generic article-image CSS whenever the original source contains explicit sizing or alignment rules.
+- Do not introduce a generic image rule that silently changes the rendered scale of an individually audited image.
+
+### Intentional Post-Rebuild Visual Changes
+- After a page passes the original-content and rendering audit, a user-requested visual modification may be applied only to the explicitly identified element or property.
+- All other audited content, image mappings, title-line properties, layout relationships, and rendering properties must remain unchanged unless separately requested and re-audited.
+- Rebuilding or reformatting unrelated parts of the page is not an acceptable side effect of a targeted visual change.
+
+### Governing Reconstruction Principle
+> **Do not rebuild from assumptions when the original has explicit HTML or CSS. Extract, inventory, map, and reproduce the original content-bearing rendering rules first; only then apply the approved new design or an explicitly requested visual change.**
+
 29. **Global Components / Single Source of Truth / Duplication Check**
     - Before adding, rebuilding, or modifying any global site component, inspect `worker.js` first.
     - The approved global components are:
