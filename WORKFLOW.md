@@ -53,6 +53,38 @@ Record, as applicable:
 - page-specific colors
 - obsolete in-body global Disclaimer
 
+### 4a. Title/component mapping gate
+
+Before constructing the standard article header, explicitly determine how the original title/meta block maps to the rebuilt page.
+
+Classify each original title-bearing element as exactly one of:
+
+1. **Preserved as the standard component** — the original content is represented by the standard title/meta component and must not also remain elsewhere in the article.
+2. **Preserved as page-specific article content** — it remains in the article because it is distinct from the standard page title.
+3. **Obsolete/replaced global component** — it is intentionally replaced by an approved global component.
+
+For every original title, subtitle, author/date/meta line, and title-associated block, record:
+
+- exact text
+- exact line structure, including explicit `<br>`, paragraph boundaries, and intentional blank lines
+- DOM context/role
+- font size
+- font weight
+- font family
+- line-height
+- alignment
+- decoration
+- margins/padding/spacing
+- color where relevant
+- inline/nested formatting
+- responsive rules where relevant
+
+**Hard rule: never add a standard title merely because a page has a title in its metadata. First prove that the original title does not already map to that standard component.**
+
+**Hard rule: every original title-bearing element must map to exactly one rebuilt representation unless it is explicitly classified as an obsolete/replaced global component.**
+
+This gate prevents duplicate titles and prevents title-like content from silently inheriting generic article styling.
+
 ## 5. Rebuild
 
 Rebuild the page using the approved site design baseline while preserving the original page-specific content and explicit rendering properties.
@@ -67,6 +99,7 @@ Rules:
 - Do not let generic article CSS override explicit original page-specific image or heading rules.
 - Remove obsolete in-body Disclaimer content while retaining the approved global footer Disclaimer.
 - Preserve intentional wording; do not silently normalize unusual language.
+- When converting an original content element to a semantic element, reproduce its original explicit visual properties independently of the new semantic element's default or standard CSS.
 
 ## 6. Pre-test verification
 
@@ -76,6 +109,7 @@ At minimum verify:
 
 - 100% content mapping
 - title/meta line structure
+- title/component 1:1 mapping and no duplicate title
 - heading/title formatting
 - paragraph-title formatting
 - image count and 1:1 image mapping
@@ -115,6 +149,8 @@ At minimum re-check:
 - expected CSS/HTML changes are present
 - image paths and explicit image rules are present
 - no unintended deletion or insertion occurred
+- title/component mapping is still 1:1
+- no duplicate title or duplicated title-associated block was introduced
 
 Only after this verification is complete may the page be offered for live testing.
 
