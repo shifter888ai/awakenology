@@ -66,7 +66,8 @@ Inspect the actual DOM, not only extracted text or CSS.
 - [ ] Global navigation: English / 日本語 / 中文 / Search / Ask.
 - [ ] Global navigation appears only in the header; it is not duplicated inside the article body or TOC.
 - [ ] Footer order is exactly:
-  Contact → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer → © 2024 Awakenology.org
+  Contact email icon → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer → © 2024 Awakenology.org
+- [ ] Contact is represented by the standardized email icon, linking to `mailto:contact@awakenology.org`; it is not treated as article content.
 - [ ] Exactly three Reddit anchors exist in the footer, in the required order:
   1. https://www.reddit.com/r/EscapeReincarnation/
   2. https://www.reddit.com/r/EscapePrisonPlanet/
