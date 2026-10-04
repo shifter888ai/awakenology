@@ -362,3 +362,11 @@ When an original content element is converted to a different HTML element, its o
 - When multiple original title/meta lines are reconstructed inside one element, explicitly reproduce their original line boundaries rather than relying on normal whitespace wrapping.
 - The line-structure inventory must be compared against the final rebuilt DOM/CSS before live testing.
 - Any unexplained loss, insertion, merging, or relocation of an original title/meta line break is a hard failure before live testing.
+
+
+51. **Heading / Title CSS Property Preservation / Standard CSS Override Prevention**
+    - For every original content heading or title whose HTML element is changed during reconstruction, inventory each original explicit rendering property separately: font size, font weight, font family, line height, horizontal alignment, text decoration, margins/padding/spacing, color where explicitly specified, responsive sizing/behavior, and any inline or nested formatting that materially affects rendering.
+    - Reproduce every original explicit property in the rebuilt CSS/DOM unless the user explicitly approves a visual change to that property.
+    - Standardized article/component CSS must not silently override, normalize, or replace an original explicit heading/title property merely because the rebuilt element is now an H1/H2/H3/H4/H5 or another semantic element.
+    - Before live testing, compare the original property inventory against the final rebuilt CSS/DOM for each heading/title individually, including relevant responsive rules and CSS specificity/cascade effects.
+    - A text match or correct semantic element alone does not pass this gate; loss of any original explicit rendering property is a hard failure unless it is an explicitly approved visual change.
