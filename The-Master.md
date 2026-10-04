@@ -218,6 +218,12 @@ Copyright:
 
 **© 2024 Awakenology.org**
 
+### Duplication Check — Global Component Duplication
+
+- Standardized global components that are already provided by the site (for example Disclaimer, Contact, navigation, or footer content) must not be unnecessarily duplicated inside the article/body.
+- Any intentional repetition must be explicitly documented and approved.
+- If the site has a dedicated `/Disclaimer/` page and a global footer Disclaimer link, an obsolete in-body Disclaimer block must not remain.
+
 ## Hard Rule
 
 > **Never remove any content.**
