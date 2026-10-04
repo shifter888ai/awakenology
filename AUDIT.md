@@ -170,6 +170,13 @@ All four gates below are independent and mandatory. Passing one does not compens
 - [ ] Confirm promotion to the standardized H1/header did not normalize or alter those line-specific properties unless explicitly requested.
 - [ ] Do not treat a multi-line original title as a uniform H1 by assumption.
 
+
+## Heading / Paragraph Title Alignment Audit
+- [ ] For every content heading/paragraph title, compare original vs. rebuilt horizontal alignment: left, center, right, or justified.
+- [ ] Verify both the relevant CSS/property and the rendered/container alignment where applicable.
+- [ ] Confirm that promotion to a standardized H1/H2/H3 did not silently normalize the original alignment.
+- [ ] Any alignment mismatch is a hard failure before user testing unless it is an explicitly requested visual change.
+
 ## Per-Image Rendering Inventory Audit
 - [ ] Create an individual rendering record for every page-specific content image.
 - [ ] Record source asset/path and original source position/order.
