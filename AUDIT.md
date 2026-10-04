@@ -199,6 +199,21 @@ All four gates below are independent and mandatory. Passing one does not compens
 - [ ] Confirm no unrelated audited content, image mapping, title-line property, layout relationship, or rendering property changed.
 - [ ] Re-run the relevant audit after the targeted change and verify the committed file before live testing.
 
+
+## Heading / Paragraph Title Formatting Preservation Audit
+- [ ] For every content heading/paragraph title, inventory original line breaks, font size, weight, font family, text decoration (including underline), alignment, line height, and spacing/margins.
+- [ ] Confirm every audited property is preserved after reconstruction or explicit promotion to H1/H2/H3.
+- [ ] Confirm no original underlined title has silently become non-underlined.
+- [ ] Confirm no multi-line title has been collapsed or normalized into a uniform H1 without an explicit request.
+- [ ] Any mismatch is a hard failure before user testing unless explicitly requested.
+
+## Global Component Content Exclusion Audit
+- [ ] Classify legacy page-level copies of standardized global components separately from page-specific article content.
+- [ ] Confirm obsolete in-body Disclaimer content is removed when replaced by the global Disclaimer link/component.
+- [ ] Confirm obsolete page-level copyright is removed when replaced by the standardized global footer copyright.
+- [ ] Confirm Contact/navigation/footer content is not duplicated inside article content.
+- [ ] Confirm each approved global component has exactly one active/visible instance.
+
 ## 8. Worker.js Consistency
 
 - [ ] Inspect `worker.js` before modifying any global component.
