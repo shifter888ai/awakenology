@@ -34,10 +34,11 @@ The inventory must account for every content-bearing element, including:
 - TOCs
 - metadata
 - links
-- **every content image individually**
-- image source/path
-- image position/order
+- **every content image individually, wherever it appears in the original document body**
+- image source/path and actual asset
+- image position/order relative to all other content-bearing elements
 - image/container dimensions and CSS constraints
+- content-bearing elements that are siblings of the main text block or appear before/after the main text block
 - bold, underline, italic, color, alignment, and other intentional formatting
 - intentional whitespace/spacers
 - other content-bearing elements embedded inside legacy WebsiteBuilder wrappers
@@ -47,6 +48,9 @@ For images specifically:
 - Every original content image must have a verified 1:1 rebuilt counterpart.
 - Verify the actual asset file/path, position, and applicable original HTML/CSS sizing rules for each image.
 - An image must never be classified as a "legacy artifact" merely because its element is inside an old WebsiteBuilder wrapper if it is part of the page's original content.
+- **Content scope is the entire original document body, not merely the main text/article container.** Inspect all original body-level and wrapper-contained content-bearing elements before the footer/global components are separated out.
+- **A content-bearing image outside the main text block is still a content image.** This includes images placed in a separate WebsiteBuilder picture wrapper before or after the main text block, provided the image is part of the original page content rather than a standardized global header/footer asset.
+- Distinguish global template assets from page-specific content assets by inspecting their role, wrapper/context, source, position, and original page structure; do not classify by location alone.
 - Any inventory mismatch is a hard failure and must be resolved before user testing.
 
 The inventory is the **page-specific evidence of what was there**; the Audit checklist is the **global verification that it was preserved**.
