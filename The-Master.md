@@ -182,6 +182,18 @@ The inventory is the **page-specific evidence of what was there**; the Audit che
 - If the original page contains legacy copies of these components, they must be explicitly classified during inventory and removed when the approved global component replaces them.
 - The rebuilt page must contain exactly one active/visible standardized instance of each approved global component.
 
+### Content Duplication / 1:1 Element Matching
+- Every content-bearing element extracted from the original page must be mapped to exactly one rebuilt element unless it is explicitly classified as an obsolete global component being replaced by an approved standardized global component.
+- Do not manually add a rebuilt element when an equivalent original content element has already been preserved through extraction or reconstruction.
+- The original-to-rebuilt inventory must explicitly check for both missing elements and duplicated elements.
+- For small but content-bearing elements such as source credits, attribution lines, author names, dates, separators, and copyright/source blocks, verify the original count and rebuilt count individually.
+- A rebuilt page fails the inventory gate if any original content-bearing element appears zero times or more than once without an explicit approved reason.
+
+### Source / Credit Block Audit
+- Original source-credit and attribution elements such as `----`, `YWS`, author names, dates, and similar bottom-of-article elements must be inventoried individually and preserved exactly once when they are page-specific content.
+- Do not recreate source-credit elements separately after extracting the original article content unless the original inventory shows that they were omitted and need restoration.
+- Distinguish page-specific source/credit content from standardized global footer copyright and other global components before reconstruction.
+
 ### Governing Reconstruction Principle
 > **Do not rebuild from assumptions when the original has explicit HTML or CSS. Extract, inventory, map, and reproduce the original content-bearing rendering rules first; only then apply the approved new design or an explicitly requested visual change.**
 
