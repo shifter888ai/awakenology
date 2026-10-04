@@ -330,3 +330,13 @@ Only then should the page be committed for user visual testing.
 - Any intentional exception must be explicitly classified and documented; never infer an exception merely because the original page used a different value.
 - Cross-page consistency is a separate hard gate from page-specific content preservation.
 - On the final committed CSS/DOM, flag every unexplained difference from the approved baseline or representative approved pages as a hard failure.
+
+
+## Paragraph-Title Formatting Preservation
+
+- Every original paragraph title or title-like content line must be inventoried individually, including titles that remain ordinary paragraph elements rather than being promoted to H1/H2/H3.
+- Preserve each original title's formatting state: bold/strong, italic/emphasis, underline, font size, font family, text color, line breaks, alignment, line height, spacing/margins, and other intentional inline or CSS formatting.
+- Do not treat preservation of the title text alone as sufficient. A title passes only when its original formatting is also mapped to the rebuilt element.
+- If an original paragraph title is bold/strong, the rebuilt title must remain explicitly bold/strong unless an intentional design change is separately requested and audited.
+- The formatting inventory must compare the original DOM/CSS against the final rebuilt DOM/CSS for every paragraph title before live testing.
+- Any formatting mismatch is a hard failure, even when the text content matches exactly.
