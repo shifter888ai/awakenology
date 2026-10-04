@@ -112,6 +112,9 @@ All four gates below are independent and mandatory. Passing one does not compens
 - [ ] Preserve the original display scale/size of every content image, including intentional per-image width, max-width, height behavior, and responsive scaling.
 - [ ] Compare rebuilt image sizing against the original HTML/CSS; do not assume all images use the same scale.
 - [ ] Confirm article links and external links are preserved.
+- [ ] Validate **every internal link** on the rebuilt page against the actual repository/deployed route; confirm the target exists and the link points to the correct intended page.
+- [ ] Validate all global/header/footer links, TOC links, article links, language links, and other internal links; do not rely on visual inspection alone.
+- [ ] For URL-encoded Japanese/Chinese paths, decode and verify the link against the actual repository path as well as the deployed route.
 - [ ] No unintended legacy external assets remain.
 
 ## 8. Worker.js Consistency
