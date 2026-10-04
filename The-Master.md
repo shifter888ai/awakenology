@@ -352,3 +352,13 @@ Only then should the page be committed for user visual testing.
 ## Semantic Element Conversion / Formatting Preservation
 
 When an original content element is converted to a different HTML element, its original visual formatting must be inventoried and reproduced independently. The new semantic element's default or standardized CSS must not override the original font weight, size, decoration, alignment, line height, spacing, or other intentional formatting unless an intentional design change is explicitly approved. Any mismatch introduced by semantic conversion is a hard failure before live testing.
+
+## Title / Meta Line-Structure Preservation
+
+- Every original page title, subtitle, author/date/meta block, and other title-associated block must be inventoried not only for text and formatting, but also for its exact line structure.
+- Record each original line separately, including explicit HTML line breaks such as <br>, separate paragraph boundaries, and intentional blank/whitespace lines or spacing between lines.
+- Preserve the original line breaks and line boundaries in the rebuilt DOM unless an intentional design change is explicitly requested and separately audited.
+- Text-content equality alone is not sufficient: "A B" and "A<br>B" are different rendered structures and must be treated as different.
+- When multiple original title/meta lines are reconstructed inside one element, explicitly reproduce their original line boundaries rather than relying on normal whitespace wrapping.
+- The line-structure inventory must be compared against the final rebuilt DOM/CSS before live testing.
+- Any unexplained loss, insertion, merging, or relocation of an original title/meta line break is a hard failure before live testing.
