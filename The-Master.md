@@ -23,6 +23,34 @@
 19. **Approved components become the baseline** — Once tested and approved, do not alter them without deliberate approval.
 20. **Production isolation** — `awakenology.org` remains untouched; `awakenology.space` is the test site.
 21. **100% Original Content Match**
+
+### Original-to-Rebuilt Content Inventory Gate
+
+Before any rebuilt page is sent for live testing, create an explicit **Original-to-Rebuilt Content Inventory** from the original source and compare it against the rebuilt page.
+
+The inventory must account for every content-bearing element, including:
+- text/content blocks
+- headings and paragraph titles
+- TOCs
+- metadata
+- links
+- **every content image individually**
+- image source/path
+- image position/order
+- image/container dimensions and CSS constraints
+- bold, underline, italic, color, alignment, and other intentional formatting
+- intentional whitespace/spacers
+- other content-bearing elements embedded inside legacy WebsiteBuilder wrappers
+
+For images specifically:
+- Original content-image count must equal rebuilt content-image count.
+- Every original content image must have a verified 1:1 rebuilt counterpart.
+- Verify the actual asset file/path, position, and applicable original HTML/CSS sizing rules for each image.
+- An image must never be classified as a "legacy artifact" merely because its element is inside an old WebsiteBuilder wrapper if it is part of the page's original content.
+- Any inventory mismatch is a hard failure and must be resolved before user testing.
+
+The inventory is the **page-specific evidence of what was there**; the Audit checklist is the **global verification that it was preserved**.
+
     - **Never remove any original content.**
     - Compare every rebuilt page against the original source.
     - Preserve all text, headings, TOCs, metadata, links, images, unusual wording, intentional formatting, spaces, NBSPs, and content-bearing elements.
