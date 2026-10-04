@@ -228,6 +228,11 @@ This is a separate final gate after structural/content verification. It checks t
 - [ ] Confirm the selected Chinese variant persists according to the Worker behavior.
 - [ ] Check both Simplified and Traditional views on desktop and mobile.
 
+## Duplication Check — Global Component Duplication
+- [ ] Verify that standardized global components already provided by the site (for example Disclaimer, Contact, navigation, or footer content) are not unnecessarily duplicated inside the article/body.
+- [ ] Any intentional repetition is explicitly documented and approved.
+- [ ] If the site has a dedicated `/Disclaimer/` page and a global footer Disclaimer link, confirm that no obsolete in-body Disclaimer block remains.
+
 ## 11. Pre-Test Rendering Gate
 - [ ] Complete source, DOM, CSS, asset, link, duplication, and responsive checks before requesting live testing.
 - [ ] Where rendered-page inspection is available, inspect the rendered result before reporting the page ready for testing.
