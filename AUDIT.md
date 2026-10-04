@@ -109,8 +109,11 @@ All four gates below are independent and mandatory. Passing one does not compens
 - [ ] Inspect every `<img src>`.
 - [ ] Confirm every image resolves.
 - [ ] Confirm internal asset paths are correct.
-- [ ] Preserve the original display scale/size of every content image, including intentional per-image width, max-width, height behavior, and responsive scaling.
-- [ ] Compare rebuilt image sizing against the original HTML/CSS; do not assume all images use the same scale.
+- [ ] Preserve the original display scale/size of every content image, including intentional per-image width, max-width, fixed-height, auto-width, container-size, alignment, and responsive behavior.
+- [ ] Compare rebuilt image sizing against the original HTML/CSS, including both the image element and its containing element; do not assume all images use the same scale.
+- [ ] If the original uses explicit per-image or per-container sizing (for example fixed height with width:auto, min-width/max-width, or other image-container rules), reproduce that behavior explicitly rather than relying on the image's intrinsic dimensions or a generic `max-width:100%;height:auto` rule.
+- [ ] When original CSS contains multiple image-specific rules, map and verify each content image individually; do not collapse distinct original scales into one shared rule.
+- [ ] Verify responsive behavior separately where the original CSS changes image/container sizing at mobile or other breakpoints.
 - [ ] Confirm article links and external links are preserved.
 - [ ] Validate **every internal link** on the rebuilt page against the actual repository/deployed route; confirm the target exists and the link points to the correct intended page.
 - [ ] Validate all global/header/footer links, TOC links, article links, language links, and other internal links; do not rely on visual inspection alone.
