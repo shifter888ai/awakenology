@@ -9,6 +9,8 @@ Use the applicable language-specific section for English, Japanese, or Chinese p
 - [ ] Compare the rebuilt page against the original page.
 - [ ] Confirm 100% of original content is preserved.
 - [ ] Preserve all text, headings, TOCs, metadata, links, images, unusual wording, intentional formatting, spaces, NBSPs, and content-bearing elements.
+- [ ] Paragraph titles that are bold/strong in the original or approved page structure remain bold/strong after rebuilding.
+- [ ] Every bold/strong text element in the original content body is preserved in the rebuilt page, except elements intentionally replaced or promoted as standardized global components.
 - [ ] Confirm content moved into standardized header metadata has not been accidentally removed from the article body.
 - [ ] Confirm no new article content was invented.
 
