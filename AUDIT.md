@@ -126,6 +126,26 @@ All four gates below are independent and mandatory. Passing one does not compens
 - [ ] Re-run this audit after the final change.
 - [ ] Only then ask for live-page testing.
 
+## 10. Final Visual Verification
+
+This is a separate final gate after structural/content verification. It checks the rendered design against the approved visual baseline.
+
+- [ ] Overall visual hierarchy and spacing are consistent with the approved design.
+- [ ] Header, brand, and navigation have the correct alignment, spacing, typography, and responsive behavior.
+- [ ] Article H1/title and metadata are positioned and styled correctly.
+- [ ] Article width, line length, font size, line height, and left alignment are readable and consistent.
+- [ ] TOC appearance and separation from article content are correct.
+- [ ] Heading hierarchy and spacing are visually consistent.
+- [ ] Intentional blank-line/spacer formatting renders correctly without accidental large gaps.
+- [ ] Images are correctly sized, aligned, and contained within the article layout.
+- [ ] Footer structure, spacing, icon sizing, and visual balance match the approved baseline.
+- [ ] Dark mode and light mode both render correctly, including text, links, borders, controls, and footer.
+- [ ] Mobile/responsive layout is visually correct and does not overflow or collapse unexpectedly.
+- [ ] Worker floating controls (theme toggle and Return-to-top) appear once, in the correct position, and remain usable in both themes.
+- [ ] No obvious legacy WebsiteBuilder styling, fonts, wrappers, controls, or visual artifacts remain.
+- [ ] Where actual rendered-page inspection is available, inspect the rendered page rather than relying only on source/CSS analysis.
+- [ ] If rendered-page inspection is not available, complete the code/DOM/CSS visual audit and then require live-page testing as the final rendered check.
+
 ## Language-Specific Checks
 
 ### English Pages
@@ -152,11 +172,11 @@ All four gates below are independent and mandatory. Passing one does not compens
 - [ ] Confirm the selected Chinese variant persists according to the Worker behavior.
 - [ ] Check both Simplified and Traditional views on desktop and mobile.
 
-## 10. Live Test
+## 11. Live Test
 
 After deployment:
 
-- [ ] Open the live English page.
+- [ ] Open the live page.
 - [ ] Check desktop appearance.
 - [ ] Check mobile appearance.
 - [ ] Check dark/light mode.
