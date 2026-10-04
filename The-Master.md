@@ -168,6 +168,20 @@ The inventory is the **page-specific evidence of what was there**; the Audit che
 - All other audited content, image mappings, title-line properties, layout relationships, and rendering properties must remain unchanged unless separately requested and re-audited.
 - Rebuilding or reformatting unrelated parts of the page is not an acceptable side effect of a targeted visual change.
 
+
+### Heading / Paragraph Title Formatting Preservation
+- Every original content heading/paragraph title must be inventoried individually for line breaks, font size, font weight, font family, text decoration (including underline), horizontal alignment, line height, and spacing/margins.
+- Preserve these properties when rebuilding, even if the element is promoted to a standardized H1/H2/H3 or otherwise restyled.
+- Do not collapse multiple original title lines into a uniform H1 by assumption.
+- Original text decoration must be derived from the original HTML/CSS/container behavior, not assumed from the new template.
+- Any intentional formatting change must be explicitly requested and audited as a targeted visual change.
+
+### Global Component Content Exclusion
+- Standardized global components are not page-specific article content and must not be counted as preserved article content when they are intentionally replaced by the approved global component.
+- This includes the global Disclaimer, footer copyright, Contact, global navigation, and other standardized site-wide components.
+- If the original page contains legacy copies of these components, they must be explicitly classified during inventory and removed when the approved global component replaces them.
+- The rebuilt page must contain exactly one active/visible standardized instance of each approved global component.
+
 ### Governing Reconstruction Principle
 > **Do not rebuild from assumptions when the original has explicit HTML or CSS. Extract, inventory, map, and reproduce the original content-bearing rendering rules first; only then apply the approved new design or an explicitly requested visual change.**
 
