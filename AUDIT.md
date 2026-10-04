@@ -17,10 +17,11 @@ Create and complete a page-specific inventory **before user testing**. The inven
 - [ ] TOCs
 - [ ] Metadata
 - [ ] Internal and external links
-- [ ] **Every content image individually**
+- [ ] **Every content image individually, wherever it appears in the original document body**
 - [ ] Image source/path and actual asset
-- [ ] Image position/order
+- [ ] Image position/order relative to all other content-bearing elements
 - [ ] Image and containing-element dimensions/CSS constraints
+- [ ] Content-bearing elements outside the main text/article container, including sibling WebsiteBuilder wrappers before/after the main text block
 - [ ] Bold/strong, underline, italic, color, alignment, and other intentional formatting
 - [ ] Intentional whitespace/spacers
 - [ ] Other content-bearing elements inside legacy WebsiteBuilder wrappers
@@ -36,6 +37,9 @@ Create and complete a page-specific inventory **before user testing**. The inven
 - [ ] Preserve explicit width, height, min/max-width, min/max-height, margins, alignment, object-fit/object-position, and responsive rules where applicable.
 - [ ] Do not replace distinct original image rules with a generic max-width:100%;height:auto assumption.
 - [ ] Do not classify an image as a legacy artifact merely because it is embedded in an old WebsiteBuilder wrapper if it is content-bearing.
+- [ ] **Inventory the entire original document body, not only the main article/text container.**
+- [ ] **Content-bearing images outside the main article/text container are included in the inventory and mapped 1:1.**
+- [ ] Distinguish page-specific content assets from standardized global header/footer assets by role, wrapper/context, source, and original page structure—not by location alone.
 - [ ] Any image inventory mismatch is a hard failure.
 
 ### Inventory completion
