@@ -172,6 +172,12 @@ This is a separate final gate after structural/content verification. It checks t
 - [ ] Do not introduce English or Chinese content into the Japanese article body.
 - [ ] Confirm Japanese characters render correctly on desktop and mobile.
 
+## Global Chinese Default
+- [ ] Traditional Chinese (繁體中文) is the global default for Chinese pages.
+- [ ] The Worker-provided 简/繁 toggle remains available for switching to Simplified Chinese.
+- [ ] A saved explicit user preference may be respected, but the site-wide default is Traditional Chinese.
+- [ ] Verify this behavior on Chinese pages, not only the Chinese TOC or Disclaimer.
+
 ### Chinese Pages
 
 - [ ] Preserve the original Chinese wording, punctuation, spacing, line breaks, links, images, and intentional formatting.
@@ -182,6 +188,11 @@ This is a separate final gate after structural/content verification. It checks t
 - [ ] Confirm conversion does not alter non-Chinese content, URLs, HTML attributes, or site controls.
 - [ ] Confirm the selected Chinese variant persists according to the Worker behavior.
 - [ ] Check both Simplified and Traditional views on desktop and mobile.
+
+## 11. Pre-Test Rendering Gate
+- [ ] Complete source, DOM, CSS, asset, link, duplication, and responsive checks before requesting live testing.
+- [ ] Where rendered-page inspection is available, inspect the rendered result before reporting the page ready for testing.
+- [ ] Do not use user live testing as the first discovery method for structural or image-scale problems.
 
 ## 11. Live Test
 
