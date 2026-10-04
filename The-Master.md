@@ -68,6 +68,33 @@
     - If the committed file does not contain the intended change, correct it before reporting completion.
 
 
+28. **Image Scale / Rendering Preservation Check**
+    - For every content image, compare the original HTML **and CSS**, including the image element and its containing element.
+    - Preserve intentional per-image and per-container width, height, min-width, max-width, fixed-height, auto-width, alignment, margins, object-fit/object-position, and responsive behavior.
+    - If the original uses explicit image-specific or container-specific rules, reproduce those rules explicitly; do not replace them with a generic intrinsic-size or `max-width:100%;height:auto` assumption.
+    - Map and verify each content image individually when original images use different sizing rules.
+    - Inspect original responsive/breakpoint overrides and preserve their intended behavior.
+    - Image-scale verification is mandatory before a page is sent for live testing; visual discovery by the user must not be the first image-scale check.
+
+29. **All Internal Links Validation**
+    - Validate every internal link on every rebuilt page against the actual repository path and deployed route.
+    - Confirm the target exists and the link points to the correct intended page.
+    - This includes header navigation, TOC links, article links, footer links, language links, and other internal links.
+    - URL-encoded Japanese/Chinese paths must be decoded and checked against actual repository paths as well as deployed routes.
+    - Do not rely on visual inspection alone.
+
+30. **Chinese Default Variant**
+    - Traditional Chinese (繁體中文) is the unconditional global default for Chinese pages.
+    - Simplified Chinese remains available through the Worker-provided 简/繁 toggle.
+    - A saved explicit user preference may be respected after the global Traditional default is established.
+    - This rule applies site-wide, not only to the Chinese TOC or Disclaimer page.
+
+31. **Live Rendering Verification**
+    - Source/CSS/DOM verification must be completed before user testing.
+    - Where rendered-page inspection is available, inspect the rendered page before reporting the page ready for testing.
+    - User live testing remains the final rendered check after automated/source verification.
+    - Do not report a page as complete based only on text/content comparison.
+
 27. **Asset Path / Image Integrity Check**
     - Every preserved image, download, and other content-bearing asset must retain its intended target and resolve correctly from the rebuilt page.
     - Relative legacy asset paths must be converted appropriately for the new route structure; never assume a legacy relative path will work unchanged.
