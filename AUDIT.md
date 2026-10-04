@@ -343,3 +343,13 @@ For every content element whose HTML element type changes during reconstruction,
 - [ ] Do not treat matching extracted text as sufficient when the original contains explicit line breaks or separate line boundaries.
 - [ ] Verify merged or collapsed title/meta lines are not introduced by reconstruction unless explicitly approved.
 - [ ] Treat any unexplained loss, insertion, merging, or relocation of an original title/meta line break as a hard failure before live testing.
+
+
+## Heading / Title CSS Property Preservation / Standard CSS Override Prevention Audit Gate
+- [ ] For every original content heading/title whose HTML element changes during reconstruction, inventory each original explicit rendering property separately: font size, font weight, font family, line height, horizontal alignment, text decoration, margins/padding/spacing, explicitly specified color, responsive sizing/behavior, and relevant inline/nested formatting.
+- [ ] Compare those original properties against the final rebuilt CSS/DOM for each heading/title individually.
+- [ ] Check the final CSS cascade/specificity to confirm standardized article/component rules do not silently override or normalize an original explicit heading/title property.
+- [ ] Verify responsive rules as well as the default/desktop rules.
+- [ ] Confirm every original explicit rendering property is preserved unless its change was explicitly requested and separately audited.
+- [ ] Text/content matching or correct semantic-element conversion alone does not pass this gate.
+- [ ] Any unexplained loss or override of an original explicit heading/title rendering property is a hard failure before live testing.
