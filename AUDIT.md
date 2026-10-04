@@ -288,6 +288,14 @@ This is a separate final gate after structural/content verification. It checks t
 - [ ] Any intentional repetition is explicitly documented and approved.
 - [ ] If the site has a dedicated `/Disclaimer/` page and a global footer Disclaimer link, confirm that no obsolete in-body Disclaimer block remains.
 
+## Context-Specific Original Style / Duplicate-Text Context Isolation Audit
+- [ ] Identify every repeated content string that occurs in more than one DOM context or structural region.
+- [ ] Treat each occurrence as a separate inventory record with its own original formatting requirements.
+- [ ] Verify TOC, article, caption, source-credit, navigation, footer, and other regions independently where identical text occurs.
+- [ ] Confirm formatting changes target the exact intended DOM occurrence, not merely the first/global text match.
+- [ ] Confirm all non-target occurrences retain their original formatting after the change.
+- [ ] A duplicate-text occurrence with the wrong formatting in the wrong context is a hard failure before live testing.
+
 ## 11. Pre-Test Rendering Gate
 - [ ] Complete source, DOM, CSS, asset, link, duplication, and responsive checks before requesting live testing.
 - [ ] Where rendered-page inspection is available, inspect the rendered result before reporting the page ready for testing.
