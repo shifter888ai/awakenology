@@ -335,3 +335,11 @@ After deployment:
 ## Semantic Element Conversion / Formatting Preservation Audit Gate
 
 For every content element whose HTML element type changes during reconstruction, inventory its original visual formatting and map it to the rebuilt element. Verify the new semantic element's CSS does not override original intentional font weight, size, decoration, alignment, line height, spacing, or other formatting. A formatting mismatch introduced by semantic conversion is a hard failure before live testing.
+
+## Title / Meta Line-Structure Preservation Audit Gate
+- [ ] Inventory every original title, subtitle, author/date/meta line, and title-associated block line-by-line.
+- [ ] Record explicit <br> elements, paragraph boundaries, blank/whitespace lines, and intentional spacing between lines.
+- [ ] Verify the rebuilt DOM preserves the original line boundaries and line order.
+- [ ] Do not treat matching extracted text as sufficient when the original contains explicit line breaks or separate line boundaries.
+- [ ] Verify merged or collapsed title/meta lines are not introduced by reconstruction unless explicitly approved.
+- [ ] Treat any unexplained loss, insertion, merging, or relocation of an original title/meta line break as a hard failure before live testing.
