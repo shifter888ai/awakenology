@@ -363,3 +363,14 @@ For every content element whose HTML element type changes during reconstruction,
 - [ ] Confirm every original explicit rendering property is preserved unless its change was explicitly requested and separately audited.
 - [ ] Text/content matching or correct semantic-element conversion alone does not pass this gate.
 - [ ] Any unexplained loss or override of an original explicit heading/title rendering property is a hard failure before live testing.
+
+
+## Footer Source Structure / Legacy Footer Isolation Gate
+- [ ] Confirm exactly one footer element exists in the committed page source.
+- [ ] Confirm the footer uses the approved source structure: .site-footer, .footer-inner, and .footer-links.
+- [ ] Check for legacy footer classes or page-specific footer CSS that could override or conflict with the approved structure.
+- [ ] If a legacy footer structure can affect rendering, normalize the footer at source level before live testing.
+- [ ] Verify the approved Email, three Reddit, and Disclaimer links/icons and © 2017 Awakenology.
+- [ ] Verify explicit text-decoration:none behavior for Email and Disclaimer icons, including hover.
+- [ ] Do not treat Worker runtime footer replacement as sufficient when the page source contains a conflicting legacy footer structure or CSS.
+- [ ] Re-fetch the committed file and repeat these checks after the update.
