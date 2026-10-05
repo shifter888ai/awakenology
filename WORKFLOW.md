@@ -254,3 +254,15 @@ When the user confirms the page is correct:
 - `The-Master.md`: what the rebuilt site must satisfy.
 - `AUDIT.md`: what must be verified.
 - `WORKFLOW.md`: how the work is executed.
+
+
+### Footer normalization for legacy pages
+
+Some legacy pages contain a .footer structure and page-specific footer CSS that can conflict with the approved global footer even when Worker runtime injection supplies the correct content. Therefore:
+
+1. Inspect the actual committed footer element and its surrounding CSS before testing.
+2. If the page uses a legacy footer structure/class or conflicting footer CSS, normalize the footer source itself to the approved .site-footer / .footer-inner / .footer-links structure.
+3. Preserve the approved Email, three Reddit, and Disclaimer links/icons and © 2017 Awakenology.
+4. Explicitly prevent underline on Email and Disclaimer icons, including hover.
+5. Re-fetch the committed file and verify exactly one footer and the approved structure before asking the user to live-test.
+6. Worker runtime replacement must be treated as supplementary; it must not be relied upon to compensate for a structurally conflicting page source.
