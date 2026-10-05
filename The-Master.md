@@ -21,7 +21,7 @@
 17. **Maintainability** — Prefer simple structures that are easy to understand, update, and reuse.
 18. **One controlled change at a time** — Build → commit → deploy → test → approve → next.
 19. **Approved components become the baseline** — Once tested and approved, do not alter them without deliberate approval.
-20. **Production isolation** — `awakenology.org` remains untouched; `awakenology.space` is the test site.
+20. **Official new site / domain** — `awakenology.space` is the official new Awakenology website and primary domain. `awakenology.org` is not being migrated to this new website and must remain outside this migration/rebuild.
 21. **100% Original Content Match**
 
 ### Original-to-Rebuilt Content Inventory Gate
