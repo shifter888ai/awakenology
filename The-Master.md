@@ -370,3 +370,13 @@ When an original content element is converted to a different HTML element, its o
     - Standardized article/component CSS must not silently override, normalize, or replace an original explicit heading/title property merely because the rebuilt element is now an H1/H2/H3/H4/H5 or another semantic element.
     - Before live testing, compare the original property inventory against the final rebuilt CSS/DOM for each heading/title individually, including relevant responsive rules and CSS specificity/cascade effects.
     - A text match or correct semantic element alone does not pass this gate; loss of any original explicit rendering property is a hard failure unless it is an explicitly approved visual change.
+
+
+53. **Footer Source Structure / Legacy Footer Class Isolation**
+    - Every rebuilt page must use the approved footer source structure, not merely rely on Worker runtime replacement to create the approved visual result.
+    - Before live testing, inspect the committed page source for the actual footer element, its class names, child structure, and page-specific footer CSS.
+    - Legacy footer classes such as .footer must not remain when they can conflict with the approved .site-footer / .footer-inner / .footer-links structure or page-specific CSS cascade.
+    - The approved footer must be normalized at source level whenever a legacy page's footer structure or CSS can affect rendering.
+    - Verify exactly one footer, the approved footer hierarchy, the approved icon links, © 2017 Awakenology, and explicit no-underline rules for the Email and Disclaimer icons.
+    - Worker footer injection/replacement is supplementary runtime behavior and is not a substitute for source-level footer normalization.
+    - A page that passes source content checks but still contains a structurally conflicting legacy footer is a hard failure before live testing.
