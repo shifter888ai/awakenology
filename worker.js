@@ -59,7 +59,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     return new HTMLRewriter()
       .on("body",{element(el){var current=el.getAttribute("class")||"";if(isLanguageTocPage)current+=" awakenology-toc-page";if(decodedPathname==="/English/")current+=" awakenology-lang-en";if(decodedPathname==="/Japanese/")current+=" awakenology-lang-ja";if(decodedPathname==="/Chinese/")current+=" awakenology-lang-zh";if(isLegacyDarkPage)current+=" awakenology-legacy-dark-page";if(isChinesePage)current+=" awakenology-chinese-page";el.setAttribute("class",current)}})
       .on("head",{element(el){el.append(theme+script+chineseScript,{html:true})}})
-      .on("body",{text(text){if(text.text.includes("© 2017 Awakenology")){text.replace(text.text.replace("© 2024 Awakenology.org","© 2024 Awakenology.space"))}}})
+      .on("body",{text(text){if(text.text.includes("© 2017 Awakenology")){text.replace(text.text.replace("© 2017 Awakenology","© 2017 Awakenology"))}}})
       .transform(response);
   }
 };
