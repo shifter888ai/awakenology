@@ -224,7 +224,7 @@ The inventory is the **page-specific evidence of what was there**; the Audit che
       2. **↑ Return-to-top floating button** — Worker-owned
       3. **Chinese 简/繁 floating toggle** — Worker-owned
       4. **Global navigation menu:** English / 日本語 / 中文 / Search / Ask — page-template-owned
-      5. **Global footer:** Contact → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer → © 2024 Awakenology.org — page-template-owned
+      5. **Global footer:** Contact → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer → © 2017 Awakenology — page-template-owned
     - Global component ownership is explicit:
       - **Cloudflare Worker:** global floating/behavioral components: Dark/Light, ↑ Return-to-top, and Chinese 简/繁 switching.
       - **Rebuilt page template:** global structural components: English / 日本語 / 中文 / Search / Ask navigation and the standard footer.
@@ -421,3 +421,15 @@ A migration is complete only when all blocking audit checks pass, the committed 
 ### Agent Independence
 
 Codex, Claude Code, Gemini/Google AI Studio, or another capable agent may execute or review work. No agent-specific behavior is part of the site specification. The migration engine and deterministic audit remain the system of record.
+
+## SEO Rules
+
+- `https://awakenology.space` is the only canonical site domain; `awakenology.org` is excluded from this migration.
+- Sitemap must contain only live canonical routes. Deleted routes must be removed.
+- Every indexable HTML page must have a meaningful `<title>`, `meta description`, canonical URL, and valid `html lang`.
+- Existing page-specific metadata must not be duplicated by the Worker. The Worker may supply missing metadata deterministically.
+- `/ai-search/` is an interactive utility page and is `noindex, follow`.
+- Do not add hreflang mechanically. Add it only when genuine equivalent language URLs exist; the Worker-based Simplified Chinese conversion is not a separate hreflang URL.
+- Do not add structured data merely for SEO volume. Use only minimal, semantically accurate structured data where it provides clear value.
+- SEO changes must not rewrite or keyword-stuff preserved article content.
+- Legacy heading anomalies are audited separately; do not normalize H1/H2 structure automatically when doing metadata-only SEO work.
