@@ -1,3 +1,9 @@
+/* Awakenology Runtime Implementation — Full Automated Migration & Redesign Pipeline v2
+ * Runtime/global implementation lives here.
+ * Source migration rules: The-Master.md
+ * Verification rules: AUDIT.md
+ * Inventory/state: migration-manifest.json
+ */
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
