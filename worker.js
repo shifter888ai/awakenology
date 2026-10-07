@@ -125,4 +125,6 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle{background:#222;color:#eee;bor
         if(prop==="og:site_name")seoHasOgSiteName=true;
       }})
       .on("link",{element(el){var rel=(el.getAttribute("rel")||"").toLowerCase().split(/\s+/);if(rel.includes("canonical"))seoHasCanonical=true;}})
-
+      .transform(response);
+  }
+};
