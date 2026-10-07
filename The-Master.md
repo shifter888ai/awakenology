@@ -11,7 +11,7 @@
 7. **System fonts only** — No external fonts. Serif may be used selectively for major headings.
 8. **Responsive by default** — Desktop and mobile must work properly.
 9. **Consistent navigation** — English / 日本語 / 中文 / Search / Ask, with the active language clear.
-10. **Consistent footer** — Contact email icon → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer, then © 2024 Awakenology.space. The Contact icon links to `mailto:contact@awakenology.org` and is a standardized global footer component, not article content.
+10. **Consistent footer** — Contact email icon → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer, then © 2017 Awakenology. The Contact icon links to `mailto:contact@awakenology.org` and is a standardized global footer component, not article content.
 11. **Common lightweight article template** — All articles use the approved global structure.
 12. **Preserve intentional wording** — Never silently correct unusual English or intentional formatting.
 13. **Accessibility and readability** — Maintain readable typography, spacing, contrast, links, and responsive behavior.
@@ -380,3 +380,44 @@ When an original content element is converted to a different HTML element, its o
     - Verify exactly one footer, the approved footer hierarchy, the approved icon links, © 2017 Awakenology, and explicit no-underline rules for the Email and Disclaimer icons.
     - Worker footer injection/replacement is supplementary runtime behavior and is not a substitute for source-level footer normalization.
     - A page that passes source content checks but still contains a structurally conflicting legacy footer is a hard failure before live testing.
+
+
+## Full Automated Migration & Redesign Pipeline v2
+
+The migration/redesign process is an **agent-independent system**. AI coding agents may change, but the migration rules, inventory, validation, audit, and completion gates remain stable.
+
+### Formal Pipeline
+
+**Discover → Snapshot → Transform → Validate → Audit → Report → Commit → Deploy → Verify → Human Smoke Test**
+
+### Automation Rules
+
+- Discover the complete repository/page/asset inventory in one run.
+- Create a baseline snapshot before transformation.
+- Treat original page-specific content as protected data.
+- Apply deterministic transformation rules wherever possible.
+- Process the complete approved inventory without page-by-page confirmation.
+- Run the full automated audit before commit.
+- **ERROR** findings block commit and deployment.
+- **WARNING** findings are reported and remain visible in the migration manifest.
+- Produce a machine-readable migration manifest containing inventory, state, audit results, and exceptions.
+- Use one coherent migration commit for an approved migration batch.
+- Verify the committed result, deployment, and representative live behavior after deployment.
+- Perform a final human smoke test on representative desktop/mobile pages and critical interactions.
+- The process must be resumable from the manifest without losing prior verified state.
+- Safety and content preservation take priority over speed.
+
+### Control File Roles
+
+- **The-Master.md** — authoritative specification of what the site should be.
+- **AUDIT.md** — authoritative verification rules for proving the site is correct.
+- **worker.js** — runtime/global implementation of approved site behavior.
+- **migration-manifest.json** — machine-readable inventory, migration state, audit results, and exceptions.
+
+### Completion Gate
+
+A migration is complete only when all blocking audit checks pass, the committed result has been re-verified, deployment verification passes, and the final human smoke test passes.
+
+### Agent Independence
+
+Codex, Claude Code, Gemini/Google AI Studio, or another capable agent may execute or review work. No agent-specific behavior is part of the site specification. The migration engine and deterministic audit remain the system of record.
