@@ -3,8 +3,8 @@
   "repository": "shifter888ai/awakenology",
   "branch": "main",
   "baseline_commit": "0435b6ee4ca8a8c4d32bf938b41025ef975b8f46",
-  "current_commit": "db700ec30968d388e300c9dbf332649cbfc6d077",
-  "generated_at": "2026-10-07",
+  "current_commit": "6b381408d4c3e6f391c7057bccca3a0e8d0bd4cf",
+  "generated_at": "2026-10-08",
   "final_migration_state": "FINALIZED_BASELINE",
   "site_domain": "https://awakenology.space",
   "excluded_domains": [
@@ -19,11 +19,13 @@
     "image_asset_integrity": "PASS",
     "image_scale_rendering_preservation": "PASS",
     "deployment_workflow": "PASS",
-    "live_smoke_test": "PASS"
+    "live_smoke_test": "PASS",
+    "seo": "PASS_WITH_ACTIONS"
   },
   "deployment_verification": "PASS",
   "warnings": [
-    "Some legacy-derived HTML wrappers remain on individual pages; no content-affecting cleanup is authorized without a separate audit."
+    "Some legacy-derived HTML wrappers remain on individual pages; no content-affecting cleanup is authorized without a separate audit.",
+    "SEO baseline cleanup added deterministic missing metadata/canonical handling and removed the stale sitemap route; legacy H1 anomalies remain separately classified for review."
   ],
   "errors": [],
   "notes": [
@@ -33,6 +35,7 @@
     "AUDIT.md is the authoritative verification specification.",
     "worker.js contains runtime/global implementation.",
     "This manifest is the machine-readable baseline/state record; future full-site migrations must regenerate inventory and audit results automatically.",
-    "Blocking ERROR findings must prevent commit/deployment."
+    "Blocking ERROR findings must prevent commit/deployment.",
+    "SEO governance is defined in The-Master.md and SEO verification is defined in AUDIT.md."
   ]
 }
