@@ -1,0 +1,38 @@
+{
+  "pipeline_version": "2.0",
+  "repository": "shifter888ai/awakenology",
+  "branch": "main",
+  "baseline_commit": "0435b6ee4ca8a8c4d32bf938b41025ef975b8f46",
+  "current_commit": "5fea77875ca114fd23604d98f810b35b20580189",
+  "generated_at": "2026-10-07",
+  "final_migration_state": "FINALIZED_BASELINE",
+  "site_domain": "https://awakenology.space",
+  "excluded_domains": [
+    "https://awakenology.org"
+  ],
+  "page_count": 114,
+  "asset_count": 207,
+  "inventory_status": "verified-baseline-counts",
+  "route_inventory_note": "114 canonical index.html routes were verified in the prior finalized migration audit; future automated migration runs must regenerate the complete route inventory from the repository rather than relying on this static baseline.",
+  "audit_summary": {
+    "standard_component_match": "PASS",
+    "image_asset_integrity": "PASS",
+    "image_scale_rendering_preservation": "PASS",
+    "deployment_workflow": "PASS",
+    "live_smoke_test": "PASS"
+  },
+  "deployment_verification": "PASS",
+  "warnings": [
+    "Some legacy-derived HTML wrappers remain on individual pages; no content-affecting cleanup is authorized without a separate audit."
+  ],
+  "errors": [],
+  "notes": [
+    "Current production baseline is stable.",
+    "awakenology.org is excluded from the new-site migration.",
+    "The-Master.md is the authoritative site specification.",
+    "AUDIT.md is the authoritative verification specification.",
+    "worker.js contains runtime/global implementation.",
+    "This manifest is the machine-readable baseline/state record; future full-site migrations must regenerate inventory and audit results automatically.",
+    "Blocking ERROR findings must prevent commit/deployment."
+  ]
+}
