@@ -109,7 +109,7 @@ Inspect the actual DOM, not only extracted text or CSS.
 - [ ] Global navigation: English / 日本語 / 中文 / Search / Ask.
 - [ ] Global navigation appears only in the header; it is not duplicated inside the article body or TOC.
 - [ ] Footer order is exactly:
-  Contact email icon → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer → © 2024 Awakenology.space
+  Contact email icon → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer → © 2017 Awakenology
 - [ ] Contact is represented by the standardized email icon, linking to `mailto:contact@awakenology.org`; it is not treated as article content.
 - [ ] Exactly three Reddit anchors exist in the footer, in the required order:
   1. https://www.reddit.com/r/EscapeReincarnation/
@@ -374,3 +374,52 @@ For every content element whose HTML element type changes during reconstruction,
 - [ ] Verify explicit text-decoration:none behavior for Email and Disclaimer icons, including hover.
 - [ ] Do not treat Worker runtime footer replacement as sufficient when the page source contains a conflicting legacy footer structure or CSS.
 - [ ] Re-fetch the committed file and repeat these checks after the update.
+
+
+## Full Automated Migration & Redesign Pipeline v2 — Verification Gates
+
+The migration system is agent-independent. These gates verify the **result**, regardless of which AI agent performed the work.
+
+### A. Baseline / Inventory Gate
+- Complete page and asset inventory exists before transformation.
+- Baseline commit/snapshot is recorded.
+- Original content is protected and traceable.
+- Inventory mismatches are blocking errors.
+
+### B. Full-Run Transformation Gate
+- The approved inventory is processed as one automated batch wherever practical.
+- No page-by-page confirmation is required for deterministic transformations.
+- Any exception is recorded in the migration manifest.
+
+### C. Complete Automated Audit Gate
+Run all applicable audits in this file before commit, including content preservation, standard components, HTML structure, formatting isolation, language isolation, image integrity/scale, internal links, and deployment configuration.
+
+### D. Commit Safety Gate
+- **PASS** — all blocking checks pass.
+- **WARNING** — non-blocking anomaly recorded.
+- **ERROR** — blocking failure; stop before commit/deploy.
+- **SKIPPED** — only when formally not applicable and the reason is recorded.
+
+### E. Post-Deployment Verification Gate
+- Confirm deployment completes successfully.
+- Confirm representative routes return correctly.
+- Confirm critical global behavior remains functional.
+- Confirm canonical domain remains `https://awakenology.space`.
+
+### F. Human Smoke-Test Gate
+After automated verification, perform a small final live test covering representative desktop/mobile pages and critical interactions. This is the final safety check, not a substitute for automation.
+
+### G. Minimum Migration Manifest Fields
+The machine-readable manifest should record at minimum:
+- pipeline version
+- repository and branch
+- baseline/current commit
+- generation timestamp
+- canonical domain and excluded domains
+- page count and asset count
+- route inventory and per-route state
+- audit results
+- warnings/errors/exceptions
+- deployment verification
+- final migration state
+
