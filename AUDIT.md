@@ -423,3 +423,17 @@ The machine-readable manifest should record at minimum:
 - deployment verification
 - final migration state
 
+
+## SEO Verification
+
+- [ ] Sitemap contains only live canonical routes; no deleted/orphan route remains.
+- [ ] Every indexable HTML page has exactly one meaningful `<title>`.
+- [ ] Every indexable HTML page has a meaningful meta description unless explicitly classified as non-indexable.
+- [ ] Every indexable HTML page has exactly one canonical URL pointing to `https://awakenology.space/` plus its route.
+- [ ] `html lang` is present and matches the page language.
+- [ ] `/ai-search/` is explicitly `noindex, follow`.
+- [ ] Existing page metadata is not duplicated by Worker injection.
+- [ ] Hreflang is used only for genuine equivalent language URLs; dynamic Simplified Chinese conversion is not treated as a separate hreflang URL.
+- [ ] Open Graph and structured data are treated as controlled global enhancements, not mandatory per-page content rewrites.
+- [ ] SEO changes do not alter preserved article wording or content.
+- [ ] H1/H2 anomalies are reviewed separately from metadata-only SEO changes; no automatic heading normalization is permitted without content/rendering audit.
