@@ -17,6 +17,27 @@ export default {
       "/What-Is-Hypnosis/","/What-Is-Hypnotic-Reincarnation/","/The-History-of-Reincarnation/","/Multidimensional-Body-Complex-1-Single-Complex/","/Multidimensional-Body-Complex-3-Multi-Complex/","/What-is-The-Ultimate-Source/","/What-does-The-Ultimate-Source-like/","/What-is-Multidimensional-Space-Time/","/What-is-Zero-Energy-Space/","/Energy-Consumption-and-Transformation/","/アインシュタイン協議百年催眠実験/","/意識強度とは/","/意識強度検測点1自動意識制御領域/","/意識強度検測点2自主意識領域/","/意識強度検測点抽出検測データサンプル20190317/","/人の多次元複合体構造1-単重複合体/","/人の多次元複合体構造2-二重複合体霊-体/","/伝統修行の五段階/"
     ];
     const isLegacyDarkPage = legacyDarkPages.includes(decodedPathname);
+    const seoDescriptions = {
+      "/Destruction-Occurs-in-an-Instant/": "Awakenology — an account of how 3,000 Domain team members were instantaneously captured 10,000 years ago on Earth.",
+      "/ai-search/": "Search the Awakenology site or ask questions about its material using AI.",
+      "/三十六計/": "《三十六計》：中國傳統兵法三十六計的全文整理。",
+      "/人の多次元複合体構造1-単重複合体/": "人の多次元複合体構造（1）----単重複合体。肉体、霊体、霊串、霊核などの構造を整理。",
+      "/人の多次元複合体構造2-二重複合体霊-体/": "人の多次元複合体構造（2）----二重複合体「霊+体」。霊と体の関係と各複合体を整理。",
+      "/人の多次元複合体構造3-多重複合体/": "人の多次元複合体構造（3）----多重複合体。多次元的な複合体構造について整理。",
+      "/人的多次元複合體結構6-人體18規則與章程/": "人的多次元複合體結構（6）----人體18規則與章程，整理人體資訊模組系統及其管理與技術規則。",
+      "/個體現象界與集體現象界/": "個體現象界與集體現象界：介紹自由意識所創造的個體現象界與集體現象界。",
+      "/多重時空是什麽/": "多重時空是什麽：介紹界、空間、時空及不同空間的時間特性。",
+      "/意識強度檢測點抽樣檢測資料樣本/": "意識強度檢測點：抽樣檢測資料樣本20190317，包含第1至9區的檢測資料。",
+      "/愛因斯坦協議百年催眠實驗/": "愛因斯坦協議：百年催眠實驗，2025年公開發布的信息披露內容。",
+      "/摧毀只是一瞬間/": "摧毀只是一瞬間：記錄一萬年前同領地三千名隊員被瞬間捕捉的催眠偷襲事件。",
+      "/時間是什麽/": "時間是什麽：從深層靈界、淺層靈界與物質界的角度介紹時間遊戲及其規則。",
+      "/本源喜歡什麽/": "本源喜歡什麽：以問答形式討論本源、遊戲及自由意識。",
+      "/本源是什麽/": "本源是什麽：從與本源合一的觀察，描述本源的無限性、唯一性與不可定義性。",
+      "/空間是什麽/": "空間是什麽：從本源與意識的角度討論空間、界與不同層次的存在。",
+      "/零能量空間是什麽/": "零能量空間是什麽：介紹零能量空間及其相關概念。"
+    };
+    const seoDescription = seoDescriptions[decodedPathname] || "";
+    const seoNoindex = decodedPathname === "/ai-search/";
     if (!contentType.toLowerCase().includes("text/html")) return response;
 
     const theme = `<style id="awakenology-theme-style">
@@ -61,7 +82,17 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle{background:#222;color:#eee;bor
     return new HTMLRewriter()
       .on("link",{element(el){var rel=(el.getAttribute("rel")||"").toLowerCase().split(/\\s+/);if(rel.includes("icon")||rel.includes("apple-touch-icon"))el.remove()}})
       .on("body",{element(el){var current=el.getAttribute("class")||"";if(isLanguageTocPage)current+=" awakenology-toc-page";if(decodedPathname==="/English/")current+=" awakenology-lang-en";if(decodedPathname==="/Japanese/")current+=" awakenology-lang-ja";if(decodedPathname==="/Chinese/")current+=" awakenology-lang-zh";if(isLegacyDarkPage)current+=" awakenology-legacy-dark-page";if(isChinesePage)current+=" awakenology-chinese-page";el.setAttribute("class",current)}})
-      .on("head",{element(el){el.append(theme+script+chineseScript+"<link rel=\"icon\" type=\"image/png\" href=\"/gallery/favicons/favicon.png\">",{html:true})}})
+      .on("head",{element(el){
+        var hasDescription=false,hasCanonical=false,hasRobots=false;
+        el.onEndTag(function(endTag){
+          if(seoDescription&&!hasDescription)endTag.before("<meta name=\"description\" content=\""+seoDescription.replace(/&/g,"&amp;").replace(/"/g,"&quot;")+"\">",{html:true});
+          if(!hasCanonical&&decodedPathname!="/ai-search/")endTag.before("<link rel=\"canonical\" href=\"https://awakenology.space"+encodeURI(decodedPathname)+"\">",{html:true});
+          if(seoNoindex&&!hasRobots)endTag.before("<meta name=\"robots\" content=\"noindex,follow\">",{html:true});
+          endTag.before(theme+script+chineseScript+"<link rel=\"icon\" type=\"image/png\" href=\"/gallery/favicons/favicon.png\">",{html:true});
+        });
+      }})
+      .on("meta",{element(el){var name=(el.getAttribute("name")||"").toLowerCase();if(name==="description")hasDescription=true;if(name==="robots")hasRobots=true;}})
+      .on("link",{element(el){var rel=(el.getAttribute("rel")||"").toLowerCase().split(/\s+/);if(rel.includes("canonical"))hasCanonical=true;}})
       .on("footer",{element(el){el.setInnerContent("<div class=\"footer-inner\" style=\"max-width:760px;margin:0 auto;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;color:inherit;font-size:13px\"><span class=\"footer-links\" style=\"display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:0\"><a class=\"contact-icon\" href=\"mailto:contact@awakenology.org\" aria-label=\"Email Awakenology\" title=\"Contact\"><span aria-hidden=\"true\">✉</span></a><a class=\"reddit-icon reddit-one\" href=\"https://www.reddit.com/r/EscapeReincarnation/\" aria-label=\"Reddit: Escape Reincarnation\"><img src=\"/assets/reddit-one.svg\" alt=\"\"></a><a class=\"reddit-icon reddit-two\" href=\"https://www.reddit.com/r/EscapePrisonPlanet/\" aria-label=\"Reddit: Escape Prison Planet\"><img src=\"/assets/reddit-two.svg\" alt=\"\"></a><a class=\"reddit-icon reddit-three\" href=\"https://www.reddit.com/user/Lower-Lingonberry-40/\" aria-label=\"Reddit: Lower-Lingonberry-40\"><img src=\"/assets/reddit-three.svg\" alt=\"\"></a><a class=\"disclaimer-icon\" href=\"/Disclaimer/\" aria-label=\"Disclaimer\" title=\"Disclaimer\"><span aria-hidden=\"true\">ⓘ</span></a></span><span>© 2017 Awakenology</span></div>" ,{html:true})}})
       .transform(response);
   }
