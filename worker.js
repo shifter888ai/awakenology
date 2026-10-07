@@ -42,7 +42,13 @@ export default {
     var seoHasCanonical = false;
     var seoHasRobots = false;
     var seoTitle = "";
-    var seoDescriptionMeta = "";
+    var seoTitleText = "";
+    var seoDescriptionMeta = seoDescription;
+    var seoHasOgTitle = false;
+    var seoHasOgDescription = false;
+    var seoHasOgUrl = false;
+    var seoHasOgType = false;
+    var seoHasOgSiteName = false;
     var seoCanonical = "https://awakenology.space" + encodeURI(decodedPathname);
     if (!contentType.toLowerCase().includes("text/html")) return response;
 
@@ -90,14 +96,32 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle{background:#222;color:#eee;bor
       .on("body",{element(el){var current=el.getAttribute("class")||"";if(isLanguageTocPage)current+=" awakenology-toc-page";if(decodedPathname==="/English/")current+=" awakenology-lang-en";if(decodedPathname==="/Japanese/")current+=" awakenology-lang-ja";if(decodedPathname==="/Chinese/")current+=" awakenology-lang-zh";if(isLegacyDarkPage)current+=" awakenology-legacy-dark-page";if(isChinesePage)current+=" awakenology-chinese-page";el.setAttribute("class",current)}})
       .on("head",{element(el){
         el.onEndTag(function(endTag){
-          if(seoTitle)endTag.before("<meta property=\"og:title\" content=\""+seoTitle.replace(/&/g,"&amp;").replace(/"/g,"&quot;")+"\"><meta property=\"og:description\" content=\""+seoDescriptionMeta.replace(/&/g,"&amp;").replace(/"/g,"&quot;")+"\"><meta property=\"og:url\" content=\""+seoCanonical+"\"><meta property=\"og:type\" content=\"website\"><meta property=\"og:site_name\" content=\"Awakenology\">",{html:true});
+          var title=seoTitleText.trim();
+          var og=[];
+          if(!seoHasOgTitle&&title)og.push("<meta property=\"og:title\" content=\""+title.replace(/&/g,"&amp;").replace(/"/g,"&quot;")+"\">");
+          if(!seoHasOgDescription&&seoDescriptionMeta)og.push("<meta property=\"og:description\" content=\""+seoDescriptionMeta.replace(/&/g,"&amp;").replace(/"/g,"&quot;")+"\">");
+          if(!seoHasOgUrl)og.push("<meta property=\"og:url\" content=\""+seoCanonical+"\">");
+          if(!seoHasOgType)og.push("<meta property=\"og:type\" content=\"website\">");
+          if(!seoHasOgSiteName)og.push("<meta property=\"og:site_name\" content=\"Awakenology\">");
+          if(og.length)endTag.before(og.join(""),{html:true});
           if(seoDescription&&!seoHasDescription)endTag.before("<meta name=\"description\" content=\""+seoDescription.replace(/&/g,"&amp;").replace(/"/g,"&quot;")+"\">",{html:true});
           if(!seoHasCanonical&&decodedPathname!="/ai-search/")endTag.before("<link rel=\"canonical\" href=\""+seoCanonical+"\">",{html:true});
           if(seoNoindex&&!seoHasRobots)endTag.before("<meta name=\"robots\" content=\"noindex,follow\">",{html:true});
           endTag.before(theme+script+chineseScript+"<link rel=\"icon\" type=\"image/png\" href=\"/gallery/favicons/favicon.png\">",{html:true});
         });
       }})
-      .on("title",{element(el){el.onEndTag(function(){seoTitle=el.textContent?el.textContent.trim():"";});}})
-      .on("meta",{element(el){var name=(el.getAttribute("name")||"").toLowerCase();if(name==="description")seoHasDescription=true;if(name==="robots")seoHasRobots=true;var prop=(el.getAttribute("property")||"").toLowerCase();if(prop==="og:title")seoTitle="";}})
+      .on("title",{element(el){el.onEndTag(function(){seoTitle=seoTitleText.trim();});}})
+      .on("title",{text(text){seoTitleText+=text.text;}})
+      .on("meta",{element(el){
+        var name=(el.getAttribute("name")||"").toLowerCase();
+        if(name==="description"){seoHasDescription=true;seoDescriptionMeta=el.getAttribute("content")||seoDescriptionMeta;}
+        if(name==="robots")seoHasRobots=true;
+        var prop=(el.getAttribute("property")||"").toLowerCase();
+        if(prop==="og:title")seoHasOgTitle=true;
+        if(prop==="og:description")seoHasOgDescription=true;
+        if(prop==="og:url")seoHasOgUrl=true;
+        if(prop==="og:type")seoHasOgType=true;
+        if(prop==="og:site_name")seoHasOgSiteName=true;
+      }})
       .on("link",{element(el){var rel=(el.getAttribute("rel")||"").toLowerCase().split(/\s+/);if(rel.includes("canonical"))seoHasCanonical=true;}})
 
