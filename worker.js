@@ -107,6 +107,7 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle{background:#222;color:#eee;bor
           if(seoDescription&&!seoHasDescription)endTag.before("<meta name=\"description\" content=\""+seoDescription.replace(/&/g,"&amp;").replace(/"/g,"&quot;")+"\">",{html:true});
           if(!seoHasCanonical&&decodedPathname!="/ai-search/")endTag.before("<link rel=\"canonical\" href=\""+seoCanonical+"\">",{html:true});
           if(seoNoindex&&!seoHasRobots)endTag.before("<meta name=\"robots\" content=\"noindex,follow\">",{html:true});
+          if(decodedPathname==="/")endTag.before("<script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"WebSite\",\"name\":\"Awakenology\",\"url\":\"https://awakenology.space/\"}</script>",{html:true});
           endTag.before(theme+script+chineseScript+"<link rel=\"icon\" type=\"image/png\" href=\"/gallery/favicons/favicon.png\">",{html:true});
         });
       }})
