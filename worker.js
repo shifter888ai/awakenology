@@ -41,6 +41,9 @@ export default {
     var seoHasDescription = false;
     var seoHasCanonical = false;
     var seoHasRobots = false;
+    var seoTitle = "";
+    var seoDescriptionMeta = "";
+    var seoCanonical = "https://awakenology.space" + encodeURI(decodedPathname);
     if (!contentType.toLowerCase().includes("text/html")) return response;
 
     const theme = `<style id="awakenology-theme-style">
@@ -87,16 +90,14 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle{background:#222;color:#eee;bor
       .on("body",{element(el){var current=el.getAttribute("class")||"";if(isLanguageTocPage)current+=" awakenology-toc-page";if(decodedPathname==="/English/")current+=" awakenology-lang-en";if(decodedPathname==="/Japanese/")current+=" awakenology-lang-ja";if(decodedPathname==="/Chinese/")current+=" awakenology-lang-zh";if(isLegacyDarkPage)current+=" awakenology-legacy-dark-page";if(isChinesePage)current+=" awakenology-chinese-page";el.setAttribute("class",current)}})
       .on("head",{element(el){
         el.onEndTag(function(endTag){
+          if(seoTitle)endTag.before("<meta property=\"og:title\" content=\""+seoTitle.replace(/&/g,"&amp;").replace(/"/g,"&quot;")+"\"><meta property=\"og:description\" content=\""+seoDescriptionMeta.replace(/&/g,"&amp;").replace(/"/g,"&quot;")+"\"><meta property=\"og:url\" content=\""+seoCanonical+"\"><meta property=\"og:type\" content=\"website\"><meta property=\"og:site_name\" content=\"Awakenology\">",{html:true});
           if(seoDescription&&!seoHasDescription)endTag.before("<meta name=\"description\" content=\""+seoDescription.replace(/&/g,"&amp;").replace(/"/g,"&quot;")+"\">",{html:true});
-          if(!seoHasCanonical&&decodedPathname!="/ai-search/")endTag.before("<link rel=\"canonical\" href=\"https://awakenology.space"+encodeURI(decodedPathname)+"\">",{html:true});
+          if(!seoHasCanonical&&decodedPathname!="/ai-search/")endTag.before("<link rel=\"canonical\" href=\""+seoCanonical+"\">",{html:true});
           if(seoNoindex&&!seoHasRobots)endTag.before("<meta name=\"robots\" content=\"noindex,follow\">",{html:true});
           endTag.before(theme+script+chineseScript+"<link rel=\"icon\" type=\"image/png\" href=\"/gallery/favicons/favicon.png\">",{html:true});
         });
       }})
-      .on("meta",{element(el){var name=(el.getAttribute("name")||"").toLowerCase();if(name==="description")seoHasDescription=true;if(name==="robots")seoHasRobots=true;}})
+      .on("title",{element(el){el.onEndTag(function(){seoTitle=el.textContent?el.textContent.trim():"";});}})
+      .on("meta",{element(el){var name=(el.getAttribute("name")||"").toLowerCase();if(name==="description")seoHasDescription=true;if(name==="robots")seoHasRobots=true;var prop=(el.getAttribute("property")||"").toLowerCase();if(prop==="og:title")seoTitle="";}})
       .on("link",{element(el){var rel=(el.getAttribute("rel")||"").toLowerCase().split(/\s+/);if(rel.includes("canonical"))seoHasCanonical=true;}})
-      .on("footer",{element(el){el.setInnerContent("<div class=\"footer-inner\" style=\"max-width:760px;margin:0 auto;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;color:inherit;font-size:13px\"><span class=\"footer-links\" style=\"display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:0\"><a class=\"contact-icon\" href=\"mailto:contact@awakenology.org\" aria-label=\"Email Awakenology\" title=\"Contact\"><span aria-hidden=\"true\">✉</span></a><a class=\"reddit-icon reddit-one\" href=\"https://www.reddit.com/r/EscapeReincarnation/\" aria-label=\"Reddit: Escape Reincarnation\"><img src=\"/assets/reddit-one.svg\" alt=\"\"></a><a class=\"reddit-icon reddit-two\" href=\"https://www.reddit.com/r/EscapePrisonPlanet/\" aria-label=\"Reddit: Escape Prison Planet\"><img src=\"/assets/reddit-two.svg\" alt=\"\"></a><a class=\"reddit-icon reddit-three\" href=\"https://www.reddit.com/user/Lower-Lingonberry-40/\" aria-label=\"Reddit: Lower-Lingonberry-40\"><img src=\"/assets/reddit-three.svg\" alt=\"\"></a><a class=\"disclaimer-icon\" href=\"/Disclaimer/\" aria-label=\"Disclaimer\" title=\"Disclaimer\"><span aria-hidden=\"true\">ⓘ</span></a></span><span>© 2017 Awakenology</span></div>" ,{html:true})}})
-      .transform(response);
-  }
-};
-/* Cloudflare rebuild trigger 2026-10-03 */
+
