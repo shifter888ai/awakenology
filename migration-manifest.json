@@ -3,7 +3,7 @@
   "repository": "shifter888ai/awakenology",
   "branch": "main",
   "baseline_commit": "0435b6ee4ca8a8c4d32bf938b41025ef975b8f46",
-  "current_commit": "e5edd8e8bd3075683f20f63362b64a1fbdaf40ab",
+  "current_commit": "7e1449062964d27185aa4782c13cccb2fa638f1f",
   "generated_at": "2026-10-12",
   "final_migration_state": "FINALIZED_BASELINE",
   "site_domain": "https://awakenology.space",
@@ -20,7 +20,7 @@
     "image_scale_rendering_preservation": "PASS",
     "deployment_workflow": "PASS",
     "live_smoke_test": "PASS",
-    "seo": "PENDING_TARGETED_METADATA_REMEDIATION",
+    "seo": "PENDING_LIVE_METADATA_VERIFICATION",
     "visual_design_rules_documentation": "MERGED_AND_VERIFIED",
     "visual_rendering_audit": "PENDING"
   },
@@ -46,7 +46,10 @@
     "current_commit records the source commit reviewed for this manifest snapshot; manifest-only bookkeeping commits do not point to themselves.",
     "Sitemap audit correction committed 2026-10-12: /ai-search/ is no longer listed because it is explicitly noindex,follow. Sitemap source rechecked at 114 unique HTTPS awakenology.space URLs.",
     "Homepage canonical and og:image were already present in source during the 2026-10-12 audit; live-rendered metadata and Open Graph/structured-data consistency remain to be verified.",
-    "Targeted SEO remediation branch created 2026-10-12: improved the meta description on one page where the prior audit found a title-only description. Two other pages initially flagged were rechecked and their already-specific descriptions were preserved. Article body content remains unchanged. SEO remains pending until full metadata/content-integrity checks and live-delivered metadata verification are complete."
+    "Targeted SEO remediation branch created 2026-10-12: improved the meta description on one page where the prior audit found a title-only description. Two other pages initially flagged were rechecked and their already-specific descriptions were preserved. Article body content remains unchanged. SEO remains pending until full metadata/content-integrity checks and live-delivered metadata verification are complete.",
+    "Targeted SEO remediation through PRs #68 and #69: replaced title-only meta descriptions on two dialogue pages. For each edited page, the complete <body> source was verified unchanged. SEO remains pending until delivered metadata and broader content-integrity checks are complete.",
+    "Repository source asset-path check completed 2026-10-12: scanned local src/href/poster references for common image, media, font, CSS, and JS file extensions across all 115 HTML files (114 sitemap pages plus AI Search; excluding 404.html). Every matched local reference resolved to a path present in the repository. This verifies repository path existence, not remote URL availability or visual rendering.",
+    "PR #69 merged 2026-10-12 (merge commit 7e1449062964d27185aa4782c13cccb2fa638f1f); targeted description remediation on 與退化派對話6 is now in main."
   ],
   "manifest_version": "2.1"
 }
