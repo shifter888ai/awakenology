@@ -84,6 +84,37 @@ jobs:
               region = re.sub(r"\s+", " ", region).strip()
               return kind, region
 
+          def content_loss_reason(before, after):
+              if before is None or after is None:
+                  return None
+              before_kind, before_text = extract_content(before)
+              after_kind, after_text = extract_content(after)
+              if not before_text:
+                  return None
+              had_article = bool(re.search(r"<article\b", before, re.I))
+              has_article = bool(re.search(r"<article\b", after, re.I))
+              if had_article and not has_article and len(before_text) >= 500:
+                  return f"article container disappeared (base content: {len(before_text)} characters)."
+              if len(before_text) >= 500:
+                  minimum = max(250, int(len(before_text) * 0.60))
+                  if len(after_text) < minimum:
+                      return (
+                          f"extracted content shrank from {len(before_text)} to {len(after_text)} characters "
+                          f"(required at least {minimum}; {before_kind} -> {after_kind})."
+                      )
+              return None
+
+          # Negative/positive self-tests protect the detector itself from regressions.
+          sample_article = "<article><h1>Integrity test</h1><p>" + ("Preserved article text. " * 40) + "</p></article>"
+          emptied_article = '<article class="article"><p class="aw-spacer"></p></article>'
+          if content_loss_reason(sample_article, sample_article) is not None:
+              print("SELF-TEST FAILED: unchanged substantial article was flagged.")
+              sys.exit(1)
+          if content_loss_reason(sample_article, emptied_article) is None:
+              print("SELF-TEST FAILED: emptied substantial article was not detected.")
+              sys.exit(1)
+          print("Content-integrity detector self-tests passed (preserved and emptied article cases).")
+
           failures = []
           checked = 0
           for path in changed:
@@ -94,24 +125,12 @@ jobs:
               if before is None or after is None:
                   continue
               before_kind, before_text = extract_content(before)
-              after_kind, after_text = extract_content(after)
               if not before_text:
                   continue
               checked += 1
-              # Missing an existing article wrapper is suspicious even if other page chrome remains.
-              had_article = bool(re.search(r"<article\b", before, re.I))
-              has_article = bool(re.search(r"<article\b", after, re.I))
-              if had_article and not has_article and len(before_text) >= 500:
-                  failures.append(f"{path}: article container disappeared (base content: {len(before_text)} characters).")
-                  continue
-              # Guard meaningful existing content against emptying or a large accidental truncation.
-              if len(before_text) >= 500:
-                  minimum = max(250, int(len(before_text) * 0.60))
-                  if len(after_text) < minimum:
-                      failures.append(
-                          f"{path}: extracted content shrank from {len(before_text)} to {len(after_text)} characters "
-                          f"(required at least {minimum}; {before_kind} -> {after_kind})."
-                      )
+              reason = content_loss_reason(before, after)
+              if reason:
+                  failures.append(f"{path}: {reason}")
 
           print(f"Content integrity checked {checked} changed HTML file(s).")
           if failures:
