@@ -26,8 +26,10 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           EVENT_PATH: ${{ github.event_path }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
         run: |
           python - <<'PY'
+          import difflib
           import html
           import json
           import os
@@ -93,8 +95,8 @@ jobs:
               after_kind, after_text = extract_content(after)
               if not before_text:
                   return None
-              had_article = bool(re.search(r"<article\b", before, re.I))
-              has_article = bool(re.search(r"<article\b", after, re.I))
+              had_article = bool(re.search(r"<article\\b", before, re.I))
+              has_article = bool(re.search(r"<article\\b", after, re.I))
               if had_article and not has_article and len(before_text) >= 500:
                   return f"article container disappeared (base content: {len(before_text)} characters)."
               if len(before_text) >= 500:
@@ -103,6 +105,24 @@ jobs:
                       return (
                           f"extracted content shrank from {len(before_text)} to {len(after_text)} characters "
                           f"(required at least {minimum}; {before_kind} -> {after_kind})."
+                      )
+                  # Detect substantial deletion/replacement even when more than 60%
+                  # of the old text remains. Intentional edits require explicit review.
+                  matcher = difflib.SequenceMatcher(None, before_text, after_text, autojunk=False)
+                  deleted_spans = [
+                      before_text[i1:i2]
+                      for tag, i1, i2, j1, j2 in matcher.get_opcodes()
+                      if tag in ("delete", "replace")
+                  ]
+                  deleted_chars = sum(len(span) for span in deleted_spans)
+                  largest_span = max((len(span) for span in deleted_spans), default=0)
+                  if largest_span >= 120 or (
+                      deleted_chars >= 160 and deleted_chars / len(before_text) >= 0.01
+                  ):
+                      return (
+                          f"substantial article text was deleted or replaced "
+                          f"({deleted_chars} characters affected; largest segment {largest_span}; "
+                          f"base {len(before_text)}, head {len(after_text)})."
                       )
               return None
 
@@ -115,7 +135,12 @@ jobs:
           if content_loss_reason(sample_article, emptied_article) is None:
               print("SELF-TEST FAILED: emptied substantial article was not detected.")
               sys.exit(1)
-          print("Content-integrity detector self-tests passed (preserved and emptied article cases).")
+          partial_before = "<article><p>" + ("Stable paragraph text. " * 40) + ("UNIQUE REMOVAL SEGMENT. " * 10) + "</p></article>"
+          partial_after = partial_before.replace("UNIQUE REMOVAL SEGMENT. " * 10, "")
+          if content_loss_reason(partial_before, partial_after) is None:
+              print("SELF-TEST FAILED: substantial partial deletion above the old 60% threshold was not detected.")
+              sys.exit(1)
+          print("Content-integrity detector self-tests passed (preserved, emptied, and partial-deletion cases).")
 
           failures = []
           checked = 0
@@ -136,10 +161,16 @@ jobs:
 
           print(f"Content integrity checked {checked} changed HTML file(s).")
           if failures:
-              print("\nCONTENT INTEGRITY GATE FAILED:")
-              for failure in failures:
-                  print(f"- {failure}")
-              print("\nIf a substantial content reduction is intentional and reviewed, add the PR label 'content-loss-approved' to explicitly bypass this gate.")
-              sys.exit(1)
-          print("No suspicious content loss detected.")
+              if os.environ.get("GITHUB_EVENT_NAME") == "push":
+                  for failure in failures:
+                      print(f"::warning::Post-merge content-integrity alert: {failure}")
+                  print("Post-merge alert only: the pull-request gate is the merge-prevention control.")
+              else:
+                  print("\nCONTENT INTEGRITY GATE FAILED:")
+                  for failure in failures:
+                      print(f"- {failure}")
+                  print("\nIf a substantial content reduction is intentional, review the exact article diff and add the PR label 'content-loss-approved' to explicitly bypass this gate.")
+                  sys.exit(1)
+          else:
+              print("No suspicious content loss detected.")
           PY
