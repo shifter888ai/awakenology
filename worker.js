@@ -133,12 +133,35 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle{background:#222;color:#eee;bor
         if(name==="description"){seoHasDescription=true;var descriptionContent=el.getAttribute("content")||"";if(!descriptionContent.trim()&&seoDescription){el.setAttribute("content",seoDescription);seoDescriptionMeta=seoDescription;}else{seoDescriptionMeta=descriptionContent||seoDescriptionMeta;}}
         if(name==="robots")seoHasRobots=true;
         var prop=(el.getAttribute("property")||"").toLowerCase();
-        if(prop==="og:title")seoHasOgTitle=true;
-        if(prop==="og:image"){seoHasOgImage=true;if(!(el.getAttribute("content")||"").trim())el.setAttribute("content",seoDefaultOgImage);}
-        if(prop==="og:description")seoHasOgDescription=true;
-        if(prop==="og:url")seoHasOgUrl=true;
-        if(prop==="og:type")seoHasOgType=true;
-        if(prop==="og:site_name")seoHasOgSiteName=true;
+        var ogContent=(el.getAttribute("content")||"").trim();
+        if(prop==="og:title"){
+          if(!ogContent||seoHasOgTitle){el.remove();return;}
+          seoHasOgTitle=true;
+        }
+        if(prop==="og:description"){
+          if(!ogContent||seoHasOgDescription){el.remove();return;}
+          seoHasOgDescription=true;
+        }
+        if(prop==="og:image"){
+          if(seoHasOgImage){el.remove();return;}
+          seoHasOgImage=true;
+          if(!ogContent)el.setAttribute("content",seoDefaultOgImage);
+        }
+        if(prop==="og:url"){
+          if(seoHasOgUrl){el.remove();return;}
+          seoHasOgUrl=true;
+          el.setAttribute("content",seoCanonical);
+        }
+        if(prop==="og:type"){
+          if(seoHasOgType){el.remove();return;}
+          seoHasOgType=true;
+          if(!ogContent)el.setAttribute("content","website");
+        }
+        if(prop==="og:site_name"){
+          if(seoHasOgSiteName){el.remove();return;}
+          seoHasOgSiteName=true;
+          if(!ogContent)el.setAttribute("content","Awakenology");
+        }
       }})
       .on("link",{element(el){var rel=(el.getAttribute("rel")||"").toLowerCase().split(/\s+/);if(rel.includes("canonical")){seoHasCanonical=true;if(decodedPathname!=="/ai-search/"){if(seoCanonicalCount===0){el.setAttribute("href",seoCanonical);seoCanonicalCount++;}else{el.remove();}}}}})
       .transform(response);
