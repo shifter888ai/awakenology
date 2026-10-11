@@ -489,3 +489,18 @@ Use this section to verify consistency with the approved design baseline. These 
 - [ ] Desktop and iPhone-sized rendering were checked after any shared CSS/Worker change.
 - [ ] Source/DOM checks and rendered visual checks are recorded separately; passing one does not substitute for the other.
 - [ ] No visual change is marked complete until the committed version has been re-fetched and verified.
+
+
+## Automated Content-Integrity Gate
+
+The `.github/workflows/content-integrity.yml` workflow compares changed HTML pages in each pull request against the base revision.
+
+- [ ] The workflow passes for changes that preserve existing article content.
+- [ ] Any changed page with an existing `<article>` container keeps that container unless its removal is intentional and explicitly reviewed.
+- [ ] If a page had at least 500 extracted content characters, the new version must retain at least 60% of that content and at least 250 characters.
+- [ ] Content-loss failures are investigated against Git history before editing or reconstructing the page.
+- [ ] An intentional large content reduction may bypass the check only with the PR label `content-loss-approved`, applied after human review.
+- [ ] A passing automated check is a regression guard, not proof that all original content is present; compare against the original source when migrating or rebuilding a page.
+- [ ] Record source-level checks separately from live deployment verification.
+
+The gate is designed to catch accidental body deletion/truncation during global changes (for example, footer normalization). It does not block intentional page additions or deletions, and it skips changed HTML files that do not exist in both revisions.

@@ -1,0 +1,124 @@
+name: Content Integrity Gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  content-integrity:
+    name: Detect accidental article-content loss
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository history
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Compare changed HTML content with base
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EVENT_PATH: ${{ github.event_path }}
+        run: |
+          python - <<'PY'
+          import html
+          import json
+          import os
+          import re
+          import subprocess
+          import sys
+
+          base = os.environ.get("BASE_SHA", "")
+          head = os.environ.get("HEAD_SHA", "")
+          if not base or not head or base == "0000000000000000000000000000000000000000":
+              print("No comparable base/head SHA; skipping content comparison.")
+              sys.exit(0)
+
+          try:
+              with open(os.environ["EVENT_PATH"], encoding="utf-8") as f:
+                  event = json.load(f)
+          except (OSError, json.JSONDecodeError):
+              event = {}
+          labels = {
+              item.get("name", "")
+              for item in event.get("pull_request", {}).get("labels", [])
+          }
+          if "content-loss-approved" in labels:
+              print("The content-loss-approved label is present; intentional large content changes are explicitly approved.")
+              sys.exit(0)
+
+          changed = subprocess.check_output(
+              ["git", "diff", "--name-only", base, head], text=True
+          ).splitlines()
+
+          def read_at(ref, path):
+              result = subprocess.run(
+                  ["git", "show", f"{ref}:{path}"],
+                  text=True, capture_output=True
+              )
+              return result.stdout if result.returncode == 0 else None
+
+          def extract_content(source):
+              if source is None:
+                  return None, ""
+              article = re.search(r"<article\\b[^>]*>(.*?)</article\\s*>", source, re.I | re.S)
+              main = re.search(r"<main\\b[^>]*>(.*?)</main\\s*>", source, re.I | re.S)
+              body = re.search(r"<body\\b[^>]*>(.*?)</body\\s*>", source, re.I | re.S)
+              if article:
+                  region, kind = article.group(1), "article"
+              elif main:
+                  region, kind = main.group(1), "main"
+              elif body:
+                  region, kind = body.group(1), "body"
+              else:
+                  region, kind = source, "document"
+              region = re.sub(r"<(script|style|nav|header|footer)\\b[^>]*>.*?</\\1\\s*>", " ", region, flags=re.I | re.S)
+              region = re.sub(r"<!--.*?-->", " ", region, flags=re.S)
+              region = re.sub(r"<[^>]+>", " ", region)
+              region = html.unescape(region)
+              region = re.sub(r"\\s+", " ", region).strip()
+              return kind, region
+
+          failures = []
+          checked = 0
+          for path in changed:
+              if not path.lower().endswith((".html", ".htm")):
+                  continue
+              before = read_at(base, path)
+              after = read_at(head, path)
+              if before is None or after is None:
+                  continue
+              before_kind, before_text = extract_content(before)
+              after_kind, after_text = extract_content(after)
+              if not before_text:
+                  continue
+              checked += 1
+              # Missing an existing article wrapper is suspicious even if other page chrome remains.
+              had_article = bool(re.search(r"<article\\b", before, re.I))
+              has_article = bool(re.search(r"<article\\b", after, re.I))
+              if had_article and not has_article and len(before_text) >= 500:
+                  failures.append(f"{path}: article container disappeared (base content: {len(before_text)} characters).")
+                  continue
+              # Guard meaningful existing content against emptying or a large accidental truncation.
+              if len(before_text) >= 500:
+                  minimum = max(250, int(len(before_text) * 0.60))
+                  if len(after_text) < minimum:
+                      failures.append(
+                          f"{path}: extracted content shrank from {len(before_text)} to {len(after_text)} characters "
+                          f"(required at least {minimum}; {before_kind} -> {after_kind})."
+                      )
+
+          print(f"Content integrity checked {checked} changed HTML file(s).")
+          if failures:
+              print("\\nCONTENT INTEGRITY GATE FAILED:")
+              for failure in failures:
+                  print(f"- {failure}")
+              print("\\nIf a substantial content reduction is intentional and reviewed, add the PR label 'content-loss-approved' to explicitly bypass this gate.")
+              sys.exit(1)
+          print("No suspicious content loss detected.")
+          PY
