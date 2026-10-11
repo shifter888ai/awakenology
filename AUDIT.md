@@ -61,7 +61,7 @@ Create and complete a page-specific inventory **before user testing**. The inven
 
 - [ ] Exactly one `<html>`, `<head>`, and `<body>`.
 - [ ] No nested or duplicated document structure.
-- [ ] No legacy WebsiteBuilder wrappers or obsolete page-builder markup.
+- [ ] No unapproved or conflicting legacy WebsiteBuilder wrappers or obsolete page-builder markup. Documented, audited wrappers may remain only when explicitly retained, non-conflicting, and not used as a reason to skip content/structure validation.
 - [ ] No duplicated header, navigation, article, or footer.
 - [ ] Inspect the actual DOM tree to confirm document structure and component nesting, not only extracted text.
 
@@ -257,7 +257,7 @@ This is a separate final gate after structural/content verification. It checks t
 - [ ] Dark mode and light mode both render correctly, including text, links, borders, controls, and footer.
 - [ ] Mobile/responsive layout is visually correct and does not overflow or collapse unexpectedly.
 - [ ] Worker floating controls (theme toggle and Return-to-top) appear once, in the correct position, and remain usable in both themes.
-- [ ] No obvious legacy WebsiteBuilder styling, fonts, wrappers, controls, or visual artifacts remain.
+- [ ] No unapproved legacy WebsiteBuilder styling, fonts, wrappers, controls, or visual artifacts remain. Any explicitly retained wrapper exception is documented, audited, and non-conflicting.
 - [ ] Where actual rendered-page inspection is available, inspect the rendered page rather than relying only on source/CSS analysis.
 - [ ] If rendered-page inspection is not available, complete the code/DOM/CSS visual audit and then require live-page testing as the final rendered check.
 
@@ -311,7 +311,7 @@ This is a separate final gate after structural/content verification. It checks t
 - [ ] Where rendered-page inspection is available, inspect the rendered result before reporting the page ready for testing.
 - [ ] Do not use user live testing as the first discovery method for structural or image-scale problems.
 
-## 11. Live Test
+## 12. Live Test
 
 After deployment:
 
@@ -469,6 +469,7 @@ Use this section to verify consistency with the approved design baseline. These 
 - [ ] The approved “How To Free Your Soul” hero composition is preserved.
 - [ ] The CosmicEye-1000-jpg full-width background treatment retains its approved placement and spacing.
 - [ ] The shared header and footer match the approved baseline.
+- [ ] The homepage Coach lion image is inverted in dark mode and displayed normally in light mode.
 - [ ] Theme, return-to-top, and Chinese 简/繁 controls each appear once and remain usable.
 - [ ] Footer order and `© 2017 Awakenology` remain correct.
 - [ ] No duplicate separators, duplicated global disclaimer, duplicate brand mark, or page-local copy of a globally owned component has been introduced.
