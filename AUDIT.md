@@ -411,17 +411,22 @@ After automated verification, perform a small final live test covering represent
 
 ### G. Minimum Migration Manifest Fields
 The machine-readable manifest should record at minimum:
-- pipeline version
+- pipeline version and manifest schema version
 - repository and branch
-- baseline/current commit
+- approved `baseline_commit` and audited source `current_commit`
 - generation timestamp
 - canonical domain and excluded domains
 - page count and asset count
 - route inventory and per-route state
-- audit results
+- audit results, including pending findings
 - warnings/errors/exceptions
 - deployment verification
 - final migration state
+
+Commit-field semantics:
+- `baseline_commit` identifies the approved migration baseline and remains fixed unless a new baseline is deliberately approved.
+- `current_commit` identifies the exact repository source commit described by the audit results; it does not need to equal a later manifest-only bookkeeping commit.
+- Update `current_commit` only when the recorded source checks have actually been run against that commit. Do not mark unresolved checks as passed.
 
 
 ## SEO Verification
@@ -429,12 +434,15 @@ The machine-readable manifest should record at minimum:
 - [ ] Sitemap contains only live canonical routes; no deleted/orphan route remains.
 - [ ] Every indexable HTML page has exactly one meaningful `<title>`.
 - [ ] Every indexable HTML page has a meaningful meta description unless explicitly classified as non-indexable.
-- [ ] Every indexable HTML page has exactly one canonical URL pointing to `https://awakenology.space/` plus its route.
+- [ ] Every indexable HTML page has exactly one **absolute** canonical URL on `https://awakenology.space` that matches its actual canonical route; relative canonicals fail.
 - [ ] `html lang` is present and matches the page language.
 - [ ] `/ai-search/` is explicitly `noindex, follow`.
-- [ ] Existing page metadata is not duplicated by Worker injection.
+- [ ] Existing page metadata is not duplicated by Worker injection, and malformed or empty metadata is not counted as valid merely because the tag exists.
+- [ ] On indexable pages, `og:title`, `og:description`, and `og:url` are accurate and non-empty; `og:url` is an absolute canonical URL.
+- [ ] Any supplied `og:image` is a valid, non-empty absolute image URL. The homepage specifically must have a valid social-sharing image.
+- [ ] Homepage Open Graph type and structured data, if present, accurately describe the homepage and are semantically consistent with one another.
+- [ ] Open Graph and structured data remain controlled global enhancements; do not rewrite preserved page content or require unnecessary per-page markup.
 - [ ] Hreflang is used only for genuine equivalent language URLs; dynamic Simplified Chinese conversion is not treated as a separate hreflang URL.
-- [ ] Open Graph and structured data are treated as controlled global enhancements, not mandatory per-page content rewrites.
 - [ ] SEO changes do not alter preserved article wording or content.
 - [ ] H1/H2 anomalies are reviewed separately from metadata-only SEO changes; no automatic heading normalization is permitted without content/rendering audit.
 
