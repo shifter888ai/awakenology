@@ -49,7 +49,8 @@ export default {
     var seoHasOgUrl = false;
     var seoHasOgType = false;
     var seoHasOgSiteName = false;
-    var seoCanonical = "https://awakenology.space" + encodeURI(decodedPathname);
+    const seoCanonicalPath = decodedPathname === "/" || decodedPathname.endsWith("/") || decodedPathname.endsWith(".html") ? decodedPathname : decodedPathname + "/";
+    var seoCanonical = "https://awakenology.space" + encodeURI(seoCanonicalPath);
     if (!contentType.toLowerCase().includes("text/html")) return response;
 
     const theme = `<style id="awakenology-theme-style">
@@ -134,7 +135,7 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle{background:#222;color:#eee;bor
         if(prop==="og:type")seoHasOgType=true;
         if(prop==="og:site_name")seoHasOgSiteName=true;
       }})
-      .on("link",{element(el){var rel=(el.getAttribute("rel")||"").toLowerCase().split(/\s+/);if(rel.includes("canonical"))seoHasCanonical=true;}})
+      .on("link",{element(el){var rel=(el.getAttribute("rel")||"").toLowerCase().split(/\s+/);if(rel.includes("canonical")){seoHasCanonical=true;if(decodedPathname!=="/ai-search/")el.setAttribute("href",seoCanonical);}}})
       .transform(response);
   }
 };
