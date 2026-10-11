@@ -42,14 +42,14 @@ html[data-aw-theme="dark"] .hero-title{background-image:linear-gradient(rgba(13,
 .language-choice a:last-child{color:var(--link)}
 .search-link a{color:var(--link);border-color:var(--link)}
 .search-link a:hover{background:var(--link);color:var(--bg);border-color:var(--link)}
-.language-choice img{display:block;max-width:80px;height:80px;object-fit:contain}
-.language-choice.chinese img{height:46px;margin:17px 0}
-.language-choice a:last-child{font-size:16px;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.language-choice-label{display:flex;align-items:center;justify-content:center;min-height:44px;width:100%;font-size:16px;font-weight:700;letter-spacing:.01em;color:var(--fg)}
 .search-link{margin:30px 0 0;font-size:15px}
 .search-link a{display:inline-block;padding:10px 18px;border:1px solid var(--line);background:var(--soft);text-decoration:none}
 .search-link a:hover{border-color:var(--muted);text-decoration:none}
-.coach-link{display:block;margin:60px auto 0;width:60px}
+.coach-link{display:flex;flex-direction:column;align-items:center;gap:8px;margin:60px auto 0;width:min(240px,100%);color:var(--fg);text-decoration:none}
 .coach-link img{display:block;width:60px;height:60px;object-fit:contain}
+.coach-caption{font-family:Georgia,"Times New Roman",serif;font-size:17px;font-weight:700}
+.coach-description{font-size:13px;line-height:1.45;color:var(--muted)}
 html[data-aw-theme="dark"] .coach-link img{filter:invert(1)}
 .footer{border-top:1px solid var(--line);padding:24px}
 .footer-inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;color:var(--muted);font-size:13px}
@@ -71,11 +71,10 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
   .hero-title{font-size:26px;margin-bottom:30px;padding:42px 18px;width:100vw;margin-left:calc(50% - 50vw);background-size:cover}
   .language-grid{gap:10px 8px}
   .language-choice{width:94px;min-height:88px;padding:8px 6px}
-  .language-choice img{max-width:64px;height:64px}
-  .language-choice.chinese img{height:37px;margin:12px 0}
-  .language-choice a:last-child{font-size:13px}
+  .language-choice-label{min-height:44px;font-size:14px}
   .search-link{margin-top:22px}
   .coach-link{margin-top:24px}
+  .coach-description{max-width:230px}
   .footer{padding:20px 14px}
 }
 </style>
@@ -97,23 +96,14 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
 <h1 class="hero-title">How To Free Your Soul</h1>
 
 <div class="language-grid">
-<div class="language-choice">
-<a href="/English/" title="English"><img loading="lazy" alt="English" src="/gallery_gen/ae0b6523acc36388d8633ef91bec097e_80x80_fit.png?ts=1790408790"></a>
-<a href="/English/"><strong><u>ENGLISH</u></strong></a>
-</div>
-<div class="language-choice">
-<a href="/Japanese/" title="Japanese"><img loading="lazy" alt="Japanese" src="/gallery_gen/39d5a80c4039f19d1e0c0757e60cb250_80x80_fit.png?ts=1790408790"></a>
-<a href="/Japanese/"><strong><u>JAPANESE</u></strong></a>
-</div>
-<div class="language-choice chinese">
-<a href="/Chinese/" title="Chinese"><img loading="lazy" alt="Chinese" src="/gallery_gen/56ba5d96c5ca44fd9e0b5621f409e3b7_80x46_fit.png?ts=1790408790"></a>
-<a href="/Chinese/"><strong><u>CHINESE</u></strong></a>
-</div>
+<a class="language-choice" href="/English/" title="English"><span class="language-choice-label">English</span></a>
+<a class="language-choice" href="/Japanese/" title="Japanese"><span class="language-choice-label">日本語</span></a>
+<a class="language-choice" href="/Chinese/" title="Chinese"><span class="language-choice-label">中文</span></a>
 </div>
 
 <div class="search-link"><a href="/ai-search/">Search / Ask</a></div>
 
-<a class="coach-link" href="/Coach_en/" title="Coach"><img loading="lazy" alt="Coach" src="/gallery_gen/fd52a006c2f9ea7465eb2997c1ec9c5a_120x120_fit.png?ts=1790408790"></a>
+<a class="coach-link" href="/Coach_en/" title="Coach"><img loading="lazy" alt="" src="/gallery_gen/fd52a006c2f9ea7465eb2997c1ec9c5a_120x120_fit.png?ts=1790408790"><span class="coach-caption">Coach</span><span class="coach-description">Learn about Awakenology’s coaches.</span></a>
 </main>
 
 <footer class="footer">
