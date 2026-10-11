@@ -1,5 +1,20 @@
 # Page Audit
 
+## Content-Integrity Incident Prevention — Mandatory for Every Change
+
+These controls apply to SEO-only edits, footer cleanup, global transformations, and article edits alike. A metadata-only task is not permission to rewrite or normalize article HTML.
+
+- [ ] Before editing HTML, record the target page's current Git revision and extracted article-text length; inspect the exact intended change.
+- [ ] Prefer changing only the exact metadata/footer node that is in scope. Never run broad regular-expression replacements across an entire HTML document when the target can be isolated.
+- [ ] Review the complete diff, not only the changed line or a character count. Confirm every removed article paragraph is intentional.
+- [ ] Run the automated content-integrity gate and all applicable tests before merge.
+- [ ] The gate checks both major shrinkage and substantial deleted/replaced text, including partial loss that leaves more than 60% of the old text.
+- [ ] Any intentional substantial article-text deletion/rewrite requires explicit human review and the `content-loss-approved` PR label. The label is an exception path, not a routine workaround.
+- [ ] After merge/deploy, verify the live page at its canonical route and compare its main article text/sections against the merged source. A successful build is not proof of content preservation.
+- [ ] If content loss is detected, stop unrelated SEO/layout work, restore from a verified intact revision, and audit other pages touched by the same transformation before resuming.
+
+The automated gate is a safety net, not a proof of 100% preservation. Human diff review and post-deploy page verification remain mandatory.
+
 This checklist is mandatory for every rebuilt page before it is considered verified.
 
 Use the applicable language-specific section for English, Japanese, or Chinese pages.
