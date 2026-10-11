@@ -3,7 +3,7 @@
   "repository": "shifter888ai/awakenology",
   "branch": "main",
   "baseline_commit": "0435b6ee4ca8a8c4d32bf938b41025ef975b8f46",
-  "current_commit": "8882228fc83ff6d814c035ac729f80be77d86366",
+  "current_commit": "fe175177857f611da5abacb02f2b50336116afdd",
   "generated_at": "2026-10-11",
   "final_migration_state": "FINALIZED_BASELINE",
   "site_domain": "https://awakenology.space",
@@ -20,14 +20,15 @@
     "image_scale_rendering_preservation": "PASS",
     "deployment_workflow": "PASS",
     "live_smoke_test": "PASS",
-    "seo": "PASS",
+    "seo": "PENDING_TARGETED_METADATA_REMEDIATION",
     "visual_design_rules_documentation": "MERGED_AND_VERIFIED",
     "visual_rendering_audit": "PENDING"
   },
   "deployment_verification": "PASS",
   "warnings": [
     "Some legacy-derived HTML wrappers remain on individual pages; no content-affecting cleanup is authorized without a separate audit.",
-    "SEO baseline and SEO-2 global metadata enhancements are implemented; legacy H1 anomalies remain separately classified for review."
+    "SEO baseline and SEO-2 global metadata enhancements are implemented; legacy H1 anomalies remain separately classified for review.",
+    "Homepage SEO metadata needs targeted remediation: its canonical link is relative (href=\"/\") and og:image is empty; review homepage Open Graph type/structured-data consistency."
   ],
   "errors": [],
   "notes": [
@@ -40,7 +41,10 @@
     "Blocking ERROR findings must prevent commit/deployment.",
     "SEO governance is defined in The-Master.md and SEO verification is defined in AUDIT.md.",
     "Approved visual design baseline is consolidated in The-Master.md and corresponding verification checks are merged into main.",
-    "No worker.js or page content changes are included in this rules-consistency PR.",
-    "Visual consistency audit against the live rendered site remains pending; do not mark visual audit as passed until desktop/mobile and dark/light checks are performed."
-  ]
+    "Visual consistency audit against the live rendered site remains pending; do not mark visual audit as passed until desktop/mobile and dark/light checks are performed.",
+    "This rules-consistency change updates governance and manifest provenance only; it does not change worker.js, index.html, or article content.",
+    "current_commit records the source commit reviewed for this manifest snapshot; manifest-only bookkeeping commits do not point to themselves.",
+    "Homepage canonical/social-sharing metadata findings remain pending until a separate targeted SEO correction is implemented and verified."
+  ],
+  "manifest_version": "2.1"
 }
