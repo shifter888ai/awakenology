@@ -433,3 +433,45 @@ Codex, Claude Code, Gemini/Google AI Studio, or another capable agent may execut
 - Do not add structured data merely for SEO volume. Use only minimal, semantically accurate structured data where it provides clear value.
 - SEO changes must not rewrite or keyword-stuff preserved article content.
 - Legacy heading anomalies are audited separately; do not normalize H1/H2 structure automatically when doing metadata-only SEO work.
+
+## Approved Visual Design Baseline — 2026-10-11
+
+This section consolidates approved visual decisions that must be treated as the current baseline. It supplements the governing principles above; it does not authorize a redesign or override content-preservation requirements.
+
+### Brand and logo
+- Use the approved monochrome circled-A mark alongside the existing “Awakenology” wordmark.
+- Do not change the existing wordmark font or redesign the wordmark as part of a logo adjustment.
+- Keep the circled-A mark rotated approximately 5 degrees clockwise.
+- The mark is strictly monochrome: black/near-black in light mode and white in dark mode. Never apply violet or another accent color inside the logo.
+- Keep the current accepted logo geometry and stroke treatment as the baseline. Do not continue fine-tuning or alter its shape, proportions, stroke, or rotation without explicit approval.
+- On the homepage and shared article header, keep the mark to the left of the “Awakenology” wordmark. Use one consistent implementation wherever the shared brand appears.
+
+### Color system
+- Dark-mode background: `#0D0F12`.
+- Dark-mode primary text and monochrome logo: `#FFFFFF`.
+- Dark-mode violet accent: `#818CF8`.
+- Light-mode background: `#FFFFFF`.
+- Light-mode primary text and monochrome logo: `#0D0F12`.
+- Light-mode violet accent: `#6366C9`.
+- Muted text must remain readable in both themes.
+- Violet is a restrained interface accent for links, borders, and approved decorative treatments; it is not a logo color or a reason to add unnecessary decoration.
+- Preserve accessible contrast. Do not rely on color alone to communicate active states or meaning.
+
+### Layout and responsive behavior
+- Mobile/iPhone readability is a first-class requirement, not a later optimization.
+- Prefer compact cards and restrained spacing; do not introduce oversized cards or large decorative blocks that make mobile browsing cumbersome.
+- Prevent horizontal overflow, clipped navigation, overlapping floating controls, awkward word wrapping, and inaccessible tap targets.
+- Keep header, article, TOC, footer, and floating-control behavior consistent across desktop and mobile.
+- Use system fonts only, consistent with the existing governing principle; do not add external font dependencies.
+
+### Homepage and shared components
+- Preserve the approved homepage composition, including the “How To Free Your Soul” hero and the existing CosmicEye-1000-jpg full-width background treatment, including its approved placement and spacing.
+- Keep one shared visual system across the homepage, language TOCs, articles, Search/Ask, and Disclaimer.
+- Preserve the established header/footer structure and component ownership. Do not add page-local copies of Worker-owned theme, return-to-top, or Chinese variant controls.
+- Keep the theme switcher, return-to-top control, and Chinese 简/繁 toggle single-instance and usable in both themes.
+- Keep the approved footer content/order and `© 2017 Awakenology`; do not reintroduce duplicate separators, in-body global disclaimers, or duplicate global components.
+
+### Change-control rule
+- The current approved appearance is the baseline. A design audit must identify a concrete mismatch before recommending a visual change.
+- Make targeted changes only to the named component/property; unrelated layout, content, images, logo geometry, and behavior must remain unchanged.
+- Verify both themes and mobile/desktop behavior after any shared CSS or Worker change.

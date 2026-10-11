@@ -20,7 +20,9 @@
     "image_scale_rendering_preservation": "PASS",
     "deployment_workflow": "PASS",
     "live_smoke_test": "PASS",
-    "seo": "PASS"
+    "seo": "PASS",
+    "visual_design_rules_documentation": "UPDATED_ON_BRANCH",
+    "visual_rendering_audit": "PENDING"
   },
   "deployment_verification": "PASS",
   "warnings": [
@@ -36,6 +38,9 @@
     "worker.js contains runtime/global implementation.",
     "This manifest is the machine-readable baseline/state record; future full-site migrations must regenerate inventory and audit results automatically.",
     "Blocking ERROR findings must prevent commit/deployment.",
-    "SEO governance is defined in The-Master.md and SEO verification is defined in AUDIT.md."
+    "SEO governance is defined in The-Master.md and SEO verification is defined in AUDIT.md.",
+    "Approved visual design baseline consolidated in The-Master.md and corresponding verification checks added to AUDIT.md on branch docs/design-rules-consistency-2026-10-11.",
+    "No worker.js or page content changes are included in this design-rules documentation update.",
+    "Visual consistency audit against the live rendered site remains pending; do not mark visual audit as passed until desktop/mobile and dark/light checks are performed."
   ]
 }
