@@ -410,13 +410,24 @@ A migration is complete only when all blocking audit checks pass, the committed 
 
 Codex, Claude Code, Gemini/Google AI Studio, or another capable agent may execute or review work. No agent-specific behavior is part of the site specification. The migration engine and deterministic audit remain the system of record.
 
+### Migration Manifest Commit Provenance
+
+- The manifest must distinguish the approved `baseline_commit` from the `current_commit` whose source state is described by its audit results.
+- `baseline_commit` remains fixed unless a new migration baseline is deliberately approved.
+- `current_commit` must identify the exact repository source commit against which the recorded checks were run. It is not required to equal a later commit that changes only manifest bookkeeping; do not claim checks were run against a commit that was not actually checked.
+- Update the recorded commit only alongside the relevant verification results. Record unresolved findings as pending rather than marking the associated audit as passed.
+
 ## SEO Rules
 
 - `https://awakenology.space` is the only canonical site domain; `awakenology.org` is excluded from this migration.
 - Sitemap must contain only live canonical routes. Deleted routes must be removed.
-- Every indexable HTML page must have a meaningful `<title>`, `meta description`, canonical URL, and valid `html lang`.
-- Existing page-specific metadata must not be duplicated by the Worker. The Worker may supply missing metadata deterministically.
+- Every indexable HTML page must have a meaningful `<title>`, `meta description`, exactly one absolute canonical URL, and valid `html lang`.
+- Canonical URLs must be absolute URLs on `https://awakenology.space` and match the page's actual canonical route. A relative canonical such as `href="/"` does not pass.
+- Existing page-specific metadata must not be duplicated by the Worker. The Worker may supply missing metadata deterministically, but must not silently preserve malformed or empty metadata as if it were valid.
 - `/ai-search/` is an interactive utility page and is `noindex, follow`.
+- For indexable pages, Open Graph metadata must be accurate and non-empty when present. At minimum, `og:title`, `og:description`, and `og:url` must be valid; `og:url` must be an absolute canonical URL. Any supplied `og:image` must be a valid, non-empty absolute image URL.
+- The homepage must have a valid social-sharing image and homepage-appropriate Open Graph metadata. Its Open Graph type and any structured data must accurately describe the homepage; review consistency rather than assuming `article` is appropriate.
+- Open Graph and structured data are controlled global enhancements: use minimal, semantically accurate metadata and do not introduce per-page rewrites merely to satisfy a template.
 - Do not add hreflang mechanically. Add it only when genuine equivalent language URLs exist; the Worker-based Simplified Chinese conversion is not a separate hreflang URL.
 - Do not add structured data merely for SEO volume. Use only minimal, semantically accurate structured data where it provides clear value.
 - SEO changes must not rewrite or keyword-stuff preserved article content.
