@@ -66,9 +66,9 @@ jobs:
           def extract_content(source):
               if source is None:
                   return None, ""
-              article = re.search(r"<article\\b[^>]*>(.*?)</article\\s*>", source, re.I | re.S)
-              main = re.search(r"<main\\b[^>]*>(.*?)</main\\s*>", source, re.I | re.S)
-              body = re.search(r"<body\\b[^>]*>(.*?)</body\\s*>", source, re.I | re.S)
+              article = re.search(r"<article\b[^>]*>(.*?)</article\s*>", source, re.I | re.S)
+              main = re.search(r"<main\b[^>]*>(.*?)</main\s*>", source, re.I | re.S)
+              body = re.search(r"<body\b[^>]*>(.*?)</body\s*>", source, re.I | re.S)
               if article:
                   region, kind = article.group(1), "article"
               elif main:
@@ -77,11 +77,11 @@ jobs:
                   region, kind = body.group(1), "body"
               else:
                   region, kind = source, "document"
-              region = re.sub(r"<(script|style|nav|header|footer)\\b[^>]*>.*?</\\1\\s*>", " ", region, flags=re.I | re.S)
+              region = re.sub(r"<(script|style|nav|header|footer)\b[^>]*>.*?</\1\s*>", " ", region, flags=re.I | re.S)
               region = re.sub(r"<!--.*?-->", " ", region, flags=re.S)
               region = re.sub(r"<[^>]+>", " ", region)
               region = html.unescape(region)
-              region = re.sub(r"\\s+", " ", region).strip()
+              region = re.sub(r"\s+", " ", region).strip()
               return kind, region
 
           failures = []
@@ -99,8 +99,8 @@ jobs:
                   continue
               checked += 1
               # Missing an existing article wrapper is suspicious even if other page chrome remains.
-              had_article = bool(re.search(r"<article\\b", before, re.I))
-              has_article = bool(re.search(r"<article\\b", after, re.I))
+              had_article = bool(re.search(r"<article\b", before, re.I))
+              has_article = bool(re.search(r"<article\b", after, re.I))
               if had_article and not has_article and len(before_text) >= 500:
                   failures.append(f"{path}: article container disappeared (base content: {len(before_text)} characters).")
                   continue
@@ -115,10 +115,10 @@ jobs:
 
           print(f"Content integrity checked {checked} changed HTML file(s).")
           if failures:
-              print("\\nCONTENT INTEGRITY GATE FAILED:")
+              print("\nCONTENT INTEGRITY GATE FAILED:")
               for failure in failures:
                   print(f"- {failure}")
-              print("\\nIf a substantial content reduction is intentional and reviewed, add the PR label 'content-loss-approved' to explicitly bypass this gate.")
+              print("\nIf a substantial content reduction is intentional and reviewed, add the PR label 'content-loss-approved' to explicitly bypass this gate.")
               sys.exit(1)
           print("No suspicious content loss detected.")
           PY
