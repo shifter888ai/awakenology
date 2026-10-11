@@ -85,6 +85,9 @@ footer .footer-inner{max-width:760px!important;margin:0 auto!important;display:f
 :root{--aw-accent:#6366c9;--aw-bg:#ffffff;--aw-text:#0D0F12;--aw-muted:#626270}
 html[data-aw-theme="dark"]{--aw-accent:#818cf8;--aw-bg:#0D0F12;--aw-text:#ffffff;--aw-muted:#b8b8c3}
 html[data-aw-theme="dark"] #awakenology-theme-toggle,html[data-aw-theme="dark"] #awakenology-return-top{border-color:#34343b}
+.site-header a.brand{display:inline-flex!important;align-items:center!important;gap:9px!important;color:#0D0F12!important;text-decoration:none!important}
+.site-header a.brand .brand-symbol{display:block;width:29px;height:29px;flex:0 0 29px;color:inherit!important}
+html[data-aw-theme="dark"] .site-header a.brand,html[data-aw-theme="dark"] .site-header a.brand .brand-symbol{color:#fff!important}
 </style>
 <style id="awakenology-cn-style">
 #awakenology-cn-toggle{position:fixed;top:10px;right:54px;z-index:2147483647;border:1px solid #888;border-radius:14px;min-width:30px;height:30px;padding:4px 7px;font:14px/20px Arial,sans-serif;cursor:pointer;background:#fff;color:#222;box-shadow:0 1px 4px #0004}
@@ -99,6 +102,7 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle{background:#222;color:#eee;bor
 
     return new HTMLRewriter()
       .on("link",{element(el){var rel=(el.getAttribute("rel")||"").toLowerCase().split(/\\s+/);if(rel.includes("icon")||rel.includes("apple-touch-icon"))el.remove()}})
+      .on("a.brand",{element(el){if(decodedPathname!=="/" && (el.getAttribute("href")||"")==="/"){el.prepend('<svg class="brand-symbol" viewBox="0 0 100 100" role="img" aria-label="Circled A" style="transform:rotate(5deg);transform-origin:center"><path d="M17 80 A44 44 0 1 1 26.7 87.3" fill="none" stroke="currentColor" stroke-width="7.5" stroke-linecap="butt"/><path d="M27 87 L50 20 L72 77 L58 59 Q52 54 46 55" fill="none" stroke="currentColor" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',{html:true});}}})
       .on("body",{element(el){var current=el.getAttribute("class")||"";if(isLanguageTocPage)current+=" awakenology-toc-page";if(decodedPathname==="/English/")current+=" awakenology-lang-en";if(decodedPathname==="/Japanese/")current+=" awakenology-lang-ja";if(decodedPathname==="/Chinese/")current+=" awakenology-lang-zh";if(isLegacyDarkPage)current+=" awakenology-legacy-dark-page";if(isChinesePage)current+=" awakenology-chinese-page";el.setAttribute("class",current)}})
       .on("head",{element(el){
         el.onEndTag(function(endTag){
