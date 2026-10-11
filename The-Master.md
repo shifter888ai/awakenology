@@ -205,7 +205,7 @@ The inventory is the **page-specific evidence of what was there**; the Audit che
 ### Governing Reconstruction Principle
 > **Do not rebuild from assumptions when the original has explicit HTML or CSS. Extract, inventory, map, and reproduce the original content-bearing rendering rules first; only then apply the approved new design or an explicitly requested visual change.**
 
-29. **Global Components / Single Source of Truth / Duplication Check**
+32. **Global Components / Single Source of Truth / Duplication Check**
     - Before adding, rebuilding, or modifying any global site component, inspect `worker.js` first.
     - The approved global components are:
       1. **Dark/Light floating button** — Worker-owned
@@ -229,7 +229,7 @@ The inventory is the **page-specific evidence of what was there**; the Audit che
     - If a component is intentionally moved between Worker control and page-template control, make that an explicit site-wide design decision rather than an accidental duplicate implementation.
     - This check is independent of Standard Component Match, HTML Structure Sanity, and Content Match.
 
-28. **Reddit Footer Component Structural Integrity Check**
+33. **Reddit Footer Component Structural Integrity Check**
     - The approved footer must contain exactly three Reddit icon anchors, in this order:
       1. `https://www.reddit.com/r/EscapeReincarnation/`
       2. `https://www.reddit.com/r/EscapePrisonPlanet/`
