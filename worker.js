@@ -73,6 +73,8 @@ html[data-aw-theme="dark"] body.site-lang-en #a19e7e93bc1d0a3dd101e0022a644444 >
 html[data-aw-theme="dark"] p,html[data-aw-theme="dark"] li,html[data-aw-theme="dark"] h1,html[data-aw-theme="dark"] h2,html[data-aw-theme="dark"] h3,html[data-aw-theme="dark"] h4,html[data-aw-theme="dark"] h5,html[data-aw-theme="dark"] h6,html[data-aw-theme="dark"] .wb-stl-normal,html[data-aw-theme="dark"] .wb-stl-footer{color:#ffffff!important}
 html[data-aw-theme="dark"] body.site-lang-en #a188dda404b603086d7b3027a1d90739 span[style*="background-color:#ffffff"],html[data-aw-theme="dark"] body.site-lang-en #a188dda404b603086d7b3027a1d90739 span[style*="background-color: #ffffff"]{background-color:transparent!important;color:#ffffff!important}
 html[data-aw-theme="dark"] a{color:#818cf8!important}
+html[data-aw-theme="dark"] a.brand,html[data-aw-theme="dark"] a.brand span,html[data-aw-theme="dark"] a.brand .brand-symbol{color:#ffffff!important}
+html:not([data-aw-theme="dark"]) a.brand,html:not([data-aw-theme="dark"]) a.brand span,html:not([data-aw-theme="dark"]) a.brand .brand-symbol{color:#0D0F12!important}
 #awakenology-theme-toggle{position:fixed;top:10px;right:10px;z-index:2147483647;border:1px solid #888;border-radius:14px;width:30px;height:30px;padding:4px;font:18px/20px "Segoe UI Symbol",Arial,sans-serif;cursor:pointer;background:#fff;color:#171920;box-shadow:0 1px 4px #0004}
 html[data-aw-theme="dark"] #awakenology-theme-toggle{background:#171920;color:#eee;border-color:#777}
 
