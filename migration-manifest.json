@@ -3,7 +3,7 @@
   "repository": "shifter888ai/awakenology",
   "branch": "main",
   "baseline_commit": "0435b6ee4ca8a8c4d32bf938b41025ef975b8f46",
-  "current_commit": "426891faaf4e4a695b144c22ea1c1d837a5cd877",
+  "current_commit": "d6399d5f0f09cdfb5608763441104977729bf47c",
   "generated_at": "2026-10-12",
   "final_migration_state": "FINALIZED_BASELINE",
   "site_domain": "https://awakenology.space",
@@ -45,7 +45,8 @@
     "This rules-consistency change updates governance and manifest provenance only; it does not change worker.js, index.html, or article content.",
     "current_commit records the source commit reviewed for this manifest snapshot; manifest-only bookkeeping commits do not point to themselves.",
     "Sitemap audit correction committed 2026-10-12: /ai-search/ is no longer listed because it is explicitly noindex,follow. Sitemap source rechecked at 114 unique HTTPS awakenology.space URLs.",
-    "Homepage canonical and og:image were already present in source during the 2026-10-12 audit; live-rendered metadata and Open Graph/structured-data consistency remain to be verified."
+    "Homepage canonical and og:image were already present in source during the 2026-10-12 audit; live-rendered metadata and Open Graph/structured-data consistency remain to be verified.",
+    "Targeted SEO remediation branch created 2026-10-12: improved only the meta description in three existing pages where the prior audit found title-only descriptions. Article body content was not intentionally changed. SEO remains pending until full metadata/content-integrity checks and live-delivered metadata verification are complete."
   ],
   "manifest_version": "2.1"
 }
