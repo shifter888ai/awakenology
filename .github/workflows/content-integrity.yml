@@ -95,8 +95,8 @@ jobs:
               after_kind, after_text = extract_content(after)
               if not before_text:
                   return None
-              had_article = bool(re.search(r"<article\\b", before, re.I))
-              has_article = bool(re.search(r"<article\\b", after, re.I))
+              had_article = bool(re.search(r"<article\b", before, re.I))
+              has_article = bool(re.search(r"<article\b", after, re.I))
               if had_article and not has_article and len(before_text) >= 500:
                   return f"article container disappeared (base content: {len(before_text)} characters)."
               if len(before_text) >= 500:
@@ -108,9 +108,11 @@ jobs:
                       )
                   # Detect substantial deletion/replacement even when more than 60%
                   # of the old text remains. Intentional edits require explicit review.
-                  matcher = difflib.SequenceMatcher(None, before_text, after_text, autojunk=False)
+                  before_tokens = before_text.split()
+                  after_tokens = after_text.split()
+                  matcher = difflib.SequenceMatcher(None, before_tokens, after_tokens)
                   deleted_spans = [
-                      before_text[i1:i2]
+                      " ".join(before_tokens[i1:i2])
                       for tag, i1, i2, j1, j2 in matcher.get_opcodes()
                       if tag in ("delete", "replace")
                   ]
