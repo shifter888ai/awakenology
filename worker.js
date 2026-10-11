@@ -40,6 +40,7 @@ export default {
     const seoNoindex = decodedPathname === "/ai-search/";
     var seoHasDescription = false;
     var seoHasCanonical = false;
+    var seoCanonicalCount = 0;
     var seoHasRobots = false;
     var seoTitle = "";
     var seoTitleText = "";
@@ -135,7 +136,7 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle{background:#222;color:#eee;bor
         if(prop==="og:type")seoHasOgType=true;
         if(prop==="og:site_name")seoHasOgSiteName=true;
       }})
-      .on("link",{element(el){var rel=(el.getAttribute("rel")||"").toLowerCase().split(/\s+/);if(rel.includes("canonical")){seoHasCanonical=true;if(decodedPathname!=="/ai-search/")el.setAttribute("href",seoCanonical);}}})
+      .on("link",{element(el){var rel=(el.getAttribute("rel")||"").toLowerCase().split(/\s+/);if(rel.includes("canonical")){seoHasCanonical=true;if(decodedPathname!=="/ai-search/"){if(seoCanonicalCount===0){el.setAttribute("href",seoCanonical);seoCanonicalCount++;}else{el.remove();}}}}})
       .transform(response);
   }
 };
