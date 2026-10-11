@@ -50,6 +50,8 @@ export default {
     var seoHasOgUrl = false;
     var seoHasOgType = false;
     var seoHasOgSiteName = false;
+    var seoHasOgImage = false;
+    const seoDefaultOgImage = "https://images.squarespace-cdn.com/content/v1/5e46c1ddfed24d662efc3817/6e1d6965-c6b2-49d0-971e-4d42f9bcfaaa/Cosmic%2BEye.jpg";
     const seoCanonicalPath = decodedPathname === "/" || decodedPathname.endsWith("/") || decodedPathname.endsWith(".html") ? decodedPathname : decodedPathname + "/";
     var seoCanonical = "https://awakenology.space" + encodeURI(seoCanonicalPath);
     if (!contentType.toLowerCase().includes("text/html")) return response;
@@ -112,6 +114,7 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle{background:#222;color:#eee;bor
           var og=[];
           if(!seoHasOgTitle&&title)og.push("<meta property=\"og:title\" content=\""+title.replace(/&/g,"&amp;").replace(/"/g,"&quot;")+"\">");
           if(!seoHasOgDescription&&seoDescriptionMeta)og.push("<meta property=\"og:description\" content=\""+seoDescriptionMeta.replace(/&/g,"&amp;").replace(/"/g,"&quot;")+"\">");
+          if(!seoHasOgImage)og.push("<meta property=\"og:image\" content=\""+seoDefaultOgImage+"\">");
           if(!seoHasOgUrl)og.push("<meta property=\"og:url\" content=\""+seoCanonical+"\">");
           if(!seoHasOgType)og.push("<meta property=\"og:type\" content=\"website\">");
           if(!seoHasOgSiteName)og.push("<meta property=\"og:site_name\" content=\"Awakenology\">");
@@ -127,10 +130,11 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle{background:#222;color:#eee;bor
       .on("title",{text(text){seoTitleText+=text.text;}})
       .on("meta",{element(el){
         var name=(el.getAttribute("name")||"").toLowerCase();
-        if(name==="description"){seoHasDescription=true;seoDescriptionMeta=el.getAttribute("content")||seoDescriptionMeta;}
+        if(name==="description"){seoHasDescription=true;var descriptionContent=el.getAttribute("content")||"";if(!descriptionContent.trim()&&seoDescription){el.setAttribute("content",seoDescription);seoDescriptionMeta=seoDescription;}else{seoDescriptionMeta=descriptionContent||seoDescriptionMeta;}}
         if(name==="robots")seoHasRobots=true;
         var prop=(el.getAttribute("property")||"").toLowerCase();
         if(prop==="og:title")seoHasOgTitle=true;
+        if(prop==="og:image"){seoHasOgImage=true;if(!(el.getAttribute("content")||"").trim())el.setAttribute("content",seoDefaultOgImage);}
         if(prop==="og:description")seoHasOgDescription=true;
         if(prop==="og:url")seoHasOgUrl=true;
         if(prop==="og:type")seoHasOgType=true;
