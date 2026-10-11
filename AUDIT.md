@@ -437,3 +437,46 @@ The machine-readable manifest should record at minimum:
 - [ ] Open Graph and structured data are treated as controlled global enhancements, not mandatory per-page content rewrites.
 - [ ] SEO changes do not alter preserved article wording or content.
 - [ ] H1/H2 anomalies are reviewed separately from metadata-only SEO changes; no automatic heading normalization is permitted without content/rendering audit.
+
+## Approved Visual Design Baseline Audit
+
+Use this section to verify consistency with the approved design baseline. These checks are separate from original-content preservation and do not authorize unrequested redesign.
+
+### Brand and logo
+- [ ] The circled-A mark is monochrome only: near-black in light mode and white in dark mode.
+- [ ] The circled-A mark remains approximately 5 degrees clockwise from vertical.
+- [ ] The approved logo geometry, proportions, and stroke treatment have not been changed without explicit approval.
+- [ ] The existing “Awakenology” wordmark font is unchanged.
+- [ ] The mark appears to the left of the wordmark in the homepage and shared article header.
+- [ ] The shared brand treatment is consistent across pages and does not create duplicate marks or wordmarks.
+
+### Color and theme
+- [ ] Dark background uses the approved near-black baseline (`#0D0F12`) where the global theme applies.
+- [ ] Dark-mode violet accents use `#818CF8`; light-mode violet accents use `#6366C9`.
+- [ ] The logo remains monochrome and is never violet.
+- [ ] Primary and muted text remain readable in both themes; contrast is checked rather than assumed.
+- [ ] Links, borders, active states, and hover/focus treatments are consistent across the homepage, TOCs, articles, and shared components.
+- [ ] Theme switching does not cause a light flash, unreadable text, invisible controls, or inconsistent component colors.
+
+### Mobile-first layout
+- [ ] Inspect the page at an iPhone-sized viewport as well as desktop.
+- [ ] No horizontal overflow, clipped content, overlapping controls, or broken navigation is present.
+- [ ] Cards remain compact; no unapproved oversized card treatment has been introduced.
+- [ ] Spacing, line length, wrapping, tap targets, and floating controls remain usable on mobile.
+- [ ] Header, TOC, article, footer, and controls remain visually consistent at supported breakpoints.
+
+### Homepage and shared components
+- [ ] The approved “How To Free Your Soul” hero composition is preserved.
+- [ ] The CosmicEye-1000-jpg full-width background treatment retains its approved placement and spacing.
+- [ ] The shared header and footer match the approved baseline.
+- [ ] Theme, return-to-top, and Chinese 简/繁 controls each appear once and remain usable.
+- [ ] Footer order and `© 2017 Awakenology` remain correct.
+- [ ] No duplicate separators, duplicated global disclaimer, duplicate brand mark, or page-local copy of a globally owned component has been introduced.
+
+### Change isolation and final rendering
+- [ ] A proposed visual change addresses a documented mismatch or an explicit user request.
+- [ ] Only the approved component/property changed; unrelated content, images, layout, logo geometry, and behavior remain unchanged.
+- [ ] Both dark and light themes were checked after any shared CSS/Worker change.
+- [ ] Desktop and iPhone-sized rendering were checked after any shared CSS/Worker change.
+- [ ] Source/DOM checks and rendered visual checks are recorded separately; passing one does not substitute for the other.
+- [ ] No visual change is marked complete until the committed version has been re-fetched and verified.
