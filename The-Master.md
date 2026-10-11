@@ -100,6 +100,15 @@ The inventory is the **page-specific evidence of what was there**; the Audit che
     - If the committed file does not contain the intended change, correct it before reporting completion.
 
 
+27. **Asset Path / Image Integrity Check**
+    - Every preserved image, download, and other content-bearing asset must retain its intended target and resolve correctly from the rebuilt page.
+    - Relative legacy asset paths must be converted appropriately for the new route structure; never assume a legacy relative path will work unchanged.
+    - Automatically inspect every `<img src>` and other asset-bearing URL.
+    - Verify that each referenced asset resolves to an existing intended asset; image-tag count alone is not sufficient.
+    - A page is not complete if an asset exists in the HTML but is broken because its URL resolves incorrectly.
+    - This check is independent of Content Match, Standard Component Match, HTML Structure Sanity, Formatting Isolation, and Language Navigation Isolation.
+
+
 28. **Image Scale / Rendering Preservation Check**
     - For every content image, compare the original HTML **and CSS**, including the image element and its containing element.
     - Preserve intentional per-image and per-container width, height, min-width, max-width, fixed-height, auto-width, alignment, margins, object-fit/object-position, and responsive behavior.
@@ -126,15 +135,6 @@ The inventory is the **page-specific evidence of what was there**; the Audit che
     - Where rendered-page inspection is available, inspect the rendered page before reporting the page ready for testing.
     - User live testing remains the final rendered check after automated/source verification.
     - Do not report a page as complete based only on text/content comparison.
-
-27. **Asset Path / Image Integrity Check**
-    - Every preserved image, download, and other content-bearing asset must retain its intended target and resolve correctly from the rebuilt page.
-    - Relative legacy asset paths must be converted appropriately for the new route structure; never assume a legacy relative path will work unchanged.
-    - Automatically inspect every `<img src>` and other asset-bearing URL.
-    - Verify that each referenced asset resolves to an existing intended asset; image-tag count alone is not sufficient.
-    - A page is not complete if an asset exists in the HTML but is broken because its URL resolves incorrectly.
-    - This check is independent of Content Match, Standard Component Match, HTML Structure Sanity, Formatting Isolation, and Language Navigation Isolation.
-
 
 ### Title Line Preservation
 - When an original page title contains multiple lines with different font sizes, weights, decorations, fonts, spacing, or line heights, each line must be inventoried and preserved individually.
@@ -181,18 +181,6 @@ The inventory is the **page-specific evidence of what was there**; the Audit che
 - This includes the global Disclaimer, footer copyright, Contact, global navigation, and other standardized site-wide components.
 - If the original page contains legacy copies of these components, they must be explicitly classified during inventory and removed when the approved global component replaces them.
 - The rebuilt page must contain exactly one active/visible standardized instance of each approved global component.
-
-### Content Duplication / 1:1 Element Matching
-- Every content-bearing element extracted from the original page must be mapped to exactly one rebuilt element unless it is explicitly classified as an obsolete global component being replaced by an approved standardized global component.
-- Do not manually add a rebuilt element when an equivalent original content element has already been preserved through extraction or reconstruction.
-- The original-to-rebuilt inventory must explicitly check for both missing elements and duplicated elements.
-- For small but content-bearing elements such as source credits, attribution lines, author names, dates, separators, and copyright/source blocks, verify the original count and rebuilt count individually.
-- A rebuilt page fails the inventory gate if any original content-bearing element appears zero times or more than once without an explicit approved reason.
-
-### Source / Credit Block Audit
-- Original source-credit and attribution elements such as `----`, `YWS`, author names, dates, and similar bottom-of-article elements must be inventoried individually and preserved exactly once when they are page-specific content.
-- Do not recreate source-credit elements separately after extracting the original article content unless the original inventory shows that they were omitted and need restoration.
-- Distinguish page-specific source/credit content from standardized global footer copyright and other global components before reconstruction.
 
 ### Content Duplication / 1:1 Element Matching
 - Every content-bearing element extracted from the original page must be mapped to exactly one rebuilt element unless it is explicitly classified as an obsolete global component being replaced by an approved standardized global component.
@@ -302,7 +290,7 @@ Reddit icons:
 
 Copyright:
 
-**© 2024 Awakenology.org**
+**© 2017 Awakenology**
 
 ### Duplication Check — Global Component Duplication
 
@@ -364,7 +352,7 @@ When an original content element is converted to a different HTML element, its o
 - Any unexplained loss, insertion, merging, or relocation of an original title/meta line break is a hard failure before live testing.
 
 
-51. **Heading / Title CSS Property Preservation / Standard CSS Override Prevention**
+### Heading / Title CSS Property Preservation / Standard CSS Override Prevention
     - For every original content heading or title whose HTML element is changed during reconstruction, inventory each original explicit rendering property separately: font size, font weight, font family, line height, horizontal alignment, text decoration, margins/padding/spacing, color where explicitly specified, responsive sizing/behavior, and any inline or nested formatting that materially affects rendering.
     - Reproduce every original explicit property in the rebuilt CSS/DOM unless the user explicitly approves a visual change to that property.
     - Standardized article/component CSS must not silently override, normalize, or replace an original explicit heading/title property merely because the rebuilt element is now an H1/H2/H3/H4/H5 or another semantic element.
@@ -372,7 +360,7 @@ When an original content element is converted to a different HTML element, its o
     - A text match or correct semantic element alone does not pass this gate; loss of any original explicit rendering property is a hard failure unless it is an explicitly approved visual change.
 
 
-53. **Footer Source Structure / Legacy Footer Class Isolation**
+### Footer Source Structure / Legacy Footer Class Isolation
     - Every rebuilt page must use the approved footer source structure, not merely rely on Worker runtime replacement to create the approved visual result.
     - Before live testing, inspect the committed page source for the actual footer element, its class names, child structure, and page-specific footer CSS.
     - Legacy footer classes such as .footer must not remain when they can conflict with the approved .site-footer / .footer-inner / .footer-links structure or page-specific CSS cascade.
