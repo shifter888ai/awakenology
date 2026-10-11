@@ -4,7 +4,7 @@
   "branch": "main",
   "baseline_commit": "0435b6ee4ca8a8c4d32bf938b41025ef975b8f46",
   "current_commit": "8882228fc83ff6d814c035ac729f80be77d86366",
-  "generated_at": "2026-10-08",
+  "generated_at": "2026-10-11",
   "final_migration_state": "FINALIZED_BASELINE",
   "site_domain": "https://awakenology.space",
   "excluded_domains": [
@@ -40,7 +40,7 @@
     "Blocking ERROR findings must prevent commit/deployment.",
     "SEO governance is defined in The-Master.md and SEO verification is defined in AUDIT.md.",
     "Approved visual design baseline is consolidated in The-Master.md and corresponding verification checks are merged into main.",
-    "No worker.js or page content changes are included in this design-rules documentation update.",
+    "No worker.js or page content changes are included in this rules-consistency PR.",
     "Visual consistency audit against the live rendered site remains pending; do not mark visual audit as passed until desktop/mobile and dark/light checks are performed."
   ]
 }
