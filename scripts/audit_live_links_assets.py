@@ -39,7 +39,7 @@ def make_url(source, reference):
     # Fragments do not affect the HTTP resource; preserve query strings.
     absolute, _ = urldefrag(absolute)
     p = urlsplit(absolute)
-    path = quote(p.path, safe="/%:@!$&'()*+,;=-._~")
+    path = quote(p.path, safe="/%:@!    path = quote(p.path, safe="/%:@!$&'()*+,;=-._~")'()*+,;=-._~")
     return urlunsplit((p.scheme, p.netloc, path, p.query, ""))
 
 def request_url(url, kind, timeout):
