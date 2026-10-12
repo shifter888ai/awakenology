@@ -62,10 +62,9 @@ class PageParser(HTMLParser):
         if tag == "button" and self._button_stack:
             self.buttons.append(self._button_stack.pop())
     def handle_data(self, data):
-        text = data.strip()
-        if text:
-            for item in self._link_stack: item["text"] += " " + text
-            for item in self._button_stack: item["text"] += " " + text
+        if data.strip():
+            for item in self._link_stack: item["text"] += " " + data
+            for item in self._button_stack: item["text"] += " " + data
 
 def resolve_page(path):
     path = unquote(path or "/")
