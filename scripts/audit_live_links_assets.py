@@ -39,7 +39,7 @@ def make_url(source, reference):
     # Fragments do not affect the HTTP resource; preserve query strings.
     absolute, _ = urldefrag(absolute)
     p = urlsplit(absolute)
-    path = quote(p.path, safe="/%:@!    path = quote(p.path, safe="/%:@!$&'()*+,;=-._~")'()*+,;=-._~")
+    path = quote(p.path, safe="/%:@!$&'()*+,;=-._~")
     return urlunsplit((p.scheme, p.netloc, path, p.query, ""))
 
 def request_url(url, kind, timeout):
@@ -68,6 +68,19 @@ def request_url(url, kind, timeout):
         return exc.code, exc.headers.get("Content-Type", "") if exc.headers else "", exc.geturl(), ""
     except Exception as exc:
         return "", "", "", type(exc).__name__
+
+def classify_response(url, kind, status, content_type, final_url, error):
+    """Classify a probe without confusing redirects, request errors, or HTML asset fallbacks."""
+    if error or not isinstance(status, int):
+        return "REQUEST_ERROR"
+    if status < 200 or status >= 400:
+        return "HTTP_ERROR"
+    if final_url and final_url.rstrip("/") != url.rstrip("/"):
+        return "REDIRECT"
+    media_type = (content_type or "").split(";", 1)[0].strip().lower()
+    if kind == "asset" and media_type in {"text/html", "application/xhtml+xml"}:
+        return "CONTENT_TYPE_MISMATCH"
+    return "PASS"
 
 def main():
     ap = argparse.ArgumentParser()
@@ -100,15 +113,7 @@ def main():
         for future in as_completed(futures):
             url = futures[future]
             status, content_type, final_url, error = future.result()
-            numeric_status = isinstance(status, int)
-            if error:
-                result = "REQUEST_ERROR"
-            elif not numeric_status:
-                result = "REQUEST_ERROR"
-            elif 200 <= status < 400:
-                result = "PASS" if final_url.rstrip("/") == url.rstrip("/") else "REDIRECT"
-            else:
-                result = "HTTP_ERROR"
+            result = classify_response(url, item["kind"], status, content_type, final_url, error)
             item = unique[url]
             results.append({"url":url,"kind":item["kind"],"http_status":status,"content_type":content_type,
                 "final_url":final_url,"result":result,"error":error,
