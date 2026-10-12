@@ -614,3 +614,11 @@ The gate is designed to catch accidental body deletion/truncation during global 
 
 - Test encoded and raw Unicode paths, nested relative references, query preservation, fragment removal, and exclusion of external or non-HTTP references.
 - URL quoting must preserve valid existing percent-encoding to avoid turning `%E6...` into `%25E6...` during production probes.
+
+
+## Live Probe Reliability Gate
+
+- Compile every audit script with `python3 -m py_compile scripts/*.py` before network scans run.
+- Preserve valid percent-encoded multilingual paths without double-encoding.
+- Keep HTTP failures, request/network errors, redirects, and HTML returned in place of an expected asset as separate result classes.
+- A content-type mismatch is a diagnostic signal, not proof of a missing asset; inspect the final URL and response before repair.
