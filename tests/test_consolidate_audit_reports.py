@@ -15,6 +15,8 @@ class ConsolidateAuditReportsTests(unittest.TestCase):
             "site-integrity-report.csv": [],
             "live-link-asset-report.csv": [],
             "anchor-accessibility-report.csv": [],
+            "browser-smoke-report.csv": [],
+            "browser-accessibility-report.csv": [],
         }
         issues = AUDIT.build_issues(reports)
         self.assertEqual(len(issues), 2)
@@ -46,7 +48,7 @@ class ConsolidateAuditReportsTests(unittest.TestCase):
         }
         issues = AUDIT.build_issues(reports)
         self.assertEqual(len(issues), 1)
-        self.assertEqual(issues[0]["occurrences"], 1) # same normalized issue is one unique row
+        self.assertEqual(issues[0]["occurrences"], 2) # repeated identical source rows retain their count
 
     def test_missing_reports_are_visible_and_strict_mode_is_optional(self):
         reports = {name: None for name in AUDIT.INPUTS.values()}
