@@ -519,3 +519,13 @@ The `.github/workflows/content-integrity.yml` workflow compares changed HTML pag
 - [ ] Record source-level checks separately from live deployment verification.
 
 The gate is designed to catch accidental body deletion/truncation during global changes (for example, footer normalization). It does not block intentional page additions or deletions, and it skips changed HTML files that do not exist in both revisions.
+
+
+## Live SEO Runtime Audit (PR #79 onward)
+
+- The GitHub Actions workflow `.github/workflows/live-seo-runtime-audit.yml` must run after pushes to `main`, on its daily schedule, and on manual dispatch.
+- Run syntax compilation and parser unit tests before any production requests.
+- The live audit checks every sitemap URL plus `/ai-search/` against the deployed site. It validates delivered title/description, canonical, language, robots directives, and core Open Graph tags; it also verifies that `robots.txt` advertises the canonical sitemap and does not block crawling of the noindex utility page.
+- Keep `/ai-search/` out of the sitemap while verifying its delivered `noindex,follow` directive separately.
+- Store the source metadata inventory and runtime report as workflow artifacts. A source-only warning that is repaired by the Worker is not a live defect; report the two layers separately.
+- A green workflow is evidence for the checks it runs, not proof of visual correctness, complete content preservation, image rendering, or every internal/external link. Keep those audit dimensions independently pending until verified.

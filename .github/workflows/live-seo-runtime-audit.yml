@@ -1,5 +1,7 @@
 name: Live SEO runtime audit
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
   schedule:
     - cron: "17 3 * * *"
@@ -14,6 +16,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Compile audit scripts and run parser tests
+        run: |
+          python3 -m py_compile scripts/audit_seo_metadata.py scripts/audit_live_seo.py
+          python3 -m unittest discover -s tests -p 'test_*.py' -v
       - name: Generate source metadata inventory
         run: python3 scripts/audit_seo_metadata.py
       - name: Audit production-rendered metadata
