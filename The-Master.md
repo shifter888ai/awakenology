@@ -433,6 +433,13 @@ Codex, Claude Code, Gemini/Google AI Studio, or another capable agent may execut
 - SEO changes must not rewrite or keyword-stuff preserved article content.
 - Legacy heading anomalies are audited separately; do not normalize H1/H2 structure automatically when doing metadata-only SEO work.
 
+### Unified Audit Issue Register
+
+- Run `python3 scripts/consolidate_audit_reports.py` after all five audit reports have been generated.
+- Review `audit-issue-register.csv` and `audit-summary.md` as the single triage entry point. The register deduplicates findings, provides provisional severity and recommended action, and makes report coverage gaps visible.
+- Keep source-only SEO findings distinct from production runtime failures. Never apply an automated content edit solely because a heuristic flagged it.
+- The first rollout is informational; confirm findings and expected redirects before making checks merge-blocking.
+
 ### Automated Anchor and Basic Accessibility Audit
 
 - Run `python3 scripts/audit_anchor_accessibility.py` to inventory missing internal fragment targets, duplicate IDs/named anchors, missing image `alt` attributes, and links/buttons with no detectable accessible name.
