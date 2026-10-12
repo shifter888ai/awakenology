@@ -5,6 +5,7 @@ import csv
 import html
 from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "seo-metadata-report.csv"
@@ -16,6 +17,8 @@ class HeadParser(HTMLParser):
         self.in_title = False
         self.titles = []
         self.descriptions = []
+        self.canonicals = []
+        self.open_graph = collections.defaultdict(list)
         self.lang = ""
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
@@ -30,6 +33,10 @@ class HeadParser(HTMLParser):
             self.titles.append("")
         if tag == "meta" and a.get("name", "").lower() == "description":
             self.descriptions.append(a.get("content", "").strip())
+        if tag == "link" and "canonical" in a.get("rel", "").lower().split():
+            self.canonicals.append(a.get("href", "").strip())
+        if tag == "meta" and a.get("property", "").lower().startswith("og:"):
+            self.open_graph[a["property"].lower()].append(a.get("content", "").strip())
     def handle_endtag(self, tag):
         if tag == "title":
             self.in_title = False
@@ -74,9 +81,30 @@ for path in sorted(ROOT.rglob("*.html")):
         flags.append("duplicate-description")
     if desc and normalize(desc) == normalize(title):
         flags.append("title-only-description")
+    if scope == "normal":
+        if not parser.canonicals or not parser.canonicals[0]:
+            flags.append("missing-canonical")
+        if len(parser.canonicals) > 1:
+            flags.append("duplicate-canonical")
+    for prop, values in sorted(parser.open_graph.items()):
+        if len(values) > 1:
+            flags.append("duplicate-" + prop)
+        if any(not value for value in values):
+            flags.append("empty-" + prop)
+    for prop in ("og:url", "og:image"):
+        for value in parser.open_graph.get(prop, []):
+            parsed = urlparse(value)
+            if value and (parsed.scheme not in ("http", "https") or not parsed.netloc):
+                flags.append("nonabsolute-" + prop)
     rows.append(dict(path=relative, scope=scope, lang=parser.lang, title=title,
                      description=desc, title_count=len(parser.titles),
                      description_count=len(parser.descriptions),
+                     canonical=parser.canonicals[0] if parser.canonicals else "",
+                     canonical_count=len(parser.canonicals),
+                     og_title_count=len(parser.open_graph.get("og:title", [])),
+                     og_description_count=len(parser.open_graph.get("og:description", [])),
+                     og_url_count=len(parser.open_graph.get("og:url", [])),
+                     og_image_count=len(parser.open_graph.get("og:image", [])),
                      flags=";".join(flags)))
 with OUT.open("w", encoding="utf-8", newline="") as f:
     writer = csv.DictWriter(f, fieldnames=list(rows[0]))
