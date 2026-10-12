@@ -73,7 +73,7 @@ class LiveAuditExecutionTests(unittest.TestCase):
                     return (200, "text/html", url, "")
                 raise RuntimeError("temporary probe exception")
             with patch.object(AUDIT, "SOURCE_REPORT", source), patch.object(AUDIT, "OUT", output), \
-                 patch.object(AUDIT, "request_url", side_effect=probe), \\
+                 patch.object(AUDIT, "request_url", side_effect=probe), \
                  patch("sys.argv", ["audit_live_links_assets.py", "--workers", "2"]):
                 self.assertEqual(AUDIT.main(), 0)
             with output.open(newline="", encoding="utf-8") as stream:
