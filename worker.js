@@ -7,6 +7,8 @@
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    // Never expose repository-local editing tools on the public website.
+    if (url.pathname === "/editor" || url.pathname.startsWith("/editor/")) return new Response("Not found", { status: 404 });
     const response = await env.ASSETS.fetch(request);
     const contentType = response.headers.get("content-type") || "";
     const pathname = new URL(request.url).pathname;
