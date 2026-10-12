@@ -587,3 +587,10 @@ The gate is designed to catch accidental body deletion/truncation during global 
 - Run `python3 scripts/audit_browser_accessibility.py` after installing Playwright and Chromium.
 - Findings are informational heuristics, not a WCAG conformance claim. Review context before editing: decorative images may need `alt=""`, and heading-level skips may be intentional in legacy content.
 - Never auto-rewrite article text, headings, image alternatives, or controls based solely on scanner output. Verify each issue in the live page and preserve original content.
+
+
+## Consolidated Rendered Accessibility Findings
+
+- `browser-accessibility-report.csv` must be included in `audit-issue-register.csv` and the Markdown summary.
+- Missing reports are coverage gaps, not evidence of a clean scan.
+- Treat scanner output as a lead for human verification. Never auto-generate alt text or rewrite article headings from heuristic findings.
