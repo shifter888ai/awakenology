@@ -76,7 +76,7 @@ def build_issues(reports):
         elif source == "live-reference":
             for row in rows:
                 result = row.get("result", "")
-                if result not in {"HTTP_ERROR", "REQUEST_ERROR", "REDIRECT"}:
+                if result not in {"HTTP_ERROR", "REQUEST_ERROR", "REDIRECT", "CONTENT_TYPE_MISMATCH"}:
                     continue
                 status = row.get("http_status", "")
                 if result == "REDIRECT":
@@ -84,6 +84,11 @@ def build_issues(reports):
                     detail = "Production URL redirects to " + (row.get("final_url", "") or "an unspecified final URL")
                     action = "Review whether the redirect is intentional; update internal references to the final canonical URL when safe."
                     issue_status = "redirect-review"
+                elif result == "CONTENT_TYPE_MISMATCH":
+                    sev = "high"
+                    detail = "Expected asset returned " + (row.get("content_type", "") or "an unspecified content type") + " (HTTP " + (str(status) or "unknown") + ")"
+                    action = "Inspect the final URL and delivered body; verify whether an HTML fallback is hiding a missing asset before changing source."
+                    issue_status = "asset-content-review"
                 else:
                     sev = "high" if str(status).startswith(("4", "5")) else "warning"
                     detail = "Production request returned " + (str(status) or "no HTTP status")
