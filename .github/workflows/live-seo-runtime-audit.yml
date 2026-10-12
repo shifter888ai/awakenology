@@ -24,9 +24,13 @@ jobs:
         run: |
           python3 -m py_compile scripts/*.py
           python3 -m unittest discover -s tests -p 'test_*.py' -v
-          python3 scripts/audit_site_integrity.py
-          python3 scripts/audit_live_links_assets.py
-          python3 scripts/audit_anchor_accessibility.py
+
+      - name: Generate local reference inventory
+        run: python3 scripts/audit_site_integrity.py
+      - name: Audit live references and assets
+        run: python3 scripts/audit_live_links_assets.py
+      - name: Audit anchors and accessibility source
+        run: python3 scripts/audit_anchor_accessibility.py
       - name: Generate source metadata inventory
         run: python3 scripts/audit_seo_metadata.py
       - name: Audit production-rendered metadata
