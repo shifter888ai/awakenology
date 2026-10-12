@@ -63,8 +63,10 @@ def request_url(url, kind, timeout):
                 with urllib.request.urlopen(req, timeout=timeout) as response:
                     response.read(1024)
                     return response.status, response.headers.get("Content-Type", ""), response.geturl(), ""
+            except urllib.error.HTTPError as retry:
+                return retry.code, retry.headers.get("Content-Type", "") if retry.headers else "", retry.geturl(), ""
             except Exception as retry:
-                return getattr(retry, "code", ""), "", "", type(retry).__name__
+                return "", "", "", type(retry).__name__
         return exc.code, exc.headers.get("Content-Type", "") if exc.headers else "", exc.geturl(), ""
     except Exception as exc:
         return "", "", "", type(exc).__name__
@@ -112,15 +114,19 @@ def main():
         futures = {pool.submit(request_url, item["url"], item["kind"], args.timeout): url for url, item in unique.items()}
         for future in as_completed(futures):
             url = futures[future]
-            status, content_type, final_url, error = future.result()
-            result = classify_response(url, item["kind"], status, content_type, final_url, error)
             item = unique[url]
+            try:
+                status, content_type, final_url, error = future.result()
+            except Exception as exc:
+                status, content_type, final_url, error = "", "", "", type(exc).__name__
+            result = classify_response(url, item["kind"], status, content_type, final_url, error)
             results.append({"url":url,"kind":item["kind"],"http_status":status,"content_type":content_type,
                 "final_url":final_url,"result":result,"error":error,
                 "referenced_by_count":len(item["sources"]),
                 "referenced_by":";".join(sorted(item["sources"])),
                 "source_references":";".join(sorted(item["references"]))})
-    results.sort(key=lambda row:(row["result"] != "HTTP_ERROR", row["result"] != "REQUEST_ERROR", row["url"]))
+    priority = {"HTTP_ERROR": 0, "CONTENT_TYPE_MISMATCH": 1, "REQUEST_ERROR": 2, "REDIRECT": 3, "PASS": 4}
+    results.sort(key=lambda row: (priority.get(row["result"], 5), row["url"]))
     fields=["url","kind","http_status","content_type","final_url","result","error","referenced_by_count","referenced_by","source_references"]
     with OUT.open("w",encoding="utf-8",newline="") as f:
         writer=csv.DictWriter(f,fieldnames=fields); writer.writeheader(); writer.writerows(results)
