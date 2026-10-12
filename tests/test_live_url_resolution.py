@@ -1,6 +1,10 @@
 """Regression tests for production URL resolution and response classification."""
 import importlib.util
 import unittest
+from unittest.mock import patch
+from concurrent.futures import Future
+import csv
+import tempfile
 from pathlib import Path
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "audit_live_links_assets.py"
@@ -51,6 +55,33 @@ class LiveResponseClassificationTests(unittest.TestCase):
     def test_network_error_is_not_http_error(self):
         self.assertEqual(AUDIT.classify_response("https://awakenology.space/a", "link", "",
                          "", "", "TimeoutError"), "REQUEST_ERROR")
+
+class LiveAuditExecutionTests(unittest.TestCase):
+    def test_completed_probe_uses_matching_item_kind_and_handles_future_exception(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "site-integrity-report.csv"
+            output = Path(tmp) / "live-link-asset-report.csv"
+            with source.open("w", newline="", encoding="utf-8") as stream:
+                writer = csv.DictWriter(stream, fieldnames=["status", "source", "reference", "kind"])
+                writer.writeheader()
+                writer.writerow({"status": "PASS", "source": "index.html",
+                                 "reference": "/gallery/a.png", "kind": "asset"})
+                writer.writerow({"status": "PASS", "source": "index.html",
+                                 "reference": "/English/", "kind": "link"})
+            def probe(url, kind, timeout):
+                if kind == "asset":
+                    return (200, "text/html", url, "")
+                raise RuntimeError("temporary probe exception")
+            with patch.object(AUDIT, "SOURCE_REPORT", source), patch.object(AUDIT, "OUT", output), \
+                 patch.object(AUDIT, "request_url", side_effect=probe), \\
+                 patch("sys.argv", ["audit_live_links_assets.py", "--workers", "2"]):
+                self.assertEqual(AUDIT.main(), 0)
+            with output.open(newline="", encoding="utf-8") as stream:
+                rows = {row["url"]: row for row in csv.DictReader(stream)}
+            self.assertEqual(rows["https://awakenology.space/gallery/a.png"]["result"],
+                             "CONTENT_TYPE_MISMATCH")
+            self.assertEqual(rows["https://awakenology.space/English/"]["result"], "REQUEST_ERROR")
+            self.assertEqual(rows["https://awakenology.space/English/"]["error"], "RuntimeError")
 
 if __name__ == "__main__":
     unittest.main()
