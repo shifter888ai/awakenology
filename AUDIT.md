@@ -629,3 +629,10 @@ The gate is designed to catch accidental body deletion/truncation during global 
 - `CONTENT_TYPE_MISMATCH` results must reach the consolidated issue register with the returned content type, URL, and referencing-file count.
 - Treat an HTML response for an expected asset as a high-priority review item, not proof of a missing file until the delivered response is inspected.
 - Keep the independent audit steps separate in CI so one scanner failure does not suppress the remaining reports; always consolidate and upload available artifacts.
+
+
+## Audit Execution Continuity
+
+- A completed live-probe future must resolve its matching URL metadata before classification; unexpected future exceptions become `REQUEST_ERROR` rows rather than aborting the whole report.
+- An HTTP error from the GET fallback after an unsupported HEAD request retains its HTTP status and is not mislabeled as a network exception.
+- Independent audit workflow steps use `if: always()` so one failure does not skip unrelated scanners. The live-reference step runs only when its prerequisite local inventory exists. Consolidation and artifact upload still run after failures.
