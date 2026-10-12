@@ -433,6 +433,12 @@ Codex, Claude Code, Gemini/Google AI Studio, or another capable agent may execut
 - SEO changes must not rewrite or keyword-stuff preserved article content.
 - Legacy heading anomalies are audited separately; do not normalize H1/H2 structure automatically when doing metadata-only SEO work.
 
+### Multilingual Mobile Interaction Coverage
+
+- Choose mobile smoke-test routes across the homepage and detected English, Japanese, and Chinese route groups; avoid sampling only the first alphabetically sorted pages.
+- On mobile, verify theme switching and persistence across reload, return-to-top behavior, and Chinese variant toggle initialization where applicable.
+- These checks are heuristic and informational. They do not replace visual review, language/content QA, or a full accessibility audit.
+
 ### Browser-Level Production Smoke Audit
 
 - Run `python3 -m pip install playwright`, install Chromium, then run `python3 scripts/audit_browser_smoke.py --screenshots`.
