@@ -520,3 +520,10 @@ This section consolidates approved visual decisions that must be treated as the 
 - The current approved appearance is the baseline. A design audit must identify a concrete mismatch before recommending a visual change.
 - Make targeted changes only to the named component/property; unrelated layout, content, images, logo geometry, and behavior must remain unchanged.
 - Verify both themes and mobile/desktop behavior after any shared CSS or Worker change.
+
+
+### Rendered Accessibility Audit
+
+- Audit the live DOM, not only source HTML: visible image alt attributes, interactive control names, document language, main landmark count, heading-level progression, and initial keyboard focus.
+- Keep findings informational pending manual review; this is a smoke test, not a complete WCAG audit or proof of keyboard usability for every interaction.
+- Accessibility fixes must preserve original article wording and image intent. Do not infer or invent descriptive alt text automatically.
