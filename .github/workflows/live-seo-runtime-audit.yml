@@ -23,6 +23,7 @@ jobs:
           python3 scripts/audit_site_integrity.py
           python3 scripts/audit_live_links_assets.py
           python3 scripts/audit_anchor_accessibility.py
+          python3 scripts/consolidate_audit_reports.py
       - name: Generate source metadata inventory
         run: python3 scripts/audit_seo_metadata.py
       - name: Audit production-rendered metadata
@@ -38,4 +39,6 @@ jobs:
             site-integrity-report.csv
             live-link-asset-report.csv
             anchor-accessibility-report.csv
+            audit-issue-register.csv
+            audit-summary.md
           if-no-files-found: warn

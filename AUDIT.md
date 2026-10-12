@@ -554,3 +554,11 @@ The gate is designed to catch accidental body deletion/truncation during global 
 - The generated `anchor-accessibility-report.csv` includes source file, finding type, severity, reference, target, and details. Findings are informational at first; legacy markup and false positives must be triaged before strict mode is enabled.
 - An explicit empty image `alt=""` is treated as intentional decorative-image markup, not as a missing-alt finding.
 - This source audit cannot fully evaluate names created by JavaScript, accessible-name computation, keyboard behavior, or the Worker-transformed live DOM. Browser accessibility checks remain necessary.
+
+
+## Unified Audit Issue Register
+
+- `scripts/consolidate_audit_reports.py` combines the source SEO, production SEO, local-reference, live-reference, and anchor/accessibility CSVs into `audit-issue-register.csv` and `audit-summary.md`.
+- The register normalizes issue categories, assigns provisional severity, groups identical findings, and records a fingerprint plus recommended next action. It explicitly distinguishes source-only metadata warnings from production failures.
+- Severity is a triage hint, not an automatic repair instruction. Confirm the live/source behavior and intended route before making edits.
+- Missing input reports are listed as coverage gaps. The initial workflow remains informational and must not silently convert heuristic findings into merge-blocking failures.
