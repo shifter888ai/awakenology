@@ -433,6 +433,13 @@ Codex, Claude Code, Gemini/Google AI Studio, or another capable agent may execut
 - SEO changes must not rewrite or keyword-stuff preserved article content.
 - Legacy heading anomalies are audited separately; do not normalize H1/H2 structure automatically when doing metadata-only SEO work.
 
+### Browser-Level Production Smoke Audit
+
+- Run `python3 -m pip install playwright`, install Chromium, then run `python3 scripts/audit_browser_smoke.py --screenshots`.
+- Audit every sitemap route at desktop size and a representative subset at mobile size. Capture rendered title/lang, same-host network errors, image load failures, horizontal overflow, JavaScript exceptions, and mobile theme-toggle behavior.
+- Treat findings as prompts for triage, not automatic proof of defects. Screenshots are review artifacts; this does not replace full visual comparison or manual keyboard/accessibility checks.
+- Generate the unified issue register only after the browser report and other audit reports are available, and retain missing reports as explicit coverage gaps.
+
 ### Unified Audit Issue Register
 
 - Run `python3 scripts/consolidate_audit_reports.py` after all five audit reports have been generated.
