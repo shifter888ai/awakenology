@@ -21,6 +21,7 @@ jobs:
           python3 -m py_compile scripts/audit_seo_metadata.py scripts/audit_live_seo.py
           python3 -m unittest discover -s tests -p 'test_*.py' -v
           python3 scripts/audit_site_integrity.py
+          python3 scripts/audit_live_links_assets.py
       - name: Generate source metadata inventory
         run: python3 scripts/audit_seo_metadata.py
       - name: Audit production-rendered metadata
@@ -34,4 +35,5 @@ jobs:
             seo-metadata-report.csv
             seo-runtime-report.csv
             site-integrity-report.csv
+            live-link-asset-report.csv
           if-no-files-found: warn

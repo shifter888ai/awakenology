@@ -537,3 +537,12 @@ The gate is designed to catch accidental body deletion/truncation during global 
 - The report `site-integrity-report.csv` records the source file, reference type, original reference, resolved target, and result. External links and non-navigation schemes are intentionally excluded from this local existence check.
 - The workflow uploads the report as an artifact. Initially this report is informational rather than merge-blocking so existing legacy issues can be triaged without blocking unrelated changes. After baseline findings are reviewed and repaired, consider enabling strict mode in CI.
 - A source file existing does not prove an image or route works in production; live status and browser visual rendering remain separate verification steps.
+
+
+## Live Link and Asset Availability Audit
+
+- `scripts/audit_live_links_assets.py` probes the unique internal page and asset URLs collected by the local integrity inventory against the production domain.
+- The report `live-link-asset-report.csv` records HTTP status, content type, final URL, result, and the source files that reference each resource. Duplicate references are collapsed into one request to reduce load.
+- Asset probes use HEAD first and retry with GET where the server disallows HEAD. Page links use GET. Redirects are reported separately from HTTP/request failures.
+- The live probe runs as an informational audit and does not change files or block unrelated merges by default. Review failures before enabling strict mode; some legacy routes may intentionally redirect.
+- A successful HTTP response does not prove that a browser renders an image correctly, that an anchor fragment exists, or that an external destination works. Those remain separate checks.
