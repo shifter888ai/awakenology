@@ -541,3 +541,10 @@ This section consolidates approved visual decisions that must be treated as the 
 - Test the issue-register consolidator whenever scanner outputs or report mappings change.
 - Verify missing reports are surfaced as coverage issues and never interpreted as zero findings.
 - Verify rendered accessibility findings retain route, viewport, check type, severity, and occurrence count in the consolidated register.
+
+
+### Live Redirect and Failure Triage
+
+- Preserve production redirects in the consolidated issue register as warnings with original URL, final URL, and referencing-file count.
+- Do not treat redirects as confirmed defects by default. Review canonical intent and legacy compatibility before updating internal references.
+- Keep HTTP status failures distinct from transient request errors; do not invent a 404 for a timeout or network error.

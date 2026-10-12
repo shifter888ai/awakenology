@@ -76,16 +76,25 @@ def build_issues(reports):
         elif source == "live-reference":
             for row in rows:
                 result = row.get("result", "")
-                if result not in {"HTTP_ERROR", "REQUEST_ERROR"}:
+                if result not in {"HTTP_ERROR", "REQUEST_ERROR", "REDIRECT"}:
                     continue
                 status = row.get("http_status", "")
-                sev = "high" if str(status).startswith("4") or str(status).startswith("5") else "warning"
+                if result == "REDIRECT":
+                    sev = "warning"
+                    detail = "Production URL redirects to " + (row.get("final_url", "") or "an unspecified final URL")
+                    action = "Review whether the redirect is intentional; update internal references to the final canonical URL when safe."
+                    issue_status = "redirect-review"
+                else:
+                    sev = "high" if str(status).startswith(("4", "5")) else "warning"
+                    detail = "Production request returned " + (str(status) or "no HTTP status")
+                    if row.get("error"):
+                        detail += "; " + row.get("error", "")
+                    action = "Check the URL, hosting response, and referring source files; retry transient network errors before editing."
+                    issue_status = "live-failure"
                 issues.append(issue(source, sev, "live-reference:" + result,
                     row.get("url", ""),
-                    "Production request returned " + (str(status) or "no HTTP status") +
-                    (("; " + row.get("error", "")) if row.get("error") else "") +
-                    "; referenced by " + row.get("referenced_by_count", "unknown") + " source file(s).",
-                    "live-failure", "Check the URL, redirect policy, hosting response, and referring source files."))
+                    detail + "; referenced by " + row.get("referenced_by_count", "unknown") + " source file(s).",
+                    issue_status, action))
         elif source == "browser-smoke":
             for row in rows:
                 check = row.get("check", "unknown")
