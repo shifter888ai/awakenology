@@ -594,3 +594,10 @@ The gate is designed to catch accidental body deletion/truncation during global 
 - `browser-accessibility-report.csv` must be included in `audit-issue-register.csv` and the Markdown summary.
 - Missing reports are coverage gaps, not evidence of a clean scan.
 - Treat scanner output as a lead for human verification. Never auto-generate alt text or rewrite article headings from heuristic findings.
+
+
+## Audit Consolidator Regression Tests
+
+- Run `python3 -m unittest discover -s tests -p 'test_*.py' -v` whenever report inputs or mapping logic changes.
+- Tests must cover expected report coverage, missing-report visibility, preservation of findings, severity normalization, and deduplication counts.
+- Do not mark a report as clean when its input artifact is missing.
