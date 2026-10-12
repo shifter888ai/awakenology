@@ -576,3 +576,10 @@ This section consolidates approved visual decisions that must be treated as the 
 - Resolve each asynchronous probe's URL record before reading its kind; record unexpected task exceptions without losing the full CSV.
 - Keep GET-fallback HTTP responses separate from network failures and sort report findings by explicit severity class.
 - Run independent CI scanners after earlier failures; gate only true dependencies, and always consolidate/upload available results.
+
+
+### Pre-merge Live Audit Visibility
+
+- The live SEO/runtime audit must run on relevant PRs, main pushes, manual dispatch, and schedule, producing reviewable consolidated artifacts.
+- PR live probes observe the deployed production domain; they do not imply that an unmerged Worker or page edit has already been deployed.
+- Keep production probes read-only and review report coverage before treating the audit as complete.

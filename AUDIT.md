@@ -636,3 +636,10 @@ The gate is designed to catch accidental body deletion/truncation during global 
 - A completed live-probe future must resolve its matching URL metadata before classification; unexpected future exceptions become `REQUEST_ERROR` rows rather than aborting the whole report.
 - An HTTP error from the GET fallback after an unsupported HEAD request retains its HTTP status and is not mislabeled as a network exception.
 - Independent audit workflow steps use `if: always()` so one failure does not skip unrelated scanners. The live-reference step runs only when its prerequisite local inventory exists. Consolidation and artifact upload still run after failures.
+
+
+## Pre-merge Live Audit Verification
+
+- Run the complete read-only live audit on PRs changing audit scripts, tests, the audit workflow, Worker, sitemap, or website HTML/CSS/JS, as well as main pushes, manual dispatch, and the existing schedule.
+- Review `audit-summary.md`, `audit-issue-register.csv`, and report coverage in the PR run's uploaded artifact before merging audit changes. A successful unit-test workflow alone does not establish that the production scan ran.
+- Live findings are observational and may reflect the currently deployed main branch rather than unmerged PR behavior. Do not mistake PR-time production observations for a deployed preview test.
