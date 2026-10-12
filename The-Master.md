@@ -433,6 +433,12 @@ Codex, Claude Code, Gemini/Google AI Studio, or another capable agent may execut
 - SEO changes must not rewrite or keyword-stuff preserved article content.
 - Legacy heading anomalies are audited separately; do not normalize H1/H2 structure automatically when doing metadata-only SEO work.
 
+### Automated Local Link and Asset Integrity
+
+- Run `python3 scripts/audit_site_integrity.py` to scan source HTML and CSS for broken internal page links and local assets, including image sources/srcsets, script/style references, inline styles, and CSS URL/import references.
+- Review the generated `site-integrity-report.csv` as an artifact. The first phase is informational and must not block unrelated work until existing findings are triaged.
+- Treat local source existence, live HTTP availability, and browser rendering as separate checks. Passing this scanner does not certify production links, external destinations, or visual correctness.
+
 ### Automated Live SEO Verification
 
 - The workflow `.github/workflows/live-seo-runtime-audit.yml` runs on pushes to `main`, daily, and by manual dispatch.
