@@ -546,3 +546,11 @@ The gate is designed to catch accidental body deletion/truncation during global 
 - Asset probes use HEAD first and retry with GET where the server disallows HEAD. Page links use GET. Redirects are reported separately from HTTP/request failures.
 - The live probe runs as an informational audit and does not change files or block unrelated merges by default. Review failures before enabling strict mode; some legacy routes may intentionally redirect.
 - A successful HTTP response does not prove that a browser renders an image correctly, that an anchor fragment exists, or that an external destination works. Those remain separate checks.
+
+
+## Anchor, Duplicate-ID, and Basic Accessible-Name Audit
+
+- `scripts/audit_anchor_accessibility.py` scans source HTML for internal links whose fragment target is missing, duplicate IDs/named anchors, images with no `alt` attribute, and links/buttons with no detectable accessible name.
+- The generated `anchor-accessibility-report.csv` includes source file, finding type, severity, reference, target, and details. Findings are informational at first; legacy markup and false positives must be triaged before strict mode is enabled.
+- An explicit empty image `alt=""` is treated as intentional decorative-image markup, not as a missing-alt finding.
+- This source audit cannot fully evaluate names created by JavaScript, accessible-name computation, keyboard behavior, or the Worker-transformed live DOM. Browser accessibility checks remain necessary.

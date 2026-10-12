@@ -433,6 +433,12 @@ Codex, Claude Code, Gemini/Google AI Studio, or another capable agent may execut
 - SEO changes must not rewrite or keyword-stuff preserved article content.
 - Legacy heading anomalies are audited separately; do not normalize H1/H2 structure automatically when doing metadata-only SEO work.
 
+### Automated Anchor and Basic Accessibility Audit
+
+- Run `python3 scripts/audit_anchor_accessibility.py` to inventory missing internal fragment targets, duplicate IDs/named anchors, missing image `alt` attributes, and links/buttons with no detectable accessible name.
+- Review `anchor-accessibility-report.csv` as an informational artifact before deciding which legacy findings to repair. Explicit `alt=""` is valid for decorative images.
+- This is a source-level heuristic, not a complete WCAG audit; JavaScript-generated names, keyboard navigation, focus visibility, contrast, and the Worker-rendered DOM require separate browser verification.
+
 ### Automated Live Link and Asset Availability
 
 - After generating `site-integrity-report.csv`, run `python3 scripts/audit_live_links_assets.py` to check each unique internal route or asset reference against the production domain.
