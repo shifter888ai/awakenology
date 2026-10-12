@@ -18,6 +18,7 @@ INPUTS = {
     "live-reference": "live-link-asset-report.csv",
     "anchor-accessibility": "anchor-accessibility-report.csv",
     "browser-smoke": "browser-smoke-report.csv",
+    "browser-accessibility": "browser-accessibility-report.csv",
 }
 REGISTER = ROOT / "audit-issue-register.csv"
 SUMMARY = ROOT / "audit-summary.md"
@@ -96,6 +97,16 @@ def build_issues(reports):
                 issues.append(issue(source, sev, "browser:" + check, location,
                     row.get("detail", check), "browser-finding",
                     "Reproduce in a browser and confirm the live DOM/network behavior before editing source."))
+        elif source == "browser-accessibility":
+            for row in rows:
+                check = row.get("check", "unknown")
+                sev = row.get("severity", "warning")
+                if sev not in {"high", "warning", "info"}:
+                    sev = "warning"
+                location = row.get("url", "") + (" [" + row.get("viewport", "") + "]" if row.get("viewport") else "")
+                issues.append(issue(source, sev, "rendered-accessibility:" + check, location,
+                    row.get("detail", check), "accessibility-finding",
+                    "Inspect the rendered page and keyboard behavior; preserve original article wording and image intent."))
         elif source == "anchor-accessibility":
             for row in rows:
                 category = row.get("issue", "unknown")
