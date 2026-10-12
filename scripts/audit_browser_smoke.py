@@ -144,14 +144,21 @@ async def inspect_route(browser, url, semaphore, viewport, screenshot=False, int
                     rows.append(finding(url, viewport, "theme-toggle-missing", "warning", "Global theme toggle was not found in the mobile DOM"))
                 top_locator = page.locator("#awakenology-return-top")
                 if await top_locator.count():
-                    await page.evaluate("window.scrollTo(0, Math.max(1000, document.documentElement.scrollHeight))")
-                    await page.wait_for_timeout(100)
-                    visible = await top_locator.is_visible()
-                    if not visible:
+                    scrollable = await page.evaluate("document.documentElement.scrollHeight > window.innerHeight + 100")
+                    if scrollable:
+                        await page.evaluate("window.scrollTo(0, document.documentElement.scrollHeight)")
+                        await page.wait_for_function("window.scrollY > 80", timeout=3000)
+                    visible = await top_locator.is_visible() if scrollable else False
+                    if not scrollable:
+                        pass  # Short pages cannot meaningfully exercise return-to-top.
+                    elif not visible:
                         rows.append(finding(url, viewport, "return-top-not-visible-after-scroll", "warning", "Return-to-top control did not become visible after scrolling"))
                     else:
                         await top_locator.click(timeout=3000)
-                        await page.wait_for_timeout(300)
+                        try:
+                            await page.wait_for_function("window.scrollY <= 80", timeout=3000)
+                        except Exception:
+                            pass
                         scroll_y = await page.evaluate("window.scrollY")
                         if scroll_y > 80:
                             rows.append(finding(url, viewport, "return-top-click-failed", "warning", f"Scroll position after click: {scroll_y}"))
