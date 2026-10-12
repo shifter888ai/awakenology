@@ -601,3 +601,10 @@ The gate is designed to catch accidental body deletion/truncation during global 
 - Run `python3 -m unittest discover -s tests -p 'test_*.py' -v` whenever report inputs or mapping logic changes.
 - Tests must cover expected report coverage, missing-report visibility, preservation of findings, severity normalization, and deduplication counts.
 - Do not mark a report as clean when its input artifact is missing.
+
+
+## Live Redirect Triage
+
+- Production redirects are reviewable warnings, not automatic failures. The consolidated register must retain the original URL, final URL, and number of referencing source files.
+- Prefer updating internal references to canonical destinations when verified safe; retain intentional redirects for legacy/external compatibility.
+- Distinguish HTTP failures from request/network errors; retry transient errors before making source changes.
