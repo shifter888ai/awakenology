@@ -17,6 +17,7 @@ INPUTS = {
     "local-reference": "site-integrity-report.csv",
     "live-reference": "live-link-asset-report.csv",
     "anchor-accessibility": "anchor-accessibility-report.csv",
+    "browser-smoke": "browser-smoke-report.csv",
 }
 REGISTER = ROOT / "audit-issue-register.csv"
 SUMMARY = ROOT / "audit-summary.md"
@@ -84,6 +85,17 @@ def build_issues(reports):
                     (("; " + row.get("error", "")) if row.get("error") else "") +
                     "; referenced by " + row.get("referenced_by_count", "unknown") + " source file(s).",
                     "live-failure", "Check the URL, redirect policy, hosting response, and referring source files."))
+        elif source == "browser-smoke":
+            for row in rows:
+                check = row.get("check", "unknown")
+                status = row.get("status", "")
+                if check == "console-error" and status == "info":
+                    continue
+                sev = "high" if check in {"page-http-status", "browser-navigation-error", "same-host-http-error"} else "warning"
+                location = row.get("url", "") + (" [" + row.get("viewport", "") + "]" if row.get("viewport") else "")
+                issues.append(issue(source, sev, "browser:" + check, location,
+                    row.get("detail", check), "browser-finding",
+                    "Reproduce in a browser and confirm the live DOM/network behavior before editing source."))
         elif source == "anchor-accessibility":
             for row in rows:
                 category = row.get("issue", "unknown")

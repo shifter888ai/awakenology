@@ -562,3 +562,12 @@ The gate is designed to catch accidental body deletion/truncation during global 
 - The register normalizes issue categories, assigns provisional severity, groups identical findings, and records a fingerprint plus recommended next action. It explicitly distinguishes source-only metadata warnings from production failures.
 - Severity is a triage hint, not an automatic repair instruction. Confirm the live/source behavior and intended route before making edits.
 - Missing input reports are listed as coverage gaps. The initial workflow remains informational and must not silently convert heuristic findings into merge-blocking failures.
+
+
+## Browser-Level Production Smoke Audit
+
+- `scripts/audit_browser_smoke.py` reads the published sitemap and uses Chromium via Playwright to inspect every sitemap route at a desktop viewport plus a bounded representative mobile pass.
+- Checks include main-document HTTP errors, missing rendered title/lang, horizontal overflow, failed same-host requests, broken rendered images, JavaScript exceptions, and the global theme toggle on mobile.
+- The report `browser-smoke-report.csv` is informational. Console errors may be caused by optional third-party scripts and are retained as low-priority context rather than treated as confirmed defects.
+- Representative screenshots are artifacts for visual review, not proof of a full visual regression test. Review screenshot samples on mobile and desktop; dynamic content and browser differences still require human verification.
+- The unified audit register must run after all reports have been generated, even if the browser scan fails, so report coverage gaps remain visible.
