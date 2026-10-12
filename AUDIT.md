@@ -529,3 +529,11 @@ The gate is designed to catch accidental body deletion/truncation during global 
 - Keep `/ai-search/` out of the sitemap while verifying its delivered `noindex,follow` directive separately.
 - Store the source metadata inventory and runtime report as workflow artifacts. A source-only warning that is repaired by the Worker is not a live defect; report the two layers separately.
 - A green workflow is evidence for the checks it runs, not proof of visual correctness, complete content preservation, image rendering, or every internal/external link. Keep those audit dimensions independently pending until verified.
+
+
+## Local Link and Asset Integrity Audit
+
+- `scripts/audit_site_integrity.py` inventories internal page links and local asset references across source HTML and CSS, including image `src`/`srcset`, stylesheet and script references, inline styles, and CSS `url(...)`/imports.
+- The report `site-integrity-report.csv` records the source file, reference type, original reference, resolved target, and result. External links and non-navigation schemes are intentionally excluded from this local existence check.
+- The workflow uploads the report as an artifact. Initially this report is informational rather than merge-blocking so existing legacy issues can be triaged without blocking unrelated changes. After baseline findings are reviewed and repaired, consider enabling strict mode in CI.
+- A source file existing does not prove an image or route works in production; live status and browser visual rendering remain separate verification steps.
