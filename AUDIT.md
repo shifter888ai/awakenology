@@ -622,3 +622,10 @@ The gate is designed to catch accidental body deletion/truncation during global 
 - Preserve valid percent-encoded multilingual paths without double-encoding.
 - Keep HTTP failures, request/network errors, redirects, and HTML returned in place of an expected asset as separate result classes.
 - A content-type mismatch is a diagnostic signal, not proof of a missing asset; inspect the final URL and response before repair.
+
+
+## Asset HTML Fallback Triage
+
+- `CONTENT_TYPE_MISMATCH` results must reach the consolidated issue register with the returned content type, URL, and referencing-file count.
+- Treat an HTML response for an expected asset as a high-priority review item, not proof of a missing file until the delivered response is inspected.
+- Keep the independent audit steps separate in CI so one scanner failure does not suppress the remaining reports; always consolidate and upload available artifacts.
