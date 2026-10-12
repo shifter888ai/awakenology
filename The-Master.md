@@ -554,3 +554,11 @@ This section consolidates approved visual decisions that must be treated as the 
 
 - Preserve existing percent-encoded path bytes when preparing URLs for live probes; do not double-encode encoded multilingual routes.
 - Regression-test raw Unicode, percent-encoded Unicode, nested relative references, query strings, fragment stripping, and external/scheme exclusions.
+
+
+### Live Probe Reliability
+
+- CI must compile all Python audit scripts before invoking any scanner.
+- Live URL results must distinguish `HTTP_ERROR`, `REQUEST_ERROR`, `REDIRECT`, `CONTENT_TYPE_MISMATCH`, and `PASS`.
+- Asset responses that return HTML at a successful status must be flagged for review, because a fallback page may hide a missing image or file.
+- Preserve percent-encoded Japanese/Chinese paths and test URL resolution without making production changes.
