@@ -30,8 +30,11 @@ class ConsolidateAuditReportsTests(unittest.TestCase):
             "site-integrity-report.csv": [],
             "live-link-asset-report.csv": [{"result":"HTTP_ERROR","http_status":"404","url":"https://awakenology.space/missing/","referenced_by_count":"3","error":""}],
             "anchor-accessibility-report.csv": [],
+            "browser-smoke-report.csv": [],
+            "browser-accessibility-report.csv": [],
         }
         issues = AUDIT.build_issues(reports)
+        self.assertEqual(len(issues), 1)
         self.assertEqual(issues[0]["severity"], "high")
         self.assertEqual(issues[0]["status"], "live-failure")
 
@@ -45,10 +48,16 @@ class ConsolidateAuditReportsTests(unittest.TestCase):
             ],
             "live-link-asset-report.csv": [],
             "anchor-accessibility-report.csv": [],
+            "browser-smoke-report.csv": [],
+            "browser-accessibility-report.csv": [],
         }
         issues = AUDIT.build_issues(reports)
         self.assertEqual(len(issues), 1)
         self.assertEqual(issues[0]["occurrences"], 2) # repeated identical source rows retain their count
+
+    def test_complete_empty_reports_produce_no_findings(self):
+        reports = {filename: [] for filename in AUDIT.INPUTS.values()}
+        self.assertEqual(AUDIT.build_issues(reports), [])
 
     def test_missing_reports_are_visible_and_strict_mode_is_optional(self):
         reports = {name: None for name in AUDIT.INPUTS.values()}
