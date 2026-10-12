@@ -1,0 +1,29 @@
+name: Live SEO runtime audit
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * *"
+permissions:
+  contents: read
+jobs:
+  live-seo-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Generate source metadata inventory
+        run: python3 scripts/audit_seo_metadata.py
+      - name: Audit production-rendered metadata
+        run: python3 scripts/audit_live_seo.py
+      - name: Upload source and runtime reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-source-and-runtime-reports
+          path: |
+            seo-metadata-report.csv
+            seo-runtime-report.csv
+          if-no-files-found: warn
