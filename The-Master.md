@@ -527,3 +527,10 @@ This section consolidates approved visual decisions that must be treated as the 
 - Audit the live DOM, not only source HTML: visible image alt attributes, interactive control names, document language, main landmark count, heading-level progression, and initial keyboard focus.
 - Keep findings informational pending manual review; this is a smoke test, not a complete WCAG audit or proof of keyboard usability for every interaction.
 - Accessibility fixes must preserve original article wording and image intent. Do not infer or invent descriptive alt text automatically.
+
+
+### Audit report coverage
+
+- Every generated report, including `browser-accessibility-report.csv`, must feed the consolidated issue register.
+- Report absence must be visible as a coverage gap; it must never be silently interpreted as zero findings.
+- Keep source findings, production findings, and rendered accessibility findings distinguishable so repairs target the actual failure layer.
