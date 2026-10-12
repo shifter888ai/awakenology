@@ -569,3 +569,10 @@ This section consolidates approved visual decisions that must be treated as the 
 - Every live probe outcome, including `CONTENT_TYPE_MISMATCH`, must be represented in consolidated triage; no newly introduced scanner status may silently disappear.
 - Run local inventory, live reference checks, and anchor checks as separate workflow steps, then consolidate and upload reports even when an earlier scan fails.
 - Verify suspected HTML fallback assets before modifying content or replacing images.
+
+
+### Audit Execution Continuity
+
+- Resolve each asynchronous probe's URL record before reading its kind; record unexpected task exceptions without losing the full CSV.
+- Keep GET-fallback HTTP responses separate from network failures and sort report findings by explicit severity class.
+- Run independent CI scanners after earlier failures; gate only true dependencies, and always consolidate/upload available results.
