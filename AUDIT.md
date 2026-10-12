@@ -571,3 +571,11 @@ The gate is designed to catch accidental body deletion/truncation during global 
 - The report `browser-smoke-report.csv` is informational. Console errors may be caused by optional third-party scripts and are retained as low-priority context rather than treated as confirmed defects.
 - Representative screenshots are artifacts for visual review, not proof of a full visual regression test. Review screenshot samples on mobile and desktop; dynamic content and browser differences still require human verification.
 - The unified audit register must run after all reports have been generated, even if the browser scan fails, so report coverage gaps remain visible.
+
+
+## Browser Smoke Audit Coverage Improvements
+
+- The mobile sample is selected deterministically across the homepage and detected English, Japanese, and Chinese route groups instead of taking the first alphabetically sorted routes.
+- Mobile interaction checks verify that the theme control changes the theme and that the preference survives a reload, and exercise the return-to-top control after scrolling.
+- On a detected Chinese route, the audit waits for the variant control to initialize and checks that clicking it changes the document language. This is a heuristic smoke test; it does not validate translation quality.
+- Findings are still informational. Browser-only false positives, delayed scripts, and network conditions must be reviewed before treating a finding as a defect.
