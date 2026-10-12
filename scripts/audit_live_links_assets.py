@@ -86,7 +86,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--timeout", type=int, default=15)
-    ap.add_argument("--strict", action="store_true", help="exit non-zero for HTTP errors and request failures")
+    ap.add_argument("--strict", action="store_true", help="exit non-zero for HTTP errors, request failures, and asset content-type mismatches")
     args = ap.parse_args()
     if not SOURCE_REPORT.exists():
         print("FAIL: site-integrity-report.csv is missing; run scripts/audit_site_integrity.py first")
@@ -124,12 +124,13 @@ def main():
     fields=["url","kind","http_status","content_type","final_url","result","error","referenced_by_count","referenced_by","source_references"]
     with OUT.open("w",encoding="utf-8",newline="") as f:
         writer=csv.DictWriter(f,fieldnames=fields); writer.writeheader(); writer.writerows(results)
-    failed=sum(r["result"] in {"HTTP_ERROR","REQUEST_ERROR"} for r in results)
+    failed=sum(r["result"] in {"HTTP_ERROR","REQUEST_ERROR","CONTENT_TYPE_MISMATCH"} for r in results)
+    mismatches=sum(r["result"]=="CONTENT_TYPE_MISMATCH" for r in results)
     redirects=sum(r["result"]=="REDIRECT" for r in results)
     passed=sum(r["result"]=="PASS" for r in results)
-    print(f"Live resources: {len(results)}; passed: {passed}; redirects: {redirects}; failures: {failed}")
+    print(f"Live resources: {len(results)}; passed: {passed}; redirects: {redirects}; content-type mismatches: {mismatches}; failures: {failed}")
     print(f"Report: {OUT.name}")
-    for row in [r for r in results if r["result"] in {"HTTP_ERROR","REQUEST_ERROR"}][:40]:
+    for row in [r for r in results if r["result"] in {"HTTP_ERROR","REQUEST_ERROR","CONTENT_TYPE_MISMATCH"}][:40]:
         print(f'{row["result"]}: {row["http_status"]} {row["url"]} (referenced by {row["referenced_by_count"]} source(s))')
     if failed > 40: print(f"... plus {failed-40} more; see CSV report")
     return 1 if args.strict and failed else 0

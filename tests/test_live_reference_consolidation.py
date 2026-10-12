@@ -41,6 +41,24 @@ class LiveReferenceConsolidationTests(unittest.TestCase):
         self.assertEqual(match["severity"], "high")
         self.assertEqual(match["status"], "live-failure")
 
+    def test_html_asset_fallback_is_visible_in_issue_register(self):
+        reports = blank_reports()
+        reports["live-link-asset-report.csv"] = [{
+            "url": "https://awakenology.space/gallery/missing.png",
+            "kind": "asset",
+            "result": "CONTENT_TYPE_MISMATCH",
+            "http_status": "200",
+            "content_type": "text/html; charset=utf-8",
+            "final_url": "https://awakenology.space/gallery/missing.png",
+            "referenced_by_count": "7",
+        }]
+        issues = AUDIT.build_issues(reports)
+        match = next(row for row in issues if row["source_report"] == "live-reference")
+        self.assertEqual(match["severity"], "high")
+        self.assertEqual(match["status"], "asset-content-review")
+        self.assertIn("text/html", match["detail"])
+        self.assertIn("7 source file(s)", match["detail"])
+
     def test_transient_request_failure_is_not_reported_as_http_404(self):
         reports = blank_reports()
         reports["live-link-asset-report.csv"] = [{

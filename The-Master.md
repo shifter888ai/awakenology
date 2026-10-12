@@ -562,3 +562,10 @@ This section consolidates approved visual decisions that must be treated as the 
 - Live URL results must distinguish `HTTP_ERROR`, `REQUEST_ERROR`, `REDIRECT`, `CONTENT_TYPE_MISMATCH`, and `PASS`.
 - Asset responses that return HTML at a successful status must be flagged for review, because a fallback page may hide a missing image or file.
 - Preserve percent-encoded Japanese/Chinese paths and test URL resolution without making production changes.
+
+
+### Complete Live Asset Audit Reporting
+
+- Every live probe outcome, including `CONTENT_TYPE_MISMATCH`, must be represented in consolidated triage; no newly introduced scanner status may silently disappear.
+- Run local inventory, live reference checks, and anchor checks as separate workflow steps, then consolidate and upload reports even when an earlier scan fails.
+- Verify suspected HTML fallback assets before modifying content or replacing images.
