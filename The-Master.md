@@ -583,3 +583,9 @@ This section consolidates approved visual decisions that must be treated as the 
 - The live SEO/runtime audit must run on relevant PRs, main pushes, manual dispatch, and schedule, producing reviewable consolidated artifacts.
 - PR live probes observe the deployed production domain; they do not imply that an unmerged Worker or page edit has already been deployed.
 - Keep production probes read-only and review report coverage before treating the audit as complete.
+
+
+### Same-page Anchor Coverage
+
+- Check same-page fragment links against the current document, including named anchors, without excluding all `#fragment` links.
+- Include self-closing images in missing-alt inventory and retain content-safe, read-only auditing.

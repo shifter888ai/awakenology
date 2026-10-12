@@ -643,3 +643,10 @@ The gate is designed to catch accidental body deletion/truncation during global 
 - Run the complete read-only live audit on PRs changing audit scripts, tests, the audit workflow, Worker, sitemap, or website HTML/CSS/JS, as well as main pushes, manual dispatch, and the existing schedule.
 - Review `audit-summary.md`, `audit-issue-register.csv`, and report coverage in the PR run's uploaded artifact before merging audit changes. A successful unit-test workflow alone does not establish that the production scan ran.
 - Live findings are observational and may reflect the currently deployed main branch rather than unmerged PR behavior. Do not mistake PR-time production observations for a deployed preview test.
+
+
+## Same-page Anchor Integrity
+
+- Source anchor checks must include same-page `#fragment` links as well as links to other pages; valid IDs and named anchors should pass.
+- Self-closing images must be included in the source missing-alt inventory.
+- Validate these rules with fixture-based tests before treating anchor findings as actionable; compare against the delivered DOM for Worker-generated anchors.

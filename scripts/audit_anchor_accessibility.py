@@ -53,6 +53,9 @@ class PageParser(HTMLParser):
         if tag == "button":
             self._button_stack.append({"text":"","label":a.get("aria-label","").strip(),
                                        "title":a.get("title","").strip(),"type":a.get("type","button")})
+    def handle_startendtag(self, tag, attrs):
+        self.handle_starttag(tag, attrs)
+
     def handle_endtag(self, tag):
         if tag == "a" and self._link_stack:
             self.links.append(self._link_stack.pop())
@@ -100,17 +103,16 @@ def main():
             if not link["text"].strip() and not link["label"] and not link["title"] and not link["has_image"]:
                 findings.append({"source":source.relative_to(ROOT).as_posix(),"issue":"empty-link-name","severity":"warning","reference":link["href"],"target":"","detail":"Link has no detectable text, aria-label, title, or non-empty-alt image"})
             href = link["href"]
-            if not href or href.startswith(("#","mailto:","tel:","javascript:","data:")): continue
+            if not href or href.lower().startswith(("mailto:","tel:","javascript:","data:")): continue
             absolute = urljoin(page_url(source), href)
             parts = urlsplit(absolute)
             if parts.scheme not in ("http","https") or parts.netloc.lower() not in {"awakenology.space","www.awakenology.space"}: continue
             if not parts.fragment: continue
-            target = resolve_page(parts.path)
+            target = source if parts.path == urlsplit(page_url(source)).path else resolve_page(parts.path)
             if target is None:
                 # Existing link/asset inventory reports missing target paths separately.
                 continue
-            try: target_parser = parsed.get(target)
-            except TypeError: target_parser = None
+            target_parser = parser if target == source else parsed.get(target)
             if target_parser is None:
                 target_parser = PageParser()
                 try: target_parser.feed(target.read_text(encoding="utf-8", errors="replace"))
