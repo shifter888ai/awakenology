@@ -534,3 +534,10 @@ This section consolidates approved visual decisions that must be treated as the 
 - Every generated report, including `browser-accessibility-report.csv`, must feed the consolidated issue register.
 - Report absence must be visible as a coverage gap; it must never be silently interpreted as zero findings.
 - Keep source findings, production findings, and rendered accessibility findings distinguishable so repairs target the actual failure layer.
+
+
+### Consolidated Audit Regression Gate
+
+- Test the issue-register consolidator whenever scanner outputs or report mappings change.
+- Verify missing reports are surfaced as coverage issues and never interpreted as zero findings.
+- Verify rendered accessibility findings retain route, viewport, check type, severity, and occurrence count in the consolidated register.
