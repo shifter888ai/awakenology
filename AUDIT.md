@@ -579,3 +579,11 @@ The gate is designed to catch accidental body deletion/truncation during global 
 - Mobile interaction checks verify that the theme control changes the theme and that the preference survives a reload, and exercise the return-to-top control after scrolling.
 - On a detected Chinese route, the audit waits for the variant control to initialize and checks that clicking it changes the document language. This is a heuristic smoke test; it does not validate translation quality.
 - Findings are still informational. Browser-only false positives, delayed scripts, and network conditions must be reviewed before treating a finding as a defect.
+
+
+## Rendered Accessibility and Keyboard Smoke Audit
+
+- The production browser audit checks visible controls and images in the rendered DOM, page language and main landmark count, heading-level jumps, and initial keyboard focus.
+- Run `python3 scripts/audit_browser_accessibility.py` after installing Playwright and Chromium.
+- Findings are informational heuristics, not a WCAG conformance claim. Review context before editing: decorative images may need `alt=""`, and heading-level skips may be intentional in legacy content.
+- Never auto-rewrite article text, headings, image alternatives, or controls based solely on scanner output. Verify each issue in the live page and preserve original content.
