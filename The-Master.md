@@ -433,6 +433,14 @@ Codex, Claude Code, Gemini/Google AI Studio, or another capable agent may execut
 - SEO changes must not rewrite or keyword-stuff preserved article content.
 - Legacy heading anomalies are audited separately; do not normalize H1/H2 structure automatically when doing metadata-only SEO work.
 
+### Automated Live SEO Verification
+
+- The workflow `.github/workflows/live-seo-runtime-audit.yml` runs on pushes to `main`, daily, and by manual dispatch.
+- It first compiles the SEO audit scripts and runs parser unit tests, then regenerates the source metadata inventory and checks metadata delivered by the production Worker.
+- Validate the canonical sitemap's uniqueness and domain, the live `robots.txt` sitemap directive, and that `/ai-search/` remains crawlable while delivering `noindex,follow`.
+- Save source and runtime reports as workflow artifacts. Do not treat a source-only warning as a live defect when the Worker repairs it.
+- A passing runtime SEO workflow does not close the independent visual, content-integrity, asset-rendering, or internal-link audits.
+
 ## Approved Visual Design Baseline — 2026-10-11
 
 This section consolidates approved visual decisions that must be treated as the current baseline. It supplements the governing principles above; it does not authorize a redesign or override content-preservation requirements.

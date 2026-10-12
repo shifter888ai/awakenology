@@ -44,6 +44,31 @@ def main():
         urls = [n.text.strip() for n in root.findall(".//{http://www.sitemaps.org/schemas/sitemap/0.9}loc") if n.text]
     except (OSError, ET.ParseError) as e:
         print(f"FAIL: sitemap.xml: {e}"); return 1
+    if len(urls) != len(set(urls)):
+        print("FAIL: sitemap contains duplicate URL entries")
+        return 1
+    if any(urlsplit(url).scheme != "https" or urlsplit(url).netloc != "awakenology.space" for url in urls):
+        print("FAIL: sitemap contains a URL outside the canonical HTTPS domain")
+        return 1
+    # A noindex page must remain crawlable so crawlers can observe its robots meta tag.
+    try:
+        req = urllib.request.Request(DOMAIN + "/robots.txt", headers={"User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=20) as response:
+            robots_text = response.read(200000).decode("utf-8", errors="replace")
+        if response.status != 200:
+            print("FAIL: robots.txt returned HTTP " + str(response.status))
+            return 1
+        for line in robots_text.splitlines():
+            if line.strip().lower().startswith("disallow:") and line.split(":", 1)[1].strip().rstrip("/") == "/ai-search":
+                print("FAIL: robots.txt blocks /ai-search/, preventing crawlers from seeing noindex")
+                return 1
+        if "https://awakenology.space/sitemap.xml" not in robots_text:
+            print("FAIL: robots.txt does not advertise the canonical sitemap URL")
+            return 1
+    except (urllib.error.URLError, TimeoutError, OSError, UnicodeError) as e:
+        print("FAIL: cannot verify robots.txt: " + type(e).__name__)
+        return 1
+    print("PASS: robots.txt allows crawler access to /ai-search/ and advertises the canonical sitemap")
     ai = DOMAIN + "/ai-search/"
     if ai not in urls: urls.append(ai)
     source_file = ROOT / "seo-metadata-report.csv"
