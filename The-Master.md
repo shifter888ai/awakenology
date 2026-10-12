@@ -433,6 +433,12 @@ Codex, Claude Code, Gemini/Google AI Studio, or another capable agent may execut
 - SEO changes must not rewrite or keyword-stuff preserved article content.
 - Legacy heading anomalies are audited separately; do not normalize H1/H2 structure automatically when doing metadata-only SEO work.
 
+### Automated Live Link and Asset Availability
+
+- After generating `site-integrity-report.csv`, run `python3 scripts/audit_live_links_assets.py` to check each unique internal route or asset reference against the production domain.
+- Review `live-link-asset-report.csv` for HTTP errors, request failures, and redirects, with the referring source files retained for efficient fixes.
+- The probe is informational until legacy redirects and expected exceptions have been triaged. It does not replace browser rendering checks or anchor-fragment validation.
+
 ### Automated Local Link and Asset Integrity
 
 - Run `python3 scripts/audit_site_integrity.py` to scan source HTML and CSS for broken internal page links and local assets, including image sources/srcsets, script/style references, inline styles, and CSS URL/import references.
