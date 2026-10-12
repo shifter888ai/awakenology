@@ -22,7 +22,7 @@ jobs:
           python3 -m playwright install --with-deps chromium
       - name: Compile audit scripts and run parser tests
         run: |
-          python3 -m py_compile scripts/audit_seo_metadata.py scripts/audit_live_seo.py scripts/audit_browser_smoke.py scripts/audit_browser_accessibility.py
+          python3 -m py_compile scripts/*.py
           python3 -m unittest discover -s tests -p 'test_*.py' -v
           python3 scripts/audit_site_integrity.py
           python3 scripts/audit_live_links_assets.py
