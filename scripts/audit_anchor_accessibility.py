@@ -99,7 +99,7 @@ def main():
         for src, issue in parser.images:
             findings.append({"source":source.relative_to(ROOT).as_posix(),"issue":issue,"severity":"warning","reference":src,"target":"","detail":"Image has no alt attribute; add descriptive alt text or alt=\"\" if decorative"})
         for link in parser.links:
-            if not link["text"].strip() and not link["label"] and not link["title"] and not link["has_image"]:
+            if link["href"] and not link["text"].strip() and not link["label"] and not link["title"] and not link["has_image"]:
                 findings.append({"source":source.relative_to(ROOT).as_posix(),"issue":"empty-link-name","severity":"warning","reference":link["href"],"target":"","detail":"Link has no detectable text, aria-label, title, or non-empty-alt image"})
             href = link["href"]
             if not href or href.lower().startswith(("mailto:","tel:","javascript:","data:")): continue
