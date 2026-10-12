@@ -14,7 +14,8 @@ class AnchorAccessibilityTests(unittest.TestCase):
         self.assertIn(("section", "h2"), p.ids)
         self.assertIn(("legacy", "a"), p.ids)
         self.assertEqual(p.images, [("x.jpg", "missing-alt")])
-        self.assertEqual(p.links[0]["text"].strip(), "Read")
+        self.assertEqual(next(link for link in p.links if link["href"] == "#section")["text"].strip(), "Read")
+        self.assertEqual(p.links[0]["href"], "")  # legacy named anchor is not a navigation link
         self.assertEqual(p.buttons[0]["text"].strip(), "Go")
 
     def test_page_resolution_supports_directory_routes(self):
