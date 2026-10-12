@@ -548,3 +548,9 @@ This section consolidates approved visual decisions that must be treated as the 
 - Preserve production redirects in the consolidated issue register as warnings with original URL, final URL, and referencing-file count.
 - Do not treat redirects as confirmed defects by default. Review canonical intent and legacy compatibility before updating internal references.
 - Keep HTTP status failures distinct from transient request errors; do not invent a 404 for a timeout or network error.
+
+
+### Live Audit URL Normalization
+
+- Preserve existing percent-encoded path bytes when preparing URLs for live probes; do not double-encode encoded multilingual routes.
+- Regression-test raw Unicode, percent-encoded Unicode, nested relative references, query strings, fragment stripping, and external/scheme exclusions.

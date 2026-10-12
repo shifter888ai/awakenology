@@ -608,3 +608,9 @@ The gate is designed to catch accidental body deletion/truncation during global 
 - Production redirects are reviewable warnings, not automatic failures. The consolidated register must retain the original URL, final URL, and number of referencing source files.
 - Prefer updating internal references to canonical destinations when verified safe; retain intentional redirects for legacy/external compatibility.
 - Distinguish HTTP failures from request/network errors; retry transient errors before making source changes.
+
+
+## Live URL Resolution Regression Tests
+
+- Test encoded and raw Unicode paths, nested relative references, query preservation, fragment removal, and exclusion of external or non-HTTP references.
+- URL quoting must preserve valid existing percent-encoding to avoid turning `%E6...` into `%25E6...` during production probes.
