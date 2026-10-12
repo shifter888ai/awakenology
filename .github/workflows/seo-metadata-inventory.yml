@@ -2,12 +2,8 @@ name: SEO metadata inventory
 on:
   workflow_dispatch:
   pull_request:
-    paths:
-      - '**/*.html'
-      - 'worker.js'
-      - 'sitemap.xml'
-      - 'scripts/audit_seo_metadata.py'
-      - '.github/workflows/seo-metadata-inventory.yml'
+  push:
+    branches: [main]
 jobs:
   inventory:
     runs-on: ubuntu-latest
