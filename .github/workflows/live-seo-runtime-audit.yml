@@ -1,5 +1,15 @@
 name: Live SEO runtime audit
 on:
+  pull_request:
+    paths:
+      - 'scripts/**'
+      - 'tests/**'
+      - '.github/workflows/live-seo-runtime-audit.yml'
+      - 'worker.js'
+      - 'sitemap.xml'
+      - '**/*.html'
+      - '**/*.css'
+      - '**/*.js'
   push:
     branches: [main]
   workflow_dispatch:
@@ -7,6 +17,9 @@ on:
     - cron: "17 3 * * *"
 permissions:
   contents: read
+concurrency:
+  group: live-audit-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
   live-seo-audit:
     runs-on: ubuntu-latest
@@ -21,6 +34,7 @@ jobs:
           python3 -m pip install playwright
           python3 -m playwright install --with-deps chromium
       - name: Compile audit scripts and run parser tests
+        if: always()
         run: |
           python3 -m py_compile scripts/*.py
           python3 -m unittest discover -s tests -p 'test_*.py' -v
@@ -66,3 +80,4 @@ jobs:
             browser-accessibility-report.csv
             browser-smoke-screenshots/*.png
           if-no-files-found: warn
+          retention-days: 14
