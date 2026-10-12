@@ -33,7 +33,9 @@ jobs:
         run: python3 scripts/audit_live_seo.py
       - name: Audit live pages in Chromium
         run: python3 scripts/audit_browser_smoke.py --screenshots
-      - name: Audit rendered accessibility and keyboard focus\n        run: python3 scripts/audit_browser_accessibility.py\n      - name: Consolidate audit reports after all scans finish
+      - name: Audit rendered accessibility and keyboard focus
+        run: python3 scripts/audit_browser_accessibility.py
+      - name: Consolidate audit reports after all scans finish
         if: always()
         run: python3 scripts/consolidate_audit_reports.py
       - name: Upload source and runtime reports
@@ -49,6 +51,7 @@ jobs:
             anchor-accessibility-report.csv
             audit-issue-register.csv
             audit-summary.md
-            browser-smoke-report.csv\n            browser-accessibility-report.csv
+            browser-smoke-report.csv
+            browser-accessibility-report.csv
             browser-smoke-screenshots/*.png
           if-no-files-found: warn
