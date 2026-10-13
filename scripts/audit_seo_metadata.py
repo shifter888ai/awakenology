@@ -64,6 +64,8 @@ for path in sorted(ROOT.rglob("*.html")):
         scope = "special-404"
     elif relative == "ai-search/index.html":
         scope = "special-ai-search"
+    elif relative == "editor/index.html":
+        scope = "special-editor"
     else:
         scope = "normal"
     parser = HeadParser()
