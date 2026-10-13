@@ -10,8 +10,8 @@
 <main><iframe id="preview" title="Article editing preview" sandbox="allow-same-origin"></iframe></main>
 <script>
 (()=>{'use strict';
-const file=document.querySelector('#file'), frame=document.querySelector('#preview'), save=document.querySelector('#save'), review=document.querySelector('#review'), status=document.querySelector('#status'), panel=document.querySelector('#reviewPanel'), fullPreview=document.querySelector('#fullPreview');
-let original=null, filename='', loaded=false, reviewedHtml=null;
+const file=document.querySelector('#file'), frame=document.querySelector('#preview'), main=document.querySelector('main'), save=document.querySelector('#save'), review=document.querySelector('#review'), status=document.querySelector('#status'), panel=document.querySelector('#reviewPanel'), fullPreview=document.querySelector('#fullPreview');
+let original=null, filename='', loaded=false, reviewedHtml=null, fullPageReady=false;
 const controls=[...document.querySelectorAll('[data-cmd],#color,#spacer')];
 function setStatus(s){status.textContent=s}
 function doc(){return frame.contentDocument}
@@ -19,8 +19,8 @@ function article(){return doc()?.querySelector('.article')}
 function ready(){return loaded && !!article()}
 function withinSelection(){const sel=frame.contentWindow.getSelection();return !!(sel&&sel.rangeCount&&article().contains(sel.getRangeAt(0).commonAncestorContainer))}
 file.addEventListener('change',async()=>{const f=file.files?.[0];if(!f)return;const text=await f.text();const parsed=new DOMParser().parseFromString(text,'text/html');if(!parsed.querySelector('.article')){setStatus('This prototype requires an article container with class="article". No changes made.');return}
-original=text;filename=f.name;loaded=false;save.disabled=true;review.disabled=true;panel.hidden=true;reviewedHtml=null;controls.forEach(x=>x.disabled=true);
-frame.onload=()=>{const a=article();if(!a){setStatus('Could not load article.');return}a.contentEditable='true';a.spellcheck=false;loaded=true;review.disabled=false;controls.forEach(x=>x.disabled=false);setStatus('Editing '+filename+' locally. Click inside article text to edit; header and footer are not editable. Export is an article fragment only; do not overwrite the source HTML.')};
+original=text;filename=f.name;loaded=false;save.disabled=true;review.disabled=true;panel.hidden=true;main.hidden=false;reviewedHtml=null;fullPageReady=!!(parsed.querySelector('header, .site-header')&&parsed.querySelector('footer, .site-footer, .footer-inner'));controls.forEach(x=>x.disabled=true);
+frame.onload=()=>{const a=article();if(!a){setStatus('Could not load article.');return}a.contentEditable='true';a.spellcheck=false;loaded=true;review.disabled=!fullPageReady;controls.forEach(x=>x.disabled=false);setStatus(fullPageReady?'Editing '+filename+' locally. Full-page header/footer detected; review will preserve the surrounding page.':'Editing '+filename+' locally. This looks like an article fragment: editing works, but full-page review is disabled. Load the original full-page HTML containing its header and footer to preserve the whole page.')};
 frame.srcdoc=text;
 });
 document.querySelectorAll('[data-cmd]').forEach(b=>b.addEventListener('mousedown',e=>e.preventDefault()));
@@ -29,8 +29,8 @@ document.querySelector('#color').addEventListener('input',e=>{if(!ready()||!with
 document.querySelector('#spacer').addEventListener('mousedown',e=>e.preventDefault());
 document.querySelector('#spacer').addEventListener('click',()=>{if(!ready()||!withinSelection())return;doc().execCommand('insertHTML',false,'<p class="spacer"></p>')});
 function buildReviewedHtml(){const parsed=new DOMParser().parseFromString(original,'text/html');const sourceArticle=parsed.querySelector('.article');const edited=article().cloneNode(true);edited.removeAttribute('contenteditable');edited.removeAttribute('spellcheck');sourceArticle.replaceWith(edited);return '<!doctype html>\\n'+parsed.documentElement.outerHTML;}
-review.addEventListener('click',()=>{if(!ready()||!original)return;reviewedHtml=buildReviewedHtml();const before=new DOMParser().parseFromString(original,'text/html').querySelector('.article');const after=new DOMParser().parseFromString(reviewedHtml,'text/html').querySelector('.article');const b=(before?.innerText||before?.textContent||'').trim();const a=(after?.innerText||after?.textContent||'').trim();document.querySelector('#reviewSummary').textContent='Full-page copy prepared. Article text '+(b===a?'is unchanged.':'has changed.')+' Original page elements outside .article are retained. Inspect the preview below before downloading.';fullPreview.srcdoc=reviewedHtml;panel.hidden=false;save.disabled=false;setStatus('Review generated locally. Nothing has been downloaded or uploaded yet.');});
-document.querySelector('#cancelReview').addEventListener('click',()=>{panel.hidden=true;reviewedHtml=null;save.disabled=true;setStatus('Review cancelled. Original file remains unchanged.');});
+review.addEventListener('click',()=>{if(!ready()||!original)return;reviewedHtml=buildReviewedHtml();const before=new DOMParser().parseFromString(original,'text/html').querySelector('.article');const after=new DOMParser().parseFromString(reviewedHtml,'text/html').querySelector('.article');const b=(before?.innerText||before?.textContent||'').trim();const a=(after?.innerText||after?.textContent||'').trim();document.querySelector('#reviewSummary').textContent='Full-page copy prepared. Article text '+(b===a?'is unchanged.':'has changed.')+' Original page elements outside .article are retained. Inspect the preview below before downloading.';fullPreview.srcdoc=reviewedHtml;panel.hidden=false;main.hidden=true;save.disabled=false;setStatus('Review generated locally. Only the reviewed page is shown. Nothing has been downloaded or uploaded yet.');});
+document.querySelector('#cancelReview').addEventListener('click',()=>{panel.hidden=true;main.hidden=false;reviewedHtml=null;save.disabled=true;setStatus('Review cancelled. Original file remains unchanged.');});
 save.addEventListener('click',()=>{if(!reviewedHtml){setStatus('Click Review full-page HTML first.');return;}const url=URL.createObjectURL(new Blob([reviewedHtml],{type:'text/html;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=filename.replace(/\\.html?$/i,'')+'-reviewed.html';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);setStatus('Downloaded a reconstructed full-page HTML copy. Original file remains unchanged; inspect the downloaded page before using it.');});
 })();
 </script></body></html>
