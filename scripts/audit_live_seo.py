@@ -76,6 +76,16 @@ def main():
     if source_file.exists():
         with source_file.open(encoding="utf-8", newline="") as f:
             source = {r["path"]: r.get("flags", "") for r in csv.DictReader(f)}
+    # Production routes stay live-checked; PR-only routes use checked-out HTML.
+    try:
+        req = urllib.request.Request(DOMAIN + "/sitemap.xml", headers={"User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=20) as response:
+            if response.status != 200: raise OSError("production sitemap status")
+            deployed_root = ET.fromstring(response.read(3000000))
+        deployed_urls = {n.text.strip() for n in deployed_root.findall(".//{http://www.sitemaps.org/schemas/sitemap/0.9}loc") if n.text}
+    except (urllib.error.URLError, TimeoutError, OSError, ET.ParseError) as e:
+        print("FAIL: cannot verify production sitemap: " + type(e).__name__)
+        return 1
     opener, rows = urllib.request.build_opener(), []
     for i, url in enumerate(urls, 1):
         errors, status, title, desc, canonical, robots, lang = [], "", "", "", "", "", ""
@@ -84,11 +94,17 @@ def main():
         source_path = "index.html" if path == "/" else path.lstrip("/") + "index.html"
         expected = DOMAIN + (path if path.endswith("/") or path == "/" else path + "/")
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": UA})
-            with opener.open(req, timeout=20) as res:
-                status, final, ctype = res.status, res.geturl(), res.headers.get("Content-Type", "")
-                charset = res.headers.get_content_charset() or "utf-8"
-                raw = res.read(3000000)
+            if url not in deployed_urls and not is_ai:
+                local = ROOT / source_path
+                if not local.is_file(): raise OSError("new route missing local HTML")
+                status, final, ctype, charset = 200, url, "text/html", "utf-8"
+                raw = local.read_bytes()
+            else:
+                req = urllib.request.Request(url, headers={"User-Agent": UA})
+                with opener.open(req, timeout=20) as res:
+                    status, final, ctype = res.status, res.geturl(), res.headers.get("Content-Type", "")
+                    charset = res.headers.get_content_charset() or "utf-8"
+                    raw = res.read(3000000)
             if status != 200: errors.append("http-status-" + str(status))
             if "text/html" not in ctype.lower(): errors.append("non-html-content-type")
             if final.rstrip("/") != url.rstrip("/"): errors.append("redirected-url")
