@@ -1,29 +1,42 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Awakenology — Local Visual Editor (Prototype)</title>
-<meta name="description" content="Local-only Awakenology article editor prototype for previewing and exporting article HTML.">
+<title>Awakenology — Private Visual Editor</title>
+<meta name="description" content="Private visual editor for reviewing Awakenology article HTML changes.">
 <meta name="robots" content="noindex, nofollow">
 <style>
 :root{font:15px/1.5 system-ui,sans-serif;color-scheme:dark;background:#151515;color:#eee}*{box-sizing:border-box}body{margin:0}header{padding:15px 20px;border-bottom:1px solid #444;display:flex;gap:12px;align-items:center;flex-wrap:wrap}h1{font-size:17px;margin:0 auto 0 0}button,.file{border:1px solid #666;background:#292929;color:inherit;border-radius:5px;padding:7px 10px;cursor:pointer}button:disabled{opacity:.4;cursor:not-allowed}input[type=file]{max-width:230px}nav{padding:10px 20px;display:flex;flex-wrap:wrap;gap:7px;border-bottom:1px solid #444}main{max-width:960px;margin:20px auto;padding:0 15px}iframe{display:block;width:100%;min-height:70vh;border:1px solid #555;background:white;border-radius:6px}#status{font-size:12px;color:#bbb;padding:8px 20px}small{color:#aaa}.diff{white-space:pre-wrap;overflow-wrap:anywhere;background:#101010;border:1px solid #444;border-radius:5px;padding:10px;max-height:45vh;overflow:auto;font:12px/1.5 ui-monospace,monospace}.diff .add{color:#9ee6a0}.diff .remove{color:#ffaaaa}.diff .same{color:#aaa}input[type=color]{height:32px;width:42px;vertical-align:middle} 
 </style></head><body>
-<header><h1>Awakenology · Local Visual Editor <small>prototype</small></h1><label>Load article HTML <input id="file" type="file" accept=".html,.htm,text/html"></label><button id="review" disabled>Review full-page HTML</button><button id="save" disabled>Download reviewed HTML</button></header>
+<header><h1>Awakenology · Private Visual Editor</h1><label>GitHub article path <input id="githubPath" type="text" placeholder="e.g. 與退化派對話8/index.html" style="width:min(340px,80vw);padding:7px;background:#222;color:#eee;border:1px solid #666;border-radius:5px"></label><button id="loadGitHub">Load from GitHub</button><label>Or load local HTML <input id="file" type="file" accept=".html,.htm,text/html"></label><button id="review" disabled>Review full-page HTML</button><button id="save" disabled>Download reviewed HTML</button></header>
 <nav aria-label="Formatting"><button data-cmd="bold" disabled><b>Bold</b></button><button data-cmd="underline" disabled><u>Underline</u></button><button data-cmd="undo" disabled>Undo</button><button data-cmd="redo" disabled>Redo</button><label>Text color <input id="color" type="color" value="#0000ff" disabled></label><button id="spacer" disabled>Insert blank line</button></nav>
-<div id="status" role="status">Choose a local article HTML file. Nothing is uploaded or saved automatically.</div><section id="reviewPanel" hidden style="max-width:960px;margin:12px auto;padding:12px 15px;border:1px solid #555;border-radius:6px"><h2 style="font-size:16px">Review before download</h2><p id="reviewSummary"></p><h3 style="font-size:14px">Article text changes</h3><p><small>Lines prefixed with − were removed; lines prefixed with + were added. This compares article text, not HTML formatting or attributes.</small></p><pre id="changeDiff" class="diff" aria-label="Article text difference"></pre><p><strong>Safety note:</strong> Browser serialization can normalize HTML markup. The original file is never changed. Inspect the downloaded copy before using it.</p><iframe id="fullPreview" title="Reconstructed full-page preview" style="width:100%;min-height:50vh;background:white"></iframe><button id="cancelReview">Cancel review</button></section>
+<div id="status" role="status">Enter a path in the public Awakenology GitHub repository or choose a local HTML file. GitHub loading is read-only; edits are not saved to GitHub.</div><section id="reviewPanel" hidden style="max-width:960px;margin:12px auto;padding:12px 15px;border:1px solid #555;border-radius:6px"><h2 style="font-size:16px">Review before download</h2><p id="reviewSummary"></p><h3 style="font-size:14px">Article text changes</h3><p><small>Lines prefixed with − were removed; lines prefixed with + were added. This compares article text, not HTML formatting or attributes.</small></p><pre id="changeDiff" class="diff" aria-label="Article text difference"></pre><p><strong>Safety note:</strong> Browser serialization can normalize HTML markup. The original file is never changed. Inspect the downloaded copy before using it.</p><iframe id="fullPreview" title="Reconstructed full-page preview" style="width:100%;min-height:50vh;background:white"></iframe><button id="cancelReview">Cancel review</button></section>
 <main><iframe id="preview" title="Article editing preview" sandbox="allow-same-origin"></iframe></main>
 <script>
 (()=>{'use strict';
 const file=document.querySelector('#file'), frame=document.querySelector('#preview'), main=document.querySelector('main'), save=document.querySelector('#save'), review=document.querySelector('#review'), status=document.querySelector('#status'), panel=document.querySelector('#reviewPanel'), fullPreview=document.querySelector('#fullPreview');
-let original=null, filename='', loaded=false, reviewedHtml=null, fullPageReady=false;
+let original=null, filename='', loaded=false, reviewedHtml=null, fullPageReady=false, loadedRepoPath='';
 const controls=[...document.querySelectorAll('[data-cmd],#color,#spacer')];
 function setStatus(s){status.textContent=s}
 function doc(){return frame.contentDocument}
 function article(){return doc()?.querySelector('.article')}
 function ready(){return loaded && !!article()}
 function withinSelection(){const sel=frame.contentWindow.getSelection();return !!(sel&&sel.rangeCount&&article().contains(sel.getRangeAt(0).commonAncestorContainer))}
-file.addEventListener('change',async()=>{const f=file.files?.[0];if(!f)return;const text=await f.text();const parsed=new DOMParser().parseFromString(text,'text/html');if(!parsed.querySelector('.article')){setStatus('This prototype requires an article container with class="article". No changes made.');return}
-original=text;filename=f.name;loaded=false;save.disabled=true;review.disabled=true;panel.hidden=true;main.hidden=false;reviewedHtml=null;fullPageReady=!!(parsed.querySelector('header, .site-header')&&parsed.querySelector('footer, .site-footer, .footer-inner'));controls.forEach(x=>x.disabled=true);
-frame.onload=()=>{const a=article();if(!a){setStatus('Could not load article.');return}a.contentEditable='true';a.spellcheck=false;loaded=true;review.disabled=false;controls.forEach(x=>x.disabled=false);setStatus(fullPageReady?'Editing '+filename+' locally. Full-page header/footer detected; review will preserve the surrounding page.':'Editing '+filename+' locally. Header/footer detection was inconclusive; review is enabled, but check the reconstructed page carefully.')};
-frame.srcdoc=text;
+function loadHtmlText(text,name,sourcePath=''){
+const parsed=new DOMParser().parseFromString(text,'text/html');
+if(!parsed.querySelector('.article')){setStatus('This file has no element with class="article". No changes made.');return false}
+original=text;filename=name;loadedRepoPath=sourcePath;loaded=false;save.disabled=true;review.disabled=true;panel.hidden=true;main.hidden=false;reviewedHtml=null;fullPageReady=!!(parsed.querySelector('header, .site-header')&&parsed.querySelector('footer, .site-footer, .footer-inner'));controls.forEach(x=>x.disabled=true);
+frame.onload=()=>{const a=article();if(!a){setStatus('Could not load article.');return}a.contentEditable='true';a.spellcheck=false;loaded=true;review.disabled=false;controls.forEach(x=>x.disabled=false);setStatus(fullPageReady?'Editing '+filename+'. Full-page header/footer detected; review will preserve the surrounding page.':'Editing '+filename+'. Header/footer detection was inconclusive; check the reconstructed page carefully.')};
+frame.srcdoc=text;return true;
+}
+file.addEventListener('change',async()=>{const f=file.files?.[0];if(!f)return;loadHtmlText(await f.text(),f.name,'')});
+document.querySelector('#loadGitHub').addEventListener('click',async()=>{
+const rawPath=document.querySelector('#githubPath').value.trim().replace(/^\\/+|\\+$/g,'');
+if(!rawPath||rawPath.split('/').some(part=>!part||part==='.'||part==='..')){setStatus('Enter a repository-relative file path, such as a folder name/index.html.');return}
+if(!/\\.html?$/i.test(rawPath)){setStatus('Please choose an HTML file path ending in .html or .htm.');return}
+const button=document.querySelector('#loadGitHub');button.disabled=true;setStatus('Loading '+rawPath+' from the public GitHub repository…');
+try{const url='https://raw.githubusercontent.com/shifter888ai/awakenology/main/'+rawPath.split('/').map(encodeURIComponent).join('/');
+const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw new Error('GitHub returned HTTP '+response.status);
+const text=await response.text();if(loadHtmlText(text,rawPath.split('/').pop(),rawPath))setStatus('Loaded '+rawPath+' from GitHub (read-only). Edits are local until you export the reviewed HTML.');
+}catch(err){setStatus('Could not load from GitHub: '+(err?.message||String(err)))}finally{button.disabled=false}
 });
 document.querySelectorAll('[data-cmd]').forEach(b=>b.addEventListener('mousedown',e=>e.preventDefault()));
 document.querySelectorAll('[data-cmd]').forEach(b=>b.addEventListener('click',()=>{if(!ready()||!withinSelection())return;doc().execCommand(b.dataset.cmd,false,null);article().focus()}));
