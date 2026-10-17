@@ -8,7 +8,7 @@ from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 DOMAIN = "https://awakenology.space"
-SPECIAL = {"404.html", "ai-search/index.html", "editor/index.html"}
+SPECIAL = {"404.html", "ai-search/index.html", "editor/index.html", "github-editor/index.html"}
 files = {p.relative_to(ROOT).as_posix() for p in ROOT.rglob("index.html")}
 files.add("index.html")
 expected = {"/" if p == "index.html" else "/" + p[:-len("index.html")] for p in files - SPECIAL}
