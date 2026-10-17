@@ -4,13 +4,162 @@
  * Verification rules: AUDIT.md
  * Inventory/state: migration-manifest.json
  */
+const EDITOR_HOST = "editor.awakenology.space";
+const GITHUB_REPO = "shifter888ai/awakenology";
+
+function jsonResponse(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" }
+  });
+}
+function base64UrlBytes(value) {
+  const padded = value.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - value.length % 4) % 4);
+  const binary = atob(padded);
+  return Uint8Array.from(binary, c => c.charCodeAt(0));
+}
+function base64UrlJson(value) {
+  return JSON.parse(new TextDecoder().decode(base64UrlBytes(value)));
+}
+function toBase64Url(bytes) {
+  let binary = "";
+  for (const b of bytes) binary += String.fromCharCode(b);
+  return btoa(binary).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+}
+async function verifyCloudflareAccess(request, env) {
+  const audience = env.ACCESS_AUD;
+  const teamSetting = env.ACCESS_TEAM_DOMAIN;
+  const assertion = request.headers.get("cf-access-jwt-assertion");
+  if (!audience || !teamSetting || !assertion) return false;
+  try {
+    const issuer = (teamSetting.startsWith("http") ? teamSetting : "https://" + teamSetting).replace(/\/+$/, "");
+    const parts = assertion.split(".");
+    if (parts.length !== 3) return false;
+    const header = base64UrlJson(parts[0]);
+    const claims = base64UrlJson(parts[1]);
+    const now = Math.floor(Date.now() / 1000);
+    if (header.alg !== "RS256" || !header.kid || claims.iss !== issuer) return false;
+    if (!(claims.aud === audience || (Array.isArray(claims.aud) && claims.aud.includes(audience)))) return false;
+    if (typeof claims.exp !== "number" || claims.exp < now || (typeof claims.nbf === "number" && claims.nbf > now + 60)) return false;
+    const keyResponse = await fetch(issuer + "/cdn-cgi/access/certs", { cf: { cacheTtl: 300 } });
+    if (!keyResponse.ok) return false;
+    const keySet = await keyResponse.json();
+    const jwk = (keySet.keys || []).find(key => key.kid === header.kid);
+    if (!jwk) return false;
+    const publicKey = await crypto.subtle.importKey("jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
+    return await crypto.subtle.verify("RSASSA-PKCS1-v1_5", publicKey, base64UrlBytes(parts[2]), new TextEncoder().encode(parts[0] + "." + parts[1]));
+  } catch {
+    return false;
+  }
+}
+async function createGitHubInstallationToken(env) {
+  if (!env.GITHUB_APP_ID || !env.GITHUB_APP_INSTALLATION_ID || !env.GITHUB_APP_PRIVATE_KEY) {
+    throw new Error("GitHub App secrets are not configured in Cloudflare yet.");
+  }
+  const now = Math.floor(Date.now() / 1000);
+  const header = toBase64Url(new TextEncoder().encode(JSON.stringify({ alg: "RS256", typ: "JWT" })));
+  const claims = toBase64Url(new TextEncoder().encode(JSON.stringify({ iat: now - 30, exp: now + 540, iss: String(env.GITHUB_APP_ID) })));
+  const pem = env.GITHUB_APP_PRIVATE_KEY.replace(/\\n/g, "\n").replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s/g, "");
+  const binary = atob(pem);
+  const keyBytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+  const key = await crypto.subtle.importKey("pkcs8", keyBytes, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]);
+  const signature = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(header + "." + claims));
+  const appJwt = header + "." + claims + "." + toBase64Url(new Uint8Array(signature));
+  const response = await fetch("https://api.github.com/app/installations/" + encodeURIComponent(env.GITHUB_APP_INSTALLATION_ID) + "/access_tokens", {
+    method: "POST",
+    headers: { "authorization": "Bearer " + appJwt, "accept": "application/vnd.github+json", "x-github-api-version": "2022-11-28", "content-type": "application/json", "user-agent": "Awakenology-Private-Editor" },
+    body: "{}"
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.token) throw new Error("GitHub App could not issue an installation token: " + (data.message || response.status));
+  return data.token;
+}
+async function githubApi(path, token, options = {}) {
+  const response = await fetch("https://api.github.com" + path, {
+    ...options,
+    headers: { "authorization": "Bearer " + token, "accept": "application/vnd.github+json", "x-github-api-version": "2022-11-28", "content-type": "application/json", "user-agent": "Awakenology-Private-Editor", ...(options.headers || {}) }
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error("GitHub API " + response.status + ": " + (data.message || "request failed"));
+  return data;
+}
+function sha256Hex(value) {
+  return crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)).then(bytes => [...new Uint8Array(bytes)].map(b => b.toString(16).padStart(2, "0")).join(""));
+}
+function decodeGitHubFile(content) {
+  const binary = atob(content.replace(/\s/g, ""));
+  const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+  return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+}
+async function createReviewedDraftPR(request, env) {
+  if (request.method !== "POST") return jsonResponse({ error: "Method not allowed." }, 405);
+  if (!(request.headers.get("content-type") || "").toLowerCase().includes("application/json")) return jsonResponse({ error: "JSON content type required." }, 415);
+  const length = Number(request.headers.get("content-length") || 0);
+  if (length > 600000) return jsonResponse({ error: "Reviewed HTML payload is too large." }, 413);
+  let body;
+  try { body = await request.json(); } catch { return jsonResponse({ error: "Invalid JSON request." }, 400); }
+  const path = body.path;
+  const reviewedHtml = body.reviewedHtml;
+  const baselineSha256 = body.baselineSha256;
+  if (typeof path !== "string" || path.length > 500 || path.startsWith("/") || path.includes("\\") ||
+      !/\.html?$/i.test(path) || path.split("/").some(part => !part || part === "." || part === ".." || part.startsWith("."))) {
+    return jsonResponse({ error: "Invalid repository-relative article path." }, 400);
+  }
+  if (typeof reviewedHtml !== "string" || reviewedHtml.length > 250000 || !/<html[\s>]/i.test(reviewedHtml) || !/class\s*=\s*["'][^"']*\barticle\b/i.test(reviewedHtml)) {
+    return jsonResponse({ error: "Reviewed HTML is missing the full document or .article element, or exceeds the size limit." }, 400);
+  }
+  if (typeof baselineSha256 !== "string" || !/^[a-f0-9]{64}$/i.test(baselineSha256)) return jsonResponse({ error: "Missing valid baseline fingerprint." }, 400);
+  try {
+    const token = await createGitHubInstallationToken(env);
+    const encodedPath = path.split("/").map(encodeURIComponent).join("/");
+    const current = await githubApi("/repos/" + GITHUB_REPO + "/contents/" + encodedPath + "?ref=main", token);
+    if (current.type !== "file" || !current.content || current.encoding !== "base64") return jsonResponse({ error: "GitHub did not return a supported HTML file." }, 409);
+    const currentHtml = decodeGitHubFile(current.content);
+    if (await sha256Hex(currentHtml) !== baselineSha256.toLowerCase()) {
+      return jsonResponse({ error: "The article on main has changed since it was loaded. Reload the latest version, reapply your edits, and review again." }, 409);
+    }
+    const mainRef = await githubApi("/repos/" + GITHUB_REPO + "/git/ref/heads/main", token);
+    const slug = path.replace(/\.html?$/i, "").split("/").map(part => part.replace(/[^A-Za-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "")).filter(Boolean).join("-").slice(-45) || "article";
+    const branch = "visual-editor/" + new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14) + "-" + crypto.randomUUID().slice(0, 8) + "-" + slug;
+    await githubApi("/repos/" + GITHUB_REPO + "/git/refs", token, { method: "POST", body: JSON.stringify({ ref: "refs/heads/" + branch, sha: mainRef.object.sha }) });
+    await githubApi("/repos/" + GITHUB_REPO + "/contents/" + encodedPath, token, {
+      method: "PUT",
+      body: JSON.stringify({ message: "Edit article via private visual editor: " + path, content: btoa(String.fromCharCode(...new TextEncoder().encode(reviewedHtml))), sha: current.sha, branch })
+    });
+    const pr = await githubApi("/repos/" + GITHUB_REPO + "/pulls", token, {
+      method: "POST",
+      body: JSON.stringify({
+        title: "Edit article: " + path,
+        head: branch,
+        base: "main",
+        draft: true,
+        maintainer_can_modify: true,
+        body: "## Summary\nReviewed article edit created with the Awakenology private visual editor.\n\n- Article: " + path + "\n- Full-page review and text-difference checks completed in the editor\n- Draft only: inspect the rendered page and diff before merging\n\nThis change does not deploy until the PR is merged."
+      })
+    });
+    return jsonResponse({ ok: true, number: pr.number, pullRequestUrl: pr.html_url, branch });
+  } catch (error) {
+    return jsonResponse({ error: error && error.message ? error.message : "Could not create the draft pull request." }, 502);
+  }
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    // Keep the prototype editor private on the public site; allow only this PR preview hostname for testing.
+    const isEditorHost = url.hostname === EDITOR_HOST;
     const isEditorPath = url.pathname === "/editor" || url.pathname.startsWith("/editor/");
-    const isEditorPreviewHost = url.hostname === "fix-editor-safe-fragment-export-20261013-awakenology.shifter888.workers.dev" || /^[a-f0-9]{8}-awakenology\.shifter888\.workers\.dev$/i.test(url.hostname);
-    if (isEditorPath && !isEditorPreviewHost) return new Response("Not found", { status: 404 });
+    const isEditorApi = url.pathname === "/api/editor/create-draft-pr";
+    if (isEditorHost && (isEditorPath || isEditorApi || url.pathname === "/")) {
+      if (!(await verifyCloudflareAccess(request, env))) return new Response("Private editor authentication required.", { status: 401, headers: { "cache-control": "no-store" } });
+      if (isEditorApi) return createReviewedDraftPR(request, env);
+      if (url.pathname === "/") {
+        url.pathname = "/editor/";
+        return env.ASSETS.fetch(new Request(url.toString(), request));
+      }
+      return env.ASSETS.fetch(request);
+    }
+    // Never expose the editor or publishing API on the public website or temporary preview hosts.
+    if (isEditorPath || isEditorApi) return new Response("Not found", { status: 404 });
     const response = await env.ASSETS.fetch(request);
     const contentType = response.headers.get("content-type") || "";
     const pathname = new URL(request.url).pathname;
