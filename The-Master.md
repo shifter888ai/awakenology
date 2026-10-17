@@ -589,3 +589,21 @@ This section consolidates approved visual decisions that must be treated as the 
 
 - Check same-page fragment links against the current document, including named anchors, without excluding all `#fragment` links.
 - Include self-closing images in missing-alt inventory and retain content-safe, read-only auditing.
+
+
+## Private Visual Editor — Stable Baseline (verified 2026-10-18)
+
+The private visual editor at `https://editor.awakenology.space/editor/` is an approved, stable workflow baseline following the successful end-to-end test in PR #160. Preserve this behavior unless a deliberate change is approved and passes the full validation workflow.
+
+- The editor must require an authorized GitHub sign-in; GitHub credentials remain server-side in the Cloudflare Worker and must never be exposed to the browser.
+- Editing and review must not modify `main` directly. Publishing creates a Draft pull request for human review; creating a PR must not itself merge or deploy.
+- The editor must establish a current, valid repository baseline for the target article and verify that the source has not changed before publishing.
+- The editor must disable PR creation until an actual change has been reviewed and a valid article path/baseline is established.
+- An unchanged article must be rejected by the server even if a client-side control is bypassed. Empty/no-op PRs must not be created.
+- Review must show the intended article text diff and reconstructed full-page preview. Preserve surrounding page structure and reject unsafe exports/changes.
+- Whitespace is content: accidental whitespace-only edits are real diffs and must be reviewed, not silently normalized. Do not broaden or normalize edits beyond the user's intent.
+- Draft PRs must pass all required CI checks, including Content Integrity Gate, Live SEO runtime audit, SEO metadata inventory, Sitemap route parity, and Workers Builds, before merge.
+- Merge only after human review and explicit approval. The standard successful path is Draft PR → inspect diff and preview → all required checks pass → human approval → merge → deployment verification → live-page smoke test.
+- A successful build or a “Ready” deployment status alone is not proof of production rollout. Verify the live canonical page after deployment.
+- Treat the behavior verified by PR #160 as the regression baseline. Any future change to editor publishing, baseline validation, review gating, authentication, or deployment behavior must include focused regression tests and must not weaken these safeguards.
+- Do not change the editor or Worker merely as part of “freezing” the baseline. This section documents the approved behavior; implementation changes require a separate, scoped change.
