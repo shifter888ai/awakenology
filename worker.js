@@ -26,6 +26,34 @@ function toBase64Url(bytes) {
   for (const b of bytes) binary += String.fromCharCode(b);
   return btoa(binary).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
 }
+function derLength(length) {
+  if (length < 128) return Uint8Array.of(length);
+  const bytes = [];
+  for (let n = length; n > 0; n = Math.floor(n / 256)) bytes.unshift(n & 255);
+  return Uint8Array.of(0x80 | bytes.length, ...bytes);
+}
+function pkcs1ToPkcs8(pkcs1) {
+  const prefix = Uint8Array.of(0x30,0x0d,0x06,0x09,0x2a,0x86,0x48,0x86,0xf7,0x0d,0x01,0x01,0x01,0x05,0x00);
+  const octetLength = derLength(pkcs1.length);
+  const octetHeader = Uint8Array.of(0x04, ...octetLength);
+  const body = new Uint8Array(prefix.length + octetHeader.length + pkcs1.length);
+  body.set(prefix, 0); body.set(octetHeader, prefix.length); body.set(pkcs1, prefix.length + octetHeader.length);
+  const sequenceLength = derLength(body.length);
+  const result = new Uint8Array(1 + sequenceLength.length + body.length);
+  result[0] = 0x30; result.set(sequenceLength, 1); result.set(body, 1 + sequenceLength.length);
+  return result;
+}
+function pemPrivateKeyBytes(pemValue) {
+  const match = pemValue.trim().match(/-----BEGIN (RSA )?PRIVATE KEY-----([\s\S]+?)-----END (RSA )?PRIVATE KEY-----/);
+  if (!match) throw new Error("GitHub App private key must be a PEM private key.");
+  const bytes = Uint8Array.from(atob(match[2].replace(/\s/g, "")), c => c.charCodeAt(0));
+  return match[1] ? pkcs1ToPkcs8(bytes) : bytes;
+}
+function toBase64(bytes) {
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(binary);
+}
 async function verifyCloudflareAccess(request, env) {
   const audience = env.ACCESS_AUD;
   const teamSetting = env.ACCESS_TEAM_DOMAIN;
@@ -59,9 +87,7 @@ async function createGitHubInstallationToken(env) {
   const now = Math.floor(Date.now() / 1000);
   const header = toBase64Url(new TextEncoder().encode(JSON.stringify({ alg: "RS256", typ: "JWT" })));
   const claims = toBase64Url(new TextEncoder().encode(JSON.stringify({ iat: now - 30, exp: now + 540, iss: String(env.GITHUB_APP_ID) })));
-  const pem = env.GITHUB_APP_PRIVATE_KEY.replace(/\\n/g, "\n").replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s/g, "");
-  const binary = atob(pem);
-  const keyBytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+  const keyBytes = pemPrivateKeyBytes(env.GITHUB_APP_PRIVATE_KEY.replace(/\\n/g, "\n"));
   const key = await crypto.subtle.importKey("pkcs8", keyBytes, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]);
   const signature = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(header + "." + claims));
   const appJwt = header + "." + claims + "." + toBase64Url(new Uint8Array(signature));
@@ -105,7 +131,7 @@ async function createReviewedDraftPR(request, env) {
       !/\.html?$/i.test(path) || path.split("/").some(part => !part || part === "." || part === ".." || part.startsWith("."))) {
     return jsonResponse({ error: "Invalid repository-relative article path." }, 400);
   }
-  if (typeof reviewedHtml !== "string" || reviewedHtml.length > 250000 || !/<html[\s>]/i.test(reviewedHtml) || !/class\s*=\s*["'][^"']*\barticle\b/i.test(reviewedHtml)) {
+  if (typeof reviewedHtml !== "string" || reviewedHtml.length > 60000 || !/<html[\s>]/i.test(reviewedHtml) || !/class\s*=\s*["'][^"']*\barticle\b/i.test(reviewedHtml)) {
     return jsonResponse({ error: "Reviewed HTML is missing the full document or .article element, or exceeds the size limit." }, 400);
   }
   if (typeof baselineSha256 !== "string" || !/^[a-f0-9]{64}$/i.test(baselineSha256)) return jsonResponse({ error: "Missing valid baseline fingerprint." }, 400);
@@ -124,7 +150,7 @@ async function createReviewedDraftPR(request, env) {
     await githubApi("/repos/" + GITHUB_REPO + "/git/refs", token, { method: "POST", body: JSON.stringify({ ref: "refs/heads/" + branch, sha: mainRef.object.sha }) });
     await githubApi("/repos/" + GITHUB_REPO + "/contents/" + encodedPath, token, {
       method: "PUT",
-      body: JSON.stringify({ message: "Edit article via private visual editor: " + path, content: btoa(String.fromCharCode(...new TextEncoder().encode(reviewedHtml))), sha: current.sha, branch })
+      body: JSON.stringify({ message: "Edit article via private visual editor: " + path, content: toBase64(new TextEncoder().encode(reviewedHtml)), sha: current.sha, branch })
     });
     const pr = await githubApi("/repos/" + GITHUB_REPO + "/pulls", token, {
       method: "POST",
