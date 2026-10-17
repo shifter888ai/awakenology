@@ -62,13 +62,13 @@ jobs:
               sys.exit("Blocked: article on main changed since it was loaded. Reload it and review again.")
           if len(html.encode("utf-8")) > 60000:
               sys.exit("Blocked: reviewed HTML exceeds the safe workflow input limit. Use the authenticated editor integration instead.")
-          if not re.search(r'class=["\'][^"\']*\\barticle\\b', html) and not re.search(r'class=["\']article["\']', html):
+          if not re.search(r'class=["\'][^"\']*\barticle\b', html) and not re.search(r'class=["\']article["\']', html):
               sys.exit('Blocked: reviewed HTML does not appear to contain an article element.')
-          if not re.search(r"<html\\b", html, re.I) or not re.search(r"</html\\s*>", html, re.I):
+          if not re.search(r"<html\b", html, re.I) or not re.search(r"</html\s*>", html, re.I):
               sys.exit("Blocked: input must be a complete HTML document.")
           target.write_text(html, encoding="utf-8", newline="")
           with open(os.environ["GITHUB_OUTPUT"], "a") as out:
-              out.write("path=" + path + "\\n")
+              out.write("path=" + path + "\n")
           PY
 
       - name: Create branch and draft pull request
