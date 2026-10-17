@@ -49,7 +49,24 @@
     "Targeted SEO remediation branch created 2026-10-12: improved the meta description on one page where the prior audit found a title-only description. Two other pages initially flagged were rechecked and their already-specific descriptions were preserved. Article body content remains unchanged. SEO remains pending until full metadata/content-integrity checks and live-delivered metadata verification are complete.",
     "Targeted SEO remediation through PRs #68 and #69: replaced title-only meta descriptions on two dialogue pages. For each edited page, the complete <body> source was verified unchanged. SEO remains pending until delivered metadata and broader content-integrity checks are complete.",
     "Repository source asset-path check completed 2026-10-12: scanned local src/href/poster references for common image, media, font, CSS, and JS file extensions across all 115 HTML files (114 sitemap pages plus AI Search; excluding 404.html). Every matched local reference resolved to a path present in the repository. This verifies repository path existence, not remote URL availability or visual rendering.",
-    "PR #69 merged 2026-10-12 (merge commit 7e1449062964d27185aa4782c13cccb2fa638f1f); targeted description remediation on 與退化派對話6 is now in main."
+    "PR #69 merged 2026-10-12 (merge commit 7e1449062964d27185aa4782c13cccb2fa638f1f); targeted description remediation on 與退化派對話6 is now in main.",
+    "Private visual editor stable baseline recorded 2026-10-18 after PR #160 was squash-merged, Cloudflare build version c12c7766 reported Ready, and the site owner confirmed the live article page was OK. Future editor/publishing changes must pass the dedicated regression gate in AUDIT.md; the reference PR does not authorize automatic merging."
   ],
-  "manifest_version": "2.1"
+  "manifest_version": "2.2",
+  "private_visual_editor_baseline": {
+    "status": "VERIFIED_STABLE",
+    "verified_date": "2026-10-18",
+    "reference_pr": 160,
+    "merge_commit": "2c79cfc48cb5616c89af5c52430cc3adfbe2d513",
+    "cloudflare_version": "c12c7766",
+    "production_smoke_test": "PASS_CONFIRMED_BY_SITE_OWNER",
+    "required_checks": [
+      "Content Integrity Gate / Detect accidental article-content loss",
+      "Live SEO runtime audit",
+      "SEO metadata inventory",
+      "Sitemap route parity",
+      "Workers Builds"
+    ],
+    "governance": "The-Master.md defines approved behavior; AUDIT.md defines mandatory regression checks. Do not alter implementation as part of baseline documentation."
+  }
 }
