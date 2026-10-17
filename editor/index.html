@@ -8,7 +8,15 @@
 </style></head><body>
 <header><h1>Awakenology · Private Visual Editor</h1><label>GitHub article path <input id="githubPath" type="text" placeholder="e.g. 與退化派對話8/index.html" style="width:min(340px,80vw);padding:7px;background:#222;color:#eee;border:1px solid #666;border-radius:5px"></label><button id="loadGitHub">Load from GitHub</button><label>Or load local HTML <input id="file" type="file" accept=".html,.htm,text/html"></label><button id="review" disabled>Review full-page HTML</button><button id="save" disabled>Download reviewed HTML</button></header>
 <nav aria-label="Formatting"><button data-cmd="bold" disabled><b>Bold</b></button><button data-cmd="underline" disabled><u>Underline</u></button><button data-cmd="undo" disabled>Undo</button><button data-cmd="redo" disabled>Redo</button><label>Text color <input id="color" type="color" value="#0000ff" disabled></label><button id="spacer" disabled>Insert blank line</button></nav>
-<div id="status" role="status">Enter a path in the public Awakenology GitHub repository or choose a local HTML file. GitHub loading is read-only; edits are not saved to GitHub.</div><section id="reviewPanel" hidden style="max-width:960px;margin:12px auto;padding:12px 15px;border:1px solid #555;border-radius:6px"><h2 style="font-size:16px">Review before download</h2><p id="reviewSummary"></p><h3 style="font-size:14px">Article text changes</h3><p><small>Lines prefixed with − were removed; lines prefixed with + were added. This compares exact article text, including whitespace. Formatting-only changes are flagged separately.</small></p><pre id="changeDiff" class="diff" aria-label="Article text difference"></pre><p><strong>Safety note:</strong> Export is blocked if surrounding page elements change in the DOM comparison. Browser serialization may still normalize original source markup; inspect the downloaded copy before committing it.</p><iframe id="fullPreview" title="Reconstructed full-page preview" style="width:100%;min-height:50vh;background:white"></iframe><button id="cancelReview">Cancel review</button></section>
+<div id="status" role="status">Enter a path in the public Awakenology GitHub repository or choose a local HTML file. GitHub loading is read-only; edits are not saved to GitHub.</div><section id="reviewPanel" hidden style="max-width:960px;margin:12px auto;padding:12px 15px;border:1px solid #555;border-radius:6px"><h2 style="font-size:16px">Review before download</h2><p id="reviewSummary"></p><h3 style="font-size:14px">Article text changes</h3><p><small>Lines prefixed with − were removed; lines prefixed with + were added. This compares exact article text, including whitespace. Formatting-only changes are flagged separately.</small></p><pre id="changeDiff" class="diff" aria-label="Article text difference"></pre><p><strong>Safety note:</strong> Export is blocked if surrounding page elements change in the DOM comparison. Browser serialization may still normalize original source markup; inspect the downloaded copy before committing it.</p><iframe id="fullPreview" title="Reconstructed full-page preview" style="width:100%;min-height:50vh;background:white"></iframe><section id="githubPublish" style="margin:14px 0;padding:12px;border:1px solid #555;border-radius:6px">
+<h3 style="font-size:14px;margin-top:0">Create a GitHub pull request</h3>
+<p><small>Available only for articles loaded from GitHub. This creates a new branch and a <strong>draft PR</strong>; it does not change main or deploy the site. Use a fine-grained GitHub token limited to this repository, with <em>Contents: Read and write</em> and <em>Pull requests: Read and write</em>. The token is used only in this page's memory, sent to GitHub, and cleared after the attempt. Do not paste a classic or broadly scoped token.</small></p>
+<label for="githubToken">Temporary GitHub token</label>
+<input id="githubToken" type="password" autocomplete="off" spellcheck="false" placeholder="Paste fine-grained token" style="width:min(520px,100%);display:block;margin:5px 0 10px;padding:8px;background:#222;color:#eee;border:1px solid #666;border-radius:5px">
+<button id="createPR" disabled>Create draft PR from reviewed HTML</button>
+<p id="publishStatus" role="status" aria-live="polite"></p>
+</section>
+<button id="cancelReview">Cancel review</button></section>
 <main><iframe id="preview" title="Article editing preview" sandbox="allow-same-origin"></iframe></main>
 <script>
 (()=>{'use strict';
@@ -52,4 +60,49 @@ review.addEventListener('click',()=>{try{if(!ready()||!original){setStatus('Revi
 document.querySelector('#cancelReview').addEventListener('click',()=>{panel.hidden=true;main.hidden=false;reviewedHtml=null;save.disabled=true;setStatus('Review cancelled. Original file remains unchanged.');});
 save.addEventListener('click',()=>{if(!reviewedHtml){setStatus('Click Review full-page HTML first.');return;}const url=URL.createObjectURL(new Blob([reviewedHtml],{type:'text/html;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=filename.replace(/\\.html?$/i,'')+'-reviewed.html';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);setStatus('Downloaded a reconstructed full-page HTML copy. Original file remains unchanged; inspect the downloaded page before using it.');});
 })();
+
+const tokenInput=document.querySelector('#githubToken'), createPRButton=document.querySelector('#createPR'), publishStatus=document.querySelector('#publishStatus');
+function publishMessage(s){publishStatus.textContent=s}
+function apiHeaders(token){return {'Accept':'application/vnd.github+json','Authorization':'Bearer '+token,'X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'}}
+async function githubRequest(url,token,options={}){const response=await fetch(url,{...options,headers:{...apiHeaders(token),...(options.headers||{})}});let data={};try{data=await response.json()}catch{}if(!response.ok)throw new Error((data&&data.message)||('GitHub API returned HTTP '+response.status));return data}
+function decodeBase64Utf8(value){const binary=atob(value.replace(/\s/g,''));const bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return new TextDecoder().decode(bytes)}
+function encodeBase64Utf8(value){const bytes=new TextEncoder().encode(value);let binary='';const chunk=0x8000;for(let i=0;i<bytes.length;i+=chunk)binary+=String.fromCharCode(...bytes.subarray(i,i+chunk));return btoa(binary)}
+function encodedPath(path){return path.split('/').map(encodeURIComponent).join('/')}
+function updatePublishAvailability(){createPRButton.disabled=!(reviewedHtml&&loadedRepoPath&&loadedRepoPath.length&&panel.hidden===false)}
+updatePublishAvailability();
+review.addEventListener('click',()=>{setTimeout(updatePublishAvailability,0)});
+document.querySelector('#cancelReview').addEventListener('click',()=>{updatePublishAvailability();tokenInput.value='';publishMessage('')});
+createPRButton.addEventListener('click',async()=>{
+if(!reviewedHtml||!loadedRepoPath){publishMessage('Load the article directly from GitHub and review it before creating a PR.');return}
+const token=tokenInput.value.trim();if(!token){publishMessage('Paste a temporary fine-grained GitHub token to continue.');return}
+createPRButton.disabled=true;tokenInput.disabled=true;publishMessage('Checking GitHub access and verifying the article has not changed on main…');
+let branchUrl='';
+try{
+const apiRoot='https://api.github.com/repos/shifter888ai/awakenology';
+const path=loadedRepoPath;
+const current=await githubRequest(apiRoot+'/contents/'+encodedPath(path)+'?ref=main',token);
+if(current.type!=='file'||!current.content)throw new Error('GitHub did not return the expected article file.');
+const currentText=decodeBase64Utf8(current.content);
+if(currentText!==original)throw new Error('The article on main has changed since it was loaded. Reload the latest version and reapply your edits before creating a PR.');
+const ref=await githubRequest(apiRoot+'/git/ref/heads/main',token);
+const slug=path.replace(/\.html?$/i,'').split('/').map(s=>s.replace(/[^A-Za-z0-9._-]+/g,'-').replace(/^-+|-+$/g,'')).filter(Boolean).join('-').slice(-45)||'article';
+const stamp=new Date().toISOString().replace(/[-:.TZ]/g,'').slice(0,14);
+const branch='visual-editor/'+stamp+'-'+slug;
+await githubRequest(apiRoot+'/git/refs',token,{method:'POST',body:JSON.stringify({ref:'refs/heads/'+branch,sha:ref.object.sha})});
+branchUrl='https://github.com/shifter888ai/awakenology/tree/'+branch;
+publishMessage('Branch created. Uploading the reviewed HTML…');
+await githubRequest(apiRoot+'/contents/'+encodedPath(path),token,{method:'PUT',body:JSON.stringify({message:'Edit article via private visual editor: '+path,content:encodeBase64Utf8(reviewedHtml),sha:current.sha,branch})});
+publishMessage('Reviewed HTML committed to the new branch. Opening a draft pull request…');
+const title='Edit article: '+path;
+const body='## Summary\nReviewed article edit created with the Awakenology private visual editor.\n\n- Article: '+path+'\n- Full-page review completed in the editor\n- This is a draft for manual inspection before merge and deployment\n\nPlease inspect the rendered page and diff before marking ready for review.';
+const pr=await githubRequest(apiRoot+'/pulls',token,{method:'POST',body:JSON.stringify({title,head:branch,base:'main',body,draft:true,maintainer_can_modify:true})});
+publishMessage('Draft PR created successfully: '+pr.html_url+' . Nothing has been merged or deployed. Open the PR and inspect the diff before approving it.');
+tokenInput.value='';
+}catch(err){
+const message=err&&err.message?err.message:'Unexpected error';
+publishMessage('Could not finish creating the PR: '+message+(branchUrl?' Branch (may contain the reviewed commit): '+branchUrl:'')+'. Your token has been cleared; reload or retry only after checking GitHub.');
+tokenInput.value='';
+}finally{tokenInput.disabled=false;createPRButton.disabled=!(reviewedHtml&&loadedRepoPath&&panel.hidden===false)}
+});
+
 </script></body></html>
