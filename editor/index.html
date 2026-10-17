@@ -58,8 +58,6 @@ function buildReviewedHtml(){const parsed=new DOMParser().parseFromString(origin
 review.addEventListener('click',()=>{try{if(!ready()||!original){setStatus('Review unavailable: load an HTML file containing an .article element first.');return;}reviewedHtml=buildReviewedHtml();const before=articleText(original);const after=articleText(reviewedHtml);const exportedArticle=verifyExport(reviewedHtml);const changed=before!==after;const originalArticle=new DOMParser().parseFromString(original,'text/html').querySelector('.article');const markupChanged=originalArticle.outerHTML!==exportedArticle.outerHTML;document.querySelector('#reviewSummary').textContent='Surrounding page DOM integrity: PASS. Exact article text '+(changed?'has changed (including whitespace).':'is unchanged.')+' Article HTML/formatting '+(markupChanged?'differs; inspect carefully.':'is unchanged.')+' Source markup may still be normalized during browser serialization.';const diff=makeDiff(before,after);document.querySelector('#changeDiff').replaceChildren(...diff.map(line=>{const span=document.createElement('span');span.className=line.kind;span.textContent=line.text+'\n';return span}));fullPreview.srcdoc=reviewedHtml;panel.hidden=false;main.hidden=true;save.disabled=false;setStatus('Review generated locally. Only the reviewed page is shown. Nothing has been downloaded or uploaded yet.');}catch(err){reviewedHtml=null;save.disabled=true;panel.hidden=true;setStatus('Review failed: '+(err?.message||String(err)));console.error(err);}});
 document.querySelector('#cancelReview').addEventListener('click',()=>{panel.hidden=true;main.hidden=false;reviewedHtml=null;save.disabled=true;setStatus('Review cancelled. Original file remains unchanged.');});
 save.addEventListener('click',()=>{if(!reviewedHtml){setStatus('Click Review full-page HTML first.');return;}const url=URL.createObjectURL(new Blob([reviewedHtml],{type:'text/html;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=filename.replace(/\\.html?$/i,'')+'-reviewed.html';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);setStatus('Downloaded a reconstructed full-page HTML copy. Original file remains unchanged; inspect the downloaded page before using it.');});
-})();
-
 const createPRButton=document.querySelector('#createPR'), publishStatus=document.querySelector('#publishStatus');
 function publishMessage(s){publishStatus.textContent=s}
 function updatePublishAvailability(){createPRButton.disabled=!(reviewedHtml&&loadedRepoPath&&loadedRepoPath.length&&githubBaseline&&panel.hidden===false)}
@@ -94,6 +92,8 @@ createPRButton.addEventListener('click',async()=>{
     updatePublishAvailability();
   }
 });
+})();
+
 </script></body>
 <!-- Temporary preview verification marker; editor-only, no public article content changed. -->
 </html>
