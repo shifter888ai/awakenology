@@ -1,12 +1,18 @@
 {
   "name": "awakenology",
   "compatibility_date": "2026-09-30",
+  "vars": {
+    "EDITOR_GITHUB_ALLOWED_USER": "shifter888ai",
+    "GITHUB_APP_ID": "5354321",
+    "GITHUB_APP_INSTALLATION_ID": "172294868",
+    "GITHUB_OAUTH_CLIENT_ID": "Ov23liu1XA6eqNXWqJ16"
+  },
   "assets": {
     "directory": ".",
     "not_found_handling": "404-page",
     "binding": "ASSETS",
     "run_worker_first": true
   },
-  "main": "./worker.js",
-  "previews": {}
+  "previews": {},
+  "main": "./worker.js"
 }
