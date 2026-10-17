@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Awakenology — Private Visual Editor</title>
+<meta name="description" content="Private visual editor for reviewing Awakenology article HTML changes.">
+<meta name="robots" content="noindex, nofollow">
+<style>
+:root{font:15px/1.5 system-ui,sans-serif;color-scheme:dark;background:#151515;color:#eee}*{box-sizing:border-box}body{margin:0}header{padding:15px 20px;border-bottom:1px solid #444;display:flex;gap:12px;align-items:center;flex-wrap:wrap}h1{font-size:17px;margin:0 auto 0 0}button,.file{border:1px solid #666;background:#292929;color:inherit;border-radius:5px;padding:7px 10px;cursor:pointer}button:disabled{opacity:.4;cursor:not-allowed}input[type=file]{max-width:230px}nav{padding:10px 20px;display:flex;flex-wrap:wrap;gap:7px;border-bottom:1px solid #444}main{max-width:960px;margin:20px auto;padding:0 15px}iframe{display:block;width:100%;min-height:70vh;border:1px solid #555;background:white;border-radius:6px}#status{font-size:12px;color:#bbb;padding:8px 20px}small{color:#aaa}.diff{white-space:pre-wrap;overflow-wrap:anywhere;background:#101010;border:1px solid #444;border-radius:5px;padding:10px;max-height:45vh;overflow:auto;font:12px/1.5 ui-monospace,monospace}.diff .add{color:#9ee6a0}.diff .remove{color:#ffaaaa}.diff .same{color:#aaa}input[type=color]{height:32px;width:42px;vertical-align:middle} 
+</style></head><body>
+<header><h1>Awakenology · Private Visual Editor</h1><label>GitHub article path <input id="githubPath" type="text" placeholder="e.g. 與退化派對話8/index.html" style="width:min(340px,80vw);padding:7px;background:#222;color:#eee;border:1px solid #666;border-radius:5px"></label><button id="loadGitHub">Load from GitHub</button><label>Or load local HTML <input id="file" type="file" accept=".html,.htm,text/html"></label><button id="review" disabled>Review full-page HTML</button><button id="save" disabled>Download reviewed HTML</button></header>
+<nav aria-label="Formatting"><button data-cmd="bold" disabled><b>Bold</b></button><button data-cmd="underline" disabled><u>Underline</u></button><button data-cmd="undo" disabled>Undo</button><button data-cmd="redo" disabled>Redo</button><label>Text color <input id="color" type="color" value="#0000ff" disabled></label><button id="spacer" disabled>Insert blank line</button></nav>
+<div id="status" role="status">Enter a path in the public Awakenology GitHub repository or choose a local HTML file. GitHub loading is read-only; edits are not saved to GitHub.</div><section id="reviewPanel" hidden style="max-width:960px;margin:12px auto;padding:12px 15px;border:1px solid #555;border-radius:6px"><h2 style="font-size:16px">Review before download</h2><p id="reviewSummary"></p><h3 style="font-size:14px">Article text changes</h3><p><small>Lines prefixed with − were removed; lines prefixed with + were added. This compares exact article text, including whitespace. Formatting-only changes are flagged separately.</small></p><pre id="changeDiff" class="diff" aria-label="Article text difference"></pre><p><strong>Safety note:</strong> Export is blocked if surrounding page elements change in the DOM comparison. Browser serialization may still normalize original source markup; inspect the downloaded copy before committing it.</p><iframe id="fullPreview" title="Reconstructed full-page preview" style="width:100%;min-height:50vh;background:white"></iframe><section id="githubPublish" style="margin:14px 0;padding:12px;border:1px solid #555;border-radius:6px">
+<h3 style="font-size:14px;margin-top:0">Submit reviewed HTML through GitHub Actions</h3>
+<p><small>This GitHub-hosted pilot does not store or request a personal access token. After reviewing, copy the reviewed HTML and the current GitHub blob SHA, then submit them to the repository's authenticated Actions workflow. The workflow verifies the SHA before creating a draft PR; it never writes to main or deploys directly.</small></p>
+<label for="pilotBlobSha">Current GitHub file blob SHA</label>
+<input id="pilotBlobSha" readonly style="width:100%;display:block;margin:5px 0 10px;padding:8px;background:#222;color:#eee;border:1px solid #666;border-radius:5px">
+<button id="refreshPilotSha" type="button">Get current file SHA</button>
+<button id="copyPilotSha" type="button">Copy SHA</button>
+<label for="pilotReviewedHtml" style="display:block;margin-top:12px">Reviewed full-page HTML</label>
+<textarea id="pilotReviewedHtml" readonly rows="8" style="width:100%;display:block;margin:5px 0 10px;padding:8px;background:#222;color:#eee;border:1px solid #666;border-radius:5px"></textarea>
+<button id="copyPilotHtml" type="button">Copy reviewed HTML</button>
+<a href="https://github.com/shifter888ai/awakenology/actions/workflows/reviewed-article-pr.yml" target="_blank" rel="noopener noreferrer" style="margin-left:8px;color:#a8c7ff">Open GitHub Actions workflow</a>
+<p id="publishStatus" role="status" aria-live="polite"></p>
+</section>
+<button id="cancelReview">Cancel review</button></section>
+<main><iframe id="preview" title="Article editing preview" sandbox="allow-same-origin"></iframe></main>
+<script>
+(()=>{'use strict';
+const file=document.querySelector('#file'), frame=document.querySelector('#preview'), main=document.querySelector('main'), save=document.querySelector('#save'), review=document.querySelector('#review'), status=document.querySelector('#status'), panel=document.querySelector('#reviewPanel'), fullPreview=document.querySelector('#fullPreview');
+let original=null, filename='', loaded=false, reviewedHtml=null, fullPageReady=false, loadedRepoPath='', githubBaseline=null, baselineRequest=0;
+const controls=[...document.querySelectorAll('[data-cmd],#color,#spacer')];
+function setStatus(s){status.textContent=s}
+function doc(){return frame.contentDocument}
+function article(){return doc()?.querySelector('.article')}
+function ready(){return loaded && !!article()}
+function withinSelection(){const sel=frame.contentWindow.getSelection();return !!(sel&&sel.rangeCount&&article().contains(sel.getRangeAt(0).commonAncestorContainer))}
+function loadHtmlText(text,name,sourcePath=''){
+const parsed=new DOMParser().parseFromString(text,'text/html');
+if(!parsed.querySelector('.article')){setStatus('This file has no element with class="article". No changes made.');return false}
+original=text;filename=name;loadedRepoPath=sourcePath;githubBaseline=null;baselineRequest++;loaded=false;save.disabled=true;review.disabled=true;panel.hidden=true;main.hidden=false;reviewedHtml=null;fullPageReady=!!(parsed.querySelector('header, .site-header')&&parsed.querySelector('footer, .site-footer, .footer-inner'));controls.forEach(x=>x.disabled=true);
+frame.onload=()=>{const a=article();if(!a){setStatus('Could not load article.');return}a.contentEditable='true';a.spellcheck=false;loaded=true;review.disabled=false;controls.forEach(x=>x.disabled=false);setStatus(fullPageReady?'Editing '+filename+'. Full-page header/footer detected; review will preserve the surrounding page.':'Editing '+filename+'. Header/footer detection was inconclusive; check the reconstructed page carefully.')};
+frame.srcdoc=text;return true;
+}
+file.addEventListener('change',async()=>{const f=file.files?.[0];if(!f)return;const targetPath=document.querySelector('#githubPath').value.trim().replace(/^\\/+|\\/+$/g,'');const validPath=targetPath&&/\\.html?$/i.test(targetPath)&&!targetPath.split('/').some(part=>!part||part==='.'||part==='..');loadHtmlText(await f.text(),f.name,validPath?targetPath:'');if(!validPath)setStatus('Local HTML loaded. Enter its exact repository-relative GitHub path above, then review the page. The PR flow will verify that the original file matches main before creating a draft.');});
+document.querySelector('#githubPath').addEventListener('change',async()=>{if(!loaded)return;const p=document.querySelector('#githubPath').value.trim().replace(/^\\/+|\\/+$/g,'');if(!p||! /\\.html?$/i.test(p)||p.split('/').some(part=>!part||part==='.'||part==='..')){loadedRepoPath='';githubBaseline=null;updatePublishAvailability();return}loadedRepoPath=p;const request=++baselineRequest;githubBaseline=null;updatePublishAvailability();setStatus('Checking the current GitHub baseline for '+p+'…');try{const url='https://raw.githubusercontent.com/shifter888ai/awakenology/main/'+p.split('/').map(encodeURIComponent).join('/');const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw new Error('GitHub returned HTTP '+response.status);const baseline=await response.text();if(request!==baselineRequest)return;if(!new DOMParser().parseFromString(baseline,'text/html').querySelector('.article'))throw new Error('The GitHub target is not an article HTML page.');githubBaseline=baseline;setStatus('GitHub baseline loaded for '+p+'. Review the local HTML; the PR action will verify that main has not changed since this check.');updatePublishAvailability()}catch(err){if(request!==baselineRequest)return;loadedRepoPath='';githubBaseline=null;setStatus('Could not establish a safe GitHub baseline: '+(err?.message||String(err)));updatePublishAvailability()}});
+document.querySelector('#loadGitHub').addEventListener('click',async()=>{
+const rawPath=document.querySelector('#githubPath').value.trim().replace(/^\/+|\/+$/g,'');
+if(!rawPath||rawPath.split('/').some(part=>!part||part==='.'||part==='..')){setStatus('Enter a repository-relative file path, such as a folder name/index.html.');return}
+if(!/\.html?$/i.test(rawPath)){setStatus('Please choose an HTML file path ending in .html or .htm.');return}
+const button=document.querySelector('#loadGitHub');button.disabled=true;setStatus('Loading '+rawPath+' from the public GitHub repository…');
+try{const url='https://raw.githubusercontent.com/shifter888ai/awakenology/main/'+rawPath.split('/').map(encodeURIComponent).join('/');
+const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw new Error('GitHub returned HTTP '+response.status);
+const text=await response.text();if(loadHtmlText(text,rawPath.split('/').pop(),rawPath)){githubBaseline=text;setStatus('Loaded '+rawPath+' from GitHub (read-only). Edits are local until you export the reviewed HTML.');}
+}catch(err){setStatus('Could not load from GitHub: '+(err?.message||String(err)))}finally{button.disabled=false}
+});
+document.querySelectorAll('[data-cmd]').forEach(b=>b.addEventListener('mousedown',e=>e.preventDefault()));
+document.querySelectorAll('[data-cmd]').forEach(b=>b.addEventListener('click',()=>{if(!ready()||!withinSelection())return;doc().execCommand(b.dataset.cmd,false,null);article().focus()}));
+document.querySelector('#color').addEventListener('input',e=>{if(!ready()||!withinSelection())return;doc().execCommand('foreColor',false,e.target.value)});
+document.querySelector('#spacer').addEventListener('mousedown',e=>e.preventDefault());
+document.querySelector('#spacer').addEventListener('click',()=>{if(!ready()||!withinSelection())return;doc().execCommand('insertHTML',false,'<p class="spacer"></p>')});
+function articleText(html){const d=new DOMParser().parseFromString(html,'text/html');return d.querySelector('.article')?.textContent||''}
+function outsideArticle(html){const d=new DOMParser().parseFromString(html,'text/html');const a=d.querySelector('.article');if(!a)throw new Error('Missing article in integrity check');a.replaceWith(d.createComment('ARTICLE CONTENT'));return d.documentElement.outerHTML}
+function verifyExport(html){if(outsideArticle(original)!==outsideArticle(html))throw new Error('Surrounding page integrity check failed. Export blocked.');const d=new DOMParser().parseFromString(html,'text/html');const a=d.querySelector('.article');if(!a||a.hasAttribute('contenteditable')||a.hasAttribute('spellcheck'))throw new Error('Article export integrity check failed. Export blocked.');return a}
+function makeDiff(before,after){if(before===after)return[{kind:'same',text:'No article text changes detected.'}];let start=0;while(start<before.length&&start<after.length&&before[start]===after[start])start++;let bi=before.length-1,ai=after.length-1;while(bi>=start&&ai>=start&&before[bi]===after[ai]){bi--;ai--}let removed=before.slice(start,bi+1),added=after.slice(start,ai+1);const out=[];const context=45;const left=before.slice(Math.max(0,start-context),start);if(start>context)out.push({kind:'same',text:'… unchanged text before …'});if(left)out.push({kind:'same',text:left});let overlap='';for(let n=Math.min(removed.length,added.length);n>0;n--){if(removed.endsWith(added.slice(0,n))){overlap=added.slice(0,n);removed=removed.slice(0,-n);added=added.slice(n);break}if(added.endsWith(removed.slice(0,n))){overlap=removed.slice(0,n);removed=removed.slice(n);added=added.slice(0,-n);break}}if(removed)out.push({kind:'remove',text:'− '+removed});if(overlap)out.push({kind:'same',text:overlap});if(added)out.push({kind:'add',text:'+ '+added});const right=before.slice(bi+1,bi+1+context);if(right)out.push({kind:'same',text:right});if(bi+1+context<before.length)out.push({kind:'same',text:'… unchanged text after …'});return out}
+function buildReviewedHtml(){const parsed=new DOMParser().parseFromString(original,'text/html');const sourceArticle=parsed.querySelector('.article');const edited=article().cloneNode(true);edited.removeAttribute('contenteditable');edited.removeAttribute('spellcheck');sourceArticle.replaceWith(edited);return '<!doctype html>\n'+parsed.documentElement.outerHTML;}
+review.addEventListener('click',()=>{try{if(!ready()||!original){setStatus('Review unavailable: load an HTML file containing an .article element first.');return;}reviewedHtml=buildReviewedHtml();const before=articleText(original);const after=articleText(reviewedHtml);const exportedArticle=verifyExport(reviewedHtml);const changed=before!==after;const originalArticle=new DOMParser().parseFromString(original,'text/html').querySelector('.article');const markupChanged=originalArticle.outerHTML!==exportedArticle.outerHTML;document.querySelector('#reviewSummary').textContent='Surrounding page DOM integrity: PASS. Exact article text '+(changed?'has changed (including whitespace).':'is unchanged.')+' Article HTML/formatting '+(markupChanged?'differs; inspect carefully.':'is unchanged.')+' Source markup may still be normalized during browser serialization.';const diff=makeDiff(before,after);document.querySelector('#changeDiff').replaceChildren(...diff.map(line=>{const span=document.createElement('span');span.className=line.kind;span.textContent=line.text+'\n';return span}));fullPreview.srcdoc=reviewedHtml;panel.hidden=false;main.hidden=true;save.disabled=false;setStatus('Review generated locally. Only the reviewed page is shown. Nothing has been downloaded or uploaded yet.');}catch(err){reviewedHtml=null;save.disabled=true;panel.hidden=true;setStatus('Review failed: '+(err?.message||String(err)));console.error(err);}});
+document.querySelector('#cancelReview').addEventListener('click',()=>{panel.hidden=true;main.hidden=false;reviewedHtml=null;save.disabled=true;setStatus('Review cancelled. Original file remains unchanged.');});
+save.addEventListener('click',()=>{if(!reviewedHtml){setStatus('Click Review full-page HTML first.');return;}const url=URL.createObjectURL(new Blob([reviewedHtml],{type:'text/html;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=filename.replace(/\\.html?$/i,'')+'-reviewed.html';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);setStatus('Downloaded a reconstructed full-page HTML copy. Original file remains unchanged; inspect the downloaded page before using it.');});
+})();
+
+
+const pilotSha=document.querySelector('#pilotBlobSha'), pilotHtml=document.querySelector('#pilotReviewedHtml'), publishStatus=document.querySelector('#publishStatus');
+function publishMessage(s){publishStatus.textContent=s}
+function updatePilotExport(){pilotHtml.value=reviewedHtml||'';pilotSha.value=''}
+review.addEventListener('click',()=>setTimeout(updatePilotExport,0));
+document.querySelector('#cancelReview').addEventListener('click',()=>{pilotHtml.value='';pilotSha.value='';publishMessage('')});
+async function fetchPilotSha(){
+ if(!loadedRepoPath){publishMessage('Enter the exact repository-relative article path first.');return}
+ const b=document.querySelector('#refreshPilotSha');b.disabled=true;
+ try{
+  const url='https://api.github.com/repos/shifter888ai/awakenology/contents/'+loadedRepoPath.split('/').map(encodeURIComponent).join('/')+'?ref=main';
+  const r=await fetch(url,{headers:{Accept:'application/vnd.github+json'},cache:'no-store'});
+  if(!r.ok)throw new Error('GitHub returned HTTP '+r.status);
+  const data=await r.json();if(data.type!=='file'||!data.sha)throw new Error('Target is not a GitHub file.');
+  pilotSha.value=data.sha;publishMessage('SHA fetched from main. If the article changes before submission, the workflow will reject the stale SHA.');
+ }catch(err){publishMessage('Could not fetch file SHA: '+(err.message||String(err)))}
+ finally{b.disabled=false}
+}
+document.querySelector('#refreshPilotSha').addEventListener('click',fetchPilotSha);
+document.querySelector('#copyPilotSha').addEventListener('click',async()=>{if(!pilotSha.value)await fetchPilotSha();if(pilotSha.value){pilotSha.select();try{await navigator.clipboard.writeText(pilotSha.value);publishMessage('Blob SHA copied.')}catch{publishMessage('Select and copy the SHA manually.')}}});
+document.querySelector('#copyPilotHtml').addEventListener('click',async()=>{if(!reviewedHtml){publishMessage('Review the full-page HTML first.');return}pilotHtml.value=reviewedHtml;pilotHtml.focus();pilotHtml.select();try{await navigator.clipboard.writeText(reviewedHtml);publishMessage('Reviewed HTML copied. Paste it into the GitHub Actions workflow input.')}catch{publishMessage('HTML selected. Copy it manually, then paste into the GitHub Actions workflow input.')}});
+
+</script></body>
+<!-- Temporary preview verification marker; editor-only, no public article content changed. -->
+</html>
