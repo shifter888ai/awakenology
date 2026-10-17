@@ -54,30 +54,113 @@ function toBase64(bytes) {
   for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
   return btoa(binary);
 }
-async function verifyCloudflareAccess(request, env) {
-  const audience = env.ACCESS_AUD;
-  const teamSetting = env.ACCESS_TEAM_DOMAIN;
-  const assertion = request.headers.get("cf-access-jwt-assertion");
-  if (!audience || !teamSetting || !assertion) return false;
+function getCookie(request, name) {
+  const header = request.headers.get("cookie") || "";
+  for (const item of header.split(";")) {
+    const index = item.indexOf("=");
+    if (index < 0) continue;
+    if (item.slice(0, index).trim() === name) return item.slice(index + 1).trim();
+  }
+  return "";
+}
+function cookieHeader(name, value, maxAge) {
+  return name + "=" + value + "; Path=/; Max-Age=" + maxAge + "; Secure; HttpOnly; SameSite=Lax";
+}
+async function hmacKey(secret) {
+  return crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]);
+}
+async function signSession(payload, secret) {
+  const encoded = toBase64Url(new TextEncoder().encode(JSON.stringify(payload)));
+  const key = await hmacKey(secret);
+  const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(encoded));
+  return encoded + "." + toBase64Url(new Uint8Array(signature));
+}
+async function verifyEditorSession(request, env) {
+  const secret = env.EDITOR_SESSION_SECRET;
+  const allowedUser = (env.EDITOR_GITHUB_ALLOWED_USER || "").trim().toLowerCase();
+  const cookie = getCookie(request, "awakenology_editor_session");
+  if (!secret || secret.length < 32 || !allowedUser || !cookie) return false;
   try {
-    const issuer = (teamSetting.startsWith("http") ? teamSetting : "https://" + teamSetting).replace(/\/+$/, "");
-    const parts = assertion.split(".");
-    if (parts.length !== 3) return false;
-    const header = base64UrlJson(parts[0]);
-    const claims = base64UrlJson(parts[1]);
-    const now = Math.floor(Date.now() / 1000);
-    if (header.alg !== "RS256" || !header.kid || claims.iss !== issuer) return false;
-    if (!(claims.aud === audience || (Array.isArray(claims.aud) && claims.aud.includes(audience)))) return false;
-    if (typeof claims.exp !== "number" || claims.exp < now || (typeof claims.nbf === "number" && claims.nbf > now + 60)) return false;
-    const keyResponse = await fetch(issuer + "/cdn-cgi/access/certs", { cf: { cacheTtl: 300 } });
-    if (!keyResponse.ok) return false;
-    const keySet = await keyResponse.json();
-    const jwk = (keySet.keys || []).find(key => key.kid === header.kid);
-    if (!jwk) return false;
-    const publicKey = await crypto.subtle.importKey("jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
-    return await crypto.subtle.verify("RSASSA-PKCS1-v1_5", publicKey, base64UrlBytes(parts[2]), new TextEncoder().encode(parts[0] + "." + parts[1]));
+    const parts = cookie.split(".");
+    if (parts.length !== 2) return false;
+    const key = await hmacKey(secret);
+    const valid = await crypto.subtle.verify("HMAC", key, base64UrlBytes(parts[1]), new TextEncoder().encode(parts[0]));
+    if (!valid) return false;
+    const payload = base64UrlJson(parts[0]);
+    return typeof payload.exp === "number" && payload.exp > Math.floor(Date.now() / 1000) &&
+      typeof payload.login === "string" && payload.login.toLowerCase() === allowedUser;
   } catch {
     return false;
+  }
+}
+function authRedirect(url) {
+  return Response.redirect(url, 302);
+}
+async function startGitHubLogin(request, env) {
+  if (!env.GITHUB_OAUTH_CLIENT_ID || !env.EDITOR_GITHUB_ALLOWED_USER || !env.EDITOR_SESSION_SECRET || env.EDITOR_SESSION_SECRET.length < 32) {
+    return new Response("GitHub OAuth is not configured for the private editor.", { status: 503, headers: { "cache-control": "no-store" } });
+  }
+  const stateBytes = crypto.getRandomValues(new Uint8Array(32));
+  const state = toBase64Url(stateBytes);
+  const callback = "https://" + EDITOR_HOST + "/auth/github/callback";
+  const target = new URL("https://github.com/login/oauth/authorize");
+  target.searchParams.set("client_id", env.GITHUB_OAUTH_CLIENT_ID);
+  target.searchParams.set("redirect_uri", callback);
+  target.searchParams.set("scope", "read:user");
+  target.searchParams.set("state", state);
+  return new Response(null, {
+    status: 302,
+    headers: {
+      "location": target.toString(),
+      "set-cookie": cookieHeader("awakenology_editor_oauth_state", state, 600),
+      "cache-control": "no-store"
+    }
+  });
+}
+async function finishGitHubLogin(request, env) {
+  const url = new URL(request.url);
+  const suppliedState = url.searchParams.get("state") || "";
+  const expectedState = getCookie(request, "awakenology_editor_oauth_state");
+  const clearState = "awakenology_editor_oauth_state=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Lax";
+  if (!suppliedState || !expectedState || suppliedState !== expectedState) {
+    return new Response("GitHub sign-in could not be verified. Please try again.", { status: 400, headers: { "set-cookie": clearState, "cache-control": "no-store" } });
+  }
+  if (url.searchParams.has("error")) return authRedirect("https://" + EDITOR_HOST + "/auth/github");
+  const code = url.searchParams.get("code") || "";
+  if (!code || !env.GITHUB_OAUTH_CLIENT_ID || !env.GITHUB_OAUTH_CLIENT_SECRET ||
+      !env.EDITOR_GITHUB_ALLOWED_USER || !env.EDITOR_SESSION_SECRET || env.EDITOR_SESSION_SECRET.length < 32) {
+    return new Response("GitHub OAuth is not fully configured.", { status: 503, headers: { "set-cookie": clearState, "cache-control": "no-store" } });
+  }
+  try {
+    const tokenResponse = await fetch("https://github.com/login/oauth/access_token", {
+      method: "POST",
+      headers: { "accept": "application/json", "content-type": "application/json", "user-agent": "Awakenology-Private-Editor" },
+      body: JSON.stringify({ client_id: env.GITHUB_OAUTH_CLIENT_ID, client_secret: env.GITHUB_OAUTH_CLIENT_SECRET, code, redirect_uri: "https://" + EDITOR_HOST + "/auth/github/callback", state: suppliedState })
+    });
+    const tokenData = await tokenResponse.json().catch(() => ({}));
+    if (!tokenResponse.ok || !tokenData.access_token) throw new Error("GitHub did not issue an OAuth token.");
+    const userResponse = await fetch("https://api.github.com/user", {
+      headers: { "authorization": "Bearer " + tokenData.access_token, "accept": "application/vnd.github+json", "x-github-api-version": "2022-11-28", "user-agent": "Awakenology-Private-Editor" }
+    });
+    const user = await userResponse.json().catch(() => ({}));
+    if (!userResponse.ok || typeof user.login !== "string") throw new Error("Could not verify the GitHub account.");
+    if (user.login.toLowerCase() !== env.EDITOR_GITHUB_ALLOWED_USER.trim().toLowerCase()) {
+      return new Response("This GitHub account is not authorized to use the Awakenology editor.", {
+        status: 403,
+        headers: { "set-cookie": clearState + ", awakenology_editor_session=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Lax", "cache-control": "no-store" }
+      });
+    }
+    const session = await signSession({ login: user.login, exp: Math.floor(Date.now() / 1000) + 28800 }, env.EDITOR_SESSION_SECRET);
+    return new Response(null, {
+      status: 302,
+      headers: {
+        "location": "https://" + EDITOR_HOST + "/editor/",
+        "set-cookie": [clearState, cookieHeader("awakenology_editor_session", session, 28800)].join(", "),
+        "cache-control": "no-store"
+      }
+    });
+  } catch {
+    return new Response("GitHub sign-in failed. Please retry.", { status: 502, headers: { "set-cookie": clearState, "cache-control": "no-store" } });
   }
 }
 async function createGitHubInstallationToken(env) {
@@ -175,14 +258,26 @@ export default {
     const isEditorHost = url.hostname === EDITOR_HOST;
     const isEditorPath = url.pathname === "/editor" || url.pathname.startsWith("/editor/");
     const isEditorApi = url.pathname === "/api/editor/create-draft-pr";
-    if (isEditorHost && (isEditorPath || isEditorApi || url.pathname === "/")) {
-      if (!(await verifyCloudflareAccess(request, env))) return new Response("Private editor authentication required.", { status: 401, headers: { "cache-control": "no-store" } });
-      if (isEditorApi) return createReviewedDraftPR(request, env);
-      if (url.pathname === "/") {
-        url.pathname = "/editor/";
-        return env.ASSETS.fetch(new Request(url.toString(), request));
+    if (isEditorHost) {
+      if (url.pathname === "/auth/github" && request.method === "GET") return startGitHubLogin(request, env);
+      if (url.pathname === "/auth/github/callback" && request.method === "GET") return finishGitHubLogin(request, env);
+      if (url.pathname === "/auth/logout" && request.method === "POST") {
+        return new Response(null, { status: 302, headers: {
+          "location": "https://" + EDITOR_HOST + "/auth/github",
+          "set-cookie": "awakenology_editor_session=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Lax",
+          "cache-control": "no-store"
+        }});
       }
-      return env.ASSETS.fetch(request);
+      if (isEditorPath || isEditorApi || url.pathname === "/") {
+        const authenticated = await verifyEditorSession(request, env);
+        if (!authenticated) {
+          if (isEditorApi) return jsonResponse({ error: "Sign in with the authorized GitHub account to continue." }, 401);
+          return authRedirect("https://" + EDITOR_HOST + "/auth/github");
+        }
+        if (isEditorApi) return createReviewedDraftPR(request, env);
+        if (url.pathname === "/") return authRedirect("https://" + EDITOR_HOST + "/editor/");
+        return env.ASSETS.fetch(request);
+      }
     }
     // Never expose the editor or publishing API on the public website or temporary preview hosts.
     if (isEditorPath || isEditorApi) return new Response("Not found", { status: 404 });
