@@ -21,7 +21,7 @@
 <script>
 (()=>{'use strict';
 const file=document.querySelector('#file'), frame=document.querySelector('#preview'), main=document.querySelector('main'), save=document.querySelector('#save'), review=document.querySelector('#review'), status=document.querySelector('#status'), panel=document.querySelector('#reviewPanel'), fullPreview=document.querySelector('#fullPreview');
-let original=null, filename='', loaded=false, reviewedHtml=null, fullPageReady=false, loadedRepoPath='';
+let original=null, filename='', loaded=false, reviewedHtml=null, fullPageReady=false, loadedRepoPath='', githubBaseline=null, baselineRequest=0;
 const controls=[...document.querySelectorAll('[data-cmd],#color,#spacer')];
 function setStatus(s){status.textContent=s}
 function doc(){return frame.contentDocument}
@@ -31,12 +31,12 @@ function withinSelection(){const sel=frame.contentWindow.getSelection();return !
 function loadHtmlText(text,name,sourcePath=''){
 const parsed=new DOMParser().parseFromString(text,'text/html');
 if(!parsed.querySelector('.article')){setStatus('This file has no element with class="article". No changes made.');return false}
-original=text;filename=name;loadedRepoPath=sourcePath;loaded=false;save.disabled=true;review.disabled=true;panel.hidden=true;main.hidden=false;reviewedHtml=null;fullPageReady=!!(parsed.querySelector('header, .site-header')&&parsed.querySelector('footer, .site-footer, .footer-inner'));controls.forEach(x=>x.disabled=true);
+original=text;filename=name;loadedRepoPath=sourcePath;githubBaseline=null;baselineRequest++;loaded=false;save.disabled=true;review.disabled=true;panel.hidden=true;main.hidden=false;reviewedHtml=null;fullPageReady=!!(parsed.querySelector('header, .site-header')&&parsed.querySelector('footer, .site-footer, .footer-inner'));controls.forEach(x=>x.disabled=true);
 frame.onload=()=>{const a=article();if(!a){setStatus('Could not load article.');return}a.contentEditable='true';a.spellcheck=false;loaded=true;review.disabled=false;controls.forEach(x=>x.disabled=false);setStatus(fullPageReady?'Editing '+filename+'. Full-page header/footer detected; review will preserve the surrounding page.':'Editing '+filename+'. Header/footer detection was inconclusive; check the reconstructed page carefully.')};
 frame.srcdoc=text;return true;
 }
 file.addEventListener('change',async()=>{const f=file.files?.[0];if(!f)return;const targetPath=document.querySelector('#githubPath').value.trim().replace(/^\\/+|\\/+$/g,'');const validPath=targetPath&&/\\.html?$/i.test(targetPath)&&!targetPath.split('/').some(part=>!part||part==='.'||part==='..');loadHtmlText(await f.text(),f.name,validPath?targetPath:'');if(!validPath)setStatus('Local HTML loaded. Enter its exact repository-relative GitHub path above, then review the page. The PR flow will verify that the original file matches main before creating a draft.');});
-document.querySelector('#githubPath').addEventListener('input',()=>{if(loaded&&!loadedRepoPath){const p=document.querySelector('#githubPath').value.trim().replace(/^\\/+|\\/+$/g,'');if(p&&/\\.html?$/i.test(p)&&!p.split('/').some(part=>!part||part==='.'||part==='..')){loadedRepoPath=p;setStatus('Repository target set to '+p+'. Review the page, then enter your temporary token to create a draft PR.');updatePublishAvailability();}}});
+document.querySelector('#githubPath').addEventListener('change',async()=>{if(!loaded)return;const p=document.querySelector('#githubPath').value.trim().replace(/^\\/+|\\/+$/g,'');if(!p||! /\\.html?$/i.test(p)||p.split('/').some(part=>!part||part==='.'||part==='..')){loadedRepoPath='';githubBaseline=null;updatePublishAvailability();return}loadedRepoPath=p;const request=++baselineRequest;githubBaseline=null;updatePublishAvailability();setStatus('Checking the current GitHub baseline for '+p+'…');try{const url='https://raw.githubusercontent.com/shifter888ai/awakenology/main/'+p.split('/').map(encodeURIComponent).join('/');const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw new Error('GitHub returned HTTP '+response.status);const baseline=await response.text();if(request!==baselineRequest)return;if(!new DOMParser().parseFromString(baseline,'text/html').querySelector('.article'))throw new Error('The GitHub target is not an article HTML page.');githubBaseline=baseline;setStatus('GitHub baseline loaded for '+p+'. Review the local HTML; the PR action will verify that main has not changed since this check.');updatePublishAvailability()}catch(err){if(request!==baselineRequest)return;loadedRepoPath='';githubBaseline=null;setStatus('Could not establish a safe GitHub baseline: '+(err?.message||String(err)));updatePublishAvailability()}});
 document.querySelector('#loadGitHub').addEventListener('click',async()=>{
 const rawPath=document.querySelector('#githubPath').value.trim().replace(/^\/+|\/+$/g,'');
 if(!rawPath||rawPath.split('/').some(part=>!part||part==='.'||part==='..')){setStatus('Enter a repository-relative file path, such as a folder name/index.html.');return}
@@ -44,7 +44,7 @@ if(!/\.html?$/i.test(rawPath)){setStatus('Please choose an HTML file path ending
 const button=document.querySelector('#loadGitHub');button.disabled=true;setStatus('Loading '+rawPath+' from the public GitHub repository…');
 try{const url='https://raw.githubusercontent.com/shifter888ai/awakenology/main/'+rawPath.split('/').map(encodeURIComponent).join('/');
 const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw new Error('GitHub returned HTTP '+response.status);
-const text=await response.text();if(loadHtmlText(text,rawPath.split('/').pop(),rawPath))setStatus('Loaded '+rawPath+' from GitHub (read-only). Edits are local until you export the reviewed HTML.');
+const text=await response.text();if(loadHtmlText(text,rawPath.split('/').pop(),rawPath)){githubBaseline=text;setStatus('Loaded '+rawPath+' from GitHub (read-only). Edits are local until you export the reviewed HTML.');}
 }catch(err){setStatus('Could not load from GitHub: '+(err?.message||String(err)))}finally{button.disabled=false}
 });
 document.querySelectorAll('[data-cmd]').forEach(b=>b.addEventListener('mousedown',e=>e.preventDefault()));
@@ -74,7 +74,7 @@ updatePublishAvailability();
 review.addEventListener('click',()=>{setTimeout(updatePublishAvailability,0)});
 document.querySelector('#cancelReview').addEventListener('click',()=>{updatePublishAvailability();tokenInput.value='';publishMessage('')});
 createPRButton.addEventListener('click',async()=>{
-if(!reviewedHtml||!loadedRepoPath){publishMessage('Load the article directly from GitHub and review it before creating a PR.');return}
+if(!reviewedHtml||!loadedRepoPath||!githubBaseline){publishMessage('Load the article from GitHub, or load local HTML and set its repository path so the current baseline can be verified.');return}
 const token=tokenInput.value.trim();if(!token){publishMessage('Paste a temporary fine-grained GitHub token to continue.');return}
 createPRButton.disabled=true;tokenInput.disabled=true;publishMessage('Checking GitHub access and verifying the article has not changed on main…');
 let branchUrl='';
@@ -84,7 +84,7 @@ const path=loadedRepoPath;
 const current=await githubRequest(apiRoot+'/contents/'+encodedPath(path)+'?ref=main',token);
 if(current.type!=='file'||!current.content)throw new Error('GitHub did not return the expected article file.');
 const currentText=decodeBase64Utf8(current.content);
-if(currentText!==original)throw new Error('The article on main has changed since it was loaded. Reload the latest version and reapply your edits before creating a PR.');
+if(currentText!==githubBaseline)throw new Error('The article on main has changed since the baseline was loaded. Reload the latest source, reapply your edits, and review again before creating a PR.');
 const ref=await githubRequest(apiRoot+'/git/ref/heads/main',token);
 const slug=path.replace(/\.html?$/i,'').split('/').map(s=>s.replace(/[^A-Za-z0-9._-]+/g,'-').replace(/^-+|-+$/g,'')).filter(Boolean).join('-').slice(-45)||'article';
 const stamp=new Date().toISOString().replace(/[-:.TZ]/g,'').slice(0,14);
