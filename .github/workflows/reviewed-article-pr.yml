@@ -1,0 +1,94 @@
+name: Create draft article PR from reviewed HTML
+
+on:
+  workflow_dispatch:
+    inputs:
+      article_path:
+        description: "Repository-relative HTML article path"
+        required: true
+        type: string
+      expected_blob_sha:
+        description: "Current GitHub file blob SHA (prevents overwriting newer content)"
+        required: true
+        type: string
+      reviewed_html:
+        description: "Complete reviewed HTML document (paste from the editor)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: reviewed-article-pr-${{ github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  create-draft-pr:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Validate target and content, verify baseline, and write file
+        id: prepare
+        env:
+          ARTICLE_PATH: ${{ inputs.article_path }}
+          EXPECTED_BLOB_SHA: ${{ inputs.expected_blob_sha }}
+          REVIEWED_HTML: ${{ inputs.reviewed_html }}
+        run: |
+          python3 - <<'PY'
+          import hashlib, os, pathlib, re, subprocess, sys
+          path = os.environ["ARTICLE_PATH"].strip()
+          expected = os.environ["EXPECTED_BLOB_SHA"].strip()
+          html = os.environ["REVIEWED_HTML"]
+          if not path.lower().endswith((".html", ".htm")):
+              sys.exit("Blocked: target must be an HTML file.")
+          parts = pathlib.PurePosixPath(path).parts
+          if path.startswith("/") or any(p in ("", ".", "..") for p in parts) or "\\" in path:
+              sys.exit("Blocked: invalid repository-relative path.")
+          if not re.fullmatch(r"[0-9a-f]{40}", expected):
+              sys.exit("Blocked: expected blob SHA is missing or malformed.")
+          target = pathlib.Path(path)
+          if not target.is_file():
+              sys.exit("Blocked: target does not exist on main.")
+          blob = subprocess.check_output(["git", "hash-object", str(target)], text=True).strip()
+          if blob != expected:
+              sys.exit("Blocked: article on main changed since it was loaded. Reload it and review again.")
+          if len(html.encode("utf-8")) > 60000:
+              sys.exit("Blocked: reviewed HTML exceeds the safe workflow input limit. Use the authenticated editor integration instead.")
+          if not re.search(r'class=["\'][^"\']*\barticle\b', html) and not re.search(r'class=["\']article["\']', html):
+              sys.exit('Blocked: reviewed HTML does not appear to contain an article element.')
+          if not re.search(r"<html\b", html, re.I) or not re.search(r"</html\s*>", html, re.I):
+              sys.exit("Blocked: input must be a complete HTML document.")
+          target.write_text(html, encoding="utf-8", newline="")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write("path=" + path + "\n")
+          PY
+
+      - name: Create branch and draft pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTICLE_PATH: ${{ inputs.article_path }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          branch="editor/reviewed-html-${RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add -- "$ARTICLE_PATH"
+          if git diff --cached --quiet; then
+            echo "No change detected; no PR created."
+            exit 1
+          fi
+          git commit -m "Review article HTML: $ARTICLE_PATH"
+          git push origin "$branch"
+          gh pr create --draft --base main --head "$branch" \
+            --title "Review article HTML: $ARTICLE_PATH" \
+            --body "Created by the GitHub Actions reviewed-HTML workflow. The editor's reviewed HTML was submitted explicitly by a repository user. Main's file blob SHA was checked against the supplied baseline before writing. Please inspect the full diff and run content-integrity checks before merging."
