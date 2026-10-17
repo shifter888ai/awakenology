@@ -230,6 +230,7 @@ async function createReviewedDraftPR(request, env) {
     const current = await githubApi("/repos/" + GITHUB_REPO + "/contents/" + encodedPath + "?ref=main", token);
     if (current.type !== "file" || !current.content || current.encoding !== "base64") return jsonResponse({ error: "GitHub did not return a supported HTML file." }, 409);
     const currentHtml = decodeGitHubFile(current.content);
+    if (reviewedHtml === currentHtml) return jsonResponse({ error: "The reviewed HTML is identical to the current GitHub file. No pull request was created because there are no file changes." }, 409);
     if (await sha256Hex(currentHtml) !== baselineSha256.toLowerCase()) {
       return jsonResponse({ error: "The article on main has changed since it was loaded. Reload the latest version, reapply your edits, and review again." }, 409);
     }
