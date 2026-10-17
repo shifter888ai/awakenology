@@ -125,7 +125,7 @@ async function finishGitHubLogin(request, env) {
   if (!suppliedState || !expectedState || suppliedState !== expectedState) {
     return new Response("GitHub sign-in could not be verified. Please try again.", { status: 400, headers: { "set-cookie": clearState, "cache-control": "no-store" } });
   }
-  if (url.searchParams.has("error")) return authRedirect("https://" + EDITOR_HOST + "/auth/github");
+  if (url.searchParams.has("error")) return new Response("GitHub sign-in was cancelled or denied. You can return to the editor and try again when ready.", { status: 403, headers: { "set-cookie": clearState, "cache-control": "no-store", "content-type": "text/plain; charset=utf-8" } });
   const code = url.searchParams.get("code") || "";
   if (!code || !env.GITHUB_OAUTH_CLIENT_ID || !env.GITHUB_OAUTH_CLIENT_SECRET ||
       !env.EDITOR_GITHUB_ALLOWED_USER || !env.EDITOR_SESSION_SECRET || env.EDITOR_SESSION_SECRET.length < 32) {
@@ -145,10 +145,13 @@ async function finishGitHubLogin(request, env) {
     const user = await userResponse.json().catch(() => ({}));
     if (!userResponse.ok || typeof user.login !== "string") throw new Error("Could not verify the GitHub account.");
     if (user.login.toLowerCase() !== env.EDITOR_GITHUB_ALLOWED_USER.trim().toLowerCase()) {
-      return new Response("This GitHub account is not authorized to use the Awakenology editor.", {
+      const denied = new Response("This GitHub account is not authorized to use the Awakenology editor.", {
         status: 403,
-        headers: { "set-cookie": clearState + ", awakenology_editor_session=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Lax", "cache-control": "no-store" }
+        headers: { "cache-control": "no-store", "content-type": "text/plain; charset=utf-8" }
       });
+      denied.headers.append("set-cookie", clearState);
+      denied.headers.append("set-cookie", "awakenology_editor_session=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Lax");
+      return denied;
     }
     const session = await signSession({ login: user.login, exp: Math.floor(Date.now() / 1000) + 28800 }, env.EDITOR_SESSION_SECRET);
     const response = new Response(null, { status: 302, headers: {
