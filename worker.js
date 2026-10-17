@@ -151,14 +151,13 @@ async function finishGitHubLogin(request, env) {
       });
     }
     const session = await signSession({ login: user.login, exp: Math.floor(Date.now() / 1000) + 28800 }, env.EDITOR_SESSION_SECRET);
-    return new Response(null, {
-      status: 302,
-      headers: {
-        "location": "https://" + EDITOR_HOST + "/editor/",
-        "set-cookie": [clearState, cookieHeader("awakenology_editor_session", session, 28800)].join(", "),
-        "cache-control": "no-store"
-      }
-    });
+    const response = new Response(null, { status: 302, headers: {
+      "location": "https://" + EDITOR_HOST + "/editor/",
+      "cache-control": "no-store"
+    }});
+    response.headers.append("set-cookie", clearState);
+    response.headers.append("set-cookie", cookieHeader("awakenology_editor_session", session, 28800));
+    return response;
   } catch {
     return new Response("GitHub sign-in failed. Please retry.", { status: 502, headers: { "set-cookie": clearState, "cache-control": "no-store" } });
   }
