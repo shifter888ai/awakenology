@@ -33,11 +33,15 @@ function derLength(length) {
   return Uint8Array.of(0x80 | bytes.length, ...bytes);
 }
 function pkcs1ToPkcs8(pkcs1) {
-  const prefix = Uint8Array.of(0x30,0x0d,0x06,0x09,0x2a,0x86,0x48,0x86,0xf7,0x0d,0x01,0x01,0x01,0x05,0x00);
+  const version = Uint8Array.of(0x02, 0x01, 0x00);
+  const algorithmIdentifier = Uint8Array.of(0x30,0x0d,0x06,0x09,0x2a,0x86,0x48,0x86,0xf7,0x0d,0x01,0x01,0x01,0x05,0x00);
   const octetLength = derLength(pkcs1.length);
   const octetHeader = Uint8Array.of(0x04, ...octetLength);
-  const body = new Uint8Array(prefix.length + octetHeader.length + pkcs1.length);
-  body.set(prefix, 0); body.set(octetHeader, prefix.length); body.set(pkcs1, prefix.length + octetHeader.length);
+  const body = new Uint8Array(version.length + algorithmIdentifier.length + octetHeader.length + pkcs1.length);
+  body.set(version, 0);
+  body.set(algorithmIdentifier, version.length);
+  body.set(octetHeader, version.length + algorithmIdentifier.length);
+  body.set(pkcs1, version.length + algorithmIdentifier.length + octetHeader.length);
   const sequenceLength = derLength(body.length);
   const result = new Uint8Array(1 + sequenceLength.length + body.length);
   result[0] = 0x30; result.set(sequenceLength, 1); result.set(body, 1 + sequenceLength.length);
