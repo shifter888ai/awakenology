@@ -650,3 +650,24 @@ The gate is designed to catch accidental body deletion/truncation during global 
 - Source anchor checks must include same-page `#fragment` links as well as links to other pages; valid IDs and named anchors should pass.
 - Self-closing images must be included in the source missing-alt inventory.
 - Validate these rules with fixture-based tests before treating anchor findings as actionable; compare against the delivered DOM for Worker-generated anchors.
+
+
+## Private Visual Editor Stable-Baseline Regression Gate
+
+Use this gate whenever the private visual editor, its publishing endpoint, GitHub authentication, Worker integration, or related CI workflow changes.
+
+- [ ] Authorized sign-in is required; no GitHub credential or secret is exposed to client-side code or page content.
+- [ ] The editor cannot publish directly to `main`; successful publishing creates a Draft PR only.
+- [ ] A valid article path and current source baseline are required before publishing.
+- [ ] Publishing detects a changed/stale source baseline and stops rather than overwriting newer article content.
+- [ ] The publish action stays disabled until a real reviewed change exists.
+- [ ] An unchanged article is rejected server-side; client-side button state is not the only safeguard.
+- [ ] Review displays the exact text diff and full-page preview; unrelated page structure and content remain unchanged.
+- [ ] Whitespace-only changes are visible in the diff and are not silently discarded or introduced.
+- [ ] Test both negative and positive paths: unchanged article cannot create a PR; one intentional article edit can create a Draft PR.
+- [ ] The Draft PR runs and passes Content Integrity Gate, Live SEO runtime audit, SEO metadata inventory, Sitemap route parity, and Workers Builds.
+- [ ] Inspect the complete PR diff and confirm only the intended file/content changed.
+- [ ] After merge, verify the deployment version/source and open the live canonical page to smoke-test the exact change.
+- [ ] Record the outcome. Any failed gate blocks merge/deployment until resolved; do not bypass checks to preserve a green status.
+
+Reference end-to-end acceptance test: PR #160 (article whitespace correction), merged after all five checks passed and the live page was confirmed OK by the site owner on 2026-10-18. This is a verified example, not permission to merge future PRs automatically.
