@@ -8,6 +8,8 @@ import { createHash } from "node:crypto";
  * Deliberately blocks ambiguous Word features and all parser warnings.
  */
 const FEATURES = [
+  ["explicit Word text color (requires lossless color mapping)", /<w:color(?:\s|>)/],
+  ["highlight or shading (requires lossless mapping)", /<w:(?:highlight|shd)(?:\s|>)/],
   ["tracked insertion", /<w:ins(?:\s|>)/],
   ["tracked deletion", /<w:del(?:\s|>)/],
   ["comment range", /<w:commentRangeStart(?:\s|>)/],
