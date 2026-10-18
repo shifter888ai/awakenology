@@ -1,0 +1,13 @@
+{
+  "name": "awakenology-new-page-generator",
+  "private": true,
+  "type": "module",
+  "description": "Isolated offline-only source conversion; not a site runtime dependency",
+  "scripts": {
+    "test": "node --test *.test.mjs"
+  },
+  "dependencies": {
+    "mammoth": "1.11.0",
+    "jszip": "3.10.1"
+  }
+}
