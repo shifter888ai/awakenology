@@ -42,3 +42,16 @@ test('changed hyperlink target is reported explicitly',()=>{
  assert.equal(result.ok,false);
  assert.ok(result.issues.some(x=>x.field==='href'));
 });
+
+test('rejects non-string text and non-boolean formatting fields',()=>{
+ const a=sample(); a.runs[0].bold='false';
+ assert.throws(()=>compareRichContent(a,sample()),/Invalid run field types/);
+ const b=sample(); b.runs[0].text=42;
+ assert.throws(()=>compareRichContent(sample(),b),/Invalid run field types/);
+});
+test('rejects invalid image positions and missing asset paths',()=>{
+ const a=sample(); a.images[0].paragraphIndex=-1;
+ assert.throws(()=>compareRichContent(a,sample()),/Invalid image field types/);
+ const b=sample(); b.images[0].assetPath='';
+ assert.throws(()=>compareRichContent(sample(),b),/Invalid image field types/);
+});
