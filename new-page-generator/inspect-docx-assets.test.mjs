@@ -21,7 +21,7 @@ test("extracts inline image bytes, checksum, order, output path and alt text", a
   assert.equal(result.assets.length, 1);
   assert.equal(result.assets[0].sourceOrder, 1);
   assert.equal(result.assets[0].relationshipId, "rId1");
-  assert.equal(result.assets[0].outputPath, "assets/docx-image-001.png");
+  assert.equal(result.assets[0].outputPath, `assets/docx-${result.assets[0].sha256.slice(0, 16)}.png`);
   assert.equal(result.assets[0].altText, "A diagram");
   assert.equal(result.assets[0].byteLength, 19);
   assert.match(result.assets[0].sha256, /^[a-f0-9]{64}$/);
