@@ -92,6 +92,9 @@ export async function extractDocx(buffer) {
     });
     errors.push(...converted.messages.map(m => `DOCX parser ${m.type}: ${m.message}`));
     if (!converted.value?.trim()) errors.push("DOCX converted to empty HTML.");
+    for (const asset of assets) {
+      if (!converted.value.includes(asset.outputPath)) errors.push(`Inspected image was not preserved in converted HTML: ${asset.outputPath}.`);
+    }
     return {
       ok: errors.length === 0, errors, html: errors.length ? null : converted.value,
       sha256: digest(buffer), assets: errors.length ? [] : assets.map(({ bytes, ...asset }) => asset)
