@@ -31,7 +31,7 @@ test("incomplete route set blocks before rendering", async () => {
 function mockParser() {
   return {
     parseFromString(html) {
-      const match = /<p>([\\s\\S]*?)<\\/p>/i.exec(html);
+      const match = /<p>([\s\S]*?)<\/p>/i.exec(html);
       const text = match ? match[1].replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">") : "";
       const p = { nodeType: 1, tagName: "P", attributes: [], childNodes: [{ nodeType: 3, textContent: text }] };
       return { body: { childNodes: [p] } };
@@ -54,7 +54,7 @@ test("complete page set is generated from parsed HTML inventories", async () => 
   const result = await generateReviewedPageSet({ pageSet, inputs: completeInputs(), outputs: completeOutputs() });
   assert.equal(result.ok, true, result.errors.join("; "));
   assert.equal(result.stage, "review-ready-static-output");
-  assert.match(result.pages.en.html, /<article class="article"><p>Text<\\/p><\\/article>/);
+  assert.match(result.pages.en.html, /<article class="article"><p>Text<\/p><\/article>/);
 });
 test("rendered text changes block the whole page set", async () => {
   const result = await generateReviewedPageSet({ pageSet, inputs: completeInputs(), outputs: completeOutputs("<p>Changed</p>") });
