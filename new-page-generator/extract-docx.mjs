@@ -2,6 +2,7 @@ import JSZip from "jszip";
 import mammoth from "mammoth";
 import { createHash } from "node:crypto";
 import { inspectDocxAssets } from "./inspect-docx-assets.mjs";
+import { inspectDocxSourceMap } from "./inspect-docx-source-map.mjs";
 
 /**
  * Conservative offline DOCX extraction. Output is intermediate HTML only.
@@ -76,6 +77,16 @@ export async function extractDocx(buffer) {
   }
   if (/<w:tbl(?:\s|>)/.test(xml) && /<w:(?:gridSpan|vMerge)(?:\s|>)/.test(xml)) errors.push("Merged table cells require explicit review.");
   if (errors.length) return blocked(errors, buffer);
+  const sourceMap = await inspectDocxSourceMap(buffer);
+  if (!sourceMap.ok) return blocked(sourceMap.errors.map(error => `DOCX source map: ${error}`), buffer);
+  if (assets.length !== sourceMap.imageReferences.length) {
+    return blocked(["DOCX source map image count differs from extracted asset count."], buffer);
+  }
+  for (let i = 0; i < assets.length; i++) {
+    if (assets[i].relationshipId !== sourceMap.imageReferences[i].relationshipId) {
+      return blocked([`DOCX image source order mismatch at position ${i + 1}.`], buffer);
+    }
+  }
 
   try {
     const assetByHash = new Map(assets.map(asset => [asset.sha256, asset]));
@@ -97,7 +108,7 @@ export async function extractDocx(buffer) {
     }
     return {
       ok: errors.length === 0, errors, html: errors.length ? null : converted.value,
-      sha256: digest(buffer), assets: errors.length ? [] : assets.map(({ bytes, ...asset }) => asset)
+      sha256: digest(buffer), sourceMap: errors.length ? null : sourceMap, assets: errors.length ? [] : assets.map(({ bytes, ...asset }) => asset)
     };
   } catch (error) {
     return blocked([`DOCX conversion failed: ${error.message}`], buffer);
