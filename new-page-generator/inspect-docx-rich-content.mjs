@@ -28,7 +28,12 @@ export async function inspectDocxRichContent(buffer) {
       const properties = /<w:rPr(?=[\s>])[^>]*>([\s\S]*?)<\/w:rPr>/.exec(body)?.[1] ?? '';
       const unknown = properties.replace(/<w:(?:b|i|u|color)(?:\s[^>]*?)?\s*\/\s*>/g, '').trim();
       if (unknown) errors.push('Unresolved run property in paragraph ' + (p + 1) + '.');
-      const flag = key => new RegExp('<w:' + key + '(?:\\s[^>]*?)?\\s*/>').test(properties);
+      const flag = key => {
+        const tag = new RegExp('<w:' + key + '(?:\\s[^>]*?)?\\s*/>').exec(properties)?.[0];
+        if (!tag) return false;
+        const value = /\\bw:val=["\\x27]([^"\\x27]+)["\\x27]/.exec(tag)?.[1]?.toLowerCase();
+        return !value || !['0', 'false', 'off', 'none'].includes(value);
+      };
       const attr = (key, name) => new RegExp('<w:' + key + '\\b[^>]*\\bw:' + name + '=["\\x27]([^"\\x27]+)["\\x27][^>]*/>').exec(properties)?.[1] ?? null;
       const color = attr('color', 'val');
       if (color && !/^[0-9a-fA-F]{6}$/.test(color)) errors.push('Unresolved Word color in paragraph ' + (p + 1) + '.');
