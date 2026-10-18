@@ -66,7 +66,7 @@ export async function extractDocx(buffer) {
   if (zip.file("word/footnotes.xml")) errors.push("Footnotes require manual resolution.");
   if (zip.file("word/endnotes.xml")) errors.push("Endnotes require manual resolution.");
   if (/<w:altChunk(?:\s|>)/.test(xml)) errors.push("Alternative content chunks require manual resolution.");
-  if (/<w:drawing(?:\s|>)/.test(xml) || /<w:pict(?:\s|>)/.test(xml)) errors.push("Embedded drawings/images require separate asset extraction and review.");
+  if (/<w:drawing(?:\s|\/?>)/.test(xml) || /<w:pict(?:\s|\/?>)/.test(xml)) errors.push("Embedded drawings/images require separate asset extraction and review.");
   if (/<w:tbl(?:\s|>)/.test(xml) && /<w:(?:gridSpan|vMerge)(?:\s|>)/.test(xml)) errors.push("Merged table cells require explicit review.");
   if (errors.length) return blocked(errors, buffer);
 
