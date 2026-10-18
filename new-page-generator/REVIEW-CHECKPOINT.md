@@ -39,3 +39,9 @@ The implementation is an isolated proof of pipeline boundaries, not a working pa
 Existing pages and frozen private editor must remain untouched.
 
 - Further source-adapter inspection found that `extract-docx.mjs` intentionally blocks all `w:drawing` / `w:pict` content in the main document. This is a second independent blocker: before this illustrated article can pass, implement and test inline image relationship extraction, byte checksums, alt text/order, and safe asset output paths while continuing to block unsupported floating shapes/charts. Do not remove the guard as a shortcut.
+
+## DOCX image adapter implementation slice (2026-10-18)
+- Added `inspect-docx-assets.mjs` and fixture tests for inline image extraction: relationship resolution, source order, deterministic output paths, alt text, byte length and SHA-256, plus fail-closed behavior for external/missing images, floating drawings, and non-image drawing content.
+- CI passed for the initial adapter and tests at commit `3fe4345`: https://github.com/shifter888ai/awakenology/actions/runs/39102143170
+- Follow-up hardening now blocks Word drawings that are not recognized inline image drawings and inline drawing shapes with no image reference. CI for the latest hardening commits is pending at checkpoint update time.
+- This remains a standalone asset inspection stage, not an integrated DOCX-to-page conversion. Real pilot execution is still blocked by unavailable raw DOCX bytes; source formatting, all media, language boundaries and Japanese ending are not yet verified from the actual package.
