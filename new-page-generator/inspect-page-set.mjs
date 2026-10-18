@@ -3,6 +3,7 @@ import { extractDocx } from "./extract-docx.mjs";
 import { LANGUAGES, validatePageSet } from "./validate-page-set.mjs";
 import { inspectPastedHtml } from "./inspect-paste.mjs";
 import { validateInventory, compareInventories } from "./content-inventory.mjs";
+import { normalizeHtmlInventory } from "./normalize-html-inventory.mjs";
 
 /**
  * Connects the existing validators without inventing a DOCX converter.
@@ -32,11 +33,21 @@ export async function inspectPageSet(pageSet, inputs = {}) {
         : { ok: false, errors: extracted.errors, inventory: [] };
     }
     const pageErrors = [...inspected.errors];
+    let normalizedBlocks = [];
     if (inspected.ok) {
       pageErrors.push(...validateInventory(inspected.inventory).errors);
       pageErrors.push(...reviewPasteInventory(inspected.inventory).errors);
+      if (!pageErrors.length) {
+        const normalized = normalizeHtmlInventory(inspected.inventory, {
+          language: lang,
+          sourceMode: meta.mode === "docx" ? "docx" : "html-paste",
+          sourcePart: meta.mode === "docx" ? "converted-html" : "pasted-html"
+        });
+        pageErrors.push(...normalized.errors);
+        if (normalized.ok) normalizedBlocks = normalized.blocks;
+      }
     }
-    pages[lang] = { mode: meta.mode, inventory: inspected.inventory, errors: pageErrors };
+    pages[lang] = { mode: meta.mode, inventory: inspected.inventory, normalizedBlocks, errors: pageErrors };
     errors.push(...pageErrors.map(e => `${lang}: ${e}`));
   }
   return { ok: errors.length === 0, errors, pages };
