@@ -20,10 +20,15 @@ export function inspectRenderedRichContent(html, parser) {
       const index=decl.indexOf(':');
       if(index<0 || !allowed.has(decl.slice(0,index).trim().toLowerCase())) errors.push('Unsupported rendered style: '+decl);
     }
+    const weight=formatting(node,'font-weight'), fontStyle=formatting(node,'font-style'), decoration=formatting(node,'text-decoration');
+    if(weight!==null && !['bold','normal','400','700'].includes(weight.toLowerCase())) errors.push('Unsupported rendered font-weight: '+weight);
+    if(fontStyle!==null && !['italic','normal'].includes(fontStyle.toLowerCase())) errors.push('Unsupported rendered font-style: '+fontStyle);
+    if(decoration!==null && !['underline','none'].includes(decoration.toLowerCase())) errors.push('Unsupported rendered text-decoration: '+decoration);
+    if(['S','STRIKE','DEL'].includes(tag)) errors.push('Unsupported rendered deletion/strike formatting: '+tag);
     const next={...state};
-    if(['B','STRONG'].includes(tag) || formatting(node,'font-weight')==='bold') next.bold=true;
-    if(['I','EM'].includes(tag) || formatting(node,'font-style')==='italic') next.italic=true;
-    if(tag==='U' || formatting(node,'text-decoration')==='underline') next.underline=true;
+    if(['B','STRONG'].includes(tag) || ['bold','700'].includes((weight ?? '').toLowerCase())) next.bold=true;
+    if(['I','EM'].includes(tag) || (fontStyle ?? '').toLowerCase()==='italic') next.italic=true;
+    if(tag==='U' || (decoration ?? '').toLowerCase()==='underline') next.underline=true;
     const color=formatting(node,'color'); if(color!==null) next.color=color;
     if(tag==='A') {const href=node.getAttribute('href'); if(!href) errors.push('Link without href.'); next.href=href;}
     if(tag==='IMG') {
