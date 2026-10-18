@@ -20,3 +20,15 @@ test("extract simple text from valid package", async () => {
   assert.match(result.html, /English 日本語 繁體中文/);
   assert.match(result.sha256, /^[a-f0-9]{64}$/);
 });
+
+test("reject empty and non-Buffer inputs", async () => {
+  assert.equal((await extractDocx(Buffer.alloc(0))).ok, false);
+  assert.equal((await extractDocx("not a buffer")).ok, false);
+});
+test("reject oversized input before ZIP parsing", async () => {
+  const input = Buffer.alloc(25 * 1024 * 1024 + 1);
+  const result = await extractDocx(input);
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join(" "), /input limit/);
+  assert.equal(result.html, null);
+});
