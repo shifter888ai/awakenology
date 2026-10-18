@@ -3,10 +3,11 @@ import mammoth from "mammoth";
 import { createHash } from "node:crypto";
 
 /**
- * First real DOCX extraction stage, Node-only, offline. Returns HTML for the
- * separate paste inspector, never directly publishable markup.
- * Deliberately blocks ambiguous Word features and all parser warnings.
+ * Conservative offline DOCX extraction. Output is intermediate HTML only.
+ * Complex or ambiguous Word constructs are blocked for manual review.
  */
+const MAX_INPUT_BYTES = 25 * 1024 * 1024;
+const MAX_DOCUMENT_XML_BYTES = 20 * 1024 * 1024;
 const FEATURES = [
   ["explicit Word text color (requires lossless color mapping)", /<w:color(?:\s|>)/],
   ["highlight or shading (requires lossless mapping)", /<w:(?:highlight|shd)(?:\s|>)/],
@@ -22,25 +23,53 @@ const FEATURES = [
   ["endnote reference", /<w:endnoteReference(?:\s|>)/]
 ];
 const xmlText = bytes => new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+const digest = buffer => createHash("sha256").update(buffer).digest("hex");
+const blocked = (errors, buffer) => ({
+  ok: false, errors, html: null,
+  ...(Buffer.isBuffer(buffer) ? { sha256: digest(buffer) } : {})
+});
+
 export async function extractDocx(buffer) {
-  const errors = [];
-  if (!Buffer.isBuffer(buffer) || !buffer.length) return { ok: false, errors: ["DOCX must be a nonempty Buffer."], html: null };
+  if (!Buffer.isBuffer(buffer) || !buffer.length) {
+    return blocked(["DOCX must be a nonempty Buffer."], buffer);
+  }
+  if (buffer.length > MAX_INPUT_BYTES) {
+    return blocked([`DOCX exceeds the ${MAX_INPUT_BYTES / 1024 / 1024} MiB input limit.`], buffer);
+  }
   let zip;
-  try { zip = await JSZip.loadAsync(buffer, { checkCRC32: true }); }
-  catch { return { ok: false, errors: ["Invalid or corrupt DOCX ZIP package."], html: null }; }
+  try {
+    zip = await JSZip.loadAsync(buffer, { checkCRC32: true });
+  } catch {
+    return blocked(["Invalid or corrupt DOCX ZIP package."], buffer);
+  }
+
+  const errors = [];
   const required = ["[Content_Types].xml", "word/document.xml", "word/_rels/document.xml.rels"];
   for (const path of required) if (!zip.file(path)) errors.push(`Missing required DOCX part: ${path}.`);
-  if (errors.length) return { ok: false, errors, html: null };
-  const xml = await zip.file("word/document.xml").async("uint8array").then(xmlText);
-  for (const [name, pattern] of FEATURES) if (pattern.test(xml)) errors.push(`Unsupported or ambiguous Word feature: ${name}.`);
+  if (errors.length) return blocked(errors, buffer);
+
+  let xml;
+  try {
+    const xmlBytes = await zip.file("word/document.xml").async("uint8array");
+    if (xmlBytes.byteLength > MAX_DOCUMENT_XML_BYTES) {
+      return blocked([`word/document.xml exceeds the ${MAX_DOCUMENT_XML_BYTES / 1024 / 1024} MiB limit.`], buffer);
+    }
+    xml = xmlText(xmlBytes);
+  } catch {
+    return blocked(["word/document.xml is unreadable or is not valid UTF-8."], buffer);
+  }
+
+  for (const [name, pattern] of FEATURES) {
+    if (pattern.test(xml)) errors.push(`Unsupported or ambiguous Word feature: ${name}.`);
+  }
   if (zip.file("word/comments.xml")) errors.push("Word comments require manual resolution.");
   if (zip.file("word/footnotes.xml")) errors.push("Footnotes require manual resolution.");
   if (zip.file("word/endnotes.xml")) errors.push("Endnotes require manual resolution.");
   if (/<w:altChunk(?:\s|>)/.test(xml)) errors.push("Alternative content chunks require manual resolution.");
   if (/<w:drawing(?:\s|>)/.test(xml) || /<w:pict(?:\s|>)/.test(xml)) errors.push("Embedded drawings/images require separate asset extraction and review.");
   if (/<w:tbl(?:\s|>)/.test(xml) && /<w:(?:gridSpan|vMerge)(?:\s|>)/.test(xml)) errors.push("Merged table cells require explicit review.");
-  // Conversion is attempted only for a package with no known blockers.
-  if (errors.length) return { ok: false, errors, html: null, sha256: createHash("sha256").update(buffer).digest("hex") };
+  if (errors.length) return blocked(errors, buffer);
+
   try {
     const converted = await mammoth.convertToHtml({ buffer }, {
       styleMap: ["u => u", "strike => s"],
@@ -49,12 +78,10 @@ export async function extractDocx(buffer) {
     errors.push(...converted.messages.map(m => `DOCX parser ${m.type}: ${m.message}`));
     if (!converted.value?.trim()) errors.push("DOCX converted to empty HTML.");
     return {
-      ok: errors.length === 0,
-      errors,
-      html: errors.length ? null : converted.value,
-      sha256: createHash("sha256").update(buffer).digest("hex")
+      ok: errors.length === 0, errors, html: errors.length ? null : converted.value,
+      sha256: digest(buffer)
     };
   } catch (error) {
-    return { ok: false, errors: [`DOCX conversion failed: ${error.message}`], html: null };
+    return blocked([`DOCX conversion failed: ${error.message}`], buffer);
   }
 }
