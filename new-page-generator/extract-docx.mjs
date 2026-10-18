@@ -3,6 +3,7 @@ import mammoth from "mammoth";
 import { createHash } from "node:crypto";
 import { inspectDocxAssets } from "./inspect-docx-assets.mjs";
 import { inspectDocxSourceMap } from "./inspect-docx-source-map.mjs";
+import { compareDocxSourceToHtml } from "./compare-docx-output.mjs";
 
 /**
  * Conservative offline DOCX extraction. Output is intermediate HTML only.
@@ -103,6 +104,7 @@ export async function extractDocx(buffer) {
     });
     errors.push(...converted.messages.map(m => `DOCX parser ${m.type}: ${m.message}`));
     if (!converted.value?.trim()) errors.push("DOCX converted to empty HTML.");
+    else errors.push(...compareDocxSourceToHtml(sourceMap, converted.value).errors.map(error => `DOCX text integrity: ${error}`));
     for (const asset of assets) {
       if (!converted.value.includes(asset.outputPath)) errors.push(`Inspected image was not preserved in converted HTML: ${asset.outputPath}.`);
     }
