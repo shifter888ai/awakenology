@@ -69,3 +69,8 @@ Existing pages and frozen private editor must remain untouched.
 - `extract-docx.mjs` now requires a passing source map, checks original image reference count/order against inspected image assets, and returns the diagnostic source map on success. Added synthetic fixture tests for text and image source locations.
 - This is not a full semantic OOXML parser and does not yet prove rendered text/formatting fidelity; unsupported links and other ambiguous constructs deliberately fail closed pending dedicated mapping.
 - The actual trilingual pilot remains blocked by unavailable original DOCX bytes. No generated pilot pages, PR, merge or deployment.
+
+## Exact source-to-HTML text integrity gate (2026-10-18)
+- Added `compare-docx-output.mjs`, which compares the concatenated original mapped Word text runs to converted HTML text without whitespace, Unicode, punctuation or variant normalization. It reports the first mismatch and original paragraph/XML location. Unknown HTML elements and unparsed markup block approval.
+- `extract-docx.mjs` now requires this comparison to pass before returning intermediate HTML. Added tests for preserved entities, changed Chinese character variants, whitespace, missing characters, source locations and multiple paragraphs.
+- This is a strict text-integrity slice, not a complete formatting or semantic-structure equivalence proof. Rich formatting (including bold/color), hyperlinks, table semantics and illustration placement still require separate source-to-output checks. The actual trilingual pilot remains blocked by unavailable raw source bytes.
