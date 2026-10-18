@@ -35,6 +35,9 @@ export async function generateReviewedPageSet({ pageSet, inputs, outputs }) {
     }
     errors.push(...validateInventory(rendered.inventory).errors.map(e => `${lang}: rendered HTML: ${e}`));
     errors.push(...reviewPasteInventory(rendered.inventory).errors.map(e => `${lang}: rendered HTML: ${e}`));
+    if (pageSet.pages[lang].mode === "docx") {
+      errors.push(`${lang}: DOCX rich-content provenance is not yet independently verified; review output blocked.`);
+    }
     if (output.sourceRichInventory !== undefined || output.renderedRichInventory !== undefined) {
       try {
         if (output.sourceRichInventory === undefined || output.renderedRichInventory === undefined) throw new Error("Both source and rendered rich-content inventories are required.");
