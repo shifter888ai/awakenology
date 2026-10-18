@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
 import {inspectDocxSourceMap} from './inspect-docx-source-map.mjs';
+import {inspectDocxImagePlacement} from './inspect-docx-image-placement.mjs';
 // Independent original OOXML inspection. Unsupported inherited formatting,
 // styles, hyperlinks, and drawings fail closed rather than being guessed.
 export async function inspectDocxRichContent(buffer) {
@@ -28,12 +29,12 @@ export async function inspectDocxRichContent(buffer) {
       const text=source.paragraphs[p]?.textRuns;
       // Do not flatten nested runs or guess mappings.
       const texts=[...body.matchAll(/<w:t(?=[\s>])[^>]*>([\s\S]*?)<\/w:t>/g)];
-      if(texts.length!==1 || !text?.length) {errors.push('Ambiguous run/text mapping in paragraph '+(p+1)+'.');continue;}
+      if(texts.length===0 && /<w:drawing\\b/.test(body)) continue;\n      if(texts.length!==1 || !text?.length) {errors.push('Ambiguous run/text mapping in paragraph '+(p+1)+'.');continue;}
       const decode=s=>s.replace(/&amp;|&lt;|&gt;|&quot;|&apos;/g,x=>({'&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"','&apos;':"'"})[x]);
       runs.push({text:decode(texts[0][1]),bold:flag('b'),italic:flag('i'),underline:flag('u'),color:color?'#'+color.toLowerCase():null,href:null});
     }
   }
   if(runs.map(r=>r.text).join('')!==source.paragraphs.map(p=>p.text).join('')) errors.push('Rich runs do not reproduce exact source-map text.');
   if(!runs.length) errors.push('No rich text runs extracted.');
-  return errors.length?fail([...new Set(errors)]):{ok:true,errors:[],runs,images:[]};
+  return errors.length?fail([...new Set(errors)]):{ok:true,errors:[],runs,images:placement.images.map(({assetPath,paragraphIndex,order,alt})=>({assetPath,paragraphIndex,order,alt}))};
 }
