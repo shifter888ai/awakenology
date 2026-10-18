@@ -1,6 +1,6 @@
 # Phase 3 review checkpoint — not ready for publishing
 
-The current implementation is an isolated proof of pipeline boundaries, not a working page-creation UI.
+The implementation is an isolated proof of pipeline boundaries, not a working page-creation UI.
 
 ## Implemented in branch
 - Three-language page-set metadata validator
@@ -8,17 +8,24 @@ The current implementation is an isolated proof of pipeline boundaries, not a wo
 - Offline DOCX package inspection and conservative Mammoth HTML extraction
 - Source/output inventory comparator
 - Async page-set inspection orchestrator
-- Static HTML metadata wrapper, requiring reviewed content and shell components
-- Node test files (execution and dependency installation **not yet verified**)
+- Derived three-language route manifest and reciprocal alternate verifier
+- Reviewed-page-set coordinator that blocks before output unless all inputs and inventories pass
+- Static HTML metadata wrapper requiring reviewed content and shell components
+- Fail-closed coordinator tests for missing input, unavailable parser, and incomplete language set
+
+## Verification status
+- Tests have been authored but **have not been executed in a clean environment**.
+- The coordinator accepts caller-supplied output inventories and shell strings; these are not independently verified yet. It is a review workflow gate, not a sanitizer or security boundary.
+- No owner-supplied pilot content has been run through end to end.
 
 ## Remaining blockers before a Draft PR can be considered review-ready
 1. Install dependencies and execute all tests in a clean environment; fix failures. Do not report passing tests without evidence.
-2. Harden DOCX fidelity: styles inherited from styles.xml, numbering/list structure, hyperlink relationships, Word tables, image extraction, and source XML-to-HTML loss accounting. Current parser deliberately blocks several complex features and explicit colors.
+2. Harden DOCX fidelity: inherited styles, numbering/list structure, hyperlink relationships, Word tables, image extraction, and source XML-to-HTML loss accounting. Current parser deliberately blocks several complex features and explicit colors.
 3. Harden HTML paste: sanitizer and output construction, CSS value validation, URL policy, parser-repair detection, attribute restrictions per tag, and image asset handling. The inspector is **not** an HTML sanitizer.
 4. Normalize both adapters into one common source model with source locations and issue severity.
 5. Extract and approve exact header/footer, CSS, circled-A logo and theme controls for *new pages only*; current static shell accepts components but does not supply or verify them.
 6. Verify source/rendered content with independent extraction; a caller-supplied `integrityApproved: true` is not a security or review boundary.
-7. Preview EN/JP/zh-Hant in light/dark desktop/mobile, validate hreflang reciprocity, canonical routes, links and sitemap changes.
+7. Preview EN/JP/zh-Hant in light/dark desktop/mobile, validate canonical routes, internal links and sitemap changes.
 8. Dry-run on representative owner-supplied content, then Draft PR, CI, explicit owner approval. No automatic merge/deploy.
 
 Existing pages and frozen private editor must remain untouched.
