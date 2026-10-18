@@ -31,3 +31,10 @@ test('blocks theme-based Word colors until theme resolution is implemented',asyn
  assert.equal(r.ok,false);
  assert.ok(r.errors.some(x=>x.includes('Theme-based Word color')));
 });
+
+
+test('blocks unrecognized Word formatting values rather than flattening them',async()=>{
+ const r=await inspectDocxRichContent(await fixture('<w:p><w:r><w:rPr><w:u w:val="dotted"/></w:rPr><w:t>Underlined</w:t></w:r></w:p>'));
+ assert.equal(r.ok,false);
+ assert.ok(r.errors.some(x=>x.includes('Unsupported Word u value')));
+});
