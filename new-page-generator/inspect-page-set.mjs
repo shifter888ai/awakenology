@@ -1,3 +1,4 @@
+import { reviewPasteInventory } from "./review-paste-inventory.mjs";
 import { extractDocx } from "./extract-docx.mjs";
 import { LANGUAGES, validatePageSet } from "./validate-page-set.mjs";
 import { inspectPastedHtml } from "./inspect-paste.mjs";
@@ -31,7 +32,10 @@ export async function inspectPageSet(pageSet, inputs = {}) {
         : { ok: false, errors: extracted.errors, inventory: [] };
     }
     const pageErrors = [...inspected.errors];
-    if (inspected.ok) pageErrors.push(...validateInventory(inspected.inventory).errors);
+    if (inspected.ok) {
+      pageErrors.push(...validateInventory(inspected.inventory).errors);
+      pageErrors.push(...reviewPasteInventory(inspected.inventory).errors);
+    }
     pages[lang] = { mode: meta.mode, inventory: inspected.inventory, errors: pageErrors };
     errors.push(...pageErrors.map(e => `${lang}: ${e}`));
   }
