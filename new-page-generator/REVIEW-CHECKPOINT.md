@@ -37,3 +37,5 @@ The implementation is an isolated proof of pipeline boundaries, not a working pa
 - Next step: obtain an authorized byte/media export path, then run the existing DOCX adapter on the exact source and compare all content-bearing blocks. Keep output generation fail-closed until image and language-boundary issues are resolved.
 
 Existing pages and frozen private editor must remain untouched.
+
+- Further source-adapter inspection found that `extract-docx.mjs` intentionally blocks all `w:drawing` / `w:pict` content in the main document. This is a second independent blocker: before this illustrated article can pass, implement and test inline image relationship extraction, byte checksums, alt text/order, and safe asset output paths while continuing to block unsupported floating shapes/charts. Do not remove the guard as a shortcut.
