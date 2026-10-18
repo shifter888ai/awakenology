@@ -47,3 +47,10 @@ Existing pages and frozen private editor must remain untouched.
 - This remains a standalone asset inspection stage, not an integrated DOCX-to-page conversion. Real pilot execution is still blocked by unavailable raw DOCX bytes; source formatting, all media, language boundaries and Japanese ending are not yet verified from the actual package.
 
 - Hardening regression was caught by CI: the first guard edit had over-escaped regexes, causing a syntax failure; this was corrected in commit `a93a131`. Latest CI is green: https://github.com/shifter888ai/awakenology/actions/runs/39102267549
+
+## DOCX text/image integration slice (2026-10-18)
+- `extract-docx.mjs` now invokes the separate image inspector whenever Word drawings/pictures are present, passes validated image bytes through Mammoth's image converter, and returns asset metadata (without embedding raw bytes in the report).
+- Image output paths are content-addressed, so repeated use of the same image bytes resolves to the same stable path. The extractor blocks conversion if any inspected asset is absent from the converted HTML.
+- Added an end-to-end synthetic OOXML fixture test that verifies text and an inline image survive conversion with alt text and a verified asset record.
+- CI passed at commit `0c76cfd`: https://github.com/shifter888ai/awakenology/actions/runs/39102543447
+- This validates only the synthetic fixture and adapter integration. The real trilingual source DOCX is still unavailable as raw bytes, so the actual article, illustrations, formatting, language boundaries and Japanese ending remain unverified. Do not generate or publish the pilot yet.
