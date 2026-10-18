@@ -3,12 +3,15 @@ import { inspectPageSet } from "./inspect-page-set.mjs";
 import { buildLanguageRouteManifest, verifyLanguageRouteManifest } from "./language-route-manifest.mjs";
 import { renderStaticShell } from "./static-shell.mjs";
 import { verifyRenderedInventory } from "./inspect-page-set.mjs";
+import { inspectPastedHtml } from "./inspect-paste.mjs";
+import { validateInventory } from "./content-inventory.mjs";
+import { reviewPasteInventory } from "./review-paste-inventory.mjs";
 
 /**
  * Offline review coordinator. Returns static HTML only when source inspection,
- * caller-supplied rendered inventories, and language routes all pass.
- * The output inventory must eventually be produced by an independent parser;
- * this function is a workflow gate, not a security boundary or sanitizer.
+ * parsed rendered content, and language routes all pass. Output inventories are
+ * derived from the actual reviewedArticleHtml, never trusted from caller input.
+ * This remains a review gate, not a security boundary or a full HTML sanitizer.
  */
 export async function generateReviewedPageSet({ pageSet, inputs, outputs }) {
   const inspection = await inspectPageSet(pageSet, inputs);
@@ -24,7 +27,14 @@ export async function generateReviewedPageSet({ pageSet, inputs, outputs }) {
       errors.push(`${lang}: reviewed output is missing.`);
       continue;
     }
-    const integrity = verifyRenderedInventory(inspection.pages[lang], output.inventory);
+    const rendered = inspectPastedHtml(output.reviewedArticleHtml, output.parser);
+    if (!rendered.ok) {
+      errors.push(...rendered.errors.map(e => `${lang}: rendered HTML: ${e}`));
+      continue;
+    }
+    errors.push(...validateInventory(rendered.inventory).errors.map(e => `${lang}: rendered HTML: ${e}`));
+    errors.push(...reviewPasteInventory(rendered.inventory).errors.map(e => `${lang}: rendered HTML: ${e}`));
+    const integrity = verifyRenderedInventory(inspection.pages[lang], rendered.inventory);
     errors.push(...integrity.errors.map(e => `${lang}: ${e}`));
   }
   if (errors.length) return { ok: false, stage: "content-integrity", errors, pages: {} };
