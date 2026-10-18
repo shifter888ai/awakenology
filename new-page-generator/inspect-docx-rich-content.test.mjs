@@ -38,3 +38,13 @@ test('blocks unrecognized Word formatting values rather than flattening them',as
  assert.equal(r.ok,false);
  assert.ok(r.errors.some(x=>x.includes('Unsupported Word u value')));
 });
+
+
+test('blocks paragraph and run styles until inherited formatting is resolved',async()=>{
+ const paragraph=await inspectDocxRichContent(await fixture('<w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:t>Heading</w:t></w:r></w:p>'));
+ assert.equal(paragraph.ok,false);
+ assert.ok(paragraph.errors.some(x=>x.includes('Inherited styles')));
+ const run=await inspectDocxRichContent(await fixture('<w:p><w:r><w:rPr><w:rStyle w:val="Emphasis"/></w:rPr><w:t>Emphasized</w:t></w:r></w:p>'));
+ assert.equal(run.ok,false);
+ assert.ok(run.errors.some(x=>x.includes('Inherited styles')));
+});
