@@ -32,3 +32,15 @@ test("reject oversized input before ZIP parsing", async () => {
   assert.match(result.errors.join(" "), /input limit/);
   assert.equal(result.html, null);
 });
+
+test("reject document XML containing invalid UTF-8", async () => {
+  const zip = new JSZip();
+  zip.file("[Content_Types].xml", '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>');
+  zip.file("word/_rels/document.xml.rels", '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"/>');
+  zip.file("word/document.xml", Buffer.from([0x3c, 0x77, 0x3a, 0x74, 0x3e, 0xc3, 0x28, 0x3c, 0x2f, 0x77, 0x3a, 0x74, 0x3e]));
+  const input = await zip.generateAsync({ type: "nodebuffer" });
+  const result = await extractDocx(input);
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join(" "), /not valid UTF-8/);
+  assert.equal(result.html, null);
+});
