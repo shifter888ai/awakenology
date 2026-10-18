@@ -45,3 +45,5 @@ Existing pages and frozen private editor must remain untouched.
 - CI passed for the initial adapter and tests at commit `3fe4345`: https://github.com/shifter888ai/awakenology/actions/runs/39102143170
 - Follow-up hardening now blocks Word drawings that are not recognized inline image drawings and inline drawing shapes with no image reference. CI for the latest hardening commits is pending at checkpoint update time.
 - This remains a standalone asset inspection stage, not an integrated DOCX-to-page conversion. Real pilot execution is still blocked by unavailable raw DOCX bytes; source formatting, all media, language boundaries and Japanese ending are not yet verified from the actual package.
+
+- Hardening regression was caught by CI: the first guard edit had over-escaped regexes, causing a syntax failure; this was corrected in commit `a93a131`. Latest CI is green: https://github.com/shifter888ai/awakenology/actions/runs/39102267549
