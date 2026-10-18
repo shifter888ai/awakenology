@@ -1,6 +1,7 @@
 import JSZip from "jszip";
 import mammoth from "mammoth";
 import { createHash } from "node:crypto";
+import { inspectDocxAssets } from "./inspect-docx-assets.mjs";
 
 /**
  * Conservative offline DOCX extraction. Output is intermediate HTML only.
@@ -71,15 +72,23 @@ export async function extractDocx(buffer) {
   if (errors.length) return blocked(errors, buffer);
 
   try {
+    const assetByHash = new Map(assets.map(asset => [asset.sha256, asset]));
     const converted = await mammoth.convertToHtml({ buffer }, {
       styleMap: ["u => u", "strike => s"],
-      includeDefaultStyleMap: true
+      includeDefaultStyleMap: true,
+      convertImage: mammoth.images.imgElement(async image => {
+        const base64 = await image.read("base64");
+        const checksum = digest(Buffer.from(base64, "base64"));
+        const asset = assetByHash.get(checksum);
+        if (!asset) throw new Error("Converted image does not match an inspected DOCX asset.");
+        return { src: asset.outputPath, alt: asset.altText };
+      })
     });
     errors.push(...converted.messages.map(m => `DOCX parser ${m.type}: ${m.message}`));
     if (!converted.value?.trim()) errors.push("DOCX converted to empty HTML.");
     return {
       ok: errors.length === 0, errors, html: errors.length ? null : converted.value,
-      sha256: digest(buffer)
+      sha256: digest(buffer), assets: errors.length ? [] : assets.map(({ bytes, ...asset }) => asset)
     };
   } catch (error) {
     return blocked([`DOCX conversion failed: ${error.message}`], buffer);
