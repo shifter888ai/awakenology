@@ -16,7 +16,7 @@ The implementation is an isolated proof of pipeline boundaries, not a working pa
 ## Verification status
 - GitHub Actions clean-run verification: **43 tests passed, 0 failed** on commit `965f82e166ba89a554b4b5debe9f45a5a50dcd15`. Run: https://github.com/shifter888ai/awakenology/actions/runs/39091733226. The run completed successfully.
 - A failing test exposed that self-closing `<w:drawing/>` / `<w:pict/>` tags were not caught; the guard was fixed and the suite rerun successfully.
-- The coordinator accepts caller-supplied output inventories and shell strings; these are not independently verified yet. It is a review workflow gate, not a sanitizer or security boundary.
+- The coordinator now parses each actual `reviewedArticleHtml` string, validates that parsed inventory, and compares it against the inspected source inventory; it no longer trusts a caller-supplied output inventory. The parser and approved shell fragments are still supplied by the caller, so this is a review workflow gate, not a sanitizer or security boundary.
 - No owner-supplied pilot content has been run through end to end.
 
 ## Remaining blockers before a Draft PR can be considered review-ready
@@ -25,7 +25,7 @@ The implementation is an isolated proof of pipeline boundaries, not a working pa
 3. Harden HTML paste: sanitizer and output construction, CSS value validation, URL policy, parser-repair detection, attribute restrictions per tag, and image asset handling. The inspector is **not** an HTML sanitizer.
 4. Normalize both adapters into one common source model with source locations and issue severity.
 5. Extract and approve exact header/footer, CSS, circled-A logo and theme controls for *new pages only*; current static shell accepts components but does not supply or verify them.
-6. Verify source/rendered content with independent extraction; a caller-supplied `integrityApproved: true` is not a security or review boundary.
+6. Remove trust in caller-controlled approval flags and shell fragments; establish a trusted, reviewed shell source and a browser/HTML parser boundary. The current output HTML is parsed before inventory comparison, but `integrityApproved: true` remains an internal workflow flag, not a security boundary.
 7. Preview EN/JP/zh-Hant in light/dark desktop/mobile, validate canonical routes, internal links and sitemap changes.
 8. Dry-run on representative owner-supplied content, then Draft PR, CI, explicit owner approval. No automatic merge/deploy.
 
