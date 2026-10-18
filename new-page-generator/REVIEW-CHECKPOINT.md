@@ -14,12 +14,13 @@ The implementation is an isolated proof of pipeline boundaries, not a working pa
 - Fail-closed coordinator tests for missing input, unavailable parser, and incomplete language set
 
 ## Verification status
-- Tests have been authored but **have not been executed in a clean environment**.
+- GitHub Actions clean-run verification: **43 tests passed, 0 failed** on commit `965f82e166ba89a554b4b5debe9f45a5a50dcd15`. Run: https://github.com/shifter888ai/awakenology/actions/runs/39091733226. The run completed successfully.
+- A failing test exposed that self-closing `<w:drawing/>` / `<w:pict/>` tags were not caught; the guard was fixed and the suite rerun successfully.
 - The coordinator accepts caller-supplied output inventories and shell strings; these are not independently verified yet. It is a review workflow gate, not a sanitizer or security boundary.
 - No owner-supplied pilot content has been run through end to end.
 
 ## Remaining blockers before a Draft PR can be considered review-ready
-1. Install dependencies and execute all tests in a clean environment; fix failures. Do not report passing tests without evidence.
+1. Keep the clean CI suite green as implementation changes continue; do not report passing tests without evidence.
 2. Harden DOCX fidelity: inherited styles, numbering/list structure, hyperlink relationships, Word tables, image extraction, and source XML-to-HTML loss accounting. Current parser deliberately blocks several complex features and explicit colors.
 3. Harden HTML paste: sanitizer and output construction, CSS value validation, URL policy, parser-repair detection, attribute restrictions per tag, and image asset handling. The inspector is **not** an HTML sanitizer.
 4. Normalize both adapters into one common source model with source locations and issue severity.
