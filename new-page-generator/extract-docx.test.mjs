@@ -19,6 +19,8 @@ test("extract simple text from valid package", async () => {
   assert.equal(result.ok, true, result.errors.join("; "));
   assert.match(result.html, /English 日本語 繁體中文/);
   assert.match(result.sha256, /^[a-f0-9]{64}$/);
+  assert.equal(result.sourceMap.paragraphs[0].text, "English 日本語 繁體中文");
+  assert.equal(result.sourceMap.paragraphs[0].sourceLocation.part, "word/document.xml");
 });
 
 test("reject empty and non-Buffer inputs", async () => {
@@ -59,4 +61,6 @@ test("integrate an inline image and expose its verified asset record", async () 
   assert.match(result.html, /Fixture illustration/);
   assert.equal(result.assets.length, 1);
   assert.equal(result.assets[0].sha256.length, 64);
+  assert.equal(result.sourceMap.imageReferences.length, 1);
+  assert.equal(result.sourceMap.imageReferences[0].relationshipId, result.assets[0].relationshipId);
 });
