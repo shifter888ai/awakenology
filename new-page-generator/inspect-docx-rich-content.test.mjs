@@ -17,3 +17,10 @@ test('decodes decimal and hexadecimal XML character references exactly',async()=
  assert.equal(r.ok,true,r.errors.join('; '));
  assert.deepEqual(r.runs.map(x=>x.text),['A中文 & B']);
 });
+
+
+test('honors explicitly disabled bold, italic, and underline flags',async()=>{
+ const r=await inspectDocxRichContent(await fixture('<w:p><w:r><w:rPr><w:b w:val="0"/><w:i w:val="false"/><w:u w:val="none"/></w:rPr><w:t>Plain</w:t></w:r></w:p>'));
+ assert.equal(r.ok,true,r.errors.join('; '));
+ assert.deepEqual(r.runs,[{text:'Plain',bold:false,italic:false,underline:false,color:null,href:null}]);
+});
