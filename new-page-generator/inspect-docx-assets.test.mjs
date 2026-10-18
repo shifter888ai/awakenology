@@ -62,3 +62,10 @@ test("rejects invalid input", async () => {
   assert.equal((await inspectDocxAssets(Buffer.from("bad"))).ok, false);
   assert.equal((await inspectDocxAssets(null)).ok, false);
 });
+
+test("blocks inline drawings that are shapes rather than images", async () => {
+  const zip = await fixture({ document: "<w:p><w:r><w:drawing><wp:inline><wp:docPr id=\"1\" name=\"Shape\"/><a:graphic><a:graphicData/></a:graphic></wp:inline></w:drawing></w:r></w:p>" });
+  const result = await inspectDocxAssets(await zip.generateAsync({ type: "nodebuffer" }));
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join(" "), /contains no recognized image/);
+});
