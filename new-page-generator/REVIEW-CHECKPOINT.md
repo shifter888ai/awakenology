@@ -29,4 +29,11 @@ The implementation is an isolated proof of pipeline boundaries, not a working pa
 7. Preview EN/JP/zh-Hant in light/dark desktop/mobile, validate canonical routes, internal links and sitemap changes.
 8. Dry-run on representative owner-supplied content, then Draft PR, CI, explicit owner approval. No automatic merge/deploy.
 
+## Owner-supplied pilot: trilingual DOCX (2026-10-18)
+- Added [pilot source audit](pilot-audit-multidimensional-space.md) for `多重時空是什麼` using the exact Library copy `多重時空是什麽 - 繁體 - Copy(1).docx` (501,967 bytes, indexed as 13 pages).
+- The indexed text confirms separate Traditional Chinese, English, and Japanese streams in one file; boundaries occur mid-page, so a page-per-language assumption is invalid.
+- The Library reader does not expose authorized raw DOCX bytes or rendered illustration pages. Pages 2, 6, and 11 have unresolved illustrations. Japanese indexed text ends at the Nth-dimension example without a visible closing block; this must be checked against the original file, not filled from another language.
+- **Pilot remains blocked before HTML generation.** The available text extraction cannot validate real OOXML, images, run formatting, hyperlinks, exact paragraph order, or the Japanese end-of-document. Do not call this a completed DOCX dry-run or claim source/output integrity.
+- Next step: obtain an authorized byte/media export path, then run the existing DOCX adapter on the exact source and compare all content-bearing blocks. Keep output generation fail-closed until image and language-boundary issues are resolved.
+
 Existing pages and frozen private editor must remain untouched.
