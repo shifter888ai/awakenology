@@ -13,7 +13,7 @@ async function fixture(body) {
 test("reject non-ZIP input", async () => assert.match((await extractDocx(Buffer.from("bad"))).errors.join(" "), /corrupt/));
 test("reject tracked deletion", async () => assert.match((await extractDocx(await fixture("<w:del><w:r><w:delText>lost</w:delText></w:r></w:del>"))).errors.join(" "), /tracked deletion/));
 test("reject explicit Word colors rather than drop them", async () => assert.match((await extractDocx(await fixture('<w:rPr><w:color w:val="FF0000"/></w:rPr><w:t>Red</w:t>'))).errors.join(" "), /text color/));
-test("reject drawings pending asset pipeline", async () => assert.match((await extractDocx(await fixture("<w:drawing/>"))).errors.join(" "), /drawings\/images/));
+test("reject malformed drawings instead of silently dropping them", async () => assert.match((await extractDocx(await fixture("<w:drawing/>"))).errors.join(" "), /DOCX image adapter/));
 test("extract simple text from valid package", async () => {
   const result = await extractDocx(await fixture("<w:t>English 日本語 繁體中文</w:t>"));
   assert.equal(result.ok, true, result.errors.join("; "));
@@ -43,4 +43,20 @@ test("reject document XML containing invalid UTF-8", async () => {
   assert.equal(result.ok, false);
   assert.match(result.errors.join(" "), /not valid UTF-8/);
   assert.equal(result.html, null);
+});
+
+test("integrate an inline image and expose its verified asset record", async () => {
+  const zip = new JSZip();
+  zip.file("[Content_Types].xml", '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="png" ContentType="image/png"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>');
+  zip.file("word/_rels/document.xml.rels", '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/image1.png"/></Relationships>');
+  zip.file("word/media/image1.png", Buffer.from("image fixture bytes"));
+  zip.file("word/document.xml", '<?xml version="1.0" encoding="UTF-8"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><w:body><w:p><w:r><w:t>Before</w:t></w:r><w:r><w:drawing><wp:inline><wp:docPr id="1" name="Picture" descr="Fixture illustration"/><a:graphic><a:graphicData><a:blip r:embed="rId1"/></a:graphicData></a:graphic></wp:inline></w:drawing></w:r><w:r><w:t>After</w:t></w:r></w:p></w:body></w:document>');
+  const result = await extractDocx(await zip.generateAsync({ type: "nodebuffer" }));
+  assert.equal(result.ok, true, result.errors.join("; "));
+  assert.match(result.html, /Before/);
+  assert.match(result.html, /After/);
+  assert.match(result.html, /assets\/docx-image-001\.png/);
+  assert.match(result.html, /Fixture illustration/);
+  assert.equal(result.assets.length, 1);
+  assert.equal(result.assets[0].sha256.length, 64);
 });
