@@ -6,6 +6,7 @@ import { verifyRenderedInventory } from "./inspect-page-set.mjs";
 import { inspectPastedHtml } from "./inspect-paste.mjs";
 import { validateInventory } from "./content-inventory.mjs";
 import { reviewPasteInventory } from "./review-paste-inventory.mjs";
+import { compareRichContent } from "./compare-rich-content.mjs";
 
 /**
  * Offline review coordinator. Returns static HTML only when source inspection,
@@ -34,6 +35,15 @@ export async function generateReviewedPageSet({ pageSet, inputs, outputs }) {
     }
     errors.push(...validateInventory(rendered.inventory).errors.map(e => `${lang}: rendered HTML: ${e}`));
     errors.push(...reviewPasteInventory(rendered.inventory).errors.map(e => `${lang}: rendered HTML: ${e}`));
+    if (output.sourceRichInventory !== undefined || output.renderedRichInventory !== undefined) {
+      try {
+        if (output.sourceRichInventory === undefined || output.renderedRichInventory === undefined) throw new Error("Both source and rendered rich-content inventories are required.");
+        const rich = compareRichContent(output.sourceRichInventory, output.renderedRichInventory);
+        errors.push(...rich.issues.map(issue => `${lang}: rich-content mismatch: ${JSON.stringify(issue)}`));
+      } catch (error) {
+        errors.push(`${lang}: rich-content verification blocked: ${String(error?.message ?? error)}`);
+      }
+    }
     const integrity = verifyRenderedInventory(inspection.pages[lang], rendered.inventory);
     errors.push(...integrity.errors.map(e => `${lang}: ${e}`));
   }
