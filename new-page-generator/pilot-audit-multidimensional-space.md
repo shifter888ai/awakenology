@@ -57,3 +57,6 @@ Then run the actual DOCX adapter against the source and compare the extracted in
 ## Isolation and release status
 
 This is a read-only source audit artifact for the isolated `feature/new-page-generator-phase3` development branch. It does not modify existing article pages, `main`, sitemap, Worker routing, production, or the frozen private visual editor. No PR, merge, or deployment is authorized by this artifact.
+
+## Additional implementation finding (checked 2026-10-18)
+The current `extract-docx.mjs` adapter explicitly rejects any `w:drawing` or `w:pict` in the main document XML with “Embedded drawings/images require separate asset extraction and review.” Therefore, restoring raw DOCX access alone will not make this pilot pass. The image pipeline must be implemented and tested first (inline image relationship resolution, extracted bytes/checksums, stable output asset paths, preserved source order/alt text, and blocking of unsupported floating drawings/charts/shapes). The current behavior is appropriately fail-closed; do not remove the guard without replacing it with verified asset handling.
