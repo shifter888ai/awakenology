@@ -20,7 +20,7 @@ export function inspectPastedHtml(html, parser = globalThis.DOMParser && new DOM
   const visit = (node, path) => {
     if (node.nodeType === 8) { errors.push(`${path}: HTML comment requires review.`); return; }
     if (node.nodeType === 3) {
-      if (node.textContent.trim()) inventory.push({ type: "text", path, value: node.textContent });
+      inventory.push({ type: "text", path, value: node.textContent });
       return;
     }
     if (node.nodeType !== 1) return;
@@ -45,6 +45,6 @@ export function inspectPastedHtml(html, parser = globalThis.DOMParser && new DOM
     [...node.childNodes].forEach((child, index) => visit(child, `${path}/${index}`));
   };
   [...doc.body.childNodes].forEach((node, index) => visit(node, `/${index}`));
-  if (!inventory.some(item => item.type === "text")) errors.push("No text content found; manual review required.");
+  if (!inventory.some(item => item.type === "text" && item.value.trim())) errors.push("No text content found; manual review required.");
   return { ok: errors.length === 0, errors, inventory };
 }
