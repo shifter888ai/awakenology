@@ -1,5 +1,6 @@
 import { reviewPasteInventory } from "./review-paste-inventory.mjs";
 import { extractDocx } from "./extract-docx.mjs";
+import { inspectDocxRichContent } from "./inspect-docx-rich-content.mjs";
 import { LANGUAGES, validatePageSet } from "./validate-page-set.mjs";
 import { inspectPastedHtml } from "./inspect-paste.mjs";
 import { validateInventory, compareInventories } from "./content-inventory.mjs";
@@ -24,9 +25,14 @@ export async function inspectPageSet(pageSet, inputs = {}) {
       continue;
     }
     let inspected;
+    let sourceRichInventory = null;
     if (meta.mode === "paste") {
       inspected = inspectPastedHtml(input.html, input.parser);
     } else {
+      const rich = await inspectDocxRichContent(input.buffer);
+      if (!rich.ok) {
+        errors.push(...rich.errors.map(e => `${lang}: original DOCX rich content: ${e}`));
+      } else sourceRichInventory = rich;
       const extracted = await extractDocx(input.buffer);
       inspected = extracted.ok
         ? inspectPastedHtml(extracted.html, input.parser)
@@ -47,7 +53,7 @@ export async function inspectPageSet(pageSet, inputs = {}) {
         if (normalized.ok) normalizedBlocks = normalized.blocks;
       }
     }
-    pages[lang] = { mode: meta.mode, inventory: inspected.inventory, normalizedBlocks, errors: pageErrors };
+    pages[lang] = { mode: meta.mode, inventory: inspected.inventory, normalizedBlocks, sourceRichInventory, errors: pageErrors };
     errors.push(...pageErrors.map(e => `${lang}: ${e}`));
   }
   return { ok: errors.length === 0, errors, pages };
