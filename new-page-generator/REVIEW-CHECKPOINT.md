@@ -60,3 +60,6 @@ Existing pages and frozen private editor must remain untouched.
 - Unresolved warnings, errors, and blocking issues fail validation; source offsets, duplicate IDs, missing child references, and absent structural fields are also rejected.
 - This is a schema/validation foundation only. The DOCX and HTML-paste adapters have not yet been refactored to emit this model, so no claim is made that the pilot is represented by it.
 - Added unit tests for valid blocks, duplicate IDs, missing fields, unresolved issues, resolved notes, and child/source-offset errors. CI result for the new validator and tests is pending.
+
+- Added `normalize-html-inventory.mjs`, a first bridge from the existing parsed HTML inventory into the shared normalized block shape. It preserves text nodes, ordered child references, basic inline-format markers, link targets, and image src/alt fields. It explicitly records paths in the parsed HTML tree, not fabricated DOCX XML offsets.
+- Added tests for content/child order, formatting, links, image metadata, malformed input, and the source-location distinction. These tests do not replace original DOCX-to-HTML fidelity tests. CI status for this bridge is pending.
