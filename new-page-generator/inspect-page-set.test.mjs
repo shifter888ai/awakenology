@@ -5,16 +5,16 @@ import { inspectPageSet, verifyRenderedInventory } from "./inspect-page-set.mjs"
 const pageSet = () => ({ pages: Object.fromEntries(["en","ja","zh-Hant"].map((lang, i) => [lang, {
   title: lang, mode: i === 0 ? "docx" : "paste", source: "source-" + lang, route: "/" + lang + "/"
 }])) });
-test("DOCX is explicitly blocked pending real extraction", () => {
-  const result = inspectPageSet(pageSet(), {
-    en: { inventory: [{ type: "text", path: "/0", value: "pretend DOCX" }] },
+test("invalid DOCX is explicitly blocked", async () => {
+  const result = await inspectPageSet(pageSet(), {
+    en: { buffer: Buffer.from("not a docx") },
     ja: {}, "zh-Hant": {}
   });
   assert.equal(result.ok, false);
-  assert.match(result.errors.join(" "), /DOCX extraction not implemented/);
+  assert.match(result.errors.join(" "), /Invalid or corrupt DOCX ZIP package/);
 });
-test("missing input is blocking", () => {
-  const result = inspectPageSet(pageSet(), {});
+test("missing input is blocking", async () => {
+  const result = await inspectPageSet(pageSet(), {});
   assert.equal(result.ok, false);
   assert.match(result.errors.join(" "), /input payload missing/);
 });
