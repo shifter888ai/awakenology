@@ -13,3 +13,18 @@ test('extracts formatting, links, image position from parsed HTML',()=>{
  assert.deepEqual(r.images,[{assetPath:'asset.png',paragraphIndex:0,order:0,alt:'Diagram'}]);
 });
 test('requires parser rather than trusting a caller inventory',()=>assert.equal(inspectRenderedRichContent('<p>x</p>',null).ok,false));
+
+
+test('blocks unsupported rendered decoration values',()=>{
+ const badParser={parseFromString:()=>({body:{childNodes:[node('SPAN',{style:'text-decoration: underline line-through'},[text('styled')])]}})};
+ const r=inspectRenderedRichContent('<span>styled</span>',badParser);
+ assert.equal(r.ok,false);
+ assert.ok(r.errors.some(x=>x.includes('Unsupported rendered text-decoration')));
+});
+
+test('blocks strike-through tags instead of losing formatting',()=>{
+ const strikeParser={parseFromString:()=>({body:{childNodes:[node('S',{},[text('struck')])]}})};
+ const r=inspectRenderedRichContent('<s>struck</s>',strikeParser);
+ assert.equal(r.ok,false);
+ assert.ok(r.errors.some(x=>x.includes('deletion/strike')));
+});
