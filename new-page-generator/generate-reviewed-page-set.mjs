@@ -7,6 +7,7 @@ import { inspectPastedHtml } from "./inspect-paste.mjs";
 import { validateInventory } from "./content-inventory.mjs";
 import { reviewPasteInventory } from "./review-paste-inventory.mjs";
 import { compareRichContent } from "./compare-rich-content.mjs";
+import { inspectRenderedRichContent } from "./inspect-rendered-rich-content.mjs";
 
 /**
  * Offline review coordinator. Returns static HTML only when source inspection,
@@ -41,7 +42,9 @@ export async function generateReviewedPageSet({ pageSet, inputs, outputs }) {
     if (output.sourceRichInventory !== undefined || output.renderedRichInventory !== undefined) {
       try {
         if (output.sourceRichInventory === undefined || output.renderedRichInventory === undefined) throw new Error("Both source and rendered rich-content inventories are required.");
-        const rich = compareRichContent(output.sourceRichInventory, output.renderedRichInventory);
+        const derived = inspectRenderedRichContent(output.reviewedArticleHtml, output.parser);
+        if (!derived.ok) throw new Error(derived.errors.join("; "));
+        const rich = compareRichContent(output.sourceRichInventory, derived);
         errors.push(...rich.issues.map(issue => `${lang}: rich-content mismatch: ${JSON.stringify(issue)}`));
       } catch (error) {
         errors.push(`${lang}: rich-content verification blocked: ${String(error?.message ?? error)}`);
