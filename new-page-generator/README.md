@@ -5,7 +5,7 @@ Status: work in progress. This directory is **not a publishing endpoint**. Nothi
 ## Contract
 
 - One logical page set contains supplied English, Japanese, and Traditional Chinese content. Missing language input is a blocking error. Never auto-translate or invent article text.
-- Accepted source modes: DOCX (primary, to be implemented and tested) and formatted HTML paste (alternative).
+- Accepted source modes: DOCX (primary) and formatted HTML paste (alternative). The DOCX text extractor is conservative and fail-closed; the separate `inspect-docx-assets.mjs` stage now extracts checksum-verified inline image bytes into deterministic asset records and blocks unsupported drawings/external links. These adapter pieces are not yet a complete end-to-end normalized content model, and must not be treated as approval to generate the pilot.
 - Both sources must normalize into a common ordered content inventory, preserving headings, paragraphs, formatting, links, lists, tables, images and intentional whitespace. Any unsupported or ambiguous construct blocks generation pending review.
 - Build-time shared shell produces complete static HTML for each language; no runtime fetch of headers/footers.
 - Use the approved navigation, theme behavior, monochrome circled-A branding, Contact/Reddit/Disclaimer footer and © 2017 Awakenology. Canonical host: https://awakenology.space.
