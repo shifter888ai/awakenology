@@ -11,3 +11,9 @@ test('does not guess hyperlink inheritance',async()=>assert.equal((await inspect
 test('does not certify embedded drawings without asset mapping',async()=>assert.equal((await inspectDocxRichContent(await fixture('<w:p><w:r><w:drawing><a:blip r:embed="rId2"/></w:drawing></w:r></w:p>'))).ok,false));
 
 test('image-only run does not create a false text-run error',async()=>{const z=new JSZip();z.file('word/document.xml','<w:document xmlns:w="w" xmlns:r="r" xmlns:wp="wp" xmlns:a="a"><w:body><w:p><w:r><w:t>Before</w:t></w:r><w:r><w:drawing><wp:inline><wp:docPr id="1" descr="diagram"/><a:blip r:embed="rId2"/></wp:inline></w:drawing></w:r></w:p></w:body></w:document>');z.file('word/_rels/document.xml.rels','<Relationships><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/a.png"/></Relationships>');z.file('[Content_Types].xml','<Types><Default Extension="png" ContentType="image/png"/></Types>');z.file('word/media/a.png',Buffer.from([137,80,78,71,13,10,26,10]));const r=await inspectDocxRichContent(await z.generateAsync({type:'nodebuffer'}));assert.equal(r.ok,true,r.errors.join('; '));assert.equal(r.images.length,1);assert.equal(r.images[0].paragraphIndex,0);});
+
+test('decodes decimal and hexadecimal XML character references exactly',async()=>{
+ const r=await inspectDocxRichContent(await fixture('<w:p><w:r><w:t>A&#x4E2D;&#25991; &amp; B</w:t></w:r></w:p>'));
+ assert.equal(r.ok,true,r.errors.join('; '));
+ assert.deepEqual(r.runs.map(x=>x.text),['A中文 & B']);
+});
