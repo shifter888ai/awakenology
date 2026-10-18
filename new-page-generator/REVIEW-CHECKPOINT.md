@@ -54,3 +54,9 @@ Existing pages and frozen private editor must remain untouched.
 - Added an end-to-end synthetic OOXML fixture test that verifies text and an inline image survive conversion with alt text and a verified asset record.
 - CI passed at commit `0c76cfd`: https://github.com/shifter888ai/awakenology/actions/runs/39102543447
 - This validates only the synthetic fixture and adapter integration. The real trilingual source DOCX is still unavailable as raw bytes, so the actual article, illustrations, formatting, language boundaries and Japanese ending remain unverified. Do not generate or publish the pilot yet.
+
+## Shared normalized source model — first validation slice (2026-10-18)
+- Added `normalized-source-model.mjs` with an explicit block schema: stable IDs, language/source mode, source locations, ordered child references, exact text, formatting, links, assets, and severity-coded issues.
+- Unresolved warnings, errors, and blocking issues fail validation; source offsets, duplicate IDs, missing child references, and absent structural fields are also rejected.
+- This is a schema/validation foundation only. The DOCX and HTML-paste adapters have not yet been refactored to emit this model, so no claim is made that the pilot is represented by it.
+- Added unit tests for valid blocks, duplicate IDs, missing fields, unresolved issues, resolved notes, and child/source-offset errors. CI result for the new validator and tests is pending.
