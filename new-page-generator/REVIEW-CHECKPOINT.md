@@ -63,3 +63,9 @@ Existing pages and frozen private editor must remain untouched.
 
 - Added `normalize-html-inventory.mjs`, a first bridge from the existing parsed HTML inventory into the shared normalized block shape. It preserves text nodes, ordered child references, basic inline-format markers, link targets, and image src/alt fields. It explicitly records paths in the parsed HTML tree, not fabricated DOCX XML offsets.
 - Added tests for content/child order, formatting, links, image metadata, malformed input, and the source-location distinction. These tests do not replace original DOCX-to-HTML fidelity tests. CI status for this bridge is pending.
+
+## Original DOCX source-map diagnostic slice (2026-10-18)
+- Added `inspect-docx-source-map.mjs` to record original `word/document.xml` paragraph order, exact text-run values, source XML offsets and image relationship references with paragraph locations. It blocks constructs whose source positions cannot yet be mapped reliably.
+- `extract-docx.mjs` now requires a passing source map, checks original image reference count/order against inspected image assets, and returns the diagnostic source map on success. Added synthetic fixture tests for text and image source locations.
+- This is not a full semantic OOXML parser and does not yet prove rendered text/formatting fidelity; unsupported links and other ambiguous constructs deliberately fail closed pending dedicated mapping.
+- The actual trilingual pilot remains blocked by unavailable original DOCX bytes. No generated pilot pages, PR, merge or deployment.
