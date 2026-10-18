@@ -123,7 +123,7 @@ export async function inspectDocxAssets(buffer) {
       sourceOrder: i + 1,
       relationshipId: id,
       sourcePath: target,
-      outputPath: `assets/docx-image-${String(i + 1).padStart(3, "0")}.${extension}`,
+      outputPath: `assets/docx-${sha256(bytes).slice(0, 16)}.${extension}`,
       altText,
       contentType,
       byteLength: bytes.length,
