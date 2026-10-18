@@ -24,3 +24,10 @@ test('honors explicitly disabled bold, italic, and underline flags',async()=>{
  assert.equal(r.ok,true,r.errors.join('; '));
  assert.deepEqual(r.runs,[{text:'Plain',bold:false,italic:false,underline:false,color:null,href:null}]);
 });
+
+
+test('blocks theme-based Word colors until theme resolution is implemented',async()=>{
+ const r=await inspectDocxRichContent(await fixture('<w:p><w:r><w:rPr><w:color w:val="FF0000" w:themeColor="accent1"/></w:rPr><w:t>Colored</w:t></w:r></w:p>'));
+ assert.equal(r.ok,false);
+ assert.ok(r.errors.some(x=>x.includes('Theme-based Word color')));
+});
