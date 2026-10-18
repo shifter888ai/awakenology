@@ -65,12 +65,12 @@ export async function inspectDocxAssets(buffer) {
     errors.push("Charts, embedded objects, or alternate drawing content require manual review.");
   }
 
-  const drawingCount = [...xml.matchAll(/<w:drawing\\b/g)].length;
-  const inlineBlocks = [...xml.matchAll(/<wp:inline\\b[^>]*>[\\s\\S]*?<\\/wp:inline>/g)];
+  const drawingCount = [...xml.matchAll(/<w:drawing\b/g)].length;
+  const inlineBlocks = [...xml.matchAll(/<wp:inline\b[^>]*>[\s\S]*?<\/wp:inline>/g)];
   if (drawingCount !== inlineBlocks.length) errors.push("A Word drawing is not a recognized inline image drawing.");
   const inlineBlips = [];
   for (const block of inlineBlocks) {
-    const blockBlips = [...block[0].matchAll(/<a:blip\\b[^>]*\\/?\\s*>/g)];
+    const blockBlips = [...block[0].matchAll(/<a:blip\b[^>]*\/?\s*>/g)];
     if (!blockBlips.length) errors.push("An inline drawing contains no recognized image; shape content requires review.");
     for (const blip of blockBlips) {
       const tag = blip[0];
