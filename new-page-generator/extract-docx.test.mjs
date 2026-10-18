@@ -55,7 +55,7 @@ test("integrate an inline image and expose its verified asset record", async () 
   assert.equal(result.ok, true, result.errors.join("; "));
   assert.match(result.html, /Before/);
   assert.match(result.html, /After/);
-  assert.match(result.html, /assets\/docx-image-001\.png/);
+  assert.match(result.html, /assets\/docx-[a-f0-9]{16}\.png/);
   assert.match(result.html, /Fixture illustration/);
   assert.equal(result.assets.length, 1);
   assert.equal(result.assets[0].sha256.length, 64);
