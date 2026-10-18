@@ -31,13 +31,10 @@ export async function inspectDocxRichContent(buffer) {
       const flag = key => {
         const tag = new RegExp('<w:' + key + '(?:\\s[^>]*?)?\\s*/>').exec(properties)?.[0];
         if (!tag) return false;
-        const value = /\\bw:val=["\\x27]([^"\\x27]+)["\\x27]/.exec(tag)?.[1]?.toLowerCase();
-        if (value && !['1', 'true', 'on', '0', 'false', 'off', 'none', 'single'].includes(value)) {
+        const value = /\bw:val=["\x27]([^"\x27]+)["\x27]/.exec(tag)?.[1]?.toLowerCase();
+        const allowed = key === 'u' ? ['single', '0', 'false', 'off', 'none'] : ['1', 'true', 'on', '0', 'false', 'off', 'none'];
+        if (value && !allowed.includes(value)) {
           errors.push('Unsupported Word ' + key + ' value in paragraph ' + (p + 1) + '.');
-          return false;
-        }
-        if (key === 'u' && value && !['1', 'true', 'on', '0', 'false', 'off', 'none', 'single'].includes(value)) {
-          errors.push('Unsupported underline style in paragraph ' + (p + 1) + '.');
           return false;
         }
         return !value || !['0', 'false', 'off', 'none'].includes(value);
