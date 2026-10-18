@@ -37,18 +37,21 @@ export async function generateReviewedPageSet({ pageSet, inputs, outputs }) {
     errors.push(...validateInventory(rendered.inventory).errors.map(e => `${lang}: rendered HTML: ${e}`));
     errors.push(...reviewPasteInventory(rendered.inventory).errors.map(e => `${lang}: rendered HTML: ${e}`));
     if (pageSet.pages[lang].mode === "docx") {
-      errors.push(`${lang}: DOCX rich-content provenance is not yet independently verified; review output blocked.`);
-    }
-    if (output.sourceRichInventory !== undefined || output.renderedRichInventory !== undefined) {
       try {
-        if (output.sourceRichInventory === undefined || output.renderedRichInventory === undefined) throw new Error("Both source and rendered rich-content inventories are required.");
+        const original = inspection.pages[lang].sourceRichInventory;
+        if (!original?.ok) throw new Error("Original DOCX rich inventory unavailable.");
         const derived = inspectRenderedRichContent(output.reviewedArticleHtml, output.parser);
         if (!derived.ok) throw new Error(derived.errors.join("; "));
-        const rich = compareRichContent(output.sourceRichInventory, derived);
-        errors.push(...rich.issues.map(issue => `${lang}: rich-content mismatch: ${JSON.stringify(issue)}`));
+        const rich = compareRichContent(original, derived);
+        errors.push(...rich.issues.map(issue => `${lang}: DOCX rich-content mismatch: ${JSON.stringify(issue)}`));
       } catch (error) {
-        errors.push(`${lang}: rich-content verification blocked: ${String(error?.message ?? error)}`);
+        errors.push(`${lang}: DOCX rich-content verification blocked: ${String(error?.message ?? error)}`);
       }
+      // This conservative extractor does not yet resolve relationships,
+      // inherited styles, or full image provenance. Do not certify the pilot.
+      errors.push(`${lang}: full DOCX rich-content provenance remains incomplete; review output blocked.`);
+    } else if (output.sourceRichInventory !== undefined || output.renderedRichInventory !== undefined) {
+      errors.push(`${lang}: caller-supplied rich inventories cannot establish independent source provenance.`);
     }
     const integrity = verifyRenderedInventory(inspection.pages[lang], rendered.inventory);
     errors.push(...integrity.errors.map(e => `${lang}: ${e}`));
