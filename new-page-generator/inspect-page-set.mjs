@@ -1,3 +1,4 @@
+import { extractDocx } from "./extract-docx.mjs";
 import { LANGUAGES, validatePageSet } from "./validate-page-set.mjs";
 import { inspectPastedHtml } from "./inspect-paste.mjs";
 import { validateInventory, compareInventories } from "./content-inventory.mjs";
@@ -5,10 +6,10 @@ import { validateInventory, compareInventories } from "./content-inventory.mjs";
 /**
  * Connects the existing validators without inventing a DOCX converter.
  * `inputs` maps language to { html, parser } for paste, or
- * { inventory, issues } from a future reviewed DOCX extractor.
+ * { buffer, parser } for DOCX. DOCX extraction runs before HTML inspection.
  * The returned result is a review artifact, never publishable HTML.
  */
-export function inspectPageSet(pageSet, inputs = {}) {
+export async function inspectPageSet(pageSet, inputs = {}) {
   const contract = validatePageSet(pageSet);
   const errors = [...contract.errors];
   const pages = {};
@@ -24,9 +25,10 @@ export function inspectPageSet(pageSet, inputs = {}) {
     if (meta.mode === "paste") {
       inspected = inspectPastedHtml(input.html, input.parser);
     } else {
-      // Until the DOCX extractor exists, do not accept arbitrary inventories as
-      // evidence of successful Word conversion.
-      inspected = { ok: false, errors: ["DOCX extraction not implemented; input blocked."], inventory: [] };
+      const extracted = await extractDocx(input.buffer);
+      inspected = extracted.ok
+        ? inspectPastedHtml(extracted.html, input.parser)
+        : { ok: false, errors: extracted.errors, inventory: [] };
     }
     const pageErrors = [...inspected.errors];
     if (inspected.ok) pageErrors.push(...validateInventory(inspected.inventory).errors);
