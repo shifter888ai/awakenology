@@ -32,3 +32,21 @@ test("blocks invalid input and missing source paragraphs", async () => {
   assert.equal((await inspectDocxSourceMap(Buffer.from("bad"))).ok, false);
   assert.equal((await inspectDocxSourceMap(await fixture(""))).ok, false);
 });
+
+
+test("blocks external and internal hyperlinks until targets are mapped", async () => {
+  const external = await inspectDocxSourceMap(await fixture('<w:p><w:hyperlink r:id="rIdExt"><w:r><w:t>external</w:t></w:r></w:hyperlink></w:p>'));
+  assert.equal(external.ok, false);
+  assert.match(external.errors.join(" "), /unsupported or ambiguous/);
+  const internal = await inspectDocxSourceMap(await fixture('<w:p><w:hyperlink w:anchor="section-2"><w:r><w:t>internal</w:t></w:r></w:hyperlink></w:p>'));
+  assert.equal(internal.ok, false);
+  assert.match(internal.errors.join(" "), /unsupported or ambiguous/);
+});
+
+test("blocks tabs and line breaks rather than silently flattening layout", async () => {
+  for (const construct of ['<w:tab/>', '<w:br/>', '<w:cr/>']) {
+    const result = await inspectDocxSourceMap(await fixture('<w:p><w:r><w:t>Before</w:t>'+construct+'<w:t>After</w:t></w:r></w:p>'));
+    assert.equal(result.ok, false, construct);
+    assert.match(result.errors.join(" "), /unsupported or ambiguous/);
+  }
+});
