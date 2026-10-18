@@ -37,7 +37,7 @@ export async function inspectDocxRichContent(buffer) {
       const attr = (key, name) => new RegExp('<w:' + key + '\\b[^>]*\\bw:' + name + '=["\\x27]([^"\\x27]+)["\\x27][^>]*/>').exec(properties)?.[1] ?? null;
       const color = attr('color', 'val');
       if (color && !/^[0-9a-fA-F]{6}$/.test(color)) errors.push('Unresolved Word color in paragraph ' + (p + 1) + '.');
-      if (/<w:color\\b[^>]*\\bw:theme(?:Color|Tint|Shade)=/.test(properties)) errors.push('Theme-based Word color requires independent resolution in paragraph ' + (p + 1) + '.');
+      if (/<w:color\b[^>]*\bw:theme(?:Color|Tint|Shade)=/.test(properties)) errors.push('Theme-based Word color requires independent resolution in paragraph ' + (p + 1) + '.');
       const texts = [...body.matchAll(/<w:t(?=[\s>])[^>]*>([\s\S]*?)<\/w:t>/g)];
       if (texts.length !== 1) { errors.push('Ambiguous run/text mapping in paragraph ' + (p + 1) + '.'); continue; }
       const decode = s => s.replace(/&(?:amp|lt|gt|quot|apos);|&#(?:x[0-9a-fA-F]+|[0-9]+);/g, entity => {
