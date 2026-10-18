@@ -25,3 +25,19 @@ test("identical inspected and rendered inventories pass", () => {
   const inventory = [{ type: "text", path: "/0", value: "中文 日本語 English" }];
   assert.equal(verifyRenderedInventory({ inventory, errors: [] }, structuredClone(inventory)).ok, true);
 });
+
+test("successful paste inspection also returns normalized blocks", async () => {
+  const textNode = { nodeType: 3, textContent: "Preserve 日本語 中文 English" };
+  const parser = { parseFromString: () => ({ body: { childNodes: [textNode] } }) };
+  const set = { pages: Object.fromEntries(["en", "ja", "zh-Hant"].map(lang => [lang, {
+    title: lang, mode: "paste", source: "source-" + lang, route: "/" + lang + "/"
+  }])) };
+  const inputs = Object.fromEntries(["en", "ja", "zh-Hant"].map(lang => [lang, { html: "<p>source</p>", parser }]));
+  const result = await inspectPageSet(set, inputs);
+  assert.equal(result.ok, true, result.errors.join("; "));
+  for (const lang of ["en", "ja", "zh-Hant"]) {
+    assert.equal(result.pages[lang].normalizedBlocks[0].text, "Preserve 日本語 中文 English");
+    assert.equal(result.pages[lang].normalizedBlocks[0].language, lang);
+    assert.equal(result.pages[lang].normalizedBlocks[0].sourceLocation.part, "pasted-html");
+  }
+});
