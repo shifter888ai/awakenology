@@ -175,6 +175,6 @@ test("recognizes only the warning for a referenced and defined List Paragraph st
  const stylesXml='<w:styles><w:style w:type="paragraph" w:styleId="7"><w:name w:val="List Paragraph"/></w:style></w:styles>';
  const documentXml='<w:document><w:body><w:p><w:pPr><w:pStyle w:val="7"/></w:pPr></w:p></w:body></w:document>';
  assert.equal(isResolvedListParagraphWarning(warning,stylesXml,documentXml),true);
- assert.equal(isResolvedListParagraphWarning(warning,stylesXml,documentXml.replace('w:val="7"','w:val="Other")),false);
+ assert.equal(isResolvedListParagraphWarning(warning,stylesXml,documentXml.replace('w:val="7"','w:val="Other"')),false);
  assert.equal(isResolvedListParagraphWarning("Unrecognised paragraph style: 'Unknown' (Style ID: 7)",stylesXml,documentXml),false);
 });
