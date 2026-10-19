@@ -49,6 +49,10 @@ export function compareRichContent(source, output) {
       }
     });
   }
+  // Matching anchor metadata is not proof that HTML reproduces Word floating layout.
+  if (source.images.some(image => image.placement.kind === 'floating') || output.images.some(image => image.placement.kind === 'floating')) {
+    issues.push({kind:'floating-image-visual-review-required'});
+  }
   {
     if (source.paragraphLayouts.length !== output.paragraphLayouts.length) issues.push({kind:'paragraph-layout-count',expected:source.paragraphLayouts.length,actual:output.paragraphLayouts.length});
     for (let i=0;i<Math.min(source.paragraphLayouts.length,output.paragraphLayouts.length);i++) {
