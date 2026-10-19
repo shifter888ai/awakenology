@@ -14,6 +14,8 @@ export async function inspectDocxRichContent(buffer) {
   } catch { return fail(['Cannot read original OOXML.']); }
 
   const errors = [], runs = [];
+  const unknownRunProperties = new Map();
+  const advancedTags = new Map();
   const placement = await inspectDocxImagePlacement(buffer);
   if (!placement.ok) errors.push(...placement.errors);
   if (/<w:(?:pStyle|rStyle|basedOn|hyperlink|object|pict|fldChar|highlight|shd)\b/.test(xml)) {
@@ -53,6 +55,11 @@ export async function inspectDocxRichContent(buffer) {
       });
       runs.push({ text: decode(texts[0][1]), bold: flag('b'), italic: flag('i'), underline: flag('u'), color: color ? '#' + color.toLowerCase() : null, href: null });
     }
+  }
+  for (const [name, paragraphSet] of unknownRunProperties) {
+    const locations = [...paragraphSet].sort((a,b) => a-b);
+    const preview = locations.slice(0, 12).join(', ') + (locations.length > 12 ? ', …' : '');
+    errors.push('Unresolved run property w:' + name + ' in ' + locations.length + ' paragraph(s): ' + preview + '.');
   }
   if (runs.map(r => r.text).join('') !== source.paragraphs.map(p => p.text).join('')) errors.push('Rich runs do not reproduce exact source-map text.');
   if (!runs.length) errors.push('No rich text runs extracted.');
