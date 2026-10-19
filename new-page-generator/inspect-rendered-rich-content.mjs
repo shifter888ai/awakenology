@@ -70,11 +70,27 @@ export function inspectRenderedRichContent(html, parser) {
           else if (twips > 0) indentation.firstLine = twips;
         }
       }
-      paragraphLayouts.push({paragraphIndex,alignment,indentation});
+      const readPoints = key => {
+        const value = formatting(node,key);
+        if (value === null) return 0;
+        if (value === '0') return 0;
+        const match = /^(\d+(?:\.\d+)?)(pt|px)$/.exec(value.toLowerCase());
+        if (!match) { errors.push('Unsupported rendered paragraph '+key+': '+value); return 0; }
+        return Number(match[1]) * (match[2] === 'px' ? 0.75 : 1);
+      };
+      const rawLineHeight = formatting(node,'line-height');
+      let lineHeightPt = null;
+      if (rawLineHeight !== null) {
+        const match = /^(\d+(?:\.\d+)?)(pt|px)$/.exec(rawLineHeight.toLowerCase());
+        if (!match) errors.push('Unsupported rendered paragraph line-height: '+rawLineHeight);
+        else lineHeightPt = Number(match[1]) * (match[2] === 'px' ? 0.75 : 1);
+      }
+      const spacing = {beforePt:readPoints('margin-top'),afterPt:readPoints('margin-bottom'),lineHeightPt};
+      paragraphLayouts.push({paragraphIndex,alignment,indentation,spacing});
     }
     if (tag === 'BR') lineBreaks.push({paragraphIndex:Math.max(0,paragraphIndex),textOffset:paragraphOffsets.get(paragraphIndex) ?? 0,breakType:'textWrapping',markerOrder:nextMarkerOrder(Math.max(0,paragraphIndex))});
     const style=node.getAttribute?.('style') ?? '';
-    const allowed=new Set(['color','font-weight','font-style','text-decoration','font-size','text-align','margin-left','margin-right','text-indent']);
+    const allowed=new Set(['color','font-weight','font-style','text-decoration','font-size','text-align','margin-left','margin-right','text-indent','margin-top','margin-bottom','line-height']);
     for(const decl of style.split(';').filter(x=>x.trim())) {
       const index=decl.indexOf(':');
       if(index<0 || !allowed.has(decl.slice(0,index).trim().toLowerCase())) errors.push('Unsupported rendered style: '+decl);
