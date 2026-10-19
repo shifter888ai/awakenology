@@ -61,7 +61,7 @@ test('rejects invalid image positions and missing asset paths',()=>{
 
 
 test('compares source and rendered line-break offsets independently of text',()=>{
- const a={runs:[{paragraphIndex:0,text:'A',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null},{paragraphIndex:0,text:'B',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null}],images:[],lineBreaks:[{paragraphIndex:0,textOffset:1,breakType:'textWrapping',markerOrder:0}],paragraphCount:1};
+ const a={runs:[{paragraphIndex:0,text:'A',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null},{paragraphIndex:0,text:'B',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null}],images:[],lineBreaks:[{paragraphIndex:0,textOffset:1,breakType:'textWrapping',markerOrder:0}],paragraphLayouts:[{paragraphIndex:0,alignment:'left',indentation:{left:0,right:0}}],paragraphCount:1};
  const b=structuredClone(a);
  assert.equal(compareRichContent(a,b).ok,true);
  b.lineBreaks[0].textOffset=0;
@@ -110,6 +110,7 @@ test('detects image and line-break swaps when both share the same text offset',(
   runs:[{paragraphIndex:0,text:'A',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null}],
   images:[{assetPath:'asset.png',paragraphIndex:0,order:0,alt:'diagram',textOffset:1,markerOrder:0}],
   lineBreaks:[{paragraphIndex:0,textOffset:1,breakType:'textWrapping',markerOrder:1}],
+  paragraphLayouts:[{paragraphIndex:0,alignment:'left',indentation:{left:0,right:0}}],
   paragraphCount:1
  };
  const output=structuredClone(source);
