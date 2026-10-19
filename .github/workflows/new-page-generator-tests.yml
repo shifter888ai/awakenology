@@ -35,6 +35,12 @@ jobs:
         run: npm test
       - name: Audit uploaded pilot DOCX without approving generation
         run: node pilot-ci-audit.mjs
+      - name: Verify source-image and paragraph review artifact
+        run: |
+          test -s pilot-artifacts/pilot-visual-review.html
+          grep -q 'All source paragraphs (184)' pilot-artifacts/pilot-visual-review.html
+          grep -q 'Paragraph 184:' pilot-artifacts/pilot-visual-review.html
+          grep -q 'manual visual review required' pilot-artifacts/pilot-visual-review.html
       - name: Upload pilot diagnostic report
         if: always()
         uses: actions/upload-artifact@v4
