@@ -224,3 +224,12 @@ test("ignores serialization whitespace between paragraph blocks without merging 
  assert.equal(result.paragraphCount,2);
  assert.deepEqual(result.runs.map(run=>[run.paragraphIndex,run.text]),[[0,"First"],[1,"Second"]]);
 });
+
+
+test("preserves blockquote structure without counting it as a second paragraph",()=>{
+ const quote={parseFromString:()=>({body:{childNodes:[node("BLOCKQUOTE",{},[node("P",{},[text("Quoted text")])])]}})};
+ const result=inspectRenderedRichContent("<blockquote><p>Quoted text</p></blockquote>",quote);
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.equal(result.paragraphCount,1);
+ assert.equal(result.runs[0].text,"Quoted text");
+});
