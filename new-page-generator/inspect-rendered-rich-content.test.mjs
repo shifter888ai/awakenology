@@ -102,3 +102,13 @@ test('blocks relative or malformed rendered font sizes',()=>{
  assert.equal(r.ok,false);
  assert.ok(r.errors.some(x=>x.includes('Unsupported rendered font-size')));
 });
+
+
+test('extracts explicit rendered paragraph alignment and indentation in twips',()=>{
+ const layoutParser={parseFromString:()=>({body:{childNodes:[
+  node('P',{style:'text-align: center; margin-left: 36pt; margin-right: 12px; text-indent: 18pt'},[text('Layout')])
+ ]}})};
+ const r=inspectRenderedRichContent('<p style="text-align:center;margin-left:36pt;margin-right:12px;text-indent:18pt">Layout</p>',layoutParser);
+ assert.equal(r.ok,true,r.errors.join('; '));
+ assert.deepEqual(r.paragraphLayouts,[{paragraphIndex:0,alignment:'center',indentation:{left:720,right:180,firstLine:360}}]);
+});
