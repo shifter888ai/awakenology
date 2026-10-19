@@ -73,3 +73,15 @@ test("blocks indented and nested lists rather than flattening hierarchy",()=>{
  assert.equal(result.ok,false);
  assert.match(result.errors.join(" "),/indented or nested lists/);
 });
+
+
+test("accepts safe path-bearing links and only reviewed root-relative image assets",()=>{
+ const link=markdownToHtml("[guide](https://example.org/path?q=1)");
+ assert.equal(link.ok,true,link.errors.join("; "));
+ const image=markdownToHtml("![diagram](/assets/diagram.png)");
+ assert.equal(image.ok,true,image.errors.join("; "));
+ for(const source of ["![diagram](https://example.org/diagram.png)","![diagram](assets/diagram.png)"]){
+  const result=markdownToHtml(source);
+  assert.equal(result.ok,false,source);
+ }
+});
