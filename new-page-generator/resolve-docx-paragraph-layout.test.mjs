@@ -83,3 +83,10 @@ test("treats zero character-based indentation as no indentation",()=>{
  assert.equal(result.ok,true,result.errors.join("; "));
  assert.deepEqual(result.layout.indentation,{left:0,right:0});
 });
+
+
+test("does not confuse paragraph-mark character spacing with paragraph spacing",()=>{
+ const result=resolveDocxParagraphLayout({stylesXml:"<w:styles/>",paragraphXml:'<w:p><w:pPr><w:spacing w:line="360" w:lineRule="exact"/><w:rPr><w:spacing w:val="0"/></w:rPr></w:pPr></w:p>'});
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.deepEqual(result.layout.spacing,{beforePt:0,afterPt:0,lineHeightPt:18});
+});
