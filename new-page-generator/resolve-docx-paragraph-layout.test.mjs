@@ -69,3 +69,11 @@ test('numbering wrapper is classified once while active numbering stays blocked'
  assert.ok(active.errors.some(x=>x.includes('independent list mapping')));
  assert.ok(!active.errors.some(x=>x.includes('property w:ilvl')||x.includes('property w:numId')));
 });
+
+
+test('rejects unknown or duplicate paragraph layout attributes',()=>{
+ for(const property of ['<w:jc w:val="left" w:unknown="x"/>','<w:jc w:val="left" w:val="right"/>','<w:ind w:left="720" w:unknown="x"/>','<w:spacing w:before="120" w:before="240"/>']) {
+  const result=resolveDocxParagraphLayout({stylesXml:styles(''),paragraphXml:p('',property)});
+  assert.equal(result.ok,false,property);
+ }
+});
