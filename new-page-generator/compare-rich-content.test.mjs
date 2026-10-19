@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {compareRichContent} from './compare-rich-content.mjs';
 const sample = () => ({
   runs: [{paragraphIndex:0,text:'什麽',bold:true,italic:false,underline:false,color:'#ff0000',href:'https://example.org'}],
-  images: [{assetPath:'assets/one.png',paragraphIndex:2,order:0,alt:'diagram',textOffset:12}],
+  images: [{assetPath:'assets/one.png',paragraphIndex:2,order:0,alt:'diagram',textOffset:12,markerOrder:0}],
   lineBreaks: []
 });
 test('identical inventory passes', () => assert.equal(compareRichContent(sample(), sample()).ok, true));
@@ -59,7 +59,7 @@ test('rejects invalid image positions and missing asset paths',()=>{
 
 
 test('compares source and rendered line-break offsets independently of text',()=>{
- const a={runs:[{paragraphIndex:0,text:'A',bold:false,italic:false,underline:false,color:null,href:null},{paragraphIndex:0,text:'B',bold:false,italic:false,underline:false,color:null,href:null}],images:[],lineBreaks:[{paragraphIndex:0,textOffset:1,breakType:'textWrapping'}]};
+ const a={runs:[{paragraphIndex:0,text:'A',bold:false,italic:false,underline:false,color:null,href:null},{paragraphIndex:0,text:'B',bold:false,italic:false,underline:false,color:null,href:null}],images:[],lineBreaks:[{paragraphIndex:0,textOffset:1,breakType:'textWrapping',markerOrder:0}]};
  const b=structuredClone(a);
  assert.equal(compareRichContent(a,b).ok,true);
  b.lineBreaks[0].textOffset=0;
