@@ -70,12 +70,10 @@ export async function extractDocx(buffer) {
   for (const [name, pattern] of FEATURES) {
     if (pattern.test(xml)) errors.push(`Unsupported or ambiguous Word feature: ${name}.`);
   }
-  // Numbering references are validated by inspectDocxRichContent, which resolves
-  // concrete numbering definitions and levels before the conversion gate blocks
-  // unverified HTML list rendering.
-  // Document defaults and named styles can affect runs without any direct formatting
-  // in document.xml. Until inherited typography is rendered and compared end-to-end,
-  // never let an otherwise plain-looking document bypass the conversion gate.
+  // Numbering definitions and effective paragraph/run formatting are resolved by
+  // inspectDocxRichContent, then applied by applyDocxRichFormatting below. The
+  // generator still independently compares the final rendered inventory before
+  // any page can be marked review-ready; unsupported markers/layouts remain blocked.
   const stylesPart = zip.file("word/styles.xml");
   if (stylesPart) {
     let stylesXml;
