@@ -1,6 +1,6 @@
-// Minimal, fail-closed resolver for the subset of Word run formatting represented
-// by the rich-content inventory. This does not resolve fonts, sizes, language,
-// paragraph layout, numbering, theme colors, or other OOXML properties.
+// Fail-closed resolver for the supported Word run-formatting subset: bold, italic,
+// underline, explicit RGB color and half-point font size. It does not resolve font
+// families, language, complex-script sizes, paragraph layout, numbering or themes.
 const attrs = tag => Object.fromEntries([...tag.matchAll(/([\w:.-]+)=[\"']([^\"']*)[\"']/g)].map(m => [m[1], m[2]]));
 const inner = (xml, tag) => new RegExp(String.raw`<w:${tag}(?:\s[^>]*)?>([\s\S]*?)<\/w:${tag}>`).exec(xml)?.[1] ?? '';
 const directTag = (xml, tag) => new RegExp(String.raw`<w:${tag}\b[^>]*\/?\s*>`).exec(xml)?.[0] ?? null;
