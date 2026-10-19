@@ -75,23 +75,23 @@ export async function inspectDocxRichContent(buffer) {
     errors.push('Unresolved run property w:' + name + ' in ' + locations.length + ' paragraph(s): ' + preview + '.');
   }
   const lineBreaks = [];
+  const imagePositions = new Map();
   for (const paragraph of source.paragraphs) {
-    let textOffset = 0;
+    let textOffset = 0, markerOrder = 0;
     for (const item of paragraph.content ?? []) {
-      if (item.type === 'lineBreak') lineBreaks.push({paragraphIndex:paragraph.index,textOffset,breakType:item.breakType});
-      else if (item.type === 'text') textOffset += item.text.length;
+      if (item.type === 'lineBreak') {
+        lineBreaks.push({paragraphIndex:paragraph.index,textOffset,breakType:item.breakType,markerOrder:markerOrder++});
+      } else if (item.type === 'image') {
+        imagePositions.set(item.relationshipId,{textOffset,markerOrder:markerOrder++});
+      } else if (item.type === 'text') textOffset += item.text.length;
     }
   }
   if (runs.map(r => r.text).join('') !== source.paragraphs.map(p => p.text).join('')) errors.push('Rich runs do not reproduce exact source-map text.');
   if (!runs.length) errors.push('No rich text runs extracted.');
   const images = placement.ok ? placement.images.map(({assetPath, paragraphIndex, order, alt, relationshipId}) => {
-    const paragraph = source.paragraphs[paragraphIndex];
-    let textOffset = 0;
-    for (const item of paragraph?.content ?? []) {
-      if (item.type === 'image' && item.relationshipId === relationshipId) break;
-      if (item.type === 'text') textOffset += item.text.length;
-    }
-    return {assetPath, paragraphIndex, order, alt, textOffset};
+    const position = imagePositions.get(relationshipId);
+    if (!position) errors.push('No ordered content position for image relationship ' + relationshipId + '.');
+    return {assetPath, paragraphIndex, order, alt, textOffset:position?.textOffset ?? 0, markerOrder:position?.markerOrder ?? -1};
   }) : [];
   return errors.length ? {...fail([...new Set(errors)]), runs, images, lineBreaks} : {ok:true, errors:[], runs, images, lineBreaks};
 }
