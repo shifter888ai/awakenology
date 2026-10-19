@@ -12,7 +12,7 @@ const outputPath = 'pilot-artifacts/pilot-audit.json';
 const buffer = await readFile(sourcePath);
 const sha256 = createHash('sha256').update(buffer).digest('hex');
 const stages = {};
-const diagnostic = {unsupportedTextConstructs:[], drawingKinds:{}, explicitColors:[], lineBreaks:[], floatingDrawings:[]};
+const diagnostic = {unsupportedTextConstructs:[], drawingKinds:{}, explicitColors:[], lineBreaks:[], floatingDrawings:[], runPropertyInventory:{counts:{},samples:{}}, paragraphPropertyInventory:{counts:{},samples:{}}};
 try {
   const zip = await JSZip.loadAsync(buffer,{checkCRC32:true});
   const xml = await zip.file('word/document.xml').async('string');
@@ -31,8 +31,24 @@ try {
   }
   diagnostic.explicitColors = [...colors].map(([value,count])=>({value,count}));
   const paragraphs = [...xml.matchAll(/<w:p(?=[\s>])[^>]*>[\s\S]*?<\/w:p>/g)];
+  const recordProperties = (inventory, tag, paragraphIndex, sample) => {
+    inventory.counts[tag] = (inventory.counts[tag] ?? 0) + 1;
+    if (!inventory.samples[tag]) inventory.samples[tag] = [];
+    if (inventory.samples[tag].length < 4) inventory.samples[tag].push({paragraphIndex, sample:sample.slice(0,180)});
+  };
   for (let i=0;i<paragraphs.length;i++) {
     const raw = paragraphs[i][0];
+    for (const pPr of raw.matchAll(/<w:pPr(?=[\\s>])[^>]*>([\\s\\S]*?)<\\/w:pPr>/g)) {
+      for (const tag of pPr[1].matchAll(/<w:([A-Za-z][A-Za-z0-9]*)\\b[^>]*\\/?\\s*>/g)) {
+        if (!tag[0].startsWith('</')) recordProperties(diagnostic.paragraphPropertyInventory,tag[1],i,tag[0]);
+      }
+    }
+    for (const run of raw.matchAll(/<w:r(?=[\\s>])[^>]*>([\\s\\S]*?)<\\/w:r>/g)) {
+      const rPr = /<w:rPr(?=[\\s>])[^>]*>([\\s\\S]*?)<\\/w:rPr>/.exec(run[1]);
+      if (rPr) for (const tag of rPr[1].matchAll(/<w:([A-Za-z][A-Za-z0-9]*)\\b[^>]*\\/?\\s*>/g)) {
+        if (!tag[0].startsWith('</')) recordProperties(diagnostic.runPropertyInventory,tag[1],i,tag[0]);
+      }
+    }
     const breaks = [...raw.matchAll(/<w:br(?=[\s/>])[^>]*\/>/g)];
     for (const br of breaks) diagnostic.lineBreaks.push({paragraphIndex:i, tag:br[0], textBefore:raw.slice(0,br.index).replace(/<[^>]*>/g,'').slice(-60), textAfter:raw.slice(br.index+br[0].length).replace(/<[^>]*>/g,'').slice(0,60)});
     for (const anchor of raw.matchAll(/<wp:anchor(?=[\s>])[^>]*>[\s\S]*?<\/wp:anchor>/g)) {
