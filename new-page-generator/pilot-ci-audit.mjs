@@ -116,7 +116,15 @@ try {
       refs.push({paragraphIndex:index,numId,ilvl,abstractNumId,level});
     });
     diagnostic.numberingInventory = {definedNumIds:[...nums.entries()].map(([numId,abstractNumId])=>({numId,abstractNumId,levels:abstract.get(abstractNumId)??[]})),paragraphReferences:refs};
-  } else diagnostic.numberingInventory = {definedNumIds:[],paragraphReferences:[],warning:'word/numbering.xml is missing'};
+  } else {
+    const refs=[];
+    paragraphs.forEach((match,index)=>{
+      const numPr=/<w:numPr\b[^>]*>([\s\S]*?)<\/w:numPr>/.exec(match[0])?.[1];
+      if(!numPr) return;
+      refs.push({paragraphIndex:index,numId:/<w:numId\b[^>]*\bw:val=["']([^"']+)["']/.exec(numPr)?.[1]??null,ilvl:/<w:ilvl\b[^>]*\bw:val=["']([^"']+)["']/.exec(numPr)?.[1]??'0',raw:numPr});
+    });
+    diagnostic.numberingInventory = {definedNumIds:[],paragraphReferences:refs,warning:'word/numbering.xml is missing'};
+  }
   const recordProperties = (inventory, tag, paragraphIndex, sample) => {
     inventory.counts[tag] = (inventory.counts[tag] ?? 0) + 1;
     if (!inventory.samples[tag]) inventory.samples[tag] = [];
