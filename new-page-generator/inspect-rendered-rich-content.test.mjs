@@ -10,7 +10,7 @@ test('extracts formatting, links, image position from parsed HTML',()=>{
  assert.equal(r.runs[0].bold,true);
  assert.equal(r.runs[0].text,'什麽');
  assert.equal(r.runs[1].href,'/target');
- assert.deepEqual(r.images,[{assetPath:'asset.png',paragraphIndex:0,order:0,alt:'Diagram',textOffset:7}]);
+ assert.deepEqual(r.images,[{assetPath:'asset.png',paragraphIndex:0,order:0,alt:'Diagram',textOffset:7,markerOrder:0}]);
 });
 test('requires parser rather than trusting a caller inventory',()=>assert.equal(inspectRenderedRichContent('<p>x</p>',null).ok,false));
 
@@ -34,7 +34,7 @@ test('maps rendered br position within paragraph text',()=>{
  const breakParser={parseFromString:()=>({body:{childNodes:[node('P',{},[text('A'),node('BR'),text('B')])]}})};
  const r=inspectRenderedRichContent('<p>A<br>B</p>',breakParser);
  assert.equal(r.ok,true,r.errors.join('; '));
- assert.deepEqual(r.lineBreaks,[{paragraphIndex:0,textOffset:1,breakType:'textWrapping'}]);
+ assert.deepEqual(r.lineBreaks,[{paragraphIndex:0,textOffset:1,breakType:'textWrapping',markerOrder:0}]);
 });
 
 
