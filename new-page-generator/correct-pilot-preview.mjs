@@ -2,7 +2,7 @@
 // Does not alter source extraction, source inventories, or integrity comparisons.
 export function correctPilotPreview(html) {
   let candidate = String(html ?? "");
-  candidate = candidate.replace(/<(p|h[1-6])\b([^>]*)>([\s\S]*?)<\/\1>/gi, (whole, tag, attrs, inner) => {
+  candidate = candidate.replace(/<(p|h[1-6]|li|div)\b([^>]*)>([\s\S]*?)<\/\1>/gi, (whole, tag, attrs, inner) => {
     const plain = inner.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
     if (!["1）界是什麼？", "3）界與界的關係？"].includes(plain)) return whole;
     const correction = "margin-left:0!important;padding-left:0!important;text-indent:0!important;text-align:left!important";
