@@ -165,10 +165,6 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
     else effective.fontKerning = effective.fontSizePt >= effective.fontKerningThresholdPt ? 'normal' : 'none';
   }
   for(const [key,value] of Object.entries(effective)) if(value?.unsupported) errors.push('Unsupported inherited Word formatting: '+key+'.');
-  if(pRun.trim()) for(const [key,value] of Object.entries(runProps(pRun))) {
-    if(value?.unsupported) errors.push('Unsupported paragraph-mark formatting: '+key+'.');
-    else paragraphMarkFormatting[key]=value;
-  }
   for(const [key,value] of Object.entries(paragraphMarkFormatting)) if(value?.unsupported) errors.push('Unsupported paragraph-mark formatting: '+key+'.');
   return {ok:errors.length===0,errors,formatting:errors.length?null:effective,paragraphMarkFormatting:errors.length?null:paragraphMarkFormatting};
 }
