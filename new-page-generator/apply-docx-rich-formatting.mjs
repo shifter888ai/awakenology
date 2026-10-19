@@ -20,6 +20,15 @@ const setAttr = (node,name,value) => {
   const found=node.attrs.find(item=>item.name===name);
   if(found) found.value=value; else node.attrs.push({name,value});
 };
+const mergeStyles = (...values) => {
+  const declarations = new Map();
+  for (const value of values) for (const declaration of String(value ?? "").split(";").filter(item=>item.trim())) {
+    const colon=declaration.indexOf(":");
+    if(colon<1) continue;
+    declarations.set(declaration.slice(0,colon).trim().toLowerCase(),declaration.slice(colon+1).trim());
+  }
+  return [...declarations].map(([key,value])=>key+":"+value).join(";");
+};
 const formattingStyle = (run, fontFamily = null) => {
   const declarations = [
     "font-weight:"+(run.bold?"bold":"normal"),
@@ -104,7 +113,7 @@ export function applyDocxRichFormatting(html, sourceInventory) {
       }))
     } : layout;
     const mappedStyle=paragraphStyle(effectiveLayout);
-    if(existingStyle || mappedStyle) setAttr(block,"style",[existingStyle,mappedStyle].filter(Boolean).join(";"));
+    if(existingStyle || mappedStyle) setAttr(block,"style",mergeStyles(existingStyle,mappedStyle));
     if (block.nodeName === "li") {
       const numbering = numberingForBlock;
       if (!numbering) {
@@ -118,7 +127,7 @@ export function applyDocxRichFormatting(html, sourceInventory) {
         if (list && numbering.format in markerFormats && numbering.format !== "decimal") setAttr(list,"type",markerFormats[numbering.format]);
         if (numbering.format === "decimal" && numbering.text !== "%1.") errors.push("Word decimal marker pattern at paragraph "+(p+1)+" cannot be represented faithfully by a native HTML list.");
         if (["upperRoman","lowerRoman","upperLetter","lowerLetter"].includes(numbering.format) && numbering.text !== "%1.") errors.push("Word list marker pattern at paragraph "+(p+1)+" cannot be represented faithfully by a native HTML list.");
-        if (list && numbering.format === "none") setAttr(list,"style",[attr(list,"style"),"list-style-type:none"].filter(Boolean).join(";"));
+        if (list && numbering.format === "none") setAttr(list,"style",mergeStyles(attr(list,"style"),"list-style-type:none"));
         const firstListItem = list?.childNodes?.find(child => child.nodeName === "li");
         if (firstListItem === block && Number(numbering.start) > 1 && listTag === "ol") setAttr(list,"start",String(numbering.start));
         for (const [key,name] of [["numId","data-word-num-id"],["abstractNumId","data-word-abstract-num-id"],["level","data-word-level"],["format","data-word-num-format"],["text","data-word-num-text"],["start","data-word-num-start"]]) {
