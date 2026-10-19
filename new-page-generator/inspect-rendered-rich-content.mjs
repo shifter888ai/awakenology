@@ -90,7 +90,7 @@ export function inspectRenderedRichContent(html, parser) {
     }
     if (tag === 'BR') lineBreaks.push({paragraphIndex:Math.max(0,paragraphIndex),textOffset:paragraphOffsets.get(paragraphIndex) ?? 0,breakType:'textWrapping',markerOrder:nextMarkerOrder(Math.max(0,paragraphIndex))});
     const style=node.getAttribute?.('style') ?? '';
-    const allowed=new Set(['color','font-weight','font-style','text-decoration','font-size','text-align','margin-left','margin-right','text-indent','margin-top','margin-bottom','line-height']);
+    const allowed=new Set(['color','font-weight','font-style','text-decoration','font-size','text-align','margin-left','margin-right','text-indent','margin-top','margin-bottom','line-height','font-family','text-transform','letter-spacing']);
     for(const decl of style.split(';').filter(x=>x.trim())) {
       const index=decl.indexOf(':');
       if(index<0 || !allowed.has(decl.slice(0,index).trim().toLowerCase())) errors.push('Unsupported rendered style: '+decl);
@@ -99,9 +99,25 @@ export function inspectRenderedRichContent(html, parser) {
     if(weight!==null && !['bold','normal','400','700'].includes(weight.toLowerCase())) errors.push('Unsupported rendered font-weight: '+weight);
     if(fontStyle!==null && !['italic','normal'].includes(fontStyle.toLowerCase())) errors.push('Unsupported rendered font-style: '+fontStyle);
     if(decoration!==null && !['underline','none'].includes(decoration.toLowerCase())) errors.push('Unsupported rendered text-decoration: '+decoration);
+    const transform=formatting(node,'text-transform');
+    if(transform!==null && !['uppercase','none'].includes(transform.toLowerCase())) errors.push('Unsupported rendered text-transform: '+transform);
+    const family=formatting(node,'font-family');
+    const letterSpacing=formatting(node,'letter-spacing');
     if(['S','STRIKE','DEL'].includes(tag)) errors.push('Unsupported rendered deletion/strike formatting: '+tag);
     const next={...state};
-    const size=fontSizePt(node); if(size!==null) next.fontSizePt=size;
+    const size=fontSizePt(node); if(size!==null) {next.fontSizePt=size;next.fontSizeCsPt=size;}
+    if(family!==null) next.fontFamily=family.replace(/^['"]|['"]$/g,'');
+    const language={};
+    for(const [attr,key] of [['data-word-lang-val','val'],['data-word-lang-east-asia','eastAsia'],['data-word-lang-bidi','bidi']]) {const value=node.getAttribute?.(attr);if(value)language[key]=value;}
+    if(Object.keys(language).length) next.language=language;
+    else if(node.getAttribute?.('lang')) next.language={val:node.getAttribute('lang')};
+    if(transform!==null) next.allCaps=transform.toLowerCase()==='uppercase';
+    if(letterSpacing!==null) {
+      const match=/^(-?\d+(?:\.\d+)?)(pt|px)$/.exec(letterSpacing.toLowerCase());
+      if(letterSpacing==='0') next.letterSpacingPt=0;
+      else if(!match) errors.push('Unsupported rendered letter-spacing: '+letterSpacing);
+      else next.letterSpacingPt=Number(match[1])*(match[2]==='px'?0.75:1);
+    }
     if(['B','STRONG'].includes(tag) || ['bold','700'].includes((weight ?? '').toLowerCase())) next.bold=true;
     if(['I','EM'].includes(tag) || (fontStyle ?? '').toLowerCase()==='italic') next.italic=true;
     if(tag==='U' || (decoration ?? '').toLowerCase()==='underline') next.underline=true;
@@ -114,7 +130,7 @@ export function inspectRenderedRichContent(html, parser) {
     }
     for(const child of node.childNodes ?? []) visit(child,next);
   }
-  const initial={bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null};
+  const initial={bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null};
   for(const child of doc.body?.childNodes ?? []) visit(child,initial);
   if(!runs.length) errors.push('No rendered text runs.');
   return {ok:errors.length===0,errors,runs,images,lineBreaks,paragraphLayouts,paragraphCount:paragraphIndex+1};
