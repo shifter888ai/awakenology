@@ -18,12 +18,12 @@ try {
   const xml = await zip.file('word/document.xml').async('string');
   const textNames = ['txbxContent','altChunk','sdt','ins','del','fldSimple','instrText','hyperlink','tab','br','cr','sym','noBreakHyphen','softHyphen'];
   for (const name of textNames) {
-    const count = [...xml.matchAll(new RegExp('<w:' + name + '(?=[\s/>])','g'))].length;
+    const count = [...xml.matchAll(new RegExp('<w:' + name + '(?=[\\s/>])','g'))].length;
     if (count) diagnostic.unsupportedTextConstructs.push({name,count});
   }
   const alternate = [...xml.matchAll(/<mc:AlternateContent\b/g)].length;
   if (alternate) diagnostic.unsupportedTextConstructs.push({name:'mc:AlternateContent',count:alternate});
-  for (const name of ['anchor','inline']) diagnostic.drawingKinds[name] = [...xml.matchAll(new RegExp('<wp:' + name + '(?=[\s/>])','g'))].length;
+  for (const name of ['anchor','inline']) diagnostic.drawingKinds[name] = [...xml.matchAll(new RegExp('<wp:' + name + '(?=[\\s/>])','g'))].length;
   const colors = new Map();
   for (const tag of xml.matchAll(/<w:color\b[^>]*>/g)) {
     const value = /\bw:val=["']([^"']+)["']/.exec(tag[0])?.[1] ?? '(no val)';
@@ -93,7 +93,7 @@ try {
         if (!tag[0].startsWith('</')) recordProperties(diagnostic.runPropertyInventory,tag[1],i,tag[0]);
       }
     }
-    const breaks = [...raw.matchAll(/<w:br(?=[\s/>])[^>]*\/>/g)];
+    const breaks = [...raw.matchAll(/<w:br(?=[\\s/>])[^>]*\/>/g)];
     for (const br of breaks) diagnostic.lineBreaks.push({paragraphIndex:i, tag:br[0], textBefore:raw.slice(0,br.index).replace(/<[^>]*>/g,'').slice(-60), textAfter:raw.slice(br.index+br[0].length).replace(/<[^>]*>/g,'').slice(0,60)});
     for (const anchor of raw.matchAll(/<wp:anchor(?=[\s>])[^>]*>[\s\S]*?<\/wp:anchor>/g)) {
       const body=anchor[0], firstTag=/^<wp:anchor[^>]*>/.exec(body)?.[0] ?? '';
