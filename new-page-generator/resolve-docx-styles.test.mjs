@@ -311,3 +311,12 @@ test("rejects duplicate or unknown numeric typography attributes",()=>{
   assert.equal(result.formatting,null);
  }
 });
+
+
+test("does not certify non-self-closing run properties without checking their bodies",()=>{
+ for(const property of ['<w:b><w:unknown/></w:b>','<w:color w:val="FF0000"><w:unknown/></w:color>']) {
+  const result=resolveDocxRunFormatting({stylesXml:styles(),paragraphXml:paragraph(),runXml:run('',property)});
+  assert.equal(result.ok,false,property);
+  assert.equal(result.formatting,null);
+ }
+});
