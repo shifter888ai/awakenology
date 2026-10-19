@@ -54,7 +54,7 @@ test('reports exact unsupported run property names and paragraph locations',asyn
  const r=await inspectDocxRichContent(await fixture('<w:p><w:r><w:rPr><w:rFonts w:ascii="Arial"/><w:sz w:val="24"/></w:rPr><w:t>Styled</w:t></w:r></w:p><w:p><w:r><w:rPr><w:rFonts w:ascii="Arial"/></w:rPr><w:t>Again</w:t></w:r></w:p>'));
  assert.equal(r.ok,false);
  assert.ok(r.errors.some(x=>x.includes('Unresolved run property w:rFonts in 2 paragraph(s): 1, 2')));
- assert.ok(r.errors.some(x=>x.includes('Unresolved run property w:sz in 1 paragraph(s): 1')));
+ assert.ok(!r.errors.some(x=>x.includes('Unresolved run property w:sz'))); assert.ok(r.runs[0].fontSizePt===12);
  assert.ok(!r.errors.some(x=>x==='Unresolved run property in paragraph 1.'));
 });
 
