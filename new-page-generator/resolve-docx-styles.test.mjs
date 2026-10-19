@@ -366,3 +366,19 @@ test("treats a Word font hint without family values as selection metadata",()=>{
  assert.equal(result.formatting.fontFamily,undefined);
  assert.equal(result.formatting.fontHint,"default");
 });
+
+
+test("allows complete explicit script fonts to override unresolved inherited theme fonts",()=>{
+ const xml='<w:styles><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:asciiTheme="minorHAnsi"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>';
+ const direct='<w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:eastAsia="Yu Gothic" w:cs="Arial"/>';
+ const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml:paragraph(),runXml:run("",direct)});
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.deepEqual(result.formatting.fontFamily,{ascii:"Arial",hAnsi:"Arial",eastAsia:"Yu Gothic",cs:"Arial"});
+});
+
+test("keeps unresolved inherited theme fonts blocking when a direct override is partial",()=>{
+ const xml='<w:styles><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:asciiTheme="minorHAnsi"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>';
+ const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml:paragraph(),runXml:run("",'<w:rFonts w:ascii="Arial"/>')});
+ assert.equal(result.ok,false);
+ assert.ok(result.errors.some(error=>error.includes("Unsupported inherited Word formatting: fontFamily")));
+});
