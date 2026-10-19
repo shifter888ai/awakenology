@@ -52,3 +52,10 @@ test("preserves inline code as escaped code content",()=>{
  assert.equal(result.ok,true,result.errors.join("; "));
  assert.match(result.html,/<code>&lt;tag&gt;&amp;value<\/code>/);
 });
+
+
+test("preserves inline emphasis inside Markdown link labels",()=>{
+ const result=markdownToHtml("[**bold link**](https://example.org)");
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.match(result.html,/<a href="https:\/\/example\.org"><strong>bold link<\/strong><\/a>/);
+});
