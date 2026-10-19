@@ -76,6 +76,8 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
   if(pRun.trim()) errors.push('Paragraph-mark run formatting requires independent handling.');
   const rStyle=/<w:rStyle\b[^>]*\bw:val=[\"']([^\"']+)[\"']/.exec(runXml)?.[1] ?? null;
   if(rStyle) for(const props of chain(rStyle,'character style','character')) merge(effective,props);
+  const directRun=inner(runXml,'rPr');
+  for(const name of unsupportedRunProps(directRun).filter(name=>name!=='rStyle')) errors.push('Unsupported direct run property w:'+name+'.');
   merge(effective,runProps(inner(runXml,'rPr')));
   for(const [key,value] of Object.entries(effective)) if(value?.unsupported) errors.push('Unsupported inherited Word formatting: '+key+'.');
   return {ok:errors.length===0,errors,formatting:errors.length?null:effective};
