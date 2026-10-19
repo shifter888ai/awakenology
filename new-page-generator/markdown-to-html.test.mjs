@@ -66,3 +66,10 @@ test("blocks nested code/link constructs it cannot preserve faithfully",()=>{
  assert.equal(result.ok,false);
  assert.match(result.errors.join(" "),/nested inline code/);
 });
+
+
+test("blocks indented and nested lists rather than flattening hierarchy",()=>{
+ const result=markdownToHtml("- Parent\n  - Child");
+ assert.equal(result.ok,false);
+ assert.match(result.errors.join(" "),/indented or nested lists/);
+});
