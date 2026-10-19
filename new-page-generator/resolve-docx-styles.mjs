@@ -37,7 +37,7 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
     return {ok:false,errors:['Styles XML, paragraph XML, and run XML are required.'],formatting:null};
   }
   const styleMap=new Map();
-  // Defaults are parsed once above; use the effective run-properties element.
+  const defaults=inner(inner(stylesXml,'docDefaults'),'rPrDefault');
   const defaultsRun=inner(defaults,'rPr');
   for(const name of unsupportedRunProps(defaultsRun)) errors.push('Unsupported document-default run property w:'+name+'.');
   for (const match of stylesXml.matchAll(/<w:style\b([^>]*)>([\s\S]*?)<\/w:style>/g)) {
@@ -61,7 +61,6 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
   };
   const merge=(target,source)=>{for(const [key,value] of Object.entries(source)) target[key]=value;};
   const effective={b:false,i:false,u:false,color:null};
-  // Defaults are parsed once above; use the effective run-properties element.
   merge(effective,runProps(defaultsRun));
   const pStyle=/<w:pStyle\b[^>]*\bw:val=[\"']([^\"']+)[\"']/.exec(paragraphXml)?.[1] ?? null;
   if(pStyle) for(const props of chain(pStyle,'paragraph style')) merge(effective,props);
