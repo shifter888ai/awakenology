@@ -353,7 +353,7 @@ test('merges font-family and language attributes instead of erasing inherited sc
 test("merges paragraph-mark fonts and languages across defaults, style, and direct overrides",()=>{
  const xml='<w:styles><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial"/><w:lang w:val="en-US"/></w:rPr></w:rPrDefault></w:docDefaults><w:style w:type="paragraph" w:styleId="P"><w:pPr><w:rPr><w:rFonts w:eastAsia="Yu Gothic"/><w:lang w:eastAsia="ja-JP"/></w:rPr></w:pPr></w:style></w:styles>';
  const paragraphXml='<w:p><w:pPr><w:pStyle w:val="P"/><w:rPr><w:rFonts w:cs="Arial CS"/><w:lang w:bidi="ar-SA"/></w:rPr></w:pPr></w:p>';
- const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml,runXml:"<w:r/>"});
+ const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml,runXml:"<w:r><w:t>Text</w:t></w:r>"});
  assert.equal(result.ok,true,result.errors.join("; "));
  assert.deepEqual(result.paragraphMarkFormatting.fontFamily,{ascii:"Arial",eastAsia:"Yu Gothic",cs:"Arial CS"});
  assert.deepEqual(result.paragraphMarkFormatting.language,{val:"en-US",eastAsia:"ja-JP",bidi:"ar-SA"});
