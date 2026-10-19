@@ -75,3 +75,13 @@ test('does not apply paragraph-mark formatting to paragraph text runs',()=>{
  assert.ok(result.errors.some(x=>x.includes('Paragraph-mark run formatting')));
  assert.equal(result.formatting,null);
 });
+
+
+test('rejects a character style used as a paragraph style',()=>{
+ const result=resolveDocxRunFormatting({
+  stylesXml:styles('<w:style w:type="character" w:styleId="Wrong"><w:rPr><w:b/></w:rPr></w:style>'),
+  paragraphXml:paragraph('Wrong'),runXml:run()
+ });
+ assert.equal(result.ok,false);
+ assert.ok(result.errors.some(x=>x.includes('expected paragraph')));
+});
