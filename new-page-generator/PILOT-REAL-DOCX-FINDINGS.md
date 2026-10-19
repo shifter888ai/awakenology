@@ -62,3 +62,19 @@ Pilot stages after the diagnostic fix:
 - conversion: BLOCKED — explicit Word text color and floating drawing conversion remain unsupported.
 
 **Decision:** do not whitelist these tags simply to turn the gate green. Next engineering work must either model and compare these properties end-to-end (source OOXML → extracted inventory → rendered HTML) or clearly scope a reviewed lossless mapping for the pilot. The generation gate remains closed; no HTML generation, PR, merge, or deployment is authorized.
+
+
+### Aggregated blocker report (CI run 39200326470)
+
+The rich-content inspector now reports unresolved OOXML property names and paragraph locations in grouped messages rather than emitting one generic error for nearly every paragraph. The corrected implementation passed **112 automated tests**.
+
+The unchanged pilot now reports:
+- `w:pStyle`: 2 occurrences;
+- `w:rFonts`: 118 paragraphs;
+- `w:sz` and `w:szCs`: 113 paragraphs each;
+- `w:lang`: 58 paragraphs;
+- `w:bCs`: 62 paragraphs;
+- `w:iCs`, `w:caps`, and `w:spacing`: 36–37 paragraphs each;
+- one ambiguous run/text mapping at paragraph 125 (the known explicit text-wrapping break).
+
+This grouping confirms several distinct preservation requirements: explicit font/size/language metadata, complex-script formatting, capitalization/character spacing, style resolution, and ordered break handling. These should be addressed as separately testable capabilities, not waived together. The conversion adapter still correctly blocks explicit color and the floating drawing; rich-content and conversion remain blocked, and `pilotApproved` remains false.
