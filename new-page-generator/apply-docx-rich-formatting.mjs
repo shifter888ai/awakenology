@@ -57,8 +57,8 @@ const eastAsianScript = /[\u3000-\u303f\u3040-\u30ff\u3100-\u312f\u3130-\u318f\u
 const complexScript = /[\p{Script=Arabic}\p{Script=Hebrew}\p{Script=Syriac}\p{Script=Thaana}\p{Script=Nko}\p{Script=Devanagari}\p{Script=Bengali}\p{Script=Gurmukhi}\p{Script=Gujarati}\p{Script=Oriya}\p{Script=Tamil}\p{Script=Telugu}\p{Script=Kannada}\p{Script=Malayalam}\p{Script=Sinhala}\p{Script=Thai}\p{Script=Lao}\p{Script=Tibetan}\p{Script=Myanmar}\p{Script=Khmer}\p{Script=Ethiopic}]/u;
 function familyForChar(families, character, hint = null) {
   if (!families || typeof families !== "object" || Array.isArray(families)) return typeof families === "string" ? families : null;
-  if (/\\p{Script=Common}/u.test(character) && !/\\s/u.test(character) && hint === 'eastAsia') return families.eastAsia ?? families.hAnsi ?? families.ascii ?? families.cs ?? null;
-  if (/\\p{Script=Common}/u.test(character) && !/\\s/u.test(character) && hint === 'cs') return families.cs ?? families.hAnsi ?? families.ascii ?? families.eastAsia ?? null;
+  if (/\p{Script=Common}/u.test(character) && !/\s/u.test(character) && hint === 'eastAsia') return families.eastAsia ?? families.hAnsi ?? families.ascii ?? families.cs ?? null;
+  if (/\p{Script=Common}/u.test(character) && !/\s/u.test(character) && hint === 'cs') return families.cs ?? families.hAnsi ?? families.ascii ?? families.eastAsia ?? null;
   const order = eastAsianScript.test(character) ? ["eastAsia","hAnsi","ascii","cs"] :
     complexScript.test(character) ? ["cs","hAnsi","ascii","eastAsia"] : ["ascii","hAnsi","cs","eastAsia"];
   return order.map(key=>families[key]).find(Boolean) ?? null;
