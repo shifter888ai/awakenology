@@ -79,8 +79,10 @@ export async function inspectDocxSourceMap(buffer) {
         const item = { relationshipId, paragraphIndex: paragraphs.length, placement, sourceLocation: location("word/document.xml", start + drawing.index, start + drawing.index + drawing[0].length) };
         images.push(item);
         imageReferences.push(item);
+        content.push({type:"image",relationshipId,sourceLocation:item.sourceLocation,sourceOffset:drawing.index});
       }
     }
+    content.sort((a,b) => a.sourceOffset - b.sourceOffset);
     if (/<w:drawing\b/.test(raw) && !images.length) errors.push(`Paragraph ${paragraphs.length + 1}: unmapped drawing.`);
     paragraphs.push({
       index: paragraphs.length,
