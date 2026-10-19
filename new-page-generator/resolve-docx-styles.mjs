@@ -38,7 +38,8 @@ function runProps(xml) {
   const fonts = directTag(xml,'rFonts');
   if (fonts) {
     const a = attrs(fonts);
-    const unsupportedTheme = Object.keys(a).some(key => /Theme$/i.test(key) && key.startsWith('w:'));
+    const allowedFontAttributes = new Set(['w:ascii','w:hAnsi','w:eastAsia','w:cs','w:hint']);
+    const unsupportedTheme = Object.keys(a).some(key => !allowedFontAttributes.has(key));
     const families = {};
     for (const key of ['ascii','hAnsi','eastAsia','cs']) if (a['w:'+key]) families[key] = a['w:'+key];
     result.fontFamily = unsupportedTheme || !Object.keys(families).length ? {unsupported:true} : families;
@@ -48,7 +49,7 @@ function runProps(xml) {
   if (lang) {
     const a = attrs(lang), value = {};
     for (const key of ['val','eastAsia','bidi']) if (a['w:'+key]) value[key] = a['w:'+key];
-    result.language = Object.keys(value).length ? value : {unsupported:true};
+    result.language = Object.keys(a).some(key => !['w:val','w:eastAsia','w:bidi'].includes(key)) || !Object.keys(value).length ? {unsupported:true} : value;
   }
   const complexSize = directTag(xml,'szCs');
   if (complexSize) {
