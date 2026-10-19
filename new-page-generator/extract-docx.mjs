@@ -23,7 +23,6 @@ const FEATURES = [
   ["tracked deletion", /<w:del(?:\s|>)/],
   ["comment range", /<w:commentRangeStart(?:\s|>)/],
   ["text box", /<w:txbxContent(?:\s|>)/],
-  ["floating drawing", /<wp:anchor(?:\s|>)/],
   ["field instruction", /<w:instrText(?:\s|>)/],
   ["equation", /<m:oMath(?:\s|>)/],
   ["embedded object", /<w:object(?:\s|>)|<o:OLEObject(?:\s|>)/],
@@ -52,6 +51,7 @@ export async function extractDocx(buffer) {
   }
 
   const errors = [];
+  const hasFloatingDrawing = /<wp:anchor(?:\\s|>)/.test(xml);
   const required = ["[Content_Types].xml", "word/document.xml", "word/_rels/document.xml.rels"];
   for (const path of required) if (!zip.file(path)) errors.push(`Missing required DOCX part: ${path}.`);
   if (errors.length) return blocked(errors, buffer);
@@ -143,8 +143,11 @@ export async function extractDocx(buffer) {
     for (const asset of assets) {
       if (!converted.value.includes(asset.outputPath)) errors.push(`Inspected image was not preserved in converted HTML: ${asset.outputPath}.`);
     }
+    const resultErrors = [...errors];
+    if (hasFloatingDrawing) resultErrors.push("Floating drawing converted only to a review preview; original Word wrapping and position require visual verification.");
     return {
-      ok: errors.length === 0, errors, html: errors.length ? null : formattedHtml,
+      ok: resultErrors.length === 0, errors: resultErrors, html: resultErrors.length ? null : formattedHtml,
+      ...(hasFloatingDrawing && errors.length === 0 ? {previewHtml:formattedHtml} : {}),
       sha256: digest(buffer), sourceMap: errors.length ? null : sourceMap, assets: errors.length ? [] : assets.map(({ bytes, ...asset }) => asset)
     };
   } catch (error) {
