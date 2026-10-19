@@ -124,3 +124,10 @@ The rendered-HTML inspector now blocks text that appears outside a recognized pa
 The pilot CI diagnostic now follows the actual referenced Word style chain rather than reporting only the direct style reference. The two `w:pStyle` references point to style ID `7` (“List Paragraph”), which inherits from style ID `1` (“Normal”). The List Paragraph style defines paragraph indentation; Normal defines run font, kerning, font size, complex-script font size, and language, plus paragraph widow control and alignment. Document defaults also define run font metadata. This confirms the blocker is genuine inherited formatting, not merely a vague parser warning.
 
 Validation: **128 automated tests passed, 0 failed** in [CI run 39203373115](https://github.com/shifter888ai/awakenology/actions/runs/39203373115). The source map (184 paragraphs), asset extraction (3 images), and image-placement inspection (3 images) still pass; rich-content and conversion remain blocked. No pilot HTML has been approved or generated.
+
+
+## Word table structure gate (CI run 39203460322)
+
+The DOCX converter now blocks **all** Word tables, not just tables with merged cells. The previous guard could allow a simple table through even though cell order, row/column semantics, nested paragraphs and empty cells were not represented in the fidelity comparison. A regression test confirms even a one-cell table returns `html: null` until full table mapping exists.
+
+Validation: **129 tests passed, 0 failed** in [CI run 39203460322](https://github.com/shifter888ai/awakenology/actions/runs/39203460322). This guard is intentionally conservative and does not indicate the pilot contains a table; it prevents other DOCX inputs from silently losing table structure.
