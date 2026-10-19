@@ -213,3 +213,14 @@ test("inspects unitless line-height ratios without treating them as errors",()=>
  assert.equal(result.ok,true,result.errors.join("; "));
  assert.equal(result.paragraphLayouts[0].spacing.lineHeight,1.2);
 });
+
+
+test("ignores serialization whitespace between paragraph blocks without merging runs",()=>{
+ const first=node("P",{},[text("First")]);
+ const second=node("P",{},[text("Second")]);
+ const separator=text("\n  ");
+ const result=inspectRenderedRichContent("<p>First</p>\n  <p>Second</p>",{parseFromString:()=>({body:{childNodes:[first,separator,second]}})});
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.equal(result.paragraphCount,2);
+ assert.deepEqual(result.runs.map(run=>[run.paragraphIndex,run.text]),[[0,"First"],[1,"Second"]]);
+});
