@@ -2,8 +2,8 @@
 // by the rich-content inventory. This does not resolve fonts, sizes, language,
 // paragraph layout, numbering, theme colors, or other OOXML properties.
 const attrs = tag => Object.fromEntries([...tag.matchAll(/([\w:.-]+)=[\"']([^\"']*)[\"']/g)].map(m => [m[1], m[2]]));
-const inner = (xml, tag) => new RegExp('<w:' + tag + '(?:\\s[^>]*)?>([\\s\\S]*?)<\\/w:' + tag + '>').exec(xml)?.[1] ?? '';
-const directTag = (xml, tag) => new RegExp('<w:' + tag + '\\b[^>]*\\/?\\s*>').exec(xml)?.[0] ?? null;
+const inner = (xml, tag) => new RegExp('<w:' + tag + '(?:\s[^>]*)?>([\s\S]*?)<\/w:' + tag + '>').exec(xml)?.[1] ?? '';
+const directTag = (xml, tag) => new RegExp('<w:' + tag + '\b[^>]*\/?\s*>').exec(xml)?.[0] ?? null;
 const propertyValue = (xml, tag) => {
   const found = directTag(xml, tag);
   if (!found) return undefined;
