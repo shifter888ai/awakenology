@@ -1,13 +1,13 @@
-const attributes = xml => Object.fromEntries([...(xml??"").matchAll(/([\\w:.-]+)=["']([^"']*)["']/g)].map(match=>[match[1],match[2]]));
+const attributes = xml => Object.fromEntries([...(xml??"").matchAll(/([\w:.-]+)=["']([^"']*)["']/g)].map(match=>[match[1],match[2]]));
 const emuToPt = value => Number(value)/12700;
 const twipsToPt = value => Number(value)/20;
 const pt = value => Number(value.toFixed(4)).toString();
 
 function position(xml, tag) {
-  const match=new RegExp("<wp:"+tag+"\\\\b([^>]*)>([\\\\s\\\\S]*?)</wp:"+tag+">").exec(xml??"");
+  const match=new RegExp("<wp:"+tag+"\\b([^>]*)>([\\s\\S]*?)</wp:"+tag+">").exec(xml??"");
   if(!match) return null;
   const relativeFrom=attributes(match[1]).relativeFrom;
-  const offset=/<wp:posOffset>(-?\\d+)<\\/wp:posOffset>/.exec(match[2])?.[1];
+  const offset=/<wp:posOffset>(-?\d+)<\/wp:posOffset>/.exec(match[2])?.[1];
   return {relativeFrom,offset:offset===undefined?null:Number(offset)};
 }
 
