@@ -78,8 +78,11 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
   for (const match of stylesXml.matchAll(/<w:style\b([^>]*)>([\s\S]*?)<\/w:style>/g)) {
     const a=attrs(match[1]), body=match[2], id=a['w:styleId'];
     if (!id || styleMap.has(id)) { errors.push('Missing or duplicate Word style ID.'); continue; }
-    styleMap.set(id,{id,type:a['w:type'] ?? null,basedOn:/<w:basedOn\b[^>]*\bw:val=["']([^"']+)["']/.exec(body)?.[1] ?? null,run:runProps(inner(body,'rPr')),unsupportedRun:unsupportedRunProps(inner(body,'rPr')),unsupportedParagraph:unsupportedParagraphProps(inner(body,'pPr')),paragraphMarkRun:inner(inner(body,'pPr'),'rPr')});
+    styleMap.set(id,{id,type:a['w:type'] ?? null,isDefault:['1','true','on'].includes((a['w:default']??'').toLowerCase()),basedOn:/<w:basedOn\b[^>]*\bw:val=["']([^"']+)["']/.exec(body)?.[1] ?? null,run:runProps(inner(body,'rPr')),unsupportedRun:unsupportedRunProps(inner(body,'rPr')),unsupportedParagraph:unsupportedParagraphProps(inner(body,'pPr')),paragraphMarkRun:inner(inner(body,'pPr'),'rPr')});
   }
+  const defaultParagraphStyles=[...styleMap.values()].filter(style=>style.type==='paragraph'&&style.isDefault);
+  if(defaultParagraphStyles.length>1) errors.push('Multiple default Word paragraph styles are defined.');
+  const defaultParagraphId=defaultParagraphStyles[0]?.id??null;
   const chain=(id,label,expectedType)=>{
     const found=[], seen=new Set();
     while(id) {
