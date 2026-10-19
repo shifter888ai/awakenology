@@ -55,7 +55,7 @@ test('resolves consistent font families and font sizes in source inventory',asyn
  assert.equal(r.ok,true,r.errors.join('; '));
  assert.deepEqual(r.runs[0].fontFamily,{ascii:'Arial',hAnsi:'Arial'});
  assert.equal(r.runs[0].fontSizePt,12);
- assert.equal(r.runs[1].fontFamily,'Arial');
+ assert.deepEqual(r.runs[1].fontFamily,{ascii:'Arial'});
 });
 
 
