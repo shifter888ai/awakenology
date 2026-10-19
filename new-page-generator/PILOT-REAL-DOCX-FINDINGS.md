@@ -244,3 +244,17 @@ Word `w:spacing w:lineRule="auto"` now maps its line value (in 240ths of a line)
 [Run 39272199525](https://github.com/shifter888ai/awakenology/actions/runs/39272199525) passed all 226 tests and artifact verification. [Download review artifacts](https://github.com/shifter888ai/awakenology/actions/runs/39272199525/artifacts/12195777718).
 
 The remaining real-pilot rich-content errors are concentrated in numbering/indentation at paragraphs 5, 13 and 19; unsupported paragraph-mark font-family metadata; and inherited font-family metadata at paragraphs 121, 123 and 124. This is a narrower set of errors than earlier audits, but conversion is still BLOCKED. A floating image continues to require manual Word-versus-HTML visual comparison, and EN/JP/Chinese segmentation has not been approved.
+
+
+## Latest pilot gate update (2026-10-20)
+
+The current implementation resolves the prior typography, language, paragraph-mark, spacing, list-numbering, and paragraph-alignment blockers. The real pilot now passes **source map (184 paragraphs), asset extraction (3 images), image-placement inventory (3 images), and rich-content comparison**. The converter restores omitted empty paragraphs and the source text sequence now aligns with the converted preview.
+
+Validation: [CI run 39292339481](https://github.com/shifter888ai/awakenology/actions/runs/39292339481) passed **309 tests, 0 failed** and uploaded the [pilot audit/review bundle](https://github.com/shifter888ai/awakenology/actions/runs/39292339481/artifacts/12205702599), including `pilot-converted-preview.html` and `pilot-review-checklist.md`.
+
+Two human decisions remain before the page-set generator can be approved:
+
+1. **Floating image layout:** compare the inline preview against the original DOCX in Word. The preview does not preserve proof of the original floating wrap/position. Approval must be bound to the exact source DOCX SHA-256.
+2. **Missing image alt text:** `/assets/docx-b7dba7e21c2441ad.png` (PNG, 311,382 bytes; SHA-256 `b7dba7e21c2441ada87821f01380c2b8e6d5e0031fec00b8538270f7a0f0c32d`) has no alt text in the Word source. Inspect the image and provide a human-reviewed description via `imageAltTextBySrc` using that exact `src`.
+
+The integration path now exposes a non-publishable preview, flags the missing alt text, accepts a source-specific alt-text override, and still blocks generation until the floating-image review is approved for the same source hash. `pilotApproved` remains false. No PR, merge, or production deployment has been authorized.
