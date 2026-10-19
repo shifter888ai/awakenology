@@ -12,7 +12,11 @@ async function fixture(body) {
 }
 test("reject non-ZIP input", async () => assert.match((await extractDocx(Buffer.from("bad"))).errors.join(" "), /corrupt/));
 test("reject tracked deletion", async () => assert.match((await extractDocx(await fixture("<w:del><w:r><w:delText>lost</w:delText></w:r></w:del>"))).errors.join(" "), /tracked deletion/));
-test("reject explicit Word colors rather than drop them", async () => assert.match((await extractDocx(await fixture('<w:rPr><w:color w:val="FF0000"/></w:rPr><w:t>Red</w:t>'))).errors.join(" "), /text color/));
+test("preserves explicit Word color in inline HTML formatting", async () => {
+ const result=await extractDocx(await fixture('<w:rPr><w:color w:val="FF0000"/></w:rPr><w:t>Red</w:t>'));
+ assert.equal(result.ok,true,result.errors.join('; '));
+ assert.match(result.html,/color:#ff0000/);
+});
 test("reject malformed drawings instead of silently dropping them", async () => assert.match((await extractDocx(await fixture("<w:drawing/>"))).errors.join(" "), /DOCX image adapter/));
 
 test("rejects superscript, baseline shifts, and hidden text until formatting is mapped", async () => {
@@ -35,31 +39,32 @@ test("rejects even simple Word tables until cell and paragraph structure is mapp
 });
 
 
-test("reject font-family and font-size metadata until rendered mapping is lossless", async () => {
-  const fonts = await extractDocx(await fixture('<w:rPr><w:rFonts w:ascii="Arial" w:eastAsia="Yu Gothic"/><w:sz w:val="24"/></w:rPr><w:t>Styled</w:t>'));
-  assert.equal(fonts.ok, false);
-  assert.match(fonts.errors.join(" "), /font family/);
-  assert.match(fonts.errors.join(" "), /font size/);
-  assert.equal(fonts.html, null);
+test("preserves consistent Word font family and font size in inline HTML formatting", async () => {
+  const fonts = await extractDocx(await fixture('<w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:eastAsia="Arial" w:cs="Arial"/><w:sz w:val="24"/></w:rPr><w:t>Styled</w:t>'));
+  assert.equal(fonts.ok, true, fonts.errors.join("; "));
+  assert.match(fonts.html, /font-family:&quot;Arial&quot;/);
+  assert.match(fonts.html, /font-size:12pt/);
 });
-test("reject complex-script and language metadata until rendered mapping is lossless", async () => {
-  const result = await extractDocx(await fixture('<w:rPr><w:lang w:eastAsia="ja-JP"/><w:bCs/><w:iCs/><w:caps/></w:rPr><w:t>文字</w:t>'));
-  assert.equal(result.ok, false);
-  assert.match(result.errors.join(" "), /language metadata/);
-  assert.match(result.errors.join(" "), /complex-script bold or italic/);
-  assert.match(result.errors.join(" "), /capitalization/);
+test("preserves language, matching complex-script flags and capitalization", async () => {
+  const result = await extractDocx(await fixture('<w:rPr><w:lang w:eastAsia="ja-JP"/><w:b/><w:bCs/><w:i/><w:iCs/><w:caps/></w:rPr><w:t>文字</w:t>'));
+  assert.equal(result.ok, true, result.errors.join("; "));
+  assert.match(result.html, /data-word-lang-east-asia="ja-JP"/);
+  assert.match(result.html, /text-transform:uppercase/);
+  assert.match(result.html, /font-weight:bold/);
+  assert.match(result.html, /font-style:italic/);
 });
-test("distinguishes unsupported paragraph spacing from run character spacing", async () => {
-  const result = await extractDocx(await fixture('<w:pPr><w:spacing w:before="120" w:after="120"/></w:pPr><w:rPr><w:spacing w:val="20"/></w:rPr><w:t>Spaced</w:t>'));
-  assert.equal(result.ok, false);
-  assert.match(result.errors.join(" "), /character spacing/);
-  assert.match(result.errors.join(" "), /paragraph or line spacing/);
+test("preserves paragraph and character spacing in inline HTML formatting", async () => {
+  const result = await extractDocx(await fixture('<w:pPr><w:spacing w:before="120" w:after="120" w:line="360" w:lineRule="exact"/></w:pPr><w:rPr><w:spacing w:val="20"/></w:rPr><w:t>Spaced</w:t>'));
+  assert.equal(result.ok, true, result.errors.join("; "));
+  assert.match(result.html, /margin-top:6pt/);
+  assert.match(result.html, /margin-bottom:6pt/);
+  assert.match(result.html, /line-height:18pt/);
+  assert.match(result.html, /letter-spacing:1pt/);
 });
 test("reject style and paragraph layout metadata rather than flattening it", async () => {
   const result = await extractDocx(await fixture('<w:pPr><w:pStyle w:val="Heading1"/><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr><w:ind w:left="720"/><w:jc w:val="center"/></w:pPr><w:t>Heading</w:t>'));
   assert.equal(result.ok, false);
   assert.match(result.errors.join(" "), /numbering or list semantics/);
-  assert.match(result.errors.join(" "), /indentation or alignment/);
   assert.equal(result.html, null);
 });
 
