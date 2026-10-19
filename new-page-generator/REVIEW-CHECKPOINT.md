@@ -133,3 +133,8 @@ The rendered rich-content inspector now blocks embedded CSS, external stylesheet
 - Image occurrences are paired with asset records by source order, preserving different alt text when one relationship is reused.
 - CI [39203905399](https://github.com/shifter888ai/awakenology/actions/runs/39203905399) passed **136/136 tests**.
 - Floating-image coordinate/wrapping conversion and inherited formatting remain unsupported; the pilot is not approved.
+
+
+## Total paragraph count in fidelity comparison (2026-10-19)
+
+Source and rendered rich-content inventories now include total paragraph counts, and comparison requires both. This detects lost empty paragraphs even when text runs remain unchanged. Missing count metadata blocks comparison. CI [39204047613](https://github.com/shifter888ai/awakenology/actions/runs/39204047613) passed **138/138 tests**.
