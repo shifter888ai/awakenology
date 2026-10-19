@@ -13,6 +13,14 @@ const MAX_INPUT_BYTES = 25 * 1024 * 1024;
 const MAX_DOCUMENT_XML_BYTES = 20 * 1024 * 1024;
 const FEATURES = [
   ["explicit Word text color (requires lossless color mapping)", /<w:color(?:\s|>)/],
+  ["explicit font family (requires lossless font mapping)", /<w:rFonts(?:\s|\/?>)/],
+  ["explicit font size (requires lossless size mapping)", /<w:(?:sz|szCs)(?:\s|\/?>)/],
+  ["explicit language metadata (requires lossless language mapping)", /<w:lang(?:\s|\/?>)/],
+  ["complex-script bold or italic (requires lossless mapping)", /<w:(?:bCs|iCs)(?:\s|\/?>)/],
+  ["capitalization or character spacing (requires lossless mapping)", /<w:(?:caps|spacing)(?:\s|\/?>)/],
+  ["paragraph or run style inheritance", /<w:(?:pStyle|rStyle)(?:\s|\/?>)/],
+  ["paragraph numbering or list semantics", /<w:numPr(?:\s|\/?>)/],
+  ["paragraph indentation or alignment", /<w:(?:ind|jc)(?:\s|\/?>)/],
   ["highlight or shading (requires lossless mapping)", /<w:(?:highlight|shd)(?:\s|>)/],
   ["tracked insertion", /<w:ins(?:\s|>)/],
   ["tracked deletion", /<w:del(?:\s|>)/],
