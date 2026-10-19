@@ -1,6 +1,6 @@
 // Compare source and output rich-content inventories without normalizing authorial details.
 // Expected runs: [{paragraphIndex, text, bold, italic, underline, color, href}] in document order.
-// Expected images: [{assetPath, paragraphIndex, order, alt}] in document order.
+// Expected images: [{assetPath, paragraphIndex, order, alt, textOffset}] in document order.
 const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
 const required = (o, keys, where) => {
   if (!o || typeof o !== 'object' || keys.some(k => !own(o, k))) {
@@ -34,10 +34,10 @@ export function compareRichContent(source, output) {
     }
     value.images.forEach((r, i) => {
       const where = side + '.images[' + i + ']';
-      required(r, ['assetPath', 'paragraphIndex', 'order', 'alt'], where);
+      required(r, ['assetPath', 'paragraphIndex', 'order', 'alt', 'textOffset'], where);
       if (typeof r.assetPath !== 'string' || !r.assetPath ||
           !Number.isInteger(r.paragraphIndex) || r.paragraphIndex < 0 ||
-          !Number.isInteger(r.order) || r.order < 0 ||
+          !Number.isInteger(r.order) || r.order < 0 || !Number.isInteger(r.textOffset) || r.textOffset < 0 ||
           !(r.alt === null || typeof r.alt === 'string')) {
         throw new Error('Invalid image field types at ' + where);
       }
