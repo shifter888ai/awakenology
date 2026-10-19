@@ -131,3 +131,19 @@ test("blocks custom Word bullet glyphs not representable by the native list adap
  assert.equal(result.ok,false);
  assert.ok(result.errors.some(error=>error.includes("cannot be represented faithfully")));
 });
+
+
+test("blocks ambiguous continuation of the same Word numbering ID across HTML lists",()=>{
+ const source={
+  paragraphCount:2,
+  paragraphLayouts:[0,1].map(paragraphIndex=>({paragraphIndex,alignment:"left",indentation:{},spacing:{beforePt:0,afterPt:0,lineHeightPt:null}})),
+  paragraphNumbering:[0,1].map(paragraphIndex=>({paragraphIndex,numId:7,abstractNumId:2,level:0,format:"decimal",text:"%1.",start:1,indentation:{}})),
+  runs:[
+   {paragraphIndex:0,text:"One",bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null},
+   {paragraphIndex:1,text:"Two",bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null}
+  ]
+ };
+ const result=applyDocxRichFormatting("<ol><li>One</li></ol><ol><li>Two</li></ol>",source);
+ assert.equal(result.ok,false);
+ assert.ok(result.errors.some(error=>error.includes("continuation across separate HTML list containers")));
+});
