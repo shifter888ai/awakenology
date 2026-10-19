@@ -10,7 +10,7 @@ export function inspectRenderedRichContent(html, parser) {
   function visit(node, state) {
     if (node.nodeType===3) {
       if (node.textContent) {
-        runs.push({text:node.textContent,...state});
+        runs.push({paragraphIndex:Math.max(0,paragraphIndex),text:node.textContent,...state});
         if (paragraphIndex >= 0) paragraphOffsets.set(paragraphIndex,(paragraphOffsets.get(paragraphIndex) ?? 0)+node.textContent.length);
       }
       return;
