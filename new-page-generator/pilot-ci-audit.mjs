@@ -13,7 +13,7 @@ const outputPath = 'pilot-artifacts/pilot-audit.json';
 const buffer = await readFile(sourcePath);
 const sha256 = createHash('sha256').update(buffer).digest('hex');
 const stages = {};
-const diagnostic = {unsupportedTextConstructs:[], drawingKinds:{}, explicitColors:[], lineBreaks:[], floatingDrawings:[], runPropertyInventory:{counts:{},samples:{}}, paragraphPropertyInventory:{counts:{},samples:{}},styleResolutionInventory:{references:[],definitions:[],docDefaults:{}}};
+const diagnostic = {unsupportedTextConstructs:[], drawingKinds:{}, explicitColors:[], lineBreaks:[], floatingDrawings:[], runPropertyInventory:{counts:{},samples:{}}, paragraphPropertyInventory:{counts:{},samples:{}},fontFamilyVariants:[],styleResolutionInventory:{references:[],definitions:[],docDefaults:{}}};
 try {
   const zip = await JSZip.loadAsync(buffer,{checkCRC32:true});
   const xml = await zip.file('word/document.xml').async('string');
@@ -75,6 +75,17 @@ try {
       paragraphProperties:propNames(defaults,'pPrDefault')
     };
   }
+  const fontFamilyVariants = new Map();
+  for (const match of xml.matchAll(/<w:rFonts\b[^>]*\/?\s*>/g)) {
+    const attrs = Object.fromEntries([...match[0].matchAll(/([\w:.-]+)=["']([^"']*)["']/g)].map(item=>[item[1],item[2]]));
+    const tuple = {ascii:attrs['w:ascii']??null,hAnsi:attrs['w:hAnsi']??null,eastAsia:attrs['w:eastAsia']??null,cs:attrs['w:cs']??null};
+    const key=JSON.stringify(tuple);
+    const entry=fontFamilyVariants.get(key)??{families:tuple,count:0,samples:[]};
+    entry.count++;
+    if(entry.samples.length<5) entry.samples.push({xmlOffset:match.index,tag:match[0]});
+    fontFamilyVariants.set(key,entry);
+  }
+  diagnostic.fontFamilyVariants=[...fontFamilyVariants.values()];
   const paragraphs = [...xml.matchAll(/<w:p(?=[\s>])[^>]*>[\s\S]*?<\/w:p>/g)];
   const recordProperties = (inventory, tag, paragraphIndex, sample) => {
     inventory.counts[tag] = (inventory.counts[tag] ?? 0) + 1;
