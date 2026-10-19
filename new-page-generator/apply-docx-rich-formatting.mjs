@@ -49,6 +49,8 @@ function paragraphStyle(layout) {
   if (spacing.beforePt !== undefined && Number(spacing.beforePt)!==0) css.push("margin-top:"+spacing.beforePt+"pt");
   if (spacing.afterPt !== undefined && Number(spacing.afterPt)!==0) css.push("margin-bottom:"+spacing.afterPt+"pt");
   if (spacing.lineHeightPt !== null && spacing.lineHeightPt !== undefined) css.push("line-height:"+spacing.lineHeightPt+"pt");
+  if (spacing.lineHeight !== null && spacing.lineHeight !== undefined) css.push("line-height:"+spacing.lineHeight);
+  if (spacing.minLineHeightPt !== null && spacing.minLineHeightPt !== undefined) css.push("min-height:"+spacing.minLineHeightPt+"pt");
   return css.join(";");
 }
 const needsSpan = run => Boolean(run.bold || run.italic || run.underline || run.color || run.fontFamily ||
