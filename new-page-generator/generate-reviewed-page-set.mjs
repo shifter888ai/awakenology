@@ -8,7 +8,6 @@ import { validateInventory } from "./content-inventory.mjs";
 import { reviewPasteInventory } from "./review-paste-inventory.mjs";
 import { compareRichContent } from "./compare-rich-content.mjs";
 import { inspectRenderedRichContent } from "./inspect-rendered-rich-content.mjs";
-import { applyDocxRichFormatting } from "./apply-docx-rich-formatting.mjs";
 
 /**
  * Offline review coordinator. Returns static HTML only when source inspection,
@@ -24,57 +23,37 @@ export async function generateReviewedPageSet({ pageSet, inputs, outputs }) {
   if (!routeManifest.ok) return { ok: false, stage: "routes", errors: routeManifest.errors, pages: {} };
 
   const errors = [];
-  const reviewedHtmlByLanguage = {};
   for (const lang of LANGUAGES) {
     const output = outputs?.[lang];
     if (!output || typeof output !== "object") {
       errors.push(`${lang}: reviewed output is missing.`);
       continue;
     }
-    const mode = pageSet.pages[lang].mode;
-    const baseRendered = inspectPastedHtml(output.reviewedArticleHtml, output.parser);
-    if (!baseRendered.ok) {
-      errors.push(...baseRendered.errors.map(e => lang + ": rendered HTML: " + e));
-      continue;
-    }
-    let htmlForRender = output.reviewedArticleHtml;
-    if (mode === "docx") {
-      const original = inspection.pages[lang].sourceRichInventory;
-      if (!original?.ok) {
-        errors.push(lang + ": original DOCX rich inventory unavailable.");
-        continue;
-      }
-      const formatted = applyDocxRichFormatting(htmlForRender, original);
-      if (!formatted.ok) {
-        errors.push(...formatted.errors.map(e => lang + ": DOCX formatting application blocked: " + e));
-        continue;
-      }
-      htmlForRender = formatted.html;
-    }
-    reviewedHtmlByLanguage[lang] = htmlForRender;
-    const rendered = inspectPastedHtml(htmlForRender, output.parser);
+    const rendered = inspectPastedHtml(output.reviewedArticleHtml, output.parser);
     if (!rendered.ok) {
       errors.push(...rendered.errors.map(e => lang + ": rendered HTML: " + e));
       continue;
     }
     errors.push(...validateInventory(rendered.inventory).errors.map(e => lang + ": rendered HTML: " + e));
     errors.push(...reviewPasteInventory(rendered.inventory).errors.map(e => lang + ": rendered HTML: " + e));
-    if (mode === "docx") {
+    if (pageSet.pages[lang].mode === "docx") {
       try {
         const original = inspection.pages[lang].sourceRichInventory;
-        const derived = inspectRenderedRichContent(htmlForRender, output.parser);
+        if (!original?.ok) throw new Error("Original DOCX rich inventory unavailable.");
+        const derived = inspectRenderedRichContent(output.reviewedArticleHtml, output.parser);
         if (!derived.ok) throw new Error(derived.errors.join("; "));
         const rich = compareRichContent(original, derived);
         errors.push(...rich.issues.map(issue => lang + ": DOCX rich-content mismatch: " + JSON.stringify(issue)));
       } catch (error) {
         errors.push(lang + ": DOCX rich-content verification blocked: " + String(error?.message ?? error));
       }
+      // DOCX output is allowed only when the independently inspected source
+      // inventory, rendered inventory, and every rich-content field compare
+      // without issues. Unsupported source features fail earlier in inspection.
     } else if (output.sourceRichInventory !== undefined || output.renderedRichInventory !== undefined) {
       errors.push(lang + ": caller-supplied rich inventories cannot establish independent source provenance.");
     }
-    // Compare source structure against the unformatted base HTML. The independently
-    // verified rich inventory above checks formatter-added spans and metadata.
-    const integrity = verifyRenderedInventory(inspection.pages[lang], mode === "docx" ? baseRendered.inventory : rendered.inventory);
+    const integrity = verifyRenderedInventory(inspection.pages[lang], rendered.inventory);
     errors.push(...integrity.errors.map(e => lang + ": " + e));
   }
   if (errors.length) return { ok: false, stage: "content-integrity", errors, pages: {} };
@@ -101,7 +80,7 @@ export async function generateReviewedPageSet({ pageSet, inputs, outputs }) {
           alternates: routeManifest.pages[lang].alternates,
           approvedHeader: output.approvedHeader,
           approvedFooter: output.approvedFooter,
-          reviewedArticleHtml: reviewedHtmlByLanguage[lang],
+          reviewedArticleHtml: output.reviewedArticleHtml,
           integrityApproved: true
         })
       };
