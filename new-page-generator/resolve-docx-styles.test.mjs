@@ -302,3 +302,12 @@ test("rejects unknown and duplicate attributes on color and boolean run properti
   assert.equal(result.formatting,null);
  }
 });
+
+
+test("rejects duplicate or unknown numeric typography attributes",()=>{
+ for(const property of ['<w:sz w:val="22" w:val="24"/>','<w:szCs w:val="22" w:unknown="x"/>','<w:spacing w:val="20" w:val="40"/>','<w:kern w:val="2" w:unknown="x"/>']) {
+  const result=resolveDocxRunFormatting({stylesXml:styles(),paragraphXml:paragraph(),runXml:run('',property)});
+  assert.equal(result.ok,false,property);
+  assert.equal(result.formatting,null);
+ }
+});
