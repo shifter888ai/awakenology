@@ -149,3 +149,13 @@ test("rejects malformed UTF-8 in inherited styles rather than treating it as abs
  assert.equal(result.html,null);
  assert.match(result.errors.join(" "),/styles part is unreadable/);
 });
+
+test("rejects inherited explicit color and complex-script styling before HTML conversion", async () => {
+ const zip=await JSZip.loadAsync(await fixture("<w:t>Plain-looking text</w:t>"));
+ zip.file("word/styles.xml", '<w:styles><w:docDefaults><w:rPrDefault><w:rPr><w:color w:val="FF0000"/><w:bCs/><w:iCs/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>');
+ const result=await extractDocx(await zip.generateAsync({type:"nodebuffer"}));
+ assert.equal(result.ok,false);
+ assert.equal(result.html,null);
+ assert.match(result.errors.join(" "),/inherited Word feature: explicit Word text color/);
+ assert.match(result.errors.join(" "),/inherited Word feature: complex-script bold or italic/);
+});
