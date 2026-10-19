@@ -118,7 +118,7 @@ test("DOCX reviewed text mismatch blocks every output page",async()=>{
 test("unsupported DOCX font metadata blocks the page set before any HTML is emitted",async()=>{
  const zip=await JSZip.loadAsync(await simpleDocx());
  const doc=await zip.file("word/document.xml").async("string");
- zip.file("word/document.xml",doc.replace("<w:r><w:t>Text","<w:r><w:rPr><w:rFonts w:ascii=\"Arial\"/></w:rPr><w:t>Text"));
+ zip.file("word/document.xml",doc.replace("<w:r><w:t>Text","<w:r><w:rPr><w:rFonts w:ascii=\"Arial\" w:eastAsia=\"Yu Gothic\"/></w:rPr><w:t>Text"));
  const docx=await zip.generateAsync({type:"nodebuffer"});
  const docxPageSet={pages:Object.fromEntries(["en","ja","zh-Hant"].map((lang,i)=>[lang,{
    title:lang,mode:"docx",source:"fixture",route:["/English/docx-font/","/Japanese/docx-font/","/Chinese/docx-font/"][i]
@@ -128,5 +128,5 @@ test("unsupported DOCX font metadata blocks the page set before any HTML is emit
  assert.equal(result.ok,false);
  assert.equal(result.stage,"source-inspection");
  assert.deepEqual(result.pages,{});
- assert.ok(result.errors.some(error=>/font family/.test(error)));
+ assert.ok(result.errors.some(error=>/fontFamily/.test(error)));
 });
