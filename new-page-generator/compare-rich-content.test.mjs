@@ -132,8 +132,14 @@ test('detects lost empty paragraphs even when text runs are unchanged',()=>{
 
 
 test('changed inline/floating image placement blocks',()=>{
- const source=sample(), output=sample(); output.images[0].placement={kind:'floating'};
+ const source=sample(), output=sample(); output.images[0].placement={kind:'floating',requiresVisualReview:true};
  const result=compareRichContent(source,output);
  assert.equal(result.ok,false);
  assert.ok(result.issues.some(x=>x.field==='placement'));
+});
+
+
+test('floating image without review status is invalid inventory',()=>{
+ const source=sample(); source.images[0].placement={kind:'floating'};
+ assert.throws(()=>compareRichContent(source,sample()),/Invalid image field types/);
 });
