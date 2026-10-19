@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {compareRichContent} from './compare-rich-content.mjs';
 const sample = () => ({
   runs: [{paragraphIndex:0,text:'什麽',bold:true,italic:false,underline:false,color:'#ff0000',fontSizePt:null,href:'https://example.org'}],
-  images: [{assetPath:'assets/one.png',paragraphIndex:2,order:0,alt:'diagram',textOffset:12,markerOrder:0}],
+  images: [{assetPath:'assets/one.png',paragraphIndex:2,order:0,alt:'diagram',textOffset:12,markerOrder:0,placement:{kind:'inline'}}],
   lineBreaks: [],
   paragraphLayouts: [0,1,2].map(paragraphIndex=>({paragraphIndex,alignment:'left',indentation:{left:0,right:0}})),
   paragraphCount: 3
@@ -108,7 +108,7 @@ test('blocks an image moved before or after paragraph text',()=>{
 test('detects image and line-break swaps when both share the same text offset',()=>{
  const source={
   runs:[{paragraphIndex:0,text:'A',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null}],
-  images:[{assetPath:'asset.png',paragraphIndex:0,order:0,alt:'diagram',textOffset:1,markerOrder:0}],
+  images:[{assetPath:'asset.png',paragraphIndex:0,order:0,alt:'diagram',textOffset:1,markerOrder:0,placement:{kind:'inline'}}],
   lineBreaks:[{paragraphIndex:0,textOffset:1,breakType:'textWrapping',markerOrder:1}],
   paragraphLayouts:[{paragraphIndex:0,alignment:'left',indentation:{left:0,right:0}}],
   paragraphCount:1
