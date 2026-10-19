@@ -91,9 +91,9 @@ export function inspectRenderedRichContent(html, parser) {
       const rawLineHeight = formatting(node,'line-height');
       let lineHeightPt = null, lineHeight = null;
       if (rawLineHeight !== null) {
-        const match = /^(\\d+(?:\\.\\d+)?)(pt|px)$/.exec(rawLineHeight.toLowerCase());
+        const match = /^(\d+(?:\.\d+)?)(pt|px)$/.exec(rawLineHeight.toLowerCase());
         if (match) lineHeightPt = Number(match[1]) * (match[2] === 'px' ? 0.75 : 1);
-        else if (/^\\d+(?:\\.\\d+)?$/.test(rawLineHeight) && Number(rawLineHeight)>0) lineHeight = Number(rawLineHeight);
+        else if (/^\d+(?:\.\d+)?$/.test(rawLineHeight) && Number(rawLineHeight)>0) lineHeight = Number(rawLineHeight);
         else errors.push('Unsupported rendered paragraph line-height: '+rawLineHeight);
       }
       const spacing = {beforePt:readPoints('margin-top'),afterPt:readPoints('margin-bottom'),lineHeightPt};
