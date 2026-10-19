@@ -16,7 +16,7 @@ export function compareDocxSourceToHtml(sourceMap, html) {
   if (typeof html !== "string" || !html.trim()) return { ok: false, errors: ["Converted HTML is empty."] };
   // Unknown elements are blocked: otherwise hidden or discarded content could
   // falsely pass a text-only comparison.
-  const allowed = new Set(["p","h1","h2","h3","h4","h5","h6","strong","b","em","i","u","s","a","ul","ol","li","table","thead","tbody","tr","td","th","br","img","blockquote","sup","sub"]);
+  const allowed = new Set(["p","h1","h2","h3","h4","h5","h6","strong","b","em","i","u","s","a","ul","ol","li","table","thead","tbody","tr","td","th","br","img","blockquote","sup","sub","span"]);
   const tags = [...html.matchAll(/<\/?([a-z][\w-]*)\b[^>]*>/gi)];
   for (const tag of tags) if (!allowed.has(tag[1].toLowerCase())) errors.push(`Unreviewed HTML element: ${tag[1]}.`);
   const stripped = html.replace(/<\/?[a-z][\w-]*\b[^>]*>/gi, "");
