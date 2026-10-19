@@ -49,3 +49,22 @@ test("image sources allow HTTP(S) only and still require alt text", () => {
   const safe = inspectPastedHtml(safeHtml, makeParser("https://example.com/image.png"));
   assert.equal(safe.ok, true, safe.errors.join("; "));
 });
+
+
+test("allows standard document wrappers for explicit HTML-file mode only",()=>{
+ const html='<!doctype html><html><head><meta charset="utf-8"><title>Article</title></head><body><p>Article body</p></body></html>';
+ const parser={parseFromString:()=>({head:{childNodes:[element("title",{},[{nodeType:3,textContent:"Article"}]),element("meta",{charset:"utf-8"},[])]},body:{childNodes:[element("p",{},[{nodeType:3,textContent:"Article body"}])]}})};
+ const pasted=inspectPastedHtml(html,parser);
+ assert.equal(pasted.ok,false,"full document wrappers remain blocked for fragment paste");
+ const file=inspectPastedHtml(html,parser,{allowDocumentShell:true});
+ assert.equal(file.ok,true,file.errors.join("; "));
+});
+
+test("HTML-file mode still blocks embedded stylesheets and scripts",()=>{
+ const html='<html><head><style>p{color:red}</style><script>run()</script></head><body><p>Article</p></body></html>';
+ const parser={parseFromString:()=>({head:{childNodes:[element("style",{},[])]},body:{childNodes:[element("p",{},[{nodeType:3,textContent:"Article"}])]}})};
+ const result=inspectPastedHtml(html,parser,{allowDocumentShell:true});
+ assert.equal(result.ok,false);
+ assert.ok(result.errors.some(error=>error.includes("Embedded CSS")));
+ assert.ok(result.errors.some(error=>error.includes("unsupported element <script>")));
+});
