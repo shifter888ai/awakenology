@@ -69,3 +69,24 @@ test("rejects scripts in the raw HTML head even if the parser omits them from bo
  assert.ok(result.errors.some(x=>x.includes("Raw HTML contains unsupported element <script>")));
  assert.ok(result.errors.some(x=>x.includes("Raw HTML contains unsupported element <html>")));
 });
+
+
+test("Markdown inputs normalize through the same inspected HTML inventory",async()=>{
+ const parser={parseFromString:()=>({head:{childNodes:[]},body:{childNodes:[{
+  nodeType:1,tagName:"H1",attributes:[],childNodes:[{nodeType:3,textContent:"Markdown title"}],
+  getAttribute:()=>null
+ },{
+  nodeType:1,tagName:"P",attributes:[],childNodes:[{nodeType:3,textContent:"Keep 日本語 and 繁體中文"}],
+  getAttribute:()=>null
+ }]})};
+ const set={pages:Object.fromEntries(["en","ja","zh-Hant"].map(lang=>[lang,{
+  title:lang,mode:"markdown",source:lang+".md",route:"/"+lang+"/"
+ }]))};
+ const inputs=Object.fromEntries(["en","ja","zh-Hant"].map(lang=>[lang,{
+  markdown:"# Markdown title\n\nKeep 日本語 and 繁體中文",parser
+ }]));
+ const result=await inspectPageSet(set,inputs);
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.equal(result.pages.en.normalizedBlocks[0].sourceMode,"markdown");
+ assert.equal(result.pages.en.normalizedBlocks[0].sourceLocation.part,"markdown-source");
+});
