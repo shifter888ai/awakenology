@@ -218,3 +218,10 @@ test("blocks unitless line-height ratio mismatches",()=>{
  assert.equal(result.ok,false);
  assert.ok(result.issues.some(issue=>issue.kind==="paragraph-spacing-mismatch"&&issue.field==="lineHeight"));
 });
+
+
+test("compares script-specific font metadata independent of object key order",()=>{
+ const source={...sample(),paragraphMarkFormatting:[{paragraphIndex:0,fontFamily:{ascii:"Arial",hAnsi:"Arial"},language:{val:"en-US",eastAsia:"ja-JP"}}]};
+ const output={...sample(),paragraphMarkFormatting:[{paragraphIndex:0,fontFamily:{hAnsi:"Arial",ascii:"Arial"},language:{eastAsia:"ja-JP",val:"en-US"}}]};
+ assert.equal(compareRichContent(source,output).ok,true);
+});
