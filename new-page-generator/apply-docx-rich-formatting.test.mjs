@@ -147,3 +147,34 @@ test("blocks ambiguous continuation of the same Word numbering ID across HTML li
  assert.equal(result.ok,false);
  assert.ok(result.errors.some(error=>error.includes("continuation across separate HTML list containers")));
 });
+
+
+test("restores omitted empty Word paragraphs before aligning later text",()=>{
+ const source={
+  paragraphCount:3,
+  paragraphLayouts:[0,1,2].map(paragraphIndex=>({paragraphIndex,alignment:"left",indentation:{left:0,right:0},spacing:{beforePt:0,afterPt:0,lineHeightPt:null}})),
+  runs:[
+   {paragraphIndex:0,text:"First",bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null},
+   {paragraphIndex:2,text:"Second",bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null}
+  ]
+ };
+ const result=applyDocxRichFormatting("<p>First</p><p>Second</p>",source);
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.match(result.html,/<p>First<\/p><p><\/p><p>Second<\/p>/);
+});
+
+test("restores source markers inside an omitted empty paragraph",()=>{
+ const source={
+  paragraphCount:3,
+  paragraphLayouts:[0,1,2].map(paragraphIndex=>({paragraphIndex,alignment:"left",indentation:{left:0,right:0},spacing:{beforePt:0,afterPt:0,lineHeightPt:null}})),
+  runs:[
+   {paragraphIndex:0,text:"First",bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null},
+   {paragraphIndex:2,text:"Second",bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null}
+  ],
+  lineBreaks:[{paragraphIndex:1,textOffset:0,breakType:"textWrapping",markerOrder:0}],
+  images:[{paragraphIndex:1,assetPath:"/assets/empty.png",alt:"Empty paragraph image",textOffset:0,markerOrder:1}]
+ };
+ const result=applyDocxRichFormatting("<p>First</p><p>Second</p>",source);
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.match(result.html,/<p><br><img src="\/assets\/empty\.png" alt="Empty paragraph image"><\/p>/);
+});
