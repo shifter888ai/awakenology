@@ -2,7 +2,7 @@
 // Only explicit formatting is supported; inherited CSS requires separate review.
 const formatting = (node, key) => node.getAttribute?.('style')?.split(';').map(x=>x.trim()).find(x=>x.toLowerCase().startsWith(key+':'))?.split(':').slice(1).join(':').trim() ?? null;
 export function inspectRenderedRichContent(html, parser) {
-  const errors=[], runs=[], images=[], lineBreaks=[], paragraphLayouts=[], paragraphNumbering=[];
+  const errors=[], runs=[], images=[], lineBreaks=[], paragraphLayouts=[], paragraphNumbering=[], paragraphMarkFormatting=[];
   const paragraphOffsets = new Map();
   const fontSizePt = node => {
     const value = formatting(node,'font-size');
@@ -13,7 +13,7 @@ export function inspectRenderedRichContent(html, parser) {
   };
   const paragraphMarkerOrders = new Map();
   const nextMarkerOrder = index => { const value=paragraphMarkerOrders.get(index) ?? 0; paragraphMarkerOrders.set(index,value+1); return value; };
-  if (typeof html !== 'string' || !parser?.parseFromString) return {ok:false,errors:['HTML and a parser are required.'],runs,images,lineBreaks,paragraphLayouts,paragraphCount:0};
+  if (typeof html !== 'string' || !parser?.parseFromString) return {ok:false,errors:['HTML and a parser are required.'],runs,images,lineBreaks,paragraphLayouts,paragraphNumbering,paragraphMarkFormatting,paragraphCount:0};
   const doc=parser.parseFromString(html,'text/html');
   let paragraphIndex=-1, order=0;
   const inspectHead = node => {
@@ -97,6 +97,15 @@ export function inspectRenderedRichContent(html, parser) {
       }
       const spacing = {beforePt:readPoints('margin-top'),afterPt:readPoints('margin-bottom'),lineHeightPt};
       paragraphLayouts.push({paragraphIndex,alignment,indentation,spacing});
+      const markFonts={};
+      for(const [name,key] of [['data-word-mark-font-ascii','ascii'],['data-word-mark-font-hansi','hAnsi'],['data-word-mark-font-east-asia','eastAsia'],['data-word-mark-font-cs','cs']]) {
+        const value=node.getAttribute?.(name); if(value) markFonts[key]=value;
+      }
+      const markLanguage={};
+      for(const [name,key] of [['data-word-mark-lang-val','val'],['data-word-mark-lang-east-asia','eastAsia'],['data-word-mark-lang-bidi','bidi']]) {
+        const value=node.getAttribute?.(name); if(value) markLanguage[key]=value;
+      }
+      if(Object.keys(markFonts).length || Object.keys(markLanguage).length) paragraphMarkFormatting.push({paragraphIndex,fontFamily:Object.keys(markFonts).length?markFonts:null,language:Object.keys(markLanguage).length?markLanguage:null});
     }
     if (tag === 'BR') lineBreaks.push({paragraphIndex:Math.max(0,paragraphIndex),textOffset:paragraphOffsets.get(paragraphIndex) ?? 0,breakType:'textWrapping',markerOrder:nextMarkerOrder(Math.max(0,paragraphIndex))});
     const style=node.getAttribute?.('style') ?? '';
@@ -155,5 +164,5 @@ export function inspectRenderedRichContent(html, parser) {
   const initial={bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null,fontKerning:null,fontHint:null};
   for(const child of doc.body?.childNodes ?? []) visit(child,initial);
   if(!runs.length) errors.push('No rendered text runs.');
-  return {ok:errors.length===0,errors,runs,images,lineBreaks,paragraphLayouts,paragraphNumbering,paragraphCount:paragraphIndex+1};
+  return {ok:errors.length===0,errors,runs,images,lineBreaks,paragraphLayouts,paragraphNumbering,paragraphMarkFormatting,paragraphCount:paragraphIndex+1};
 }
