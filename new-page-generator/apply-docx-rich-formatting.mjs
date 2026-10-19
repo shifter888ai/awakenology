@@ -20,6 +20,50 @@ const setAttr = (node,name,value) => {
   const found=node.attrs.find(item=>item.name===name);
   if(found) found.value=value; else node.attrs.push({name,value});
 };
+const createElement = (name, attrs = [], childNodes = []) => {
+  const node={nodeName:name,tagName:name,attrs,namespaceURI:'http://www.w3.org/1999/xhtml',childNodes,parentNode:null};
+  for(const child of childNodes) child.parentNode=node;
+  return node;
+};
+const hasDescendant = (node, name) => (node.childNodes??[]).some(child=>child.nodeName===name||hasDescendant(child,name));
+const createEmptyParagraph = (images, breaks) => {
+  const markers=[...(images??[]).map(item=>({...item,kind:'image'})),...(breaks??[]).map(item=>({...item,kind:'break'}))]
+    .sort((a,b)=>(a.markerOrder??0)-(b.markerOrder??0));
+  const children=[];
+  for(const marker of markers) {
+    if(marker.kind==='break') children.push(createElement('br'));
+    else if(marker.assetPath) children.push(createElement('img',[{name:'src',value:marker.assetPath},{name:'alt',value:marker.alt??''}]));
+  }
+  return createElement('p',[],children);
+};
+const insertBeforeBlock = (fragment, block, placeholder, previousBlock) => {
+  let anchor=block;
+  if(block.nodeName==='li' && ['ol','ul'].includes(block.parentNode?.nodeName)) {
+    const list=block.parentNode;
+    if(previousBlock?.nodeName==='li' && previousBlock.parentNode===list) return false;
+    anchor=list;
+  }
+  const parent=anchor?.parentNode;
+  if(!parent?.childNodes) return false;
+  const index=parent.childNodes.indexOf(anchor);
+  if(index<0) return false;
+  parent.childNodes.splice(index,0,placeholder);
+  placeholder.parentNode=parent;
+  return true;
+};
+const appendAfterLastBlock = (fragment, blocks, placeholder) => {
+  const last=blocks[blocks.length-1];
+  if(!last) { fragment.childNodes.push(placeholder); placeholder.parentNode=fragment; return true; }
+  let anchor=last;
+  while(anchor.parentNode && anchor.parentNode!==fragment) anchor=anchor.parentNode;
+  const parent=anchor.parentNode;
+  if(!parent?.childNodes) return false;
+  const index=parent.childNodes.indexOf(anchor);
+  if(index<0) return false;
+  parent.childNodes.splice(index+1,0,placeholder);
+  placeholder.parentNode=parent;
+  return true;
+};
 const mergeStyles = (...values) => {
   const declarations = new Map();
   for (const value of values) for (const declaration of String(value ?? "").split(";").filter(item=>item.trim())) {
@@ -92,7 +136,6 @@ export function applyDocxRichFormatting(html, sourceInventory) {
     for(const child of node.childNodes??[]) walk(child, insideListItem || node.nodeName === "li");
   };
   walk(fragment);
-  if(blocks.length!==sourceInventory.paragraphCount) errors.push("Rendered paragraph count "+blocks.length+" differs from source count "+sourceInventory.paragraphCount+".");
   const listContainerByNumId = new Map();
   const numIdByListContainer = new Map();
   const runsByParagraph=Array.from({length:sourceInventory.paragraphCount},()=>[]);
@@ -100,6 +143,57 @@ export function applyDocxRichFormatting(html, sourceInventory) {
     if(!Number.isInteger(run.paragraphIndex)||run.paragraphIndex<0||run.paragraphIndex>=runsByParagraph.length) {errors.push("Source run has an invalid paragraph index.");continue;}
     runsByParagraph[run.paragraphIndex].push(run);
   }
+  const sourceImages=sourceInventory.images??[], sourceBreaks=sourceInventory.lineBreaks??[];
+  const sourceNumbering=sourceInventory.paragraphNumbering??[];
+  const markersByParagraph=items=>Array.from({length:sourceInventory.paragraphCount},(_,index)=>items.filter(item=>item.paragraphIndex===index));
+  const imagesByParagraph=markersByParagraph(sourceImages), breaksByParagraph=markersByParagraph(sourceBreaks);
+  // Mammoth omits empty Word paragraphs. Reinsert only unambiguous empty blocks so later source paragraphs remain aligned.
+  let sourceIndex=0, blockIndex=0, previousMatchedBlock=null;
+  while(sourceIndex<sourceInventory.paragraphCount) {
+    const expected=runsByParagraph[sourceIndex].map(run=>run.text).join("");
+    const sourceImgs=imagesByParagraph[sourceIndex], sourceBrs=breaksByParagraph[sourceIndex];
+    if(blockIndex>=blocks.length) {
+      if(expected!=="" || sourceNumbering.some(item=>item.paragraphIndex===sourceIndex)) {
+        errors.push("Missing rendered paragraph for nonempty or numbered source paragraph "+(sourceIndex+1)+".");
+        break;
+      }
+      const placeholder=createEmptyParagraph(sourceImgs,sourceBrs);
+      if(!appendAfterLastBlock(fragment,blocks,placeholder)) { errors.push("Cannot restore omitted empty source paragraph "+(sourceIndex+1)+"."); break; }
+      blocks.push(placeholder); previousMatchedBlock=placeholder; sourceIndex++; continue;
+    }
+    const block=blocks[blockIndex], actual=nodeText(block);
+    const renderedImage=hasDescendant(block,'img'), renderedBreak=hasDescendant(block,'br');
+    const markerMismatch=(!sourceImgs.length&&renderedImage)||(!sourceBrs.length&&renderedBreak);
+    if(expected==="" && (actual!=="" || markerMismatch)) {
+      if(sourceNumbering.some(item=>item.paragraphIndex===sourceIndex)) {
+        errors.push("An omitted empty numbered paragraph requires explicit list-boundary mapping at paragraph "+(sourceIndex+1)+".");
+        break;
+      }
+      const placeholder=createEmptyParagraph(sourceImgs,sourceBrs);
+      if(!insertBeforeBlock(fragment,block,placeholder,previousMatchedBlock)) {
+        errors.push("Cannot safely restore omitted empty source paragraph "+(sourceIndex+1)+" near a list boundary.");
+        break;
+      }
+      blocks.splice(blockIndex,0,placeholder); previousMatchedBlock=placeholder; sourceIndex++; continue;
+    }
+    if(expected==="" && actual==="" && (sourceImgs.length||sourceBrs.length)) {
+      if((renderedImage&&!sourceImgs.length)||(renderedBreak&&!sourceBrs.length)) {
+        if(sourceNumbering.some(item=>item.paragraphIndex===sourceIndex)) { errors.push("Empty numbered paragraph has ambiguous rendered markers at paragraph "+(sourceIndex+1)+"."); break; }
+        const placeholder=createEmptyParagraph(sourceImgs,sourceBrs);
+        if(!insertBeforeBlock(fragment,block,placeholder,previousMatchedBlock)) { errors.push("Cannot align empty source markers at paragraph "+(sourceIndex+1)+"."); break; }
+        blocks.splice(blockIndex,0,placeholder); previousMatchedBlock=placeholder; sourceIndex++; continue;
+      }
+      if(sourceImgs.length&&!renderedImage) for(const image of sourceImgs) if(image.assetPath) {
+        const node=createElement('img',[{name:'src',value:image.assetPath},{name:'alt',value:image.alt??''}]);
+        block.childNodes.push(node); node.parentNode=block;
+      }
+      if(sourceBrs.length&&!renderedBreak) for(const _ of sourceBrs) {
+        const node=createElement('br'); block.childNodes.push(node); node.parentNode=block;
+      }
+    }
+    sourceIndex++; blockIndex++; previousMatchedBlock=block;
+  }
+  if(blocks.length!==sourceInventory.paragraphCount) errors.push("Rendered paragraph count "+blocks.length+" differs from source count "+sourceInventory.paragraphCount+".");
   for(let p=0;p<Math.min(blocks.length,sourceInventory.paragraphCount);p++) {
     const block=blocks[p], expected=runsByParagraph[p].map(run=>run.text).join(""), actual=nodeText(block);
     if(actual!==expected) {errors.push("Paragraph "+(p+1)+" text differs between source runs and converted HTML.");continue;}
