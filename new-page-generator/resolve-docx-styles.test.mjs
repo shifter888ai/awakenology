@@ -125,3 +125,25 @@ test('rejects unsupported direct formatting even when its value resembles an inh
  assert.equal(result.formatting,null);
  assert.ok(result.errors.some(x=>x.includes('Unsupported direct run property w:lang')));
 });
+
+test("resolves consistent Word font families, language metadata, complex-script aliases, caps and character spacing", () => {
+ const xml=styles('<w:style w:type="paragraph" w:styleId="P"><w:rPr><w:rFonts w:ascii="Microsoft YaHei" w:hAnsi="Microsoft YaHei" w:eastAsia="Microsoft YaHei" w:cs="Microsoft YaHei"/><w:lang w:val="en-US" w:eastAsia="zh-CN"/><w:sz w:val="22"/><w:szCs w:val="22"/><w:b/><w:bCs/><w:i w:val="0"/><w:iCs w:val="0"/><w:caps/><w:spacing w:val="20"/></w:rPr></w:style>');
+ const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml:paragraph('P'),runXml:run()});
+ assert.equal(result.ok,true,result.errors.join('; '));
+ assert.equal(result.formatting.fontFamily,'Microsoft YaHei');
+ assert.deepEqual(result.formatting.language,{val:'en-US',eastAsia:'zh-CN'});
+ assert.equal(result.formatting.fontSizePt,11);
+ assert.equal(result.formatting.fontSizeCsPt,11);
+ assert.equal(result.formatting.bCs,true);
+ assert.equal(result.formatting.iCs,false);
+ assert.equal(result.formatting.caps,true);
+ assert.equal(result.formatting.letterSpacingPt,1);
+});
+test("blocks font-family fallback differences and script-specific style divergence", () => {
+ const fonts=resolveDocxRunFormatting({stylesXml:styles(),paragraphXml:paragraph(),runXml:run('', '<w:rFonts w:ascii="Arial" w:eastAsia="Yu Gothic"/>')});
+ assert.equal(fonts.ok,false);
+ assert.ok(fonts.errors.some(x=>x.includes('fontFamily')));
+ const script=resolveDocxRunFormatting({stylesXml:styles(),paragraphXml:paragraph(),runXml:run('', '<w:bCs/>')});
+ assert.equal(script.ok,false);
+ assert.ok(script.errors.some(x=>x.includes('Complex-script bold differs')));
+});
