@@ -19,7 +19,7 @@ export function renderStaticShell({ language, title, description, route, alterna
   if (!/<header\b/i.test(headerMarkup)) throw Error("Approved header must contain a header element.");
   const hreflang = ["en","ja","zh-Hant"].map(lang => `<link rel="alternate" hreflang="${lang}" href="${escapeText(absolute(alternates[lang]))}">`).join("\n");
   return `<!doctype html>
-<html lang="${language}">
+<html lang="${language}" data-aw-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
