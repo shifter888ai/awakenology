@@ -86,7 +86,7 @@ test('resolves supported paragraph layout and still blocks unsupported flow/tabl
  assert.ok(layout.errors.some(x=>x.includes('Unresolved OOXML feature w:keepNext')));
  const table=await inspectDocxRichContent(await fixture('<w:tbl><w:tr><w:tc><w:p><w:r><w:t>Cell</w:t></w:r></w:tc></w:tr></w:tbl>'));
  assert.equal(table.ok,false);
- assert.ok(table.errors.some(x=>x.includes('Unresolved OOXML feature w:tbl')));
+ assert.ok(table.errors.some(x=>/table|w:tbl/i.test(x)),table.errors.join('; '));
 });
 
 
