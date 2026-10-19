@@ -132,3 +132,20 @@ test("rejects inherited paragraph spacing even without direct paragraph spacing"
  assert.equal(result.html,null);
  assert.match(result.errors.join(" "),/inherited Word feature: paragraph or line spacing/);
 });
+
+test("rejects oversized decompressed styles XML before conversion", async () => {
+ const zip=await JSZip.loadAsync(await fixture("<w:t>Text</w:t>"));
+ zip.file("word/styles.xml", "<w:styles>"+" ".repeat(5*1024*1024)+"</w:styles>");
+ const result=await extractDocx(await zip.generateAsync({type:"nodebuffer",compression:"DEFLATE"}));
+ assert.equal(result.ok,false);
+ assert.equal(result.html,null);
+ assert.match(result.errors.join(" "),/styles part exceeds the 5 MiB limit/);
+});
+test("rejects malformed UTF-8 in inherited styles rather than treating it as absent", async () => {
+ const zip=await JSZip.loadAsync(await fixture("<w:t>Text</w:t>"));
+ zip.file("word/styles.xml",Buffer.from([0x3c,0x77,0x3a,0x73,0x3e,0xc3,0x28]));
+ const result=await extractDocx(await zip.generateAsync({type:"nodebuffer"}));
+ assert.equal(result.ok,false);
+ assert.equal(result.html,null);
+ assert.match(result.errors.join(" "),/styles part is unreadable/);
+});
