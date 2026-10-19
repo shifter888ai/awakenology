@@ -88,5 +88,17 @@ export async function generateReviewedPageSet({ pageSet, inputs, outputs }) {
   } catch (error) {
     return { ok: false, stage: "render", errors: [String(error?.message ?? error)], pages: {} };
   }
-  return { ok: true, stage: "review-ready-static-output", errors: [], pages, inspection, routeManifest };
+  const assetMap = new Map();
+  for (const lang of LANGUAGES) for (const asset of inspection.pages[lang].assetFiles ?? []) {
+    const path = asset.outputPath.replace(/^\\/+/, "");
+    const prior = assetMap.get(path);
+    if (prior && prior.sha256 !== asset.sha256) {
+      return { ok: false, stage: "assets", errors: ["Content-addressed asset path collision: " + path], pages: {} };
+    }
+    if (!prior) assetMap.set(path, {
+      path, url: asset.outputPath, contentType: asset.contentType,
+      sha256: asset.sha256, byteLength: asset.byteLength, bytes: asset.bytes
+    });
+  }
+  return { ok: true, stage: "review-ready-static-output", errors: [], pages, assets: [...assetMap.values()], inspection, routeManifest };
 }
