@@ -193,7 +193,7 @@ export function applyDocxRichFormatting(html, sourceInventory) {
         if(sourceNumbering.some(item=>item.paragraphIndex===sourceIndex)) { errors.push("Empty numbered source paragraph requires explicit list-boundary mapping at paragraph "+(sourceIndex+1)+"."); break; }
         const placeholder=createEmptyParagraph([],[]);
         if(!insertBeforeBlock(fragment,block,placeholder,previousMatchedBlock)) { errors.push("Cannot restore consecutive empty source paragraphs near a list boundary."); break; }
-        blocks.splice(blockIndex,0,placeholder); previousMatchedBlock=placeholder; sourceIndex++; continue;
+        blocks.splice(blockIndex,0,placeholder); previousMatchedBlock=placeholder; sourceIndex++; blockIndex++; continue;
       }
     }
     if(expected==="" && actual==="" && (sourceImgs.length||sourceBrs.length)) {
