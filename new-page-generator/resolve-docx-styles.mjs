@@ -184,10 +184,17 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml, theme
   const pStyle=/<w:pStyle\b[^>]*\bw:val=[\"']([^\"']+)[\"']/.exec(paragraphXml)?.[1] ?? defaultParagraphId;
   if(pStyle) for(const props of chain(pStyle,'paragraph style','paragraph')) merge(effective,props);
   const paragraphMarkFormatting={};
+  const mergeMark=(key,value)=>{
+    if((key==='fontFamily'||key==='language'||key==='fontFamilyThemeRefs') && value && typeof value==='object' && !value.unsupported) {
+      paragraphMarkFormatting[key]={...(paragraphMarkFormatting[key]??{}),...value};
+      if(key==='fontFamily' && paragraphMarkFormatting.fontFamilyThemeRefs) for(const script of Object.keys(value)) delete paragraphMarkFormatting.fontFamilyThemeRefs[script];
+      if(key==='fontFamilyThemeRefs' && paragraphMarkFormatting.fontFamily) for(const script of Object.keys(value)) delete paragraphMarkFormatting.fontFamily[script];
+    } else paragraphMarkFormatting[key]=value;
+  };
   const defaultMarkFormatting=runProps(defaultsRun);
   for(const key of ['fontFamily','language','fontFamilyThemeRefs']) {
     const value=defaultMarkFormatting[key];
-    if(value && typeof value==='object' && !value.unsupported) paragraphMarkFormatting[key]={...(paragraphMarkFormatting[key]??{}),...value};
+    if(value && typeof value==='object' && !value.unsupported) mergeMark(key,value);
   }
   if(pStyle) {
     const markChain=[], markSeen=new Set(); let markId=pStyle;
@@ -205,8 +212,7 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml, theme
       for(const name of unsupportedRunProps(markRun)) errors.push('Unsupported paragraph-mark run property w:'+name+' in Word style '+style.id+'.');
       for(const [key,value] of Object.entries(runProps(markRun))) {
         if(value?.unsupported) errors.push('Unsupported paragraph-mark formatting: '+key+' in Word style '+style.id+'.');
-        else if ((key==='fontFamily'||key==='language'||key==='fontFamilyThemeRefs') && value && typeof value==='object') paragraphMarkFormatting[key]={...(paragraphMarkFormatting[key]??{}),...value};
-        else paragraphMarkFormatting[key]=value;
+        else mergeMark(key,value);
       }
     }
   }
