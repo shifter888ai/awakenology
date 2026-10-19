@@ -28,7 +28,7 @@ export async function inspectPageSet(pageSet, inputs = {}) {
     let inspected;
     let sourceRichInventory = null;
     if (meta.mode === "paste" || meta.mode === "html") {
-      inspected = inspectPastedHtml(input.html, input.parser);
+      inspected = inspectPastedHtml(input.html, input.parser, { allowDocumentShell: meta.mode === "html" });
     } else if (meta.mode === "markdown") {
       const converted = markdownToHtml(input.markdown);
       inspected = converted.ok
