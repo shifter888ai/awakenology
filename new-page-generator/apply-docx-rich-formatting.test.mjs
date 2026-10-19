@@ -6,7 +6,7 @@ const inventory = () => ({
   paragraphCount: 1,
   paragraphLayouts: [{paragraphIndex:0,alignment:"center",indentation:{left:720,right:0},spacing:{beforePt:6,afterPt:12,lineHeightPt:18}}],
   runs: [
-    {paragraphIndex:0,text:"Bold ",bold:true,italic:false,underline:false,color:"#ff0000",fontSizePt:12,href:null,fontFamily:"Microsoft YaHei",language:{val:"en-US",eastAsia:"zh-CN"},fontSizeCsPt:12,allCaps:false,letterSpacingPt:1},
+    {paragraphIndex:0,text:"Bold ",bold:true,italic:false,underline:false,color:"#ff0000",fontSizePt:12,href:null,fontFamily:"Microsoft YaHei",language:{val:"en-US",eastAsia:"zh-CN"},fontSizeCsPt:12,allCaps:false,letterSpacingPt:1,fontKerning:'normal'},
     {paragraphIndex:0,text:"plain",bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:true,letterSpacingPt:null}
   ]
 });
@@ -21,6 +21,7 @@ test("applies independently resolved run and paragraph formatting without changi
  assert.match(result.html,/font-family:&quot;Microsoft YaHei&quot;/);
  assert.match(result.html,/data-word-lang-east-asia="zh-CN"/);
  assert.match(result.html,/letter-spacing:1pt/);
+ assert.match(result.html,/font-kerning:normal/);
  assert.match(result.html,/text-transform:uppercase/);
  assert.match(result.html,/src="assets\/one.png"/);
  assert.match(result.html,/<strong><span/);
