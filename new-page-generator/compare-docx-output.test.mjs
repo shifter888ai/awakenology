@@ -28,3 +28,28 @@ test("accepts text spanning multiple source paragraphs without inventing separat
   ] };
   assert.equal(compareDocxSourceToHtml(map, "<p>First</p><p>Second</p>").ok, true);
 });
+
+
+test("requires source text-wrapping breaks to remain at the exact character offset", () => {
+  const map = { ok: true, paragraphs: [{
+    index: 0, text: "AB", sourceLocation: { start: 1, end: 20 },
+    content: [
+      { type: "text", text: "A" },
+      { type: "lineBreak", breakType: "textWrapping" },
+      { type: "text", text: "B" }
+    ]
+  }] };
+  assert.equal(compareDocxSourceToHtml(map, "<p>A<br>B</p>").ok, true);
+  const missing = compareDocxSourceToHtml(map, "<p>AB</p>");
+  assert.equal(missing.ok, false);
+  assert.match(missing.errors.join(" "), /line-break mismatch/);
+  const relocated = compareDocxSourceToHtml(map, "<p><br>AB</p>");
+  assert.equal(relocated.ok, false);
+  assert.match(relocated.errors.join(" "), /line-break mismatch/);
+});
+
+test("detects extra HTML line breaks even when all text characters match", () => {
+  const result = compareDocxSourceToHtml(source("AB"), "<p>A<br>B</p>");
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join(" "), /line-break mismatch/);
+});
