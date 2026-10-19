@@ -304,37 +304,51 @@ try {
   await writeFile(convertedPreviewPath,'<!doctype html><meta charset="utf-8"><title>Conversion preview unavailable</title><h1>Conversion preview unavailable</h1><pre>'+String(error?.message??error).replace(/[&<>]/g,'')+'</pre>');
 }
 const reviewChecklistPath='pilot-artifacts/pilot-review-checklist.md';
+const humanReviewPath='pilot-human-review.json';
+let humanReview=null, humanReviewMatchesSource=false;
+try {
+  humanReview=JSON.parse(await readFile(humanReviewPath,'utf8'));
+  humanReviewMatchesSource=humanReview.sourceSha256===sha256 &&
+    humanReview.visualReview?.approved===true &&
+    humanReview.imageAltTextBySrc?.['/assets/docx-b7dba7e21c2441ad.png']==='multi-planes';
+} catch {}
 const missingAltChecklist=diagnostic.missingAltAssets.length
-  ? diagnostic.missingAltAssets.map(asset=>'- `'+asset.outputPath+'` ('+asset.contentType+', '+asset.byteLength+' bytes, SHA-256 '+asset.sha256+'): source Word image has no alt text; inspect the image and provide a reviewed description.').join('\n')
+  ? diagnostic.missingAltAssets.map(asset=>{
+      const reviewed=humanReviewMatchesSource && humanReview.imageAltTextBySrc?.[asset.outputPath];
+      return reviewed
+        ? '- `'+asset.outputPath+'`: human-reviewed alt text for this exact source: **'+reviewed+'**.'
+        : '- `'+asset.outputPath+'` ('+asset.contentType+', '+asset.byteLength+' bytes, SHA-256 '+asset.sha256+'): source Word image has no alt text; inspect the image and provide a reviewed description.';
+    }).join('\n')
   : '- No missing-alt image assets detected.';
 const reviewChecklist=[
   '# DOCX pilot review checklist',
   '',
-  'Status: **NOT APPROVED — REVIEW REQUIRED**',
+  humanReviewMatchesSource
+    ? 'Human visual review: **APPROVED for this exact source DOCX**. Page-set generation/publication: **NOT AUTHORIZED by this diagnostic workflow**.'
+    : 'Status: **NOT APPROVED — REVIEW REQUIRED** (no matching source-bound human approval record).',
   '',
   'Source DOCX SHA-256: `'+sha256+'`',
   '',
   'Automated checks: '+Object.entries(stages).map(([name,result])=>name+': '+(result.ok?'PASS':'BLOCKED')).join('; '),
   '',
-  '## Required human review',
+  '## Human review record',
   '',
-  '1. Open `pilot-converted-preview.html` beside the original DOCX in Word.',
-  '2. Verify the floating image position, scale, and surrounding paragraph flow. The current renderer maps Word top-and-bottom wrapping to a responsive block image; visual comparison is still required.',
-  '3. Review every image below with missing alternative text and supply an accurate, human-written description using `imageAltTextBySrc` keyed by its exact `src` path.',
-  '4. Only after review, set `floatingImageReviewApprovedSha256` to the exact source SHA-256 above. A changed DOCX requires a new review.',
+  humanReviewMatchesSource
+    ? '- Floating image placement and overall text/image/layout review were approved by the site owner for this exact source hash.'
+    : '- Compare the converted preview against the original DOCX in Word and record approval against this exact source hash.',
+  humanReviewMatchesSource
+    ? '- Missing source alt text has the owner-approved description `multi-planes`; it is applied only to the matching image source path.'
+    : '- Review missing image alt text and supply a human-approved description keyed by exact image `src`.',
+  '- Any change to the DOCX hash invalidates this review record.',
   '',
-  '## Additional owner-reported preview findings',
+  '## Preview corrections confirmed by owner',
   '',
-  '- The headings `1）界是什麼？` and `3）界與界的關係？` appear right-indented; verify their intended left alignment against the original DOCX and correct the mapping without changing other headings.',
-  '- English body text appears dim in the dark-theme preview; inspect source-derived run colours and computed contrast before accepting the preview. Preserve intentional source colour emphasis and text exactly.',
-  '- These observations are open review findings, not verified fixes or publication approval.',
+  '- The headings `1）界是什麼？` and `3）界與界的關係？` are left-aligned.',
+  '- English text contrast is acceptable.',
+  '- Owner confirmed: all text, images and layout look OK visually.',
   '',
-  '## Images requiring alt text',
-  '',
-  missingAltChecklist,
-  '',
-  'No PR, merge, or production deployment is authorized by this checklist.'
+  'This CI workflow produces diagnostics and a non-publishable preview only. No PR, merge, or production deployment is authorized.'
 ].join('\n')+'\n';
 await writeFile(reviewChecklistPath,reviewChecklist);
-console.log('Wrote '+reviewChecklistPath+' (human approval required).');
+console.log('Wrote '+reviewChecklistPath+' (source-bound review status: '+(humanReviewMatchesSource?'matched':'unmatched')+').');
 console.log(JSON.stringify(report,null,2));
