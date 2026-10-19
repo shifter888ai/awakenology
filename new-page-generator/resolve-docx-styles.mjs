@@ -206,7 +206,7 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml, theme
     for(const style of markChain) {
       for(const key of ['fontFamily','language','fontFamilyThemeRefs']) {
         const value=style.run?.[key];
-        if(value && typeof value==='object' && !value.unsupported) paragraphMarkFormatting[key]={...(paragraphMarkFormatting[key]??{}),...value};
+        if(value && typeof value==='object' && !value.unsupported) mergeMark(key,value);
       }
       const markRun=style.paragraphMarkRun ?? '';
       for(const name of unsupportedRunProps(markRun)) errors.push('Unsupported paragraph-mark run property w:'+name+' in Word style '+style.id+'.');
@@ -221,8 +221,7 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml, theme
     for(const name of unsupportedRunProps(pRun)) errors.push('Unsupported paragraph-mark run property w:'+name+'.');
     for(const [key,value] of Object.entries(runProps(pRun))) {
       if(value?.unsupported) errors.push('Unsupported paragraph-mark formatting: '+key+'.');
-      else if ((key==='fontFamily'||key==='language') && value && typeof value==='object') paragraphMarkFormatting[key]={...(paragraphMarkFormatting[key]??{}),...value};
-      else paragraphMarkFormatting[key]=value;
+      else mergeMark(key,value);
     }
   }
   const rStyle=/<w:rStyle\b[^>]*\bw:val=[\"']([^\"']+)[\"']/.exec(runXml)?.[1] ?? null;
