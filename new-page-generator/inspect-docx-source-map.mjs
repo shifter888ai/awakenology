@@ -83,6 +83,12 @@ export async function inspectDocxSourceMap(buffer) {
       }
     }
     content.sort((a,b) => a.sourceOffset - b.sourceOffset);
+    let textOffset = 0, markerOrder = 0;
+    for (const item of content) {
+      item.textOffset = textOffset;
+      item.markerOrder = markerOrder++;
+      if (item.type === "text") textOffset += item.text.length;
+    }
     if (/<w:drawing\b/.test(raw) && !images.length) errors.push(`Paragraph ${paragraphs.length + 1}: unmapped drawing.`);
     paragraphs.push({
       index: paragraphs.length,
