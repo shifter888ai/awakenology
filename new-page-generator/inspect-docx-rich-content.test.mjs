@@ -77,13 +77,14 @@ test('preserves source paragraph indices across adjacent identical runs',async()
 });
 
 
-test('blocks paragraph layout and table semantics in independent rich inventory',async()=>{
+test('resolves supported paragraph layout and still blocks unsupported flow/table semantics',async()=>{
  const layout=await inspectDocxRichContent(await fixture('<w:p><w:pPr><w:ind w:left="720"/><w:jc w:val="center"/><w:keepNext/></w:pPr><w:r><w:t>Layout</w:t></w:r></w:p>'));
  assert.equal(layout.ok,false);
- assert.ok(layout.errors.some(x=>x.includes('Unresolved OOXML feature w:ind')));
- assert.ok(layout.errors.some(x=>x.includes('Unresolved OOXML feature w:jc')));
+ assert.deepEqual(layout.paragraphLayouts[0],{paragraphIndex:0,alignment:'center',indentation:{left:720,right:0}});
+ assert.ok(!layout.errors.some(x=>x.includes('Unresolved OOXML feature w:ind')));
+ assert.ok(!layout.errors.some(x=>x.includes('Unresolved OOXML feature w:jc')));
  assert.ok(layout.errors.some(x=>x.includes('Unresolved OOXML feature w:keepNext')));
- const table=await inspectDocxRichContent(await fixture('<w:tbl><w:tr><w:tc><w:p><w:r><w:t>Cell</w:t></w:r></w:p></w:tc></w:tr></w:tbl>'));
+ const table=await inspectDocxRichContent(await fixture('<w:tbl><w:tr><w:tc><w:p><w:r><w:t>Cell</w:t></w:r></w:tc></w:tr></w:tbl>'));
  assert.equal(table.ok,false);
  assert.ok(table.errors.some(x=>x.includes('Unresolved OOXML feature w:tbl')));
 });
