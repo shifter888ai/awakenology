@@ -148,3 +148,8 @@ Conversion now blocks unhandled run effects/hidden text and paragraph pagination
 ## Raw HTML preflight and parser-repair guard (2026-10-19)
 
 The paste adapter now checks every raw HTML tag against the reviewed vocabulary before parsing, then inspects head CSS and linked stylesheets as well as the parsed body. This blocks scripts or document wrappers that parser repair could otherwise hide from body-only inventory. CI [39204366041](https://github.com/shifter888ai/awakenology/actions/runs/39204366041) passed **143/143 tests**. This reduces one blind spot but does not replace a full sanitizer or a trusted rendering boundary.
+
+
+## Word run-style inheritance resolver (2026-10-19)
+
+The source rich-content inventory now uses a conservative resolver for supported bold, italic, underline and explicit colors, applying document defaults, paragraph styles, character styles and direct formatting in precedence order. It blocks cyclic/missing or wrong-type styles, theme colors, unmodeled inherited font/size/language or paragraph-layout properties, and paragraph-mark formatting. CI [39205462857](https://github.com/shifter888ai/awakenology/actions/runs/39205462857) passed **153/153 tests**. The pilot is still not approved; inherited typography/layout, numbering and floating-image conversion remain unresolved.
