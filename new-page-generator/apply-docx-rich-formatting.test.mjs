@@ -178,3 +178,18 @@ test("restores source markers inside an omitted empty paragraph",()=>{
  assert.equal(result.ok,true,result.errors.join("; "));
  assert.match(result.html,/<p><br><img src="\/assets\/empty\.png" alt="Empty paragraph image"><\/p>/);
 });
+
+
+test("restores the correct number of consecutive empty Word paragraphs",()=>{
+ const source={
+  paragraphCount:4,
+  paragraphLayouts:[0,1,2,3].map(paragraphIndex=>({paragraphIndex,alignment:"left",indentation:{left:0,right:0},spacing:{beforePt:0,afterPt:0,lineHeightPt:null}})),
+  runs:[
+   {paragraphIndex:0,text:"First",bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null},
+   {paragraphIndex:3,text:"Second",bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null}
+  ]
+ };
+ const result=applyDocxRichFormatting("<p>First</p><p></p><p>Second</p>",source);
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.match(result.html,/<p>First<\/p><p><\/p><p><\/p><p>Second<\/p>/);
+});
