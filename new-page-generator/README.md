@@ -44,7 +44,7 @@ The paste inspector now rejects URL schemes outside the explicit link/image allo
 
 ## Supported style-reference resolution (2026-10-19)
 
-The extractor no longer rejects paragraph/character style references solely because a reference exists. The rich-content resolver applies document defaults, paragraph-style inheritance, character-style inheritance, and direct run overrides in the supported formatting subset, and rejects missing/cyclic/wrong-type references or unsupported properties. The extractor still blocks unsupported font metadata, language, complex-script typography, spacing, list semantics, and floating image fidelity. CI passed: [run 39240300513](https://github.com/shifter888ai/awakenology/actions/runs/39240300513). This removes an over-broad gate; it does not make the real pilot ready.
+The extractor no longer rejects paragraph/character style references solely because a reference exists. The rich-content resolver applies document defaults, paragraph-style inheritance, character-style inheritance, and direct run overrides in the supported formatting subset, and rejects missing/cyclic/wrong-type references or unsupported properties. The extractor still blocks unsupported font metadata, complex-script typography, spacing, list marker patterns the HTML adapter cannot represent exactly, and floating image fidelity. Standard list numbering definitions are now inventoried, but source/output list comparison must still pass. CI passed: [run 39240300513](https://github.com/shifter888ai/awakenology/actions/runs/39240300513). This removes an over-broad gate; it does not make the real pilot ready.
 
 ## Static shell baseline (2026-10-19)
 
