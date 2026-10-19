@@ -315,7 +315,7 @@ const reviewChecklist=[
   '## Required human review',
   '',
   '1. Open `pilot-converted-preview.html` beside the original DOCX in Word.',
-  '2. Verify the floating image position, text wrapping, scale, and relationship to surrounding paragraphs. The preview deliberately displays it inline and is not evidence of matching Word layout.',
+  '2. Verify the floating image position, scale, and surrounding paragraph flow. The current renderer maps Word top-and-bottom wrapping to a responsive block image; visual comparison is still required.',
   '3. Review every image below with missing alternative text and supply an accurate, human-written description using `imageAltTextBySrc` keyed by its exact `src` path.',
   '4. Only after review, set `floatingImageReviewApprovedSha256` to the exact source SHA-256 above. A changed DOCX requires a new review.',
   '',
