@@ -63,3 +63,15 @@ test('blocks unmodeled inherited font and paragraph-layout properties',()=>{
  assert.equal(layout.ok,false);
  assert.ok(layout.errors.some(x=>x.includes('Unsupported paragraph property w:ind')));
 });
+
+
+test('does not apply paragraph-mark formatting to paragraph text runs',()=>{
+ const result=resolveDocxRunFormatting({
+  stylesXml:styles(),
+  paragraphXml:'<w:p><w:pPr><w:rPr><w:b/></w:rPr></w:pPr></w:p>',
+  runXml:run()
+ });
+ assert.equal(result.ok,false);
+ assert.ok(result.errors.some(x=>x.includes('Paragraph-mark run formatting')));
+ assert.equal(result.formatting,null);
+});
