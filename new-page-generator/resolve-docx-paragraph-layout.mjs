@@ -39,7 +39,7 @@ export function resolveDocxParagraphLayout({stylesXml,paragraphXml}) {
     if(!id || map.has(id)){errors.push('Missing or duplicate Word style ID.');continue;}
     map.set(id,{type:a['w:type']??null,basedOn:/<w:basedOn\b[^>]*\bw:val=["']([^"']+)["']/.exec(m[2])?.[1]??null,pPr:bodyOf(m[2],'pPr')});
   }
-  const merge=(target,source)=>{for(const [k,v] of Object.entries(source)) target[k]=v;};
+  const merge=(target,source)=>{for(const [k,v] of Object.entries(source)){if(k==='indentation' && v && typeof v==='object' && !v.unsupported){target.indentation={...(target.indentation??{}),...v};}else target[k]=v;}};
   const result={alignment:'left',indentation:{left:0,right:0}};
   const defaults=bodyOf(bodyOf(stylesXml,'docDefaults'),'pPrDefault');
   const defaultsP=bodyOf(defaults,'pPr');
