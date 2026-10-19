@@ -4,7 +4,7 @@ import { inspectDocxImagePlacement } from './inspect-docx-image-placement.mjs';
 
 // Conservative OOXML extractor. Anything not mapped with certainty blocks approval.
 export async function inspectDocxRichContent(buffer) {
-  const fail = errors => ({ ok: false, errors, runs: [], images: [], lineBreaks: [] });
+  const fail = errors => ({ ok: false, errors, runs: [], images: [], lineBreaks: [], paragraphCount: 0 });
   const source = await inspectDocxSourceMap(buffer);
   if (!source.ok) return fail(source.errors);
   let xml;
@@ -93,5 +93,5 @@ export async function inspectDocxRichContent(buffer) {
     if (!position) errors.push('No ordered content position for image relationship ' + relationshipId + '.');
     return {assetPath, paragraphIndex, order, alt, textOffset:position?.textOffset ?? 0, markerOrder:position?.markerOrder ?? -1};
   }) : [];
-  return errors.length ? {...fail([...new Set(errors)]), runs, images, lineBreaks} : {ok:true, errors:[], runs, images, lineBreaks};
+  return errors.length ? {...fail([...new Set(errors)]), runs, images, lineBreaks, paragraphCount:source.paragraphs.length} : {ok:true, errors:[], runs, images, lineBreaks, paragraphCount:source.paragraphs.length};
 }
