@@ -49,10 +49,13 @@ export function prepareDocxInspection(extracted, parser, approvedSha256=null, im
     const alt=applyImageAltTextOverrides(extracted.html,imageAltTextBySrc);
     const inspected=inspectPastedHtml(alt.html,parser);
     inspected.errors.push(...alt.errors);
+    const imageAltIssues=findMissingImageAlt(inspected.inventory);
     return {
-      inspected,assetFiles:extracted.assetFiles??[],previewHtml:null,sourceSha256:extracted.sha256??null,
+      inspected,assetFiles:extracted.assetFiles??[],
+      previewHtml:imageAltIssues.length||Object.keys(alt.applied).length?alt.html:null,
+      sourceSha256:extracted.sha256??null,
       visualReviewRequired:false,visualReviewApproved:false,reviewWarnings:[],imageAltTextBySrc:alt.applied,
-      imageAltIssues:findMissingImageAlt(inspected.inventory)
+      imageAltIssues
     };
   }
   if(isFloatingDrawingReviewOnly(extracted)) {
