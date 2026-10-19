@@ -6,6 +6,7 @@ import {inspectDocxAssets} from './inspect-docx-assets.mjs';
 import {inspectDocxImagePlacement} from './inspect-docx-image-placement.mjs';
 import {inspectDocxRichContent} from './inspect-docx-rich-content.mjs';
 import {extractDocx} from './extract-docx.mjs';
+import {countXmlTag} from './pilot-xml-diagnostics.mjs';
 
 const sourcePath = 'temp/多重時空是什麽 - 繁體 - Copy.docx';
 const outputPath = 'pilot-artifacts/pilot-audit.json';
@@ -18,12 +19,12 @@ try {
   const xml = await zip.file('word/document.xml').async('string');
   const textNames = ['txbxContent','altChunk','sdt','ins','del','fldSimple','instrText','hyperlink','tab','br','cr','sym','noBreakHyphen','softHyphen'];
   for (const name of textNames) {
-    const count = [...xml.matchAll(new RegExp('<w:' + name + '(?=[\\s/>])','g'))].length;
+    const count = countXmlTag(xml, 'w:' + name);
     if (count) diagnostic.unsupportedTextConstructs.push({name,count});
   }
   const alternate = [...xml.matchAll(/<mc:AlternateContent\b/g)].length;
   if (alternate) diagnostic.unsupportedTextConstructs.push({name:'mc:AlternateContent',count:alternate});
-  for (const name of ['anchor','inline']) diagnostic.drawingKinds[name] = [...xml.matchAll(new RegExp('<wp:' + name + '(?=[\\s/>])','g'))].length;
+  for (const name of ['anchor','inline']) diagnostic.drawingKinds[name] = countXmlTag(xml, 'wp:' + name);
   const colors = new Map();
   for (const tag of xml.matchAll(/<w:color\b[^>]*>/g)) {
     const value = /\bw:val=["']([^"']+)["']/.exec(tag[0])?.[1] ?? '(no val)';
