@@ -1,16 +1,21 @@
 import JSZip from 'jszip';
 import { inspectDocxSourceMap } from './inspect-docx-source-map.mjs';
 import { inspectDocxImagePlacement } from './inspect-docx-image-placement.mjs';
+import { resolveDocxRunFormatting } from './resolve-docx-styles.mjs';
 
 // Conservative OOXML extractor. Anything not mapped with certainty blocks approval.
 export async function inspectDocxRichContent(buffer) {
   const fail = errors => ({ ok: false, errors, runs: [], images: [], lineBreaks: [], paragraphCount: 0 });
   const source = await inspectDocxSourceMap(buffer);
   if (!source.ok) return fail(source.errors);
-  let xml;
+  let xml, stylesXml;
   try {
     const zip = await JSZip.loadAsync(buffer, { checkCRC32: true });
-    xml = await zip.file('word/document.xml').async('string');
+    const documentPart = zip.file('word/document.xml');
+    const stylesPart = zip.file('word/styles.xml');
+    if (!documentPart || !stylesPart) return fail(['Original document or styles OOXML part is missing.']);
+    xml = await documentPart.async('string');
+    stylesXml = await stylesPart.async('string');
   } catch { return fail(['Cannot read original OOXML.']); }
 
   const errors = [], runs = [];
@@ -66,7 +71,10 @@ export async function inspectDocxRichContent(buffer) {
         const code = entity.startsWith('&#x') ? parseInt(entity.slice(3, -1), 16) : parseInt(entity.slice(2, -1), 10);
         return Number.isInteger(code) && code >= 0 && code <= 0x10ffff && !(code >= 0xd800 && code <= 0xdfff) ? String.fromCodePoint(code) : entity;
       });
-      for (const text of texts) runs.push({ paragraphIndex: p, text: decode(text[1]), bold: flag('b'), italic: flag('i'), underline: flag('u'), color: color ? '#' + color.toLowerCase() : null, href: null });
+      const resolved = resolveDocxRunFormatting({stylesXml,paragraphXml:paragraphs[p][0],runXml:match[0]});
+      if (!resolved.ok) errors.push(...resolved.errors.map(error => 'Paragraph ' + (p + 1) + ': ' + error));
+      const formatting = resolved.formatting;
+      for (const text of texts) runs.push({ paragraphIndex: p, text: decode(text[1]), bold: formatting?.b ?? flag('b'), italic: formatting?.i ?? flag('i'), underline: formatting?.u ?? flag('u'), color: formatting?.color ?? (color ? '#' + color.toLowerCase() : null), href: null });
     }
   }
   for (const [name, paragraphSet] of unknownRunProperties) {
