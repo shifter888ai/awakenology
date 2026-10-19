@@ -43,6 +43,7 @@ const styles = {
   "letter-spacing": /^-?\d+(?:\.\d+)?pt$/i,
   "font-kerning": /^(?:normal|none|auto)$/i,
   "text-transform": /^(?:uppercase|none)$/i,
+  "list-style-type": /^(?:none|disc|circle|square|decimal|decimal-leading-zero|lower-roman|upper-roman|lower-alpha|upper-alpha)$/i,
   "font-family": /^(?:"(?:[^"\\]|\\.)+"|[A-Za-z0-9 _-]+)$/i
 };
 export function reviewPasteInventory(inventory) {
