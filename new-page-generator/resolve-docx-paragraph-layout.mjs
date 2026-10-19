@@ -27,7 +27,7 @@ const layoutProps = xml => {
       if (!/^\d+$/.test(a['w:line'])) parsed.lineHeightPt = {unsupported:true};
       else if (rule === 'exact') parsed.lineHeightPt = Number(a['w:line']) / 20;
       else if (rule === 'auto') parsed.lineHeight = Number(a['w:line']) / 240;
-      else if (rule === 'atLeast') parsed.minLineHeightPt = Number(a['w:line']) / 20;
+      else if (rule === 'atLeast') parsed.lineHeightPt = {unsupported:true};
       else parsed.lineHeightPt = {unsupported:true};
     }
     for (const key of ['beforeAutospacing','afterAutospacing','beforeLines','afterLines']) {
