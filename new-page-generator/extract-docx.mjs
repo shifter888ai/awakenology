@@ -17,7 +17,6 @@ const MAX_STYLES_XML_BYTES = 5 * 1024 * 1024;
 const FEATURES = [
   ["unsupported run effects or hidden text", /<w:(?:vertAlign|position|vanish|specVanish|smallCaps|emboss|imprint|shadow|outline|effect|fitText|rtl|cs)(?:\s|\/?>)/],
   ["paragraph pagination or direction", /<w:(?:pageBreakBefore|keepNext|keepLines|outlineLvl|contextualSpacing|bidi|textDirection|mirrorIndents|snapToGrid|adjustRightInd|autoSpaceDE|autoSpaceDN)(?:\s|\/?>)/],
-  ["paragraph numbering or list semantics", /<w:numPr(?:\s|\/?>)/],
   ["Word table structure (requires cell/order/merge fidelity mapping)", /<w:tbl(?:\s|\/?>)/],
   ["highlight or shading (requires lossless mapping)", /<w:(?:highlight|shd)(?:\s|>)/],
   ["tracked insertion", /<w:ins(?:\s|>)/],
@@ -70,6 +69,10 @@ export async function extractDocx(buffer) {
 
   for (const [name, pattern] of FEATURES) {
     if (pattern.test(xml)) errors.push(`Unsupported or ambiguous Word feature: ${name}.`);
+  }
+  for (const match of xml.matchAll(/<w:numPr\b[^>]*>([\s\S]*?)<\/w:numPr>/g)) {
+    const numId=/<w:numId\b[^>]*\bw:val=["']([^"']+)["']/.exec(match[1])?.[1]??null;
+    if (numId !== '0') errors.push('Unsupported or ambiguous Word feature: active or unresolved paragraph numbering.');
   }
   // Document defaults and named styles can affect runs without any direct formatting
   // in document.xml. Until inherited typography is rendered and compared end-to-end,
