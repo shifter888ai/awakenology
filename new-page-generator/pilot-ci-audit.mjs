@@ -156,11 +156,11 @@ try {
       return {text:texts.slice(0,100),fontTag:/<w:rFonts\b[^>]*\/?\s*>/.exec(rPr)?.[0]??null,style:/<w:rStyle\b[^>]*\bw:val=["']([^"']+)["']/.exec(rPr)?.[1]??null};
     }).filter(run=>run.text.trim());
     if(runFontDetails.some(run=>!run.fontTag||!/(?:w:ascii|w:hAnsi|w:eastAsia|w:cs)=/.test(run.fontTag))) diagnostic.fontResolutionSamples.push({paragraphIndex:i,paragraphStyleId,paragraphMarkFont:markFont,runs:runFontDetails});
-    for(const match of raw.matchAll(/<w:spacing\\b[^>]*\\/?\\s*>/g)){
+    for(const match of raw.matchAll(/<w:spacing\b[^>]*\/?\s*>/g)){
       const tag=match[0], entry=paragraphSpacingVariants.get(tag)??{tag,count:0,paragraphs:[]};
       entry.count++; if(entry.paragraphs.length<10) entry.paragraphs.push(i); paragraphSpacingVariants.set(tag,entry);
     }
-    for(const match of raw.matchAll(/<w:ind\\b[^>]*\\/?\\s*>/g)){
+    for(const match of raw.matchAll(/<w:ind\b[^>]*\/?\s*>/g)){
       const tag=match[0], entry=paragraphIndentationVariants.get(tag)??{tag,count:0,paragraphs:[]};
       entry.count++; if(entry.paragraphs.length<10) entry.paragraphs.push(i); paragraphIndentationVariants.set(tag,entry);
     }
