@@ -32,5 +32,24 @@ export function compareDocxSourceToHtml(sourceMap, html) {
     });
     errors.push(`Source/HTML text mismatch at UTF-16 offset ${offset}${sourceParagraph ? `; source paragraph ${sourceParagraph.index + 1}, XML offset ${sourceParagraph.sourceLocation.start}` : ""}. Exact characters, order and whitespace must match.`);
   }
+  // Text comparison alone cannot detect a dropped or relocated Word line break.
+  // Compare each break's character offset in the concatenated text stream.
+  const expectedBreakOffsets = [];
+  let sourceOffset = 0;
+  for (const paragraph of sourceMap.paragraphs) {
+    let paragraphOffset = 0;
+    for (const item of paragraph.content ?? []) {
+      if (item.type === "lineBreak") expectedBreakOffsets.push(sourceOffset + paragraphOffset);
+      else if (item.type === "text" && typeof item.text === "string") paragraphOffset += item.text.length;
+    }
+    sourceOffset += paragraph.text.length;
+  }
+  const actualBreakOffsets = [...html.matchAll(/<br\b[^>]*\/?\s*>/gi)].map(match =>
+    decode(html.slice(0, match.index).replace(/<\/?[a-z][\w-]*\b[^>]*>/gi, "")).length
+  );
+  if (expectedBreakOffsets.length !== actualBreakOffsets.length ||
+      expectedBreakOffsets.some((offset, index) => offset !== actualBreakOffsets[index])) {
+    errors.push(`Source/HTML line-break mismatch: expected offsets [${expectedBreakOffsets.join(", ")}], actual offsets [${actualBreakOffsets.join(", ")}].`);
+  }
   return { ok: errors.length === 0, errors, expectedLength: expected.length, actualLength: actual.length };
 }
