@@ -37,3 +37,15 @@ test("rejects incomplete source formatting inventory", () => {
  const result=applyDocxRichFormatting("<p>text</p>",{runs:[],paragraphLayouts:[]});
  assert.equal(result.ok,false);
 });
+
+
+test('preserves paragraph-mark font and language metadata on the paragraph element',()=>{
+ const source=inventory();
+ source.paragraphMarkFormatting=[{paragraphIndex:0,fontFamily:{ascii:'Arial',eastAsia:'Yu Gothic'},language:{val:'en-US',eastAsia:'ja-JP'}}];
+ const result=applyDocxRichFormatting('<p>Bold plain</p>',source);
+ assert.equal(result.ok,true,result.errors.join('; '));
+ assert.match(result.html,/data-word-mark-font-ascii="Arial"/);
+ assert.match(result.html,/data-word-mark-font-east-asia="Yu Gothic"/);
+ assert.match(result.html,/data-word-mark-lang-val="en-US"/);
+ assert.match(result.html,/data-word-mark-lang-east-asia="ja-JP"/);
+});
