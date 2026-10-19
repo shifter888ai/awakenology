@@ -46,7 +46,17 @@ export async function inspectDocxRichContent(buffer) {
     paragraphLayouts.push({paragraphIndex:p, ...(layout.layout ?? {unsupported:true})});
     const numbered = resolveDocxNumbering({numberingXml,paragraphXml:paragraphs[p][0]});
     if (!numbered.ok) errors.push(...numbered.errors.map(error => 'Paragraph '+(p+1)+' numbering: '+error));
-    if (numbered.numbering) paragraphNumbering.push({paragraphIndex:p,...numbered.numbering});
+    if (numbered.numbering) {
+      paragraphNumbering.push({paragraphIndex:p,...numbered.numbering});
+      const sourceLayout=paragraphLayouts[paragraphLayouts.length-1];
+      const directIndent=sourceLayout.indentation ?? {};
+      const listIndent=numbered.numbering.indentation ?? {};
+      sourceLayout.indentation=Object.fromEntries(['left','right','firstLine','hanging'].flatMap(key=>{
+        const direct=directIndent[key];
+        const value=direct!==undefined && Number(direct)!==0 ? direct : listIndent[key];
+        return value===undefined || value===null || Number(value)===0 ? [] : [[key,value]];
+      }));
+    }
     for (const match of raw.matchAll(/<w:r(?=[\s>])[^>]*>([\s\S]*?)<\/w:r>/g)) {
       const body = match[1];
       if (/<w:drawing\b/.test(body) && !/<w:t(?=[\s>])/.test(body)) continue;
