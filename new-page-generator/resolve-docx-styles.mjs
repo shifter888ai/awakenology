@@ -113,7 +113,7 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
   const merge=(target,source)=>{for(const [key,value] of Object.entries(source)) target[key]=value;};
   const effective={b:false,i:false,u:false,color:null,fontSizePt:null};
   merge(effective,runProps(defaultsRun));
-  const pStyle=/<w:pStyle\b[^>]*\bw:val=[\"']([^\"']+)[\"']/.exec(paragraphXml)?.[1] ?? null;
+  const pStyle=/<w:pStyle\b[^>]*\bw:val=[\"']([^\"']+)[\"']/.exec(paragraphXml)?.[1] ?? defaultParagraphId;
   if(pStyle) for(const props of chain(pStyle,'paragraph style','paragraph')) merge(effective,props);
   const paragraphMarkFormatting={};
   if(pStyle) {
