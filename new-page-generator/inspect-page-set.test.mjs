@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { inspectPageSet, verifyRenderedInventory, isFloatingDrawingReviewOnly, prepareDocxInspection } from "./inspect-page-set.mjs";
+import { inspectPageSet, verifyRenderedInventory, isFloatingDrawingReviewOnly, prepareDocxInspection, applyImageAltTextOverrides } from "./inspect-page-set.mjs";
 import { FLOATING_DRAWING_REVIEW_ERROR } from "./extract-docx.mjs";
 
 const pageSet = () => ({ pages: Object.fromEntries(["en","ja","zh-Hant"].map((lang, i) => [lang, {
@@ -134,4 +134,17 @@ test("requires approval bound to the exact source hash for floating-image previe
  const blocked=prepareDocxInspection({...extracted,errors:[FLOATING_DRAWING_REVIEW_ERROR,"other blocker"]},parser,extracted.sha256);
  assert.equal(blocked.visualReviewApproved,false);
  assert.equal(blocked.inspected.ok,false);
+});
+
+
+test("requires exact image-source matching for missing-alt overrides",()=>{
+ const html='<p><img src="/assets/a.png" alt=""></p>';
+ const result=applyImageAltTextOverrides(html,{"/assets/a.png":"A diagram illustrating the process"});
+ assert.deepEqual(result.errors,[]);
+ assert.deepEqual(result.applied,{"/assets/a.png":"A diagram illustrating the process"});
+ assert.match(result.html,/alt="A diagram illustrating the process"/);
+ const unmatched=applyImageAltTextOverrides(html,{"/assets/missing.png":"Not present"});
+ assert.ok(unmatched.errors.some(error=>error.includes("does not match a missing-alt image")));
+ const conflicting=applyImageAltTextOverrides('<p><img src="/assets/a.png" alt="Original description"></p>',{"/assets/a.png":"Different description"});
+ assert.ok(conflicting.errors.some(error=>error.includes("Refusing to replace source-provided alt text")));
 });
