@@ -173,7 +173,9 @@ for (const [name, inspect] of [
       ...(Array.isArray(result.paragraphs) ? {paragraphCount: result.paragraphs.length} : {}),
       ...(Array.isArray(result.assets) ? {assetCount: result.assets.length} : {}),
       ...(Array.isArray(result.images) ? {imageCount: result.images.length, floatingImageCount:result.images.filter(image=>image.placement?.kind==='floating').length, floatingVisualReviewCount:result.images.filter(image=>image.placement?.kind==='floating' && image.placement.requiresVisualReview===true).length} : {}),
-      ...(Array.isArray(result.runs) ? {runCount: result.runs.length} : {})
+      ...(Array.isArray(result.runs) ? {runCount: result.runs.length} : {}),
+      ...(Array.isArray(result.paragraphNumbering) ? {paragraphNumbering: result.paragraphNumbering} : {}),
+      ...(Array.isArray(result.paragraphMarkFormatting) ? {paragraphMarkFormatting: result.paragraphMarkFormatting} : {})
     };
   } catch (error) {
     stages[name] = {ok:false, errors:['Inspector exception: ' + error.message]};
