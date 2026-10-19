@@ -86,8 +86,8 @@ export async function extractDocx(buffer) {
   // generator still independently compares the final rendered inventory before
   // any page can be marked review-ready; unsupported markers/layouts remain blocked.
   const stylesPart = zip.file("word/styles.xml");
+  let stylesXml = null;
   if (stylesPart) {
-    let stylesXml;
     try {
       const styleBytes = await stylesPart.async("uint8array");
       if (styleBytes.byteLength > MAX_STYLES_XML_BYTES) errors.push("Word styles part exceeds the 5 MiB limit.");
