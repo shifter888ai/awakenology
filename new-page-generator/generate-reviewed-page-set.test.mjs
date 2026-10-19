@@ -87,11 +87,11 @@ test("missing rendered parser blocks output instead of trusting caller inventory
   assert.deepEqual(result.pages, {});
 });
 
-async function simpleDocx(text="Text") {
+async function simpleDocx(text="Text", runProperties="") {
  const z=new JSZip();
  z.file("[Content_Types].xml",'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>');
  z.file("word/_rels/document.xml.rels",'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"/>');
- z.file("word/document.xml",'<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>'+text+'</w:t></w:r></w:p></w:body></w:document>');
+ z.file("word/document.xml",'<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r>'+runProperties+'<w:t>'+text+'</w:t></w:r></w:p></w:body></w:document>');
  z.file("word/styles.xml",'<w:styles><w:docDefaults><w:rPrDefault><w:rPr/></w:rPrDefault></w:docDefaults></w:styles>');
  return z.generateAsync({type:"nodebuffer"});
 }
