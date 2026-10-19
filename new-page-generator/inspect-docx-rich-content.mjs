@@ -36,7 +36,7 @@ export async function inspectDocxRichContent(buffer) {
     const raw = paragraphs[p][1];
     const layout = resolveDocxParagraphLayout({stylesXml, paragraphXml: paragraphs[p][0]});
     if (!layout.ok) errors.push(...layout.errors.map(error => 'Paragraph ' + (p + 1) + ' layout: ' + error));
-    paragraphLayouts.push({paragraphIndex:p, ...(layout.ok ? layout.layout : {unsupported:true})});
+    paragraphLayouts.push({paragraphIndex:p, ...(layout.layout ?? {unsupported:true})});
     for (const match of raw.matchAll(/<w:r(?=[\s>])[^>]*>([\s\S]*?)<\/w:r>/g)) {
       const body = match[1];
       if (/<w:drawing\b/.test(body) && !/<w:t(?=[\s>])/.test(body)) continue;
