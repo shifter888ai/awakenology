@@ -24,9 +24,13 @@ export async function inspectDocxRichContent(buffer) {
   if (hasSectionBreak) errors.push('Section breaks inside document content require manual resolution.');
   const unknownRunProperties = new Map();
   const advancedTags = new Map();
+  for (const match of xml.matchAll(/<w:numPr\b[^>]*>([\s\S]*?)<\/w:numPr>/g)) {
+    const numId=/<w:numId\b[^>]*\bw:val=["']([^"']+)["']/.exec(match[1])?.[1]??null;
+    if (numId !== '0') errors.push('Active or unresolved Word paragraph numbering requires independent list mapping.');
+  }
   const placement = await inspectDocxImagePlacement(buffer);
   if (!placement.ok) errors.push(...placement.errors);
-  for (const match of xml.matchAll(/<w:(hyperlink|object|pict|fldChar|highlight|shd|numPr|keepNext|keepLines|pageBreakBefore|outlineLvl|contextualSpacing|bidi|textDirection|mirrorIndents|snapToGrid|adjustRightInd|autoSpaceDE|autoSpaceDN|tbl|vertAlign|position|vanish|specVanish|smallCaps|emboss|imprint|shadow|outline|effect|fitText|rtl|cs)\b/g)) {
+  for (const match of xml.matchAll(/<w:(hyperlink|object|pict|fldChar|highlight|shd|keepNext|keepLines|pageBreakBefore|outlineLvl|contextualSpacing|bidi|textDirection|mirrorIndents|snapToGrid|adjustRightInd|autoSpaceDE|autoSpaceDN|tbl|vertAlign|position|vanish|specVanish|smallCaps|emboss|imprint|shadow|outline|effect|fitText|rtl|cs)\b/g)) {
     const name = match[1];
     advancedTags.set(name, (advancedTags.get(name) ?? 0) + 1);
   }
