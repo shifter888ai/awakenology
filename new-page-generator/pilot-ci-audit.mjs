@@ -299,4 +299,32 @@ try {
 } catch(error) {
   await writeFile(convertedPreviewPath,'<!doctype html><meta charset="utf-8"><title>Conversion preview unavailable</title><h1>Conversion preview unavailable</h1><pre>'+String(error?.message??error).replace(/[&<>]/g,'')+'</pre>');
 }
+const reviewChecklistPath='pilot-artifacts/pilot-review-checklist.md';
+const missingAltChecklist=diagnostic.missingAltAssets.length
+  ? diagnostic.missingAltAssets.map(asset=>'- `'+asset.outputPath+'` ('+asset.contentType+', '+asset.byteLength+' bytes, SHA-256 '+asset.sha256+'): source Word image has no alt text; inspect the image and provide a reviewed description.').join('\n')
+  : '- No missing-alt image assets detected.';
+const reviewChecklist=[
+  '# DOCX pilot review checklist',
+  '',
+  'Status: **NOT APPROVED — REVIEW REQUIRED**',
+  '',
+  'Source DOCX SHA-256: `'+sha256+'`',
+  '',
+  'Automated checks: '+Object.entries(stages).map(([name,result])=>name+': '+(result.ok?'PASS':'BLOCKED')).join('; '),
+  '',
+  '## Required human review',
+  '',
+  '1. Open `pilot-converted-preview.html` beside the original DOCX in Word.',
+  '2. Verify the floating image position, text wrapping, scale, and relationship to surrounding paragraphs. The preview deliberately displays it inline and is not evidence of matching Word layout.',
+  '3. Review every image below with missing alternative text and supply an accurate, human-written description using `imageAltTextBySrc` keyed by its exact `src` path.',
+  '4. Only after review, set `floatingImageReviewApprovedSha256` to the exact source SHA-256 above. A changed DOCX requires a new review.',
+  '',
+  '## Images requiring alt text',
+  '',
+  missingAltChecklist,
+  '',
+  'No PR, merge, or production deployment is authorized by this checklist.'
+].join('\n')+'\n';
+await writeFile(reviewChecklistPath,reviewChecklist);
+console.log('Wrote '+reviewChecklistPath+' (human approval required).');
 console.log(JSON.stringify(report,null,2));
