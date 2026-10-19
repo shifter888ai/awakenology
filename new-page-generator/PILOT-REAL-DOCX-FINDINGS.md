@@ -131,3 +131,10 @@ Validation: **128 automated tests passed, 0 failed** in [CI run 39203373115](htt
 The DOCX converter now blocks **all** Word tables, not just tables with merged cells. The previous guard could allow a simple table through even though cell order, row/column semantics, nested paragraphs and empty cells were not represented in the fidelity comparison. A regression test confirms even a one-cell table returns `html: null` until full table mapping exists.
 
 Validation: **129 tests passed, 0 failed** in [CI run 39203460322](https://github.com/shifter888ai/awakenology/actions/runs/39203460322). This guard is intentionally conservative and does not indicate the pilot contains a table; it prevents other DOCX inputs from silently losing table structure.
+
+
+## Rendered CSS and semantic-layout fail-closed guard (CI run 39203529462)
+
+The rendered rich-content inspector now rejects embedded CSS rules, linked external stylesheets, and structural/semantic tags whose browser-default layout or formatting is not yet represented in the comparison (including headings, lists, tables, blockquotes, preformatted/code, superscript/subscript, and legacy font/mark tags). The inspector also blocks text outside recognized paragraph containers. This closes a gap where CSS or built-in browser styling could affect the page without appearing in the inline-format inventory.
+
+Regression coverage verifies embedded CSS, external stylesheets and heading semantics. Validation: **131 tests passed, 0 failed** in [CI run 39203529462](https://github.com/shifter888ai/awakenology/actions/runs/39203529462). This is a conservative validation boundary, not support for these HTML structures.
