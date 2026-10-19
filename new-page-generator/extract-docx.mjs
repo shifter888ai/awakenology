@@ -23,7 +23,6 @@ const FEATURES = [
   ["paragraph pagination, direction, or section layout", /<w:(?:sectPr|pageBreakBefore|keepNext|keepLines|widowControl|outlineLvl|contextualSpacing|bidi|textDirection|mirrorIndents|snapToGrid|adjustRightInd|autoSpaceDE|autoSpaceDN)(?:\s|\/?>)/],
   ["character spacing (requires lossless mapping)", /<w:rPr\b(?:(?!<\/w:rPr>)[\s\S])*?<w:spacing(?:\s|\/?>)/],
   ["paragraph or line spacing (requires lossless mapping)", /<w:pPr\b(?:(?!<\/w:pPr>)[\s\S])*?<w:spacing(?:\s|\/?>)/],
-  ["paragraph or run style inheritance", /<w:(?:pStyle|rStyle)(?:\s|\/?>)/],
   ["paragraph numbering or list semantics", /<w:numPr(?:\s|\/?>)/],
   ["Word table structure (requires cell/order/merge fidelity mapping)", /<w:tbl(?:\s|\/?>)/],
   ["paragraph indentation or alignment", /<w:(?:ind|jc)(?:\s|\/?>)/],
