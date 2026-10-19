@@ -19,7 +19,7 @@ Rules:
 5. Record original source checksum and an ordered inventory for source-to-output verification.
 6. No conversion of tracked changes without explicit editorial resolution.
 
-## Formatted HTML file or paste (CSS-sensitive route)
+## Formatted HTML file or paste (supported-markup route)
 
 `inspect-paste.mjs` currently performs strict browser inspection only. It does not sanitize, transform or render the input. Passing inspection must never mean it is safe to inject with innerHTML; generation must construct approved DOM/HTML with escaping and URL policy. The initial allowlist is deliberately narrow. Inline CSS is reviewed, not automatically trusted.
 
