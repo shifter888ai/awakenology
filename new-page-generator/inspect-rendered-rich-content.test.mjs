@@ -97,7 +97,7 @@ test('records explicit rendered font sizes in points',()=>{
 });
 
 test('blocks relative or malformed rendered font sizes',()=>{
- const sized={parseFromString:()=>({body:{childNodes:[node('P',{},[node('SPAN',{style:'font-size: 1.2em'},[text('Relative')])]})]})};
+ const sized={parseFromString:()=>({body:{childNodes:[node('P',{},[node('SPAN',{style:'font-size: 1.2em'},[text('Relative')])])]}})};
  const r=inspectRenderedRichContent('<p><span style="font-size:1.2em">Relative</span></p>',sized);
  assert.equal(r.ok,false);
  assert.ok(r.errors.some(x=>x.includes('Unsupported rendered font-size')));
