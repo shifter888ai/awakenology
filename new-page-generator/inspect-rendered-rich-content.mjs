@@ -40,7 +40,7 @@ export function inspectRenderedRichContent(html, parser) {
     if (node.nodeType!==1) return;
     const tag=node.tagName.toUpperCase();
     let thisParagraph = activeParagraph;
-    if (['BLOCKQUOTE','TABLE','THEAD','TBODY','TFOOT','TR','TD','TH','HR','PRE','CODE','SUP','SUB','FONT','MARK','SMALL','BIG'].includes(tag)) {
+    if (['TABLE','THEAD','TBODY','TFOOT','TR','TD','TH','HR','PRE','CODE','SUP','SUB','FONT','MARK','SMALL','BIG'].includes(tag)) {
       errors.push('Unsupported rendered structural/semantic formatting tag: ' + tag + '.');
     }
     if (tag === 'STYLE') errors.push('Embedded CSS rules are unsupported in rendered rich-content inspection.');
@@ -55,7 +55,7 @@ export function inspectRenderedRichContent(html, parser) {
         paragraphNumbering.push({paragraphIndex:paragraphIndex+1,numId:number('data-word-num-id')===null?null:Number(number('data-word-num-id')),abstractNumId:number('data-word-abstract-num-id')===null?null:Number(number('data-word-abstract-num-id')),level:number('data-word-level')===null?null:Number(number('data-word-level')),format:number('data-word-num-format')??(ordered?'decimal':'bullet'),text:number('data-word-num-text'),start:number('data-word-num-start')===null?null:Number(number('data-word-num-start')),indentation:{left:number('data-word-indent-left')===null?undefined:Number(number('data-word-indent-left')),right:number('data-word-indent-right')===null?undefined:Number(number('data-word-indent-right')),firstLine:number('data-word-indent-first-line')===null?undefined:Number(number('data-word-indent-first-line')),hanging:number('data-word-indent-hanging')===null?undefined:Number(number('data-word-indent-hanging'))}});
       } else errors.push('Rendered list item lacks explicit Word numbering provenance metadata.');
     }
-    if (['P','H1','H2','H3','H4','H5','H6','LI','TD','TH','BLOCKQUOTE'].includes(tag)) {
+    if (['P','H1','H2','H3','H4','H5','H6','LI','TD','TH'].includes(tag)) {
       paragraphIndex++;
       thisParagraph = paragraphIndex;
       paragraphOffsets.set(paragraphIndex,0);
