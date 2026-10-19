@@ -36,3 +36,20 @@ test('paragraph-mark run formatting is not misclassified as paragraph layout',()
  assert.equal(result.ok,true,result.errors.join('; '));
  assert.equal(result.layout.alignment,'center');
 });
+
+test("resolves exact Word line spacing and before/after spacing into point units", () => {
+  const result = resolveDocxParagraphLayout({
+    stylesXml: styles(""),
+    paragraphXml: p("", '<w:spacing w:before="120" w:after="240" w:line="360" w:lineRule="exact"/>')
+  });
+  assert.equal(result.ok, true, result.errors.join("; "));
+  assert.deepEqual(result.layout.spacing, {beforePt:6,afterPt:12,lineHeightPt:18});
+});
+test("blocks automatic Word line spacing until a lossless CSS mapping is available", () => {
+  const result = resolveDocxParagraphLayout({
+    stylesXml: styles(""),
+    paragraphXml: p("", '<w:spacing w:line="276" w:lineRule="auto"/>')
+  });
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some(x => x.includes("paragraph spacing")));
+});
