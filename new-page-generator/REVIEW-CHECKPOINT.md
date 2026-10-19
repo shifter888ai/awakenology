@@ -112,3 +112,8 @@ The historical sections above record the sequence of earlier implementation stag
 ## Word table fail-closed gate (2026-10-19)
 
 All Word tables now block DOCX conversion until row/cell order, nested paragraphs, empty cells, and merge semantics are represented and compared. This replaces the narrower merged-cell-only guard. Regression CI [39203460322](https://github.com/shifter888ai/awakenology/actions/runs/39203460322) passed **129/129 tests**. No unsupported table is flattened into HTML.
+
+
+## Rendered CSS and semantic layout guard (2026-10-19)
+
+The rendered rich-content inspector now blocks embedded CSS, external stylesheets and unverified structural/semantic tags whose browser-default styling is not yet compared. It also rejects text outside recognized paragraph containers. CI [39203529462](https://github.com/shifter888ai/awakenology/actions/runs/39203529462) passed **131/131 tests**. Support for these structures must be implemented and compared explicitly before the gate can permit them.
