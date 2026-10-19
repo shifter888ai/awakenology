@@ -64,7 +64,11 @@ export function inspectRenderedRichContent(html, parser) {
       if (firstLine !== null) {
         const match = /^(-?\d+(?:\.\d+)?)(pt|px)$/.exec(firstLine.toLowerCase());
         if (!match) errors.push('Unsupported rendered paragraph text-indent: '+firstLine);
-        else indentation.firstLine = Number(match[1]) * (match[2] === 'px' ? 15 : 20);
+        else {
+          const twips = Number(match[1]) * (match[2] === 'px' ? 15 : 20);
+          if (twips < 0) indentation.hanging = -twips;
+          else if (twips > 0) indentation.firstLine = twips;
+        }
       }
       paragraphLayouts.push({paragraphIndex,alignment,indentation});
     }
