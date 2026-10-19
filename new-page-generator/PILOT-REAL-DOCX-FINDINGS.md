@@ -222,3 +222,9 @@ The audit now records the pilot's explicit line break at zero-based paragraph 12
 ## Inherited color and complex-script guard coverage (2026-10-19)
 
 Regression coverage now confirms that explicit color and complex-script bold/italic in `word/styles.xml` are blocking even when the visible document run contains plain text only. This complements the existing inherited font, language, and paragraph-spacing tests. CI: [run 39238732431](https://github.com/shifter888ai/awakenology/actions/runs/39238732431) passed. The behavior is deliberately fail-closed; it does not yet render these properties into output HTML.
+
+## Source-image visual review artifact (2026-10-19)
+
+The pilot CI now emits `pilot-visual-review.html` alongside the JSON diagnostic. It embeds the three validated source images, their checksums and placement metadata, and the preceding/current/following source paragraphs. It is explicitly labeled as a source-image review aid, not a converted page preview; the floating image still requires comparison with its original Word wrapping and position.
+
+The artifact was uploaded successfully in [CI run 39239093393](https://github.com/shifter888ai/awakenology/actions/runs/39239093393): [download the diagnostic and visual-review bundle](https://github.com/shifter888ai/awakenology/actions/runs/39239093393/artifacts/12180571543). This aids the manual review step but does not approve the pilot.
