@@ -62,8 +62,21 @@ export async function inspectDocxSourceMap(buffer) {
     for (const drawing of raw.matchAll(/<w:drawing(?=[\s>])[^>]*>[\s\S]*?<\/w:drawing>/g)) {
       const ids = [...drawing[0].matchAll(/<a:blip\b[^>]*\br:embed=["']([^"']+)["'][^>]*\/?\s*>/g)].map(x=>x[1]);
       if (!ids.length) errors.push(`Paragraph ${paragraphs.length + 1}: drawing without a mapped image reference.`);
+      const inline = /<wp:inline\b/.test(drawing[0]);
+      const anchorMatch = /<wp:anchor\b[^>]*>[\s\S]*?<\/wp:anchor>/.exec(drawing[0]);
+      const anchor = anchorMatch?.[0] ?? null;
+      const tagAttrs = tag => Object.fromEntries([...tag.matchAll(/([\w:.-]+)=["']([^"']*)["']/g)].map(m=>[m[1],m[2]]));
+      const docPrTag = anchor?.match(/<wp:docPr\b[^>]*\/?\s*>/)?.[0] ?? null;
+      const placement = anchor ? {
+        kind: "floating",
+        anchorAttributes: tagAttrs(anchor.match(/^<wp:anchor\b[^>]*>/)?.[0] ?? ""),
+        docPr: docPrTag ? tagAttrs(docPrTag) : {},
+        horizontalPosition: anchor.match(/<wp:positionH\b[^>]*>[\s\S]*?<\/wp:positionH>/)?.[0] ?? null,
+        verticalPosition: anchor.match(/<wp:positionV\b[^>]*>[\s\S]*?<\/wp:positionV>/)?.[0] ?? null,
+        wrap: anchor.match(/<wp:wrap\w+\b[^>]*\/?\s*>/)?.[0] ?? null
+      } : { kind: inline ? "inline" : "unknown" };
       for (const relationshipId of ids) {
-        const item = { relationshipId, paragraphIndex: paragraphs.length, sourceLocation: location("word/document.xml", start + drawing.index, start + drawing.index + drawing[0].length) };
+        const item = { relationshipId, paragraphIndex: paragraphs.length, placement, sourceLocation: location("word/document.xml", start + drawing.index, start + drawing.index + drawing[0].length) };
         images.push(item);
         imageReferences.push(item);
       }
