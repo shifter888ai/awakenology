@@ -4,6 +4,8 @@ import { createHash } from "node:crypto";
 import { inspectDocxAssets } from "./inspect-docx-assets.mjs";
 import { inspectDocxSourceMap } from "./inspect-docx-source-map.mjs";
 import { compareDocxSourceToHtml } from "./compare-docx-output.mjs";
+import { inspectDocxRichContent } from "./inspect-docx-rich-content.mjs";
+import { applyDocxRichFormatting } from "./apply-docx-rich-formatting.mjs";
 
 /**
  * Conservative offline DOCX extraction. Output is intermediate HTML only.
