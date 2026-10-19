@@ -121,7 +121,7 @@ export function inspectRenderedRichContent(html, parser) {
       lineBreaks.push({paragraphIndex:breakParagraph,textOffset:paragraphOffsets.get(breakParagraph) ?? 0,breakType:'textWrapping',markerOrder:nextMarkerOrder(breakParagraph)});
     }
     const style=node.getAttribute?.('style') ?? '';
-    const allowed=new Set(['color','font-weight','font-style','text-decoration','list-style-type','font-size','text-align','margin-left','margin-right','text-indent','margin-top','margin-bottom','float','width','height','line-height','font-family','text-transform','letter-spacing','font-kerning']);
+    const allowed=new Set(['color','font-weight','font-style','text-decoration','list-style-type','font-size','text-align','margin-left','margin-right','text-indent','margin-top','margin-bottom','float','width','height','display','clear','max-width','line-height','font-family','text-transform','letter-spacing','font-kerning']);
     for(const decl of style.split(';').filter(x=>x.trim())) {
       const index=decl.indexOf(':');
       if(index<0 || !allowed.has(decl.slice(0,index).trim().toLowerCase())) errors.push('Unsupported rendered style: '+decl);
