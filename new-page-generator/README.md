@@ -37,3 +37,7 @@ No site-wide global header/footer migration, no runtime template loading, no aut
 ## Latest verification note
 
 The coordinator has a tested positive path for a minimal, supported synthetic DOCX: it emits static HTML only after independently comparing source and rendered rich-content inventories. It also has fail-closed tests for changed reviewed text and unsupported font metadata. This is not equivalent to supporting every DOCX feature; the real multilingual illustrated pilot remains blocked until its typography, language boundaries, and floating-image placement are losslessly handled and reviewed.
+
+## HTML-paste URL guard (2026-10-19)
+
+The paste inspector now rejects URL schemes outside the explicit link/image allowlists and strips ASCII control/whitespace characters before scheme detection, preventing obfuscated `javascript:` links from bypassing the first inspection layer. Tests cover unsafe and obfuscated link schemes, protocol-relative URLs, safe relative links, and image source schemes. CI passed: [run 39238916402](https://github.com/shifter888ai/awakenology/actions/runs/39238916402). The later review-inventory gate still requires image sources to be reviewed local asset paths. This is defense-in-depth, not a full HTML sanitizer or approval of production publishing.
