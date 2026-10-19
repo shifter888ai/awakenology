@@ -38,14 +38,14 @@ try {
   };
   for (let i=0;i<paragraphs.length;i++) {
     const raw = paragraphs[i][0];
-    for (const pPr of raw.matchAll(/<w:pPr(?=[\\s>])[^>]*>([\\s\\S]*?)<\\/w:pPr>/g)) {
-      for (const tag of pPr[1].matchAll(/<w:([A-Za-z][A-Za-z0-9]*)\\b[^>]*\\/?\\s*>/g)) {
+    for (const pPr of raw.matchAll(/<w:pPr(?=[\s>])[^>]*>([\s\S]*?)<\/w:pPr>/g)) {
+      for (const tag of pPr[1].matchAll(/<w:([A-Za-z][A-Za-z0-9]*)\b[^>]*\/?\s*>/g)) {
         if (!tag[0].startsWith('</')) recordProperties(diagnostic.paragraphPropertyInventory,tag[1],i,tag[0]);
       }
     }
     for (const run of raw.matchAll(/<w:r(?=[\\s>])[^>]*>([\\s\\S]*?)<\\/w:r>/g)) {
-      const rPr = /<w:rPr(?=[\\s>])[^>]*>([\\s\\S]*?)<\\/w:rPr>/.exec(run[1]);
-      if (rPr) for (const tag of rPr[1].matchAll(/<w:([A-Za-z][A-Za-z0-9]*)\\b[^>]*\\/?\\s*>/g)) {
+      const rPr = /<w:rPr(?=[\s>])[^>]*>([\s\S]*?)<\/w:rPr>/.exec(run[1]);
+      if (rPr) for (const tag of rPr[1].matchAll(/<w:([A-Za-z][A-Za-z0-9]*)\b[^>]*\/?\s*>/g)) {
         if (!tag[0].startsWith('</')) recordProperties(diagnostic.runPropertyInventory,tag[1],i,tag[0]);
       }
     }
