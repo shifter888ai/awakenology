@@ -100,10 +100,10 @@ export async function inspectDocxRichContent(buffer) {
   }
   if (runs.map(r => r.text).join('') !== source.paragraphs.map(p => p.text).join('')) errors.push('Rich runs do not reproduce exact source-map text.');
   if (!runs.length) errors.push('No rich text runs extracted.');
-  const images = placement.ok ? placement.images.map(({assetPath, paragraphIndex, order, alt, relationshipId, sourceLocation}) => {
+  const images = placement.ok ? placement.images.map(({assetPath, paragraphIndex, order, alt, relationshipId, sourceLocation, placement: imagePlacement}) => {
     const position = imagePositions.get(relationshipId + ':' + sourceLocation.start);
     if (!position) errors.push('No ordered content position for image relationship ' + relationshipId + '.');
-    return {assetPath, paragraphIndex, order, alt, textOffset:position?.textOffset ?? 0, markerOrder:position?.markerOrder ?? -1};
+    return {assetPath, paragraphIndex, order, alt, textOffset:position?.textOffset ?? 0, markerOrder:position?.markerOrder ?? -1, placement:imagePlacement};
   }) : [];
   return errors.length ? {...fail([...new Set(errors)]), runs, images, lineBreaks, paragraphLayouts, paragraphCount:source.paragraphs.length} : {ok:true, errors:[], runs, images, lineBreaks, paragraphLayouts, paragraphCount:source.paragraphs.length};
 }
