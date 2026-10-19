@@ -91,3 +91,11 @@ Latest verified suite: **122 tests passed** in CI run [39202830200](https://gith
 - `pilotApproved`: **false**. No HTML generation, PR, merge, or deployment is authorized.
 
 The historical sections above record the sequence of earlier implementation stages; this addendum is the current status. Remaining work is to implement source-to-rendered mappings for the blocked properties, verify image placement semantics and paragraph boundaries independently, then re-run the unchanged real DOCX through the complete gate. Do not weaken the gate or mark the pilot approved merely because unit tests pass.
+
+
+## Paragraph-boundary comparison update (2026-10-19)
+
+- Source and rendered text runs now carry paragraph indices, and the rich-content comparator compares them with text and formatting. This detects text moved between paragraphs or paragraphs accidentally merged.
+- A line-break inventory is mandatory on both sides; missing provenance blocks comparison instead of being treated as an empty inventory.
+- Regression tests verify paragraph boundaries and mandatory line-break metadata. CI run [39203209912](https://github.com/shifter888ai/awakenology/actions/runs/39203209912) passed **127/127 tests**.
+- These are fidelity-gate improvements, not evidence that the pilot is publishable. The real DOCX remains blocked on inherited styles and unsupported typography/layout, and `pilotApproved` remains false.
