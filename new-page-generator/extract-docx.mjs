@@ -13,19 +13,10 @@ const MAX_INPUT_BYTES = 25 * 1024 * 1024;
 const MAX_DOCUMENT_XML_BYTES = 20 * 1024 * 1024;
 const MAX_STYLES_XML_BYTES = 5 * 1024 * 1024;
 const FEATURES = [
-  ["explicit Word text color (requires lossless color mapping)", /<w:color(?:\s|>)/],
-  ["explicit font family (requires lossless font mapping)", /<w:rFonts(?:\s|\/?>)/],
-  ["explicit font size (requires lossless size mapping)", /<w:(?:sz|szCs)(?:\s|\/?>)/],
-  ["explicit language metadata (requires lossless language mapping)", /<w:lang(?:\s|\/?>)/],
-  ["complex-script bold or italic (requires lossless mapping)", /<w:(?:bCs|iCs)(?:\s|\/?>)/],
-  ["capitalization (requires lossless mapping)", /<w:caps(?:\s|\/?>)/],
   ["unsupported run effects or hidden text", /<w:(?:vertAlign|position|vanish|specVanish|smallCaps|emboss|imprint|shadow|outline|effect|fitText|rtl|cs)(?:\s|\/?>)/],
   ["paragraph pagination, direction, or section layout", /<w:(?:sectPr|pageBreakBefore|keepNext|keepLines|widowControl|outlineLvl|contextualSpacing|bidi|textDirection|mirrorIndents|snapToGrid|adjustRightInd|autoSpaceDE|autoSpaceDN)(?:\s|\/?>)/],
-  ["character spacing (requires lossless mapping)", /<w:rPr\b(?:(?!<\/w:rPr>)[\s\S])*?<w:spacing(?:\s|\/?>)/],
-  ["paragraph or line spacing (requires lossless mapping)", /<w:pPr\b(?:(?!<\/w:pPr>)[\s\S])*?<w:spacing(?:\s|\/?>)/],
   ["paragraph numbering or list semantics", /<w:numPr(?:\s|\/?>)/],
   ["Word table structure (requires cell/order/merge fidelity mapping)", /<w:tbl(?:\s|\/?>)/],
-  ["paragraph indentation or alignment", /<w:(?:ind|jc)(?:\s|\/?>)/],
   ["highlight or shading (requires lossless mapping)", /<w:(?:highlight|shd)(?:\s|>)/],
   ["tracked insertion", /<w:ins(?:\s|>)/],
   ["tracked deletion", /<w:del(?:\s|>)/],
@@ -110,6 +101,8 @@ export async function extractDocx(buffer) {
   if (errors.length) return blocked(errors, buffer);
   const sourceMap = await inspectDocxSourceMap(buffer);
   if (!sourceMap.ok) return blocked(sourceMap.errors.map(error => `DOCX source map: ${error}`), buffer);
+  const rich = await inspectDocxRichContent(buffer);
+  if (!rich.ok) return blocked(rich.errors.map(error => `DOCX rich content: ${error}`), buffer);
   if (assets.length !== sourceMap.imageReferences.length) {
     return blocked(["DOCX source map image count differs from extracted asset count."], buffer);
   }
@@ -134,12 +127,18 @@ export async function extractDocx(buffer) {
     });
     errors.push(...converted.messages.map(m => `DOCX parser ${m.type}: ${m.message}`));
     if (!converted.value?.trim()) errors.push("DOCX converted to empty HTML.");
-    else errors.push(...compareDocxSourceToHtml(sourceMap, converted.value).errors.map(error => `DOCX text integrity: ${error}`));
+    let formattedHtml = converted.value;
+    if (converted.value?.trim()) {
+      const formatted = applyDocxRichFormatting(converted.value, rich);
+      if (!formatted.ok) errors.push(...formatted.errors.map(error => `DOCX rich formatting: ${error}`));
+      else formattedHtml = formatted.html;
+      errors.push(...compareDocxSourceToHtml(sourceMap, formattedHtml).errors.map(error => `DOCX text integrity: ${error}`));
+    }
     for (const asset of assets) {
       if (!converted.value.includes(asset.outputPath)) errors.push(`Inspected image was not preserved in converted HTML: ${asset.outputPath}.`);
     }
     return {
-      ok: errors.length === 0, errors, html: errors.length ? null : converted.value,
+      ok: errors.length === 0, errors, html: errors.length ? null : formattedHtml,
       sha256: digest(buffer), sourceMap: errors.length ? null : sourceMap, assets: errors.length ? [] : assets.map(({ bytes, ...asset }) => asset)
     };
   } catch (error) {
