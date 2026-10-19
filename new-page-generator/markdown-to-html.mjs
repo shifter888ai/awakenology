@@ -19,6 +19,10 @@ function inline(source, errors, line) {
     const url=(isImage?imageUrl:linkUrl).trim().replace(/^<|>$/g,"");
     if(!safeUrl(url,isImage)){errors.push(`Line ${line}: unsafe or unsupported Markdown ${isImage?"image":"link"} URL.`);return escapeHtml(match);}
     const escapedUrl=escapeHtml(url);
+    if (!isImage && (/@@TOKEN\d+@@/.test(label) || /!?\[[^\]]+\]\(/.test(label))) {
+      errors.push(`Line ${line}: nested inline code, links, or images inside link labels are unsupported.`);
+      return escapeHtml(match);
+    }
     return tokenise(isImage ? `<img src="${escapedUrl}" alt="${escapeHtml(alt)}">` : `<a href="${escapedUrl}">${inline(label,errors,line)}</a>`);
   });
   let text=escapeHtml(protectedSource);
