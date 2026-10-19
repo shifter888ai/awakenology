@@ -99,3 +99,11 @@ The historical sections above record the sequence of earlier implementation stag
 - A line-break inventory is mandatory on both sides; missing provenance blocks comparison instead of being treated as an empty inventory.
 - Regression tests verify paragraph boundaries and mandatory line-break metadata. CI run [39203209912](https://github.com/shifter888ai/awakenology/actions/runs/39203209912) passed **127/127 tests**.
 - These are fidelity-gate improvements, not evidence that the pilot is publishable. The real DOCX remains blocked on inherited styles and unsupported typography/layout, and `pilotApproved` remains false.
+
+
+## Style-chain diagnosis and rendered paragraph guard (2026-10-19)
+
+- Rendered HTML text outside recognized paragraph containers now blocks the rich-content inspection rather than receiving an invented paragraph index.
+- CI diagnostic resolves the pilot’s referenced style chain: style `7` (“List Paragraph”) inherits from style `1` (“Normal”). The chain includes paragraph indentation, font family, kerning, font sizes (including complex-script size), language, widow control and alignment. Document defaults also contribute font metadata.
+- CI run [39203373115](https://github.com/shifter888ai/awakenology/actions/runs/39203373115) passed **128/128 tests**.
+- This evidence clarifies the next implementation slice: implement an explicit OOXML style/default resolver and compare its effective formatting to rendered HTML, or continue to block. Do not simply ignore inherited properties. The real pilot remains unapproved.
