@@ -2,7 +2,7 @@
 // Only explicit formatting is supported; inherited CSS requires separate review.
 const formatting = (node, key) => node.getAttribute?.('style')?.split(';').map(x=>x.trim()).find(x=>x.toLowerCase().startsWith(key+':'))?.split(':').slice(1).join(':').trim() ?? null;
 export function inspectRenderedRichContent(html, parser) {
-  const errors=[], runs=[], images=[], lineBreaks=[];
+  const errors=[], runs=[], images=[], lineBreaks=[], paragraphLayouts=[];
   const paragraphOffsets = new Map();
   const fontSizePt = node => {
     const value = formatting(node,'font-size');
@@ -13,7 +13,7 @@ export function inspectRenderedRichContent(html, parser) {
   };
   const paragraphMarkerOrders = new Map();
   const nextMarkerOrder = index => { const value=paragraphMarkerOrders.get(index) ?? 0; paragraphMarkerOrders.set(index,value+1); return value; };
-  if (typeof html !== 'string' || !parser?.parseFromString) return {ok:false,errors:['HTML and a parser are required.'],runs,images,lineBreaks,paragraphCount:0};
+  if (typeof html !== 'string' || !parser?.parseFromString) return {ok:false,errors:['HTML and a parser are required.'],runs,images,lineBreaks,paragraphLayouts,paragraphCount:0};
   const doc=parser.parseFromString(html,'text/html');
   let paragraphIndex=-1, order=0;
   const inspectHead = node => {
@@ -45,6 +45,28 @@ export function inspectRenderedRichContent(html, parser) {
       paragraphIndex++;
       paragraphOffsets.set(paragraphIndex,0);
       paragraphMarkerOrders.set(paragraphIndex,0);
+      const alignmentValue = formatting(node,'text-align');
+      const alignMap = {left:'left',right:'right',center:'center',justify:'both',start:'start',end:'end'};
+      let alignment = 'left';
+      if (alignmentValue !== null) {
+        if (!Object.hasOwn(alignMap,alignmentValue.toLowerCase())) errors.push('Unsupported rendered paragraph alignment: '+alignmentValue);
+        else alignment = alignMap[alignmentValue.toLowerCase()];
+      }
+      const readTwips = (key) => {
+        const value = formatting(node,key);
+        if (value === null) return 0;
+        const match = /^(\\d+(?:\\.\\d+)?)(pt|px)$/.exec(value.toLowerCase());
+        if (!match) { errors.push('Unsupported rendered paragraph '+key+': '+value); return 0; }
+        return Number(match[1]) * (match[2] === 'px' ? 15 : 20);
+      };
+      const indentation = {left:readTwips('margin-left'),right:readTwips('margin-right')};
+      const firstLine = formatting(node,'text-indent');
+      if (firstLine !== null) {
+        const match = /^(-?\\d+(?:\\.\\d+)?)(pt|px)$/.exec(firstLine.toLowerCase());
+        if (!match) errors.push('Unsupported rendered paragraph text-indent: '+firstLine);
+        else indentation.firstLine = Number(match[1]) * (match[2] === 'px' ? 15 : 20);
+      }
+      paragraphLayouts.push({paragraphIndex,alignment,indentation});
     }
     if (tag === 'BR') lineBreaks.push({paragraphIndex:Math.max(0,paragraphIndex),textOffset:paragraphOffsets.get(paragraphIndex) ?? 0,breakType:'textWrapping',markerOrder:nextMarkerOrder(Math.max(0,paragraphIndex))});
     const style=node.getAttribute?.('style') ?? '';
@@ -75,5 +97,5 @@ export function inspectRenderedRichContent(html, parser) {
   const initial={bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null};
   for(const child of doc.body?.childNodes ?? []) visit(child,initial);
   if(!runs.length) errors.push('No rendered text runs.');
-  return {ok:errors.length===0,errors,runs,images,lineBreaks,paragraphCount:paragraphIndex+1};
+  return {ok:errors.length===0,errors,runs,images,lineBreaks,paragraphLayouts,paragraphCount:paragraphIndex+1};
 }
