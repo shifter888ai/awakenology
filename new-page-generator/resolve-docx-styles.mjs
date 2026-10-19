@@ -41,7 +41,7 @@ const themeTypeface = (themeXml, reference, script, languageHint) => {
       ? (/^ar(?:-|$)/.test(lang)?'Arab':/^he(?:-|$)/.test(lang)?'Hebr':/^th(?:-|$)/.test(lang)?'Thai':/^hi(?:-|$)/.test(lang)?'Deva':null)
       : null;
   if(!scriptCode) return null;
-  const scriptTag=[...section.matchAll(/<a:font\\b[^>]*\\/?\\s*>/g)].map(match=>match[0]).find(tag=>attrs(tag)['script']===scriptCode);
+  const scriptTag=[...section.matchAll(/<a:font\b[^>]*\/?\s*>/g)].map(match=>match[0]).find(tag=>attrs(tag)['script']===scriptCode);
   return scriptTag ? (attrs(scriptTag)['typeface'] || null) : null;
 };
 const resolveThemeReferences = (target, themeXml, language) => {
@@ -55,7 +55,8 @@ const resolveThemeReferences = (target, themeXml, language) => {
     if(resolved) families[script]=resolved;
     else unresolved.push(script);
   }
-  if(Object.keys(families).length) target.fontFamily=families;
+  if(Object.keys(families).length && !target.fontFamily?.unsupported) target.fontFamily=families;
+  else if(target.fontFamily?.unsupported) target.fontFamily={unsupported:true};
   delete target.fontFamilyThemeRefs;
   return unresolved;
 };
@@ -127,7 +128,7 @@ function runProps(xml) {
   }
   return result;
 }
-export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
+export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml, themeXml=null}) {
   const errors=[];
   if (typeof stylesXml!=='string' || typeof paragraphXml!=='string' || typeof runXml!=='string') {
     return {ok:false,errors:['Styles XML, paragraph XML, and run XML are required.'],formatting:null};
@@ -183,9 +184,9 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
   if(pStyle) for(const props of chain(pStyle,'paragraph style','paragraph')) merge(effective,props);
   const paragraphMarkFormatting={};
   const defaultMarkFormatting=runProps(defaultsRun);
-  for(const key of ['fontFamily','language']) {
+  for(const key of ['fontFamily','language','fontFamilyThemeRefs']) {
     const value=defaultMarkFormatting[key];
-    if(value && typeof value==='object' && !value.unsupported) paragraphMarkFormatting[key]={...value};
+    if(value && typeof value==='object' && !value.unsupported) paragraphMarkFormatting[key]={...(paragraphMarkFormatting[key]??{}),...value};
   }
   if(pStyle) {
     const markChain=[], markSeen=new Set(); let markId=pStyle;
@@ -195,7 +196,7 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
       markChain.unshift(style); markId=style.basedOn;
     }
     for(const style of markChain) {
-      for(const key of ['fontFamily','language']) {
+      for(const key of ['fontFamily','language','fontFamilyThemeRefs']) {
         const value=style.run?.[key];
         if(value && typeof value==='object' && !value.unsupported) paragraphMarkFormatting[key]={...(paragraphMarkFormatting[key]??{}),...value};
       }
@@ -203,7 +204,7 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
       for(const name of unsupportedRunProps(markRun)) errors.push('Unsupported paragraph-mark run property w:'+name+' in Word style '+style.id+'.');
       for(const [key,value] of Object.entries(runProps(markRun))) {
         if(value?.unsupported) errors.push('Unsupported paragraph-mark formatting: '+key+' in Word style '+style.id+'.');
-        else if ((key==='fontFamily'||key==='language') && value && typeof value==='object') paragraphMarkFormatting[key]={...(paragraphMarkFormatting[key]??{}),...value};
+        else if ((key==='fontFamily'||key==='language'||key==='fontFamilyThemeRefs') && value && typeof value==='object') paragraphMarkFormatting[key]={...(paragraphMarkFormatting[key]??{}),...value};
         else paragraphMarkFormatting[key]=value;
       }
     }
@@ -228,11 +229,11 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
   }
   const language=effective.language && typeof effective.language==='object' ? effective.language : {};
   const runText=[...runXml.matchAll(/<w:t(?=[\s>])[^>]*>([\s\S]*?)<\/w:t>/g)].map(match=>match[1]).join('');
-  const unresolvedFonts=resolveThemeReferences(effective,arguments[0]?.themeXml,language);
+  const unresolvedFonts=resolveThemeReferences(effective,themeXml,language);
   const usedScripts=new Set([...runText].map(character=>classifyWordScript(character,effective.fontHint)));
   for(const script of unresolvedFonts) if(usedScripts.has(script)) errors.push('Unsupported inherited Word formatting: fontFamily ('+script+' theme unresolved).');
   const markLanguage=paragraphMarkFormatting.language && typeof paragraphMarkFormatting.language==='object' ? paragraphMarkFormatting.language : {};
-  const unresolvedMarkFonts=resolveThemeReferences(paragraphMarkFormatting,arguments[0]?.themeXml,markLanguage);
+  const unresolvedMarkFonts=resolveThemeReferences(paragraphMarkFormatting,themeXml,markLanguage);
   for(const script of unresolvedMarkFonts) errors.push('Unsupported paragraph-mark formatting: fontFamily ('+script+' theme unresolved).');
   delete effective.fontFamilyThemeRefs;
   delete paragraphMarkFormatting.fontFamilyThemeRefs;
