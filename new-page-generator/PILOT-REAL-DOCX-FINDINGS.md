@@ -99,3 +99,10 @@ Regression coverage verifies correct placement, missing breaks, relocated breaks
 The DOCX rich-content inspector now supports a Word run containing multiple text segments separated by explicit text-wrapping breaks. It emits those text segments in order and separately records each break's paragraph index and UTF-16 text offset. The rendered-HTML inspector independently records `<br>` positions, and `compareRichContent` now compares the line-break inventories rather than assuming text equality proves break fidelity.
 
 Validation: **121 automated tests passed**. The real pilot's prior generic “ambiguous run/text mapping” error at paragraph 125 is gone; the inspector now extracts 256 text runs and records all 3 images. Rich-content approval remains blocked by the still-unresolved font family/size, language, complex-script properties, capitalization/character spacing, and paragraph style inheritance.
+
+
+## More precise spacing diagnostics (CI run 39202789033)
+
+The extraction gate now distinguishes **run-level character spacing** from **paragraph/line spacing** instead of reporting both under one ambiguous label. Each is independently blocked until it can be preserved losslessly. Regression tests cover both properties and confirm the diagnostic identifies both when they coexist.
+
+Validation: **122 automated tests passed**. One intermediate CI run failed because it tested the updated implementation against the previous test expectation; the follow-up test commit updated that expectation and added the missing coverage, and its CI run passed.
