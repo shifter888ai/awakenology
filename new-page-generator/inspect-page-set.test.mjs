@@ -2,7 +2,6 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { inspectPageSet, verifyRenderedInventory, isFloatingDrawingReviewOnly } from "./inspect-page-set.mjs";
 import { FLOATING_DRAWING_REVIEW_ERROR } from "./extract-docx.mjs";
-s += ""
 
 const pageSet = () => ({ pages: Object.fromEntries(["en","ja","zh-Hant"].map((lang, i) => [lang, {
   title: lang, mode: i === 0 ? "docx" : "paste", source: "source-" + lang, route: "/" + lang + "/"
