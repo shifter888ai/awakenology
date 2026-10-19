@@ -7,6 +7,15 @@ export function inspectRenderedRichContent(html, parser) {
   if (typeof html !== 'string' || !parser?.parseFromString) return {ok:false,errors:['HTML and a parser are required.'],runs,images,lineBreaks};
   const doc=parser.parseFromString(html,'text/html');
   let paragraphIndex=-1, order=0;
+  const inspectHead = node => {
+    if (node?.nodeType === 1) {
+      const tag = node.tagName.toUpperCase();
+      if (tag === 'STYLE') errors.push('Embedded CSS rules are unsupported in rendered rich-content inspection.');
+      if (tag === 'LINK' && /stylesheet/i.test(node.getAttribute?.('rel') ?? '')) errors.push('External stylesheets are unsupported in rendered rich-content inspection.');
+      for (const child of node.childNodes ?? []) inspectHead(child);
+    }
+  };
+  for (const child of doc.head?.childNodes ?? []) inspectHead(child);
   function visit(node, state) {
     if (node.nodeType===3) {
       if (node.textContent) {
@@ -18,6 +27,11 @@ export function inspectRenderedRichContent(html, parser) {
     }
     if (node.nodeType!==1) return;
     const tag=node.tagName.toUpperCase();
+    if (['H1','H2','H3','H4','H5','H6','BLOCKQUOTE','UL','OL','LI','TABLE','THEAD','TBODY','TFOOT','TR','TD','TH','HR','PRE','CODE','SUP','SUB','FONT','MARK','SMALL','BIG'].includes(tag)) {
+      errors.push('Unsupported rendered structural/semantic formatting tag: ' + tag + '.');
+    }
+    if (tag === 'STYLE') errors.push('Embedded CSS rules are unsupported in rendered rich-content inspection.');
+    if (tag === 'LINK' && /stylesheet/i.test(node.getAttribute?.('rel') ?? '')) errors.push('External stylesheets are unsupported in rendered rich-content inspection.');
     if (['P','H1','H2','H3','H4','H5','H6','LI','TD','TH','BLOCKQUOTE'].includes(tag)) {
       paragraphIndex++;
       paragraphOffsets.set(paragraphIndex,0);
