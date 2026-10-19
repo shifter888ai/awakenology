@@ -106,3 +106,12 @@ Validation: **121 automated tests passed**. The real pilot's prior generic “am
 The extraction gate now distinguishes **run-level character spacing** from **paragraph/line spacing** instead of reporting both under one ambiguous label. Each is independently blocked until it can be preserved losslessly. Regression tests cover both properties and confirm the diagnostic identifies both when they coexist.
 
 Validation: **122 automated tests passed**. One intermediate CI run failed because it tested the updated implementation against the previous test expectation; the follow-up test commit updated that expectation and added the missing coverage, and its CI run passed.
+
+
+## Paragraph-boundary fidelity and mandatory inventories (CI run 39203209912)
+
+The source and rendered rich-text inventories now attach a paragraph index to every text run. The comparator checks that index alongside exact run text and formatting, so combining adjacent paragraphs or moving text between paragraphs is detected even when the concatenated text remains unchanged. The comparator also requires a line-break inventory on both sides; absence of provenance cannot be interpreted as “no line breaks.”
+
+Regression coverage includes paragraph boundary movement, per-run paragraph indices, and omitted line-break metadata. The first strict-gate test run correctly failed because older test fixtures did not include the newly mandatory inventory; the fixtures were updated rather than weakening the gate. Validation: **127 tests passed, 0 failed** in [CI run 39203209912](https://github.com/shifter888ai/awakenology/actions/runs/39203209912).
+
+This improves the comparator's ability to catch structure loss; it does not resolve inherited Word styles or approve the pilot. Those remain blocked.
