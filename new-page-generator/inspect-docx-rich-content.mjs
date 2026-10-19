@@ -5,6 +5,7 @@ import { resolveDocxRunFormatting } from './resolve-docx-styles.mjs';
 import { resolveDocxParagraphLayout } from './resolve-docx-paragraph-layout.mjs';
 import { resolveDocxNumbering } from './resolve-docx-numbering.mjs';
 import { splitWordScriptSegments } from './word-script-segments.mjs';
+import { normalizeDocxImagePlacement } from './resolve-docx-floating-layout.mjs';
 
 // Conservative OOXML extractor. Anything not mapped with certainty blocks approval.
 export async function inspectDocxRichContent(buffer) {
@@ -136,7 +137,7 @@ export async function inspectDocxRichContent(buffer) {
   const images = placement.ok ? placement.images.map(({assetPath, paragraphIndex, order, alt, relationshipId, sourceLocation, placement: imagePlacement}) => {
     const position = imagePositions.get(relationshipId + ':' + sourceLocation.start);
     if (!position) errors.push('No ordered content position for image relationship ' + relationshipId + '.');
-    return {assetPath, paragraphIndex, order, alt, textOffset:position?.textOffset ?? 0, markerOrder:position?.markerOrder ?? -1, placement:imagePlacement};
+    return {assetPath, paragraphIndex, order, alt, textOffset:position?.textOffset ?? 0, markerOrder:position?.markerOrder ?? -1, placement:normalizeDocxImagePlacement(imagePlacement)};
   }) : [];
   return errors.length ? {...fail([...new Set(errors)]), runs, images, lineBreaks, paragraphLayouts, paragraphNumbering, paragraphMarkFormatting, paragraphCount:source.paragraphs.length} : {ok:true, errors:[], runs, images, lineBreaks, paragraphLayouts, paragraphNumbering, paragraphMarkFormatting, paragraphCount:source.paragraphs.length};
 }
