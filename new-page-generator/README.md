@@ -44,7 +44,11 @@ No site-wide global header/footer migration, no runtime template loading, no aut
 
 ## Latest verification note
 
-The coordinator has a tested positive path for a minimal, supported synthetic DOCX: it emits static HTML only after independently comparing source and rendered rich-content inventories. It also has fail-closed tests for changed reviewed text and unsupported font metadata. This is not equivalent to supporting every DOCX feature; the real multilingual illustrated pilot remains blocked until its typography, language boundaries, and floating-image placement are losslessly handled and reviewed.
+The real multilingual illustrated pilot now passes source-map, asset extraction, image-placement inventory, and rich-content fidelity checks. Its converted preview also matches the source paragraph text after omitted empty Word paragraphs are restored. The sole remaining conversion blocker is the floating drawing: the preview shows it inline, so original Word wrapping and position still require a human visual comparison. The preview is explicitly not publishable. CI audit: [run 39291052580](https://github.com/shifter888ai/awakenology/actions/runs/39291052580).
+
+## Floating-image review gate
+
+When the only DOCX extraction error is floating-image layout, `extractDocx` returns a non-publishable `previewHtml`. `inspectPageSet` exposes that preview and the exact `sourceSha256` with `stage: "visual-review-required"`. After a human compares the preview with the original Word document, pass `floatingImageReviewApprovedSha256` equal to that exact `sourceSha256`; this clears only the visual-review gate for that file. A changed DOCX invalidates the approval, and every other content or formatting blocker remains blocking.
 
 ## HTML-paste URL guard (2026-10-19)
 
@@ -52,7 +56,7 @@ The paste inspector now rejects URL schemes outside the explicit link/image allo
 
 ## Supported style-reference resolution (2026-10-19)
 
-The extractor no longer rejects paragraph/character style references solely because a reference exists. The rich-content resolver applies document defaults, paragraph-style inheritance, character-style inheritance, and direct run overrides in the supported formatting subset, and rejects missing/cyclic/wrong-type references or unsupported properties. The extractor still blocks unsupported font metadata, complex-script typography, spacing, list marker patterns the HTML adapter cannot represent exactly, and floating image fidelity. Standard list numbering definitions are now inventoried, but source/output list comparison must still pass. CI passed: [run 39240300513](https://github.com/shifter888ai/awakenology/actions/runs/39240300513). This removes an over-broad gate; it does not make the real pilot ready.
+The rich-content resolver now handles document defaults, paragraph-style inheritance, character-style inheritance, direct run overrides, Word theme fonts by script/language, paragraph-mark metadata, standard list numbering, and supported paragraph spacing/indentation. Empty source paragraphs omitted by Mammoth are restored only where source-to-rendered alignment is unambiguous; uncertain list boundaries remain fail-closed. The real pilot's source and rich-content gates now pass, but its floating-image layout still needs visual approval before generation can be cleared.
 
 ## Static shell baseline (2026-10-19)
 
