@@ -1,6 +1,6 @@
-// Fail-closed resolver for the supported Word run-formatting subset: bold, italic,
-// underline, explicit RGB color and half-point font size. It does not resolve font
-// families, language, complex-script sizes, paragraph layout, numbering or themes.
+// Fail-closed Word run-formatting resolver. It inventories inherited typography,
+// including script-specific fonts, language and spacing; fidelity still requires
+// independent rendered-output comparison. Numbering and themes are not resolved here.
 const attrs = tag => Object.fromEntries([...tag.matchAll(/([\w:.-]+)=[\"']([^\"']*)[\"']/g)].map(m => [m[1], m[2]]));
 const hasDuplicateAttrs = tag => { const keys=[...tag.matchAll(/([\w:.-]+)=[\"'][^\"']*[\"']/g)].map(m=>m[1]); return new Set(keys).size !== keys.length; };
 const inner = (xml, tag) => new RegExp(String.raw`<w:${tag}(?:\s[^>]*)?>([\s\S]*?)<\/w:${tag}>`).exec(xml)?.[1] ?? '';
@@ -9,8 +9,9 @@ const propertyValue = (xml, tag) => {
   const found = directTag(xml, tag);
   if (!found) return undefined;
   const value = attrs(found)['w:val'];
+  if (tag !== 'color' && (hasDuplicateAttrs(found) || Object.keys(attrs(found)).some(key => key !== 'w:val'))) return {unsupported:true};
   if (tag === 'color') {
-    if (attrs(found)['w:themeColor'] || attrs(found)['w:themeTint'] || attrs(found)['w:themeShade']) return {unsupported:true};
+    if (hasDuplicateAttrs(found) || Object.keys(attrs(found)).some(key => !['w:val'].includes(key))) return {unsupported:true};
     return value && /^[0-9a-f]{6}$/i.test(value) ? {value:'#'+value.toLowerCase()} : {unsupported:true};
   }
   if (['b','i','u','bCs','iCs','caps'].includes(tag)) {
