@@ -43,15 +43,16 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
   for (const match of stylesXml.matchAll(/<w:style\b([^>]*)>([\s\S]*?)<\/w:style>/g)) {
     const a=attrs(match[1]), body=match[2], id=a['w:styleId'];
     if (!id || styleMap.has(id)) { errors.push('Missing or duplicate Word style ID.'); continue; }
-    styleMap.set(id,{id,basedOn:/<w:basedOn\b[^>]*\bw:val=["']([^"']+)["']/.exec(body)?.[1] ?? null,run:runProps(inner(body,'rPr')),unsupportedRun:unsupportedRunProps(inner(body,'rPr')),unsupportedParagraph:unsupportedParagraphProps(inner(body,'pPr')),paragraphMarkRun:inner(inner(body,'pPr'),'rPr')});
+    styleMap.set(id,{id,type:a['w:type'] ?? null,basedOn:/<w:basedOn\b[^>]*\bw:val=["']([^"']+)["']/.exec(body)?.[1] ?? null,run:runProps(inner(body,'rPr')),unsupportedRun:unsupportedRunProps(inner(body,'rPr')),unsupportedParagraph:unsupportedParagraphProps(inner(body,'pPr')),paragraphMarkRun:inner(inner(body,'pPr'),'rPr')});
   }
-  const chain=(id,label)=>{
+  const chain=(id,label,expectedType)=>{
     const found=[], seen=new Set();
     while(id) {
       if(seen.has(id)){errors.push('Cyclic Word style inheritance in '+label+': '+id+'.');break;}
       seen.add(id);
       const style=styleMap.get(id);
       if(!style){errors.push('Missing Word style '+id+' referenced by '+label+'.');break;}
+      if(style.type!==expectedType) errors.push('Word style '+style.id+' has type '+style.type+'; expected '+expectedType+' for '+label+'.');
       for(const name of style.unsupportedRun) errors.push('Unsupported run property w:'+name+' in Word style '+style.id+'.');
       for(const name of style.unsupportedParagraph) errors.push('Unsupported paragraph property w:'+name+' in Word style '+style.id+'.');
       if(style.paragraphMarkRun.trim()) errors.push('Paragraph-mark run formatting in Word style '+style.id+' requires independent handling.');
@@ -64,11 +65,11 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
   const effective={b:false,i:false,u:false,color:null};
   merge(effective,runProps(defaultsRun));
   const pStyle=/<w:pStyle\b[^>]*\bw:val=[\"']([^\"']+)[\"']/.exec(paragraphXml)?.[1] ?? null;
-  if(pStyle) for(const props of chain(pStyle,'paragraph style')) merge(effective,props);
+  if(pStyle) for(const props of chain(pStyle,'paragraph style','paragraph')) merge(effective,props);
   const pRun=inner(inner(paragraphXml,'pPr'),'rPr');
   if(pRun.trim()) errors.push('Paragraph-mark run formatting requires independent handling.');
   const rStyle=/<w:rStyle\b[^>]*\bw:val=[\"']([^\"']+)[\"']/.exec(runXml)?.[1] ?? null;
-  if(rStyle) for(const props of chain(rStyle,'character style')) merge(effective,props);
+  if(rStyle) for(const props of chain(rStyle,'character style','character')) merge(effective,props);
   merge(effective,runProps(inner(runXml,'rPr')));
   for(const [key,value] of Object.entries(effective)) if(value?.unsupported) errors.push('Unsupported inherited Word formatting: '+key+'.');
   return {ok:errors.length===0,errors,formatting:errors.length?null:effective};
