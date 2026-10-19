@@ -114,3 +114,19 @@ test("DOCX reviewed text mismatch blocks every output page",async()=>{
  assert.deepEqual(result.pages,{});
  assert.ok(result.errors.some(error=>/DOCX rich-content mismatch/.test(error)));
 });
+
+test("unsupported DOCX font metadata blocks the page set before any HTML is emitted",async()=>{
+ const zip=await JSZip.loadAsync(await simpleDocx());
+ const doc=await zip.file("word/document.xml").async("string");
+ zip.file("word/document.xml",doc.replace("<w:r><w:t>Text","<w:r><w:rPr><w:rFonts w:ascii=\"Arial\"/></w:rPr><w:t>Text"));
+ const docx=await zip.generateAsync({type:"nodebuffer"});
+ const docxPageSet={pages:Object.fromEntries(["en","ja","zh-Hant"].map((lang,i)=>[lang,{
+   title:lang,mode:"docx",source:"fixture",route:["/English/docx-font/","/Japanese/docx-font/","/Chinese/docx-font/"][i]
+ }]))};
+ const inputs=Object.fromEntries(["en","ja","zh-Hant"].map(lang=>[lang,{buffer:docx,parser:mockParser()}]));
+ const result=await generateReviewedPageSet({pageSet:docxPageSet,inputs,outputs:completeOutputs()});
+ assert.equal(result.ok,false);
+ assert.equal(result.stage,"source-inspection");
+ assert.deepEqual(result.pages,{});
+ assert.ok(result.errors.some(error=>/font family/.test(error)));
+});
