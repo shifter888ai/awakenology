@@ -10,7 +10,7 @@ const sample = () => ({
 test('identical inventory passes', () => assert.equal(compareRichContent(sample(), sample()).ok, true));
 for (const field of ['paragraphIndex','text','bold','italic','underline','color','fontSizePt','href']) {
   test('changed run ' + field + ' blocks', () => {
-    const a=sample(), b=sample(); b.runs[0][field] = field === 'bold' || field === 'italic' || field === 'underline' ? !b.runs[0][field] : field === 'paragraphIndex' ? 99 : 'changed';
+    const a=sample(), b=sample(); b.runs[0][field] = field === 'bold' || field === 'italic' || field === 'underline' ? !b.runs[0][field] : field === 'paragraphIndex' ? 99 : field === 'fontSizePt' ? 15 : 'changed';
     assert.equal(compareRichContent(a,b).ok,false);
   });
 }
