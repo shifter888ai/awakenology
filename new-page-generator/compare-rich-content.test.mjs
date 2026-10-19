@@ -55,3 +55,19 @@ test('rejects invalid image positions and missing asset paths',()=>{
  const b=sample(); b.images[0].assetPath='';
  assert.throws(()=>compareRichContent(sample(),b),/Invalid image field types/);
 });
+
+
+test('compares source and rendered line-break offsets independently of text',()=>{
+ const a={runs:[{text:'A',bold:false,italic:false,underline:false,color:null,href:null},{text:'B',bold:false,italic:false,underline:false,color:null,href:null}],images:[],lineBreaks:[{paragraphIndex:0,textOffset:1,breakType:'textWrapping'}]};
+ const b=structuredClone(a);
+ assert.equal(compareRichContent(a,b).ok,true);
+ b.lineBreaks[0].textOffset=0;
+ const result=compareRichContent(a,b);
+ assert.equal(result.ok,false);
+ assert.ok(result.issues.some(x=>x.kind==='line-break-mismatch' && x.field==='textOffset'));
+});
+test('blocks when one side omits line-break provenance',()=>{
+ const a={runs:[],images:[],lineBreaks:[]};
+ const b={runs:[],images:[]};
+ assert.equal(compareRichContent(a,b).ok,false);
+});
