@@ -47,9 +47,11 @@ export function markdownToHtml(markdown) {
     const raw=lines[i], line=i+1;
     if(!raw.trim()){flushParagraph();flushList();flushQuote();continue;}
     if(/^\s{0,3}(```|~~~)/.test(raw)){errors.push(`Line ${line}: fenced code blocks require a dedicated code review and are not supported yet.`);flushParagraph();flushList();flushQuote();continue;}
+    if(/^\s{0,3}[-+*]\s*\[[ xX]\]/.test(raw)) {errors.push('Line '+line+': task-list syntax is not supported in the current Markdown subset.');flushParagraph();flushList();flushQuote();continue;}
+    if(/^\s+(?:\d+[.)]|[-+*])\s+/.test(raw)) {errors.push('Line '+line+': indented or nested lists require explicit nesting support.');flushParagraph();flushList();flushQuote();continue;}
     const heading=/^ {0,3}(#{1,6})\s+(.+?)\s*#*\s*$/.exec(raw);
-    const ordered=/^\s{0,3}(\d+)[.)]\s+(.+)$/.exec(raw);
-    const unordered=/^\s{0,3}([-+*])\s+(.+)$/.exec(raw);
+    const ordered=/^(\d+)[.)]\s+(.+)$/.exec(raw);
+    const unordered=/^([-+*])\s+(.+)$/.exec(raw);
     const quoteLine=/^\s{0,3}>\s?(.*)$/.exec(raw);
     if(heading){flushParagraph();flushList();flushQuote();const level=heading[1].length;output.push(`<h${level}>${inline(heading[2],errors,line)}</h${level}>`);continue;}
     if(ordered||unordered){
@@ -62,7 +64,7 @@ export function markdownToHtml(markdown) {
     }
     if(quoteLine){flushParagraph();flushList();quote.push({text:quoteLine[1],line});continue;}
     if(/^\s{0,3}([-*_])(?:\s*\1){2,}\s*$/.test(raw)){errors.push(`Line ${line}: thematic breaks are not supported in the current Markdown subset.`);flushParagraph();flushList();flushQuote();continue;}
-    if(/^\s{0,3}(<|\|)/.test(raw) || /^\s{0,3}[*+-]\s*\[[ xX]\]/.test(raw)){errors.push(`Line ${line}: raw HTML, tables, and task-list syntax are not supported in the current Markdown subset.`);flushParagraph();flushList();flushQuote();continue;}
+    if(/^\s{0,3}(<|\|)/.test(raw)){errors.push(`Line ${line}: raw HTML and tables are not supported in the current Markdown subset.`);flushParagraph();flushList();flushQuote();continue;}
     flushList();flushQuote();paragraph.push({text:raw,line});
   }
   flushParagraph();flushList();flushQuote();
