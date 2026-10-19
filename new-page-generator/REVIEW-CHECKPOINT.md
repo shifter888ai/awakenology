@@ -163,3 +163,9 @@ Repeated document-default and style-chain warnings are now deduplicated, while p
 ## Font-size provenance added (2026-10-19)
 
 The source resolver now captures inherited/direct Word `w:sz` half-point sizes; the independent HTML inventory captures explicit `pt`/`px` sizes and the comparator checks them run-by-run. Unsupported units fail closed. CI [39206257271](https://github.com/shifter888ai/awakenology/actions/runs/39206257271) passed **160/160 tests**. Pilot status remains blocked on inherited fonts, complex-script sizes, language/kerning, paragraph layout/numbering, section properties, paragraph-mark formatting and floating-image rendering.
+
+## Minimal DOCX coordinator path (2026-10-19)
+
+A simple synthetic DOCX now passes the complete reviewed-page coordinator only after the original DOCX rich inventory and independently parsed rendered HTML inventory compare without discrepancies. The unconditional DOCX rejection was removed because it prevented any future supported DOCX from ever passing. New regression coverage also requires a reviewed-text mismatch to block the whole page set and unsupported font metadata to block before output. CI for the minimal positive path passed: [39238347186](https://github.com/shifter888ai/awakenology/actions/runs/39238347186). Follow-up mismatch and unsupported-font tests are in CI.
+
+This proves the narrow simple-document path, **not** full feature coverage or pilot readiness. The real trilingual pilot still contains unsupported inherited typography and a floating image that requires visual review. It remains blocked.
