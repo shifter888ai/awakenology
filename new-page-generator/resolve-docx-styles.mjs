@@ -234,7 +234,7 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml, theme
   for(const script of unresolvedFonts) if(usedScripts.has(script)) errors.push('Unsupported inherited Word formatting: fontFamily ('+script+' theme unresolved).');
   const markLanguage=paragraphMarkFormatting.language && typeof paragraphMarkFormatting.language==='object' ? paragraphMarkFormatting.language : {};
   const unresolvedMarkFonts=resolveThemeReferences(paragraphMarkFormatting,themeXml,markLanguage);
-  for(const script of unresolvedMarkFonts) errors.push('Unsupported paragraph-mark formatting: fontFamily ('+script+' theme unresolved).');
+  for(const script of unresolvedMarkFonts) if(usedScripts.has(script)) errors.push('Unsupported paragraph-mark formatting: fontFamily ('+script+' theme unresolved).');
   delete effective.fontFamilyThemeRefs;
   delete paragraphMarkFormatting.fontFamilyThemeRefs;
   for(const [key,value] of Object.entries(effective)) if(value?.unsupported) errors.push('Unsupported inherited Word formatting: '+key+'.');
