@@ -5,6 +5,7 @@ const sample = () => ({
   runs: [{paragraphIndex:0,text:'什麽',bold:true,italic:false,underline:false,color:'#ff0000',fontSizePt:null,href:'https://example.org'}],
   images: [{assetPath:'assets/one.png',paragraphIndex:2,order:0,alt:'diagram',textOffset:12,markerOrder:0}],
   lineBreaks: [],
+  paragraphLayouts: [0,1,2].map(paragraphIndex=>({paragraphIndex,alignment:'left',indentation:{left:0,right:0}})),
   paragraphCount: 3
 });
 test('identical inventory passes', () => assert.equal(compareRichContent(sample(), sample()).ok, true));
@@ -25,7 +26,7 @@ test('incomplete source inventory throws', () => {const a=sample(); delete a.run
 
 
 test('reordered text runs block even when the same text is present',()=>{
- const source={runs:[{paragraphIndex:0,text:'A',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null},{paragraphIndex:0,text:'B',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null}],images:[],lineBreaks:[],paragraphCount:1};
+ const source={runs:[{paragraphIndex:0,text:'A',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null},{paragraphIndex:0,text:'B',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null}],images:[],lineBreaks:[],paragraphLayouts:[{paragraphIndex:0,alignment:'left',indentation:{left:0,right:0}}],paragraphCount:1};
  const output={runs:[source.runs[1],source.runs[0]],images:[],lineBreaks:[],paragraphCount:1};
  const result=compareRichContent(source,output);
  assert.equal(result.ok,false);
@@ -33,7 +34,7 @@ test('reordered text runs block even when the same text is present',()=>{
 });
 
 test('extra output text run blocks',()=>{
- const source={runs:[],images:[],lineBreaks:[],paragraphCount:0};
+ const source={runs:[],images:[],lineBreaks:[],paragraphLayouts:[],paragraphCount:0};
  const output={runs:[{paragraphIndex:0,text:'invented',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null}],images:[],lineBreaks:[],paragraphCount:1};
  assert.equal(compareRichContent(source,output).ok,false);
 });
@@ -79,7 +80,7 @@ test('blocks identical text and styling moved to a different paragraph',()=>{
  const source={runs:[
   {paragraphIndex:0,text:'First',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null},
   {paragraphIndex:1,text:'Second',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null}
- ],images:[],lineBreaks:[],paragraphCount:2};
+ ],images:[],lineBreaks:[],paragraphLayouts:[0,1].map(paragraphIndex=>({paragraphIndex,alignment:'left',indentation:{left:0,right:0}})),paragraphCount:2};
  const output={runs:[
   {paragraphIndex:0,text:'FirstSecond',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null}
  ],images:[],lineBreaks:[],paragraphCount:1};
