@@ -1,5 +1,6 @@
 import { parseFragment, serialize } from "parse5";
 import { splitWordScriptSegments } from "./word-script-segments.mjs";
+import { resolveDocxFloatingLayout } from "./resolve-docx-floating-layout.mjs";
 
 const ESCAPE = value => String(value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const CSS_QUOTE = value => '"' + String(value).replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/[\r\n]/g," ") + '"';
@@ -26,6 +27,7 @@ const createElement = (name, attrs = [], childNodes = []) => {
   return node;
 };
 const hasDescendant = (node, name) => (node.childNodes??[]).some(child=>child.nodeName===name||hasDescendant(child,name));
+const findDescendants = (node,name) => (node.childNodes??[]).flatMap(child=>child.nodeName===name?[child,...findDescendants(child,name)]:findDescendants(child,name));
 const createEmptyParagraph = (images, breaks) => {
   const markers=[...(images??[]).map(item=>({...item,kind:'image'})),...(breaks??[]).map(item=>({...item,kind:'break'}))]
     .sort((a,b)=>(a.markerOrder??0)-(b.markerOrder??0));
@@ -233,6 +235,19 @@ export function applyDocxRichFormatting(html, sourceInventory) {
     } : layout;
     const mappedStyle=paragraphStyle(effectiveLayout);
     if(existingStyle || mappedStyle) setAttr(block,"style",mergeStyles(existingStyle,mappedStyle));
+    const sourceImagesForParagraph=sourceImages.filter(image=>image.paragraphIndex===p).sort((a,b)=>(a.order??0)-(b.order??0));
+    const renderedImages=findDescendants(block,"img");
+    if(sourceImagesForParagraph.length!==renderedImages.length) errors.push("Rendered image count at paragraph "+(p+1)+" differs from the source image inventory.");
+    for(let imageIndex=0;imageIndex<Math.min(sourceImagesForParagraph.length,renderedImages.length);imageIndex++) {
+      const sourceImage=sourceImagesForParagraph[imageIndex], renderedImage=renderedImages[imageIndex];
+      const placement=sourceImage.placement??{kind:"inline",requiresVisualReview:false};
+      setAttr(renderedImage,"data-word-image-placement-json",JSON.stringify(placement));
+      if(placement.kind==="floating") {
+        const plan=resolveDocxFloatingLayout(placement,effectiveLayout.indentation??{});
+        if(!plan.ok) errors.push("Floating image layout at paragraph "+(p+1)+" is unsupported: "+plan.error);
+        else setAttr(renderedImage,"style",mergeStyles(attr(renderedImage,"style"),plan.css));
+      }
+    }
     if (block.nodeName === "li") {
       const numbering = numberingForBlock;
       if (!numbering) {
