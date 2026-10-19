@@ -42,3 +42,18 @@ jobs:
           name: trilingual-docx-pilot-audit
           path: new-page-generator/pilot-artifacts/pilot-audit.json
           if-no-files-found: warn
+      - name: Publish pilot findings in job summary
+        if: always()
+        run: |
+          {
+            echo '## Trilingual DOCX pilot diagnostic'
+            echo
+            if [ -f pilot-artifacts/pilot-audit.json ]; then
+              echo 'Diagnostic report (not approval for generation):'
+              echo '\`\`\`json'
+              cat pilot-artifacts/pilot-audit.json
+              echo '\`\`\`'
+            else
+              echo 'Diagnostic report was not generated; inspect preceding job steps.'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
