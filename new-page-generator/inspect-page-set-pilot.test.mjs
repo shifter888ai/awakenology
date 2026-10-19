@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { parse } from "parse5";
 import { inspectPageSet } from "./inspect-page-set.mjs";
-import { applySourceBoundHumanReview } from "./generate-reviewed-page-set.mjs";
+import { applySourceBoundHumanReview, generateReviewedPageSet } from "./generate-reviewed-page-set.mjs";
 import { FLOATING_DRAWING_REVIEW_ERROR } from "./extract-docx.mjs";
 
 const toDom = node => {
@@ -107,6 +107,14 @@ test("generation gate applies only repository-recorded review matching source pa
  assert.equal(inspected.pages.en.visualReviewRequired,false);
  assert.equal(inspected.pages.en.imageAltIssues.length,0);
  assert.equal(inspected.errors.some(error=>error.includes(FLOATING_DRAWING_REVIEW_ERROR)),false);
+ assert.equal(inspected.ok,true,inspected.errors.join("; "));
+
+ // Exercise the actual coordinator: with the review record matched, it reaches
+ // rendered-output validation rather than stopping at the floating-image gate.
+ const coordinated=await generateReviewedPageSet({pageSet:approvedSet,inputs,outputs:{}});
+ assert.equal(coordinated.ok,false);
+ assert.equal(coordinated.stage,"content-integrity");
+ assert.ok(coordinated.errors.some(error=>error.includes("reviewed output is missing")));
 
  const wrongSourceSet={pages:{...set.pages,en:{...set.pages.en,source:"different.docx"}}};
  const blocked=await applySourceBoundHumanReview(wrongSourceSet,inputs);
