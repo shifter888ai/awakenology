@@ -81,7 +81,7 @@ test('rejects unknown or duplicate paragraph layout attributes',()=>{
 test("treats zero character-based indentation as no indentation",()=>{
  const result=resolveDocxParagraphLayout({stylesXml:"<w:styles/>",paragraphXml:'<w:p><w:pPr><w:ind w:leftChars="0"/></w:pPr></w:p>'});
  assert.equal(result.ok,true,result.errors.join("; "));
- assert.deepEqual(result.layout.indentation,{left:0,right:0});
+ assert.deepEqual(result.layout.indentation,{left:0,right:0,leftChars:0});
 });
 
 
