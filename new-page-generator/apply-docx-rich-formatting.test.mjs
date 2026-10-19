@@ -193,3 +193,25 @@ test("restores the correct number of consecutive empty Word paragraphs",()=>{
  assert.equal(result.ok,true,result.errors.join("; "));
  assert.match(result.html,/<p>First<\/p><p><\/p><p><\/p><p>Second<\/p>/);
 });
+
+
+test("renders a supported Word floating image with measured square-wrap CSS and provenance",()=>{
+ const source={
+  paragraphCount:1,
+  paragraphLayouts:[{paragraphIndex:0,alignment:"left",indentation:{left:840,right:0},spacing:{beforePt:0,afterPt:0,lineHeightPt:null}}],
+  runs:[{paragraphIndex:0,text:"Text",bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null}],
+  images:[{paragraphIndex:0,order:0,assetPath:"/assets/a.png",alt:"Diagram",textOffset:0,placement:{
+   kind:"floating",anchorAttributes:{behindDoc:"0",distL:"114300",distR:"114300",distT:"0",distB:"0"},
+   horizontalPosition:'<wp:positionH relativeFrom="column"><wp:posOffset>0</wp:posOffset></wp:positionH>',
+   verticalPosition:'<wp:positionV relativeFrom="paragraph"><wp:posOffset>0</wp:posOffset></wp:positionV>',
+   extent:'<wp:extent cx="1270000" cy="635000"/>',wrap:'<wp:wrapSquare wrapText="bothSides"/>',requiresVisualReview:true
+  }}]
+ };
+ const result=applyDocxRichFormatting('<p>Text<img src="/assets/a.png" alt="Diagram"></p>',source);
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.match(result.html,/float:left/);
+ assert.match(result.html,/width:100pt/);
+ assert.match(result.html,/height:50pt/);
+ assert.match(result.html,/margin-left:-42pt/);
+ assert.match(result.html,/data-word-image-placement-json=/);
+});
