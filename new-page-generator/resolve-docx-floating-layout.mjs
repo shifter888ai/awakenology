@@ -18,7 +18,7 @@ export function resolveDocxFloatingLayout(placement, paragraphIndentation={}) {
   const extent=attributes(placement.extent??"");
   const horizontal=position(placement.horizontalPosition,"positionH");
   const vertical=position(placement.verticalPosition,"positionV");
-  const wrapTag=/<wp:(wrap\\w+)\\b/.exec(placement.wrap??"")?.[1]??null;
+  const wrapTag=/<wp:(wrap\w+)\b/.exec(placement.wrap??"")?.[1]??null;
   if(wrapTag==="wrapSquare"&&wrap.wrapText!=="bothSides")
     return {ok:false,error:"Square wrapping must allow text on both sides."};
   if(!["wrapSquare","wrapTopAndBottom"].includes(wrapTag))
