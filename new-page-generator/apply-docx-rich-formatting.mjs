@@ -64,7 +64,7 @@ export function applyDocxRichFormatting(html, sourceInventory) {
   const fragment=parseFragment(html);
   const blocks=[];
   const walk=(node, insideListItem=false)=>{
-    if (node.nodeName === "p" || node.nodeName === "li") {
+    if (["p","li","h1","h2","h3","h4","h5","h6"].includes(node.nodeName)) {
       if (insideListItem) {
         errors.push("Nested list content inside a list item requires explicit paragraph-boundary mapping.");
         return;
@@ -74,7 +74,7 @@ export function applyDocxRichFormatting(html, sourceInventory) {
       if (nested) errors.push("Nested lists require explicit source-to-rendered paragraph mapping.");
       return;
     }
-    if (["h1","h2","h3","h4","h5","h6","td","th","blockquote"].includes(node.nodeName)) {
+    if (["td","th","blockquote"].includes(node.nodeName)) {
       errors.push("Unsupported rendered paragraph container <"+node.nodeName+"> for source formatting alignment.");
     }
     for(const child of node.childNodes??[]) walk(child, insideListItem || node.nodeName === "li");
