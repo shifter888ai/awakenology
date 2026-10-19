@@ -56,7 +56,7 @@ test("real DOCX pilot exposes a non-publishable floating-image preview for visua
   en:{...inputs.en,imageAltTextBySrc:{[imageSrc]:"Pilot image alt-text test override"}}
  });
  assert.equal(withAlt.ok,false);
- assert.equal(withAlt.stage,"visual-review-required",withAlt.errors.join("; "));
+ assert.equal(withAlt.stage,"visual-review-required",withAlt.errors.join("; ")+"\nIMG="+JSON.stringify(withAlt.pages.en.inventory.filter(item=>item.tag==="IMG")));
  assert.deepEqual(withAlt.errors,["en: "+FLOATING_DRAWING_REVIEW_ERROR]);
  assert.equal(withAlt.pages.en.imageAltIssues.length,0);
  assert.match(withAlt.pages.en.previewHtml,/alt="Pilot image alt-text test override"/);
