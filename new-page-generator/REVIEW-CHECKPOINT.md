@@ -74,3 +74,20 @@ Existing pages and frozen private editor must remain untouched.
 - Added `compare-docx-output.mjs`, which compares the concatenated original mapped Word text runs to converted HTML text without whitespace, Unicode, punctuation or variant normalization. It reports the first mismatch and original paragraph/XML location. Unknown HTML elements and unparsed markup block approval.
 - `extract-docx.mjs` now requires this comparison to pass before returning intermediate HTML. Added tests for preserved entities, changed Chinese character variants, whitespace, missing characters, source locations and multiple paragraphs.
 - This is a strict text-integrity slice, not a complete formatting or semantic-structure equivalence proof. Rich formatting (including bold/color), hyperlinks, table semantics and illustration placement still require separate source-to-output checks. The actual trilingual pilot remains blocked by unavailable raw source bytes.
+
+
+## Updated real-DOCX fidelity checkpoint (2026-10-19)
+
+The exact pilot DOCX is available in the repository at `new-page-generator/temp/多重時空是什麽 - 繁體 - Copy.docx`; the earlier statement that raw DOCX bytes were unavailable is superseded by the real-package CI diagnostics. Its SHA-256 is `b9b8e15366fbbdb2e4d921335315c26ce56c6eb83678f8a1306b7c5cc8116ea1` (501,967 bytes). The source-map, asset extraction, and image-placement stages have passed on the actual package.
+
+Latest verified suite: **122 tests passed** in CI run [39202830200](https://github.com/shifter888ai/awakenology/actions/runs/39202830200). Additional fail-closed guards now explicitly block font families/sizes, language metadata, complex-script bold/italic, capitalization, character spacing, paragraph/line spacing, style inheritance, numbering/list semantics, indentation, and alignment until end-to-end mappings exist. Source-to-HTML line-break counts and exact text offsets are compared; source and rendered rich inventories separately record line-break positions.
+
+### Current real-pilot stage results
+- Source map: PASS — 184 paragraphs.
+- Assets: PASS — 3 image assets.
+- Image placement: PASS — 3 images, including floating drawing metadata.
+- Rich content: BLOCKED — explicit typography and inherited paragraph styles remain unresolved.
+- Conversion: BLOCKED — explicit color, typography/style/list properties, and floating drawing conversion remain unsupported.
+- `pilotApproved`: **false**. No HTML generation, PR, merge, or deployment is authorized.
+
+The historical sections above record the sequence of earlier implementation stages; this addendum is the current status. Remaining work is to implement source-to-rendered mappings for the blocked properties, verify image placement semantics and paragraph boundaries independently, then re-run the unchanged real DOCX through the complete gate. Do not weaken the gate or mark the pilot approved merely because unit tests pass.
