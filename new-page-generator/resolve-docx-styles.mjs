@@ -46,7 +46,9 @@ function runProps(xml) {
     const unsupportedTheme = hasDuplicateAttrs(fonts) || Object.keys(a).some(key => !allowedFontAttributes.has(key));
     const families = {};
     for (const key of ['ascii','hAnsi','eastAsia','cs']) if (a['w:'+key]) families[key] = a['w:'+key];
-    result.fontFamily = unsupportedTheme || !Object.keys(families).length ? {unsupported:true} : families;
+    if (unsupportedTheme) result.fontFamily = {unsupported:true};
+    else if (Object.keys(families).length) result.fontFamily = families;
+    // A hint without an explicit family changes script selection, not the font family itself.
     if (a['w:hint'] !== undefined) result.fontHint = ['default','eastAsia','cs'].includes(a['w:hint']) ? a['w:hint'] : {unsupported:true};
   }
   const lang = directTag(xml,'lang');
