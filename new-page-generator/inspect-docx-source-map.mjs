@@ -35,11 +35,29 @@ export async function inspectDocxSourceMap(buffer) {
     const start = match.index;
     const raw = match[0];
     const textRuns = [];
+    const breaks = [];
+    const content = [];
     const runPattern = /<w:t(?=[\s>])[^>]*>([\s\S]*?)<\/w:t>/g;
     for (const run of raw.matchAll(runPattern)) {
       if (/<[^>]+>/.test(run[1])) errors.push(`Paragraph ${paragraphs.length + 1}: nested markup in text run.`);
-      textRuns.push({ text: decode(run[1]), sourceLocation: location("word/document.xml", start + run.index, start + run.index + run[0].length) });
+      const item = { type: "text", text: decode(run[1]), sourceLocation: location("word/document.xml", start + run.index, start + run.index + run[0].length) };
+      textRuns.push({ text: item.text, sourceLocation: item.sourceLocation });
+      content.push({ ...item, sourceOffset: run.index });
     }
+    // Only Word's explicit text-wrapping break is mapped here. Page/column
+    // breaks and other controls remain unsupported and fail closed.
+    for (const br of raw.matchAll(/<w:br(?=[\\s/>])[^>]*\\/?\\s*>/g)) {
+      const tag = br[0];
+      const type = /\\bw:type=["']([^"']+)["']/.exec(tag)?.[1] ?? "textWrapping";
+      if (type !== "textWrapping") {
+        errors.push(`Paragraph ${paragraphs.length + 1}: unsupported Word break type "${type}".`);
+        continue;
+      }
+      const item = { type: "lineBreak", breakType: type, sourceLocation: location("word/document.xml", start + br.index, start + br.index + tag.length) };
+      breaks.push(item);
+      content.push({ ...item, sourceOffset: br.index });
+    }
+    content.sort((a,b) => a.sourceOffset - b.sourceOffset);
     const images = [];
     for (const drawing of raw.matchAll(/<w:drawing(?=[\s>])[^>]*>[\s\S]*?<\/w:drawing>/g)) {
       const ids = [...drawing[0].matchAll(/<a:blip\b[^>]*\br:embed=["']([^"']+)["'][^>]*\/?\s*>/g)].map(x=>x[1]);
@@ -55,7 +73,7 @@ export async function inspectDocxSourceMap(buffer) {
       index: paragraphs.length,
       sourceLocation: location("word/document.xml", start, start + raw.length),
       text: textRuns.map(run=>run.text).join(""),
-      textRuns, images
+      textRuns, breaks, content: content.map(({sourceOffset, ...item}) => item), images
     });
   }
   if (!paragraphs.length) errors.push("No source paragraphs could be mapped.");
