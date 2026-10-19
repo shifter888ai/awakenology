@@ -236,7 +236,7 @@ test("preserves blockquote structure without counting it as a second paragraph",
 
 
 test("validates CSS float geometry against serialized Word placement metadata",()=>{
- const placement={
+ const placement=normalizeDocxImagePlacement({
   kind:"floating",anchorAttributes:{behindDoc:"0",distL:"114300",distR:"114300",distT:"0",distB:"0"},
   horizontalPosition:'<wp:positionH relativeFrom="column"><wp:posOffset>0</wp:posOffset></wp:positionH>',
   verticalPosition:'<wp:positionV relativeFrom="paragraph"><wp:posOffset>0</wp:posOffset></wp:positionV>',
