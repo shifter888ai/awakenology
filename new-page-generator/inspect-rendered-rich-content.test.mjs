@@ -205,3 +205,11 @@ test("inspects heading elements as paragraph-level rendered content",()=>{
  assert.deepEqual(result.paragraphLayouts.map(item=>item.alignment),["center"]);
  assert.equal(result.runs[0].text,"Heading");
 });
+
+
+test("inspects unitless line-height ratios without treating them as errors",()=>{
+ const paragraph=node("P",{style:"line-height:1.2"},[text("Spacing")]);
+ const result=inspectRenderedRichContent('<p style="line-height:1.2">Spacing</p>',{parseFromString:()=>({body:{childNodes:[paragraph]}})});
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.equal(result.paragraphLayouts[0].spacing.lineHeight,1.2);
+});
