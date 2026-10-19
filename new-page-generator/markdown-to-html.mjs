@@ -5,8 +5,10 @@ const escapeHtml = value => value.replace(/&/g,"&amp;").replace(/</g,"&lt;").rep
 function safeUrl(value, image=false) {
   const url=value.trim();
   if(!url || /[\u0000-\u0020\u007f]/.test(url) || url.startsWith("//")) return false;
-  const scheme=/^([a-z][a-z0-9+.-]*):/i.exec(url)?.[1]?.toLowerCase();
-  return scheme ? (image ? ["https"].includes(scheme) : ["http","https","mailto","tel"].includes(scheme)) : !url.startsWith("\\");
+  if(image) return /^\/(?!\/)[^\s?#]+(?:\?[^\s#]*)?$/.test(url) && !url.split(/[?#]/)[0].split("/").includes("..");
+  if(/^\/(?!\/)/.test(url)) return !url.split(/[?#]/)[0].split("/").includes("..");
+  if(/^#[A-Za-z][\w-]*$/.test(url)) return true;
+  return /^(?:https?:\/\/[^\s\/@?#]+(?:[\/?#][^\s]*)?|mailto:[^\s@]+@[^\s@]+|tel:\+?[0-9().-]+)$/i.test(url);
 }
 function inline(source, errors, line) {
   if(/<\/?[A-Za-z][^>]*>/.test(source.replace(/`[^`\n]+`/g,""))) errors.push(`Line ${line}: raw HTML is unsupported in Markdown input.`);
