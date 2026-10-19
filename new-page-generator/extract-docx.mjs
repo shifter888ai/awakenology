@@ -78,6 +78,20 @@ export async function extractDocx(buffer) {
   for (const [name, pattern] of FEATURES) {
     if (pattern.test(xml)) errors.push(`Unsupported or ambiguous Word feature: ${name}.`);
   }
+  // Document defaults and named styles can affect runs without any direct formatting
+  // in document.xml. Until inherited typography is rendered and compared end-to-end,
+  // never let an otherwise plain-looking document bypass the conversion gate.
+  const stylesPart = zip.file("word/styles.xml");
+  if (stylesPart) {
+    let stylesXml;
+    try { stylesXml = xmlText(await stylesPart.async("uint8array")); }
+    catch { errors.push("Word styles part is unreadable or is not valid UTF-8."); }
+    if (stylesXml) {
+      for (const [name, pattern] of FEATURES) {
+        if (pattern.test(stylesXml)) errors.push(`Unsupported or ambiguous inherited Word feature: ${name}.`);
+      }
+    }
+  }
   if (zip.file("word/comments.xml")) errors.push("Word comments require manual resolution.");
   if (zip.file("word/footnotes.xml")) errors.push("Footnotes require manual resolution.");
   if (zip.file("word/endnotes.xml")) errors.push("Endnotes require manual resolution.");
