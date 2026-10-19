@@ -168,3 +168,10 @@ Regression coverage verifies that dropping an empty paragraph fails even when al
 The conversion adapter now also blocks unhandled run effects and hidden-text controls (including superscript/subscript baseline shifts, vertical positioning, and vanish flags), plus paragraph pagination/direction/section-layout properties (including keep-next, page-break-before, widow control and section properties). The independent rich-content inspector reports these properties too, along with indentation, alignment and table structure; the two gates no longer disagree by allowing the rich inventory to appear clean when unsupported layout is present.
 
 Regression tests cover run effects, paragraph page-flow properties, paragraph layout and tables. Validation: **141 tests passed, 0 failed** in [CI run 39204159713](https://github.com/shifter888ai/awakenology/actions/runs/39204159713). These properties remain intentionally unsupported; the gate reports them rather than flattening them.
+
+
+## Raw HTML preflight for pasted content (CI run 39204366041)
+
+The HTML-paste inspector now checks the raw input's tag vocabulary before relying on DOMParser's repaired body tree. This prevents unsupported tags hidden in a full-document head—or document wrappers discarded/moved by parser repair—from being overlooked while the original HTML string is later inserted into the page shell. It also rejects CSS and external stylesheets found in the head. Regression coverage includes a script inside a head that the test parser omits from its body result.
+
+Validation: **143 tests passed, 0 failed** in [CI run 39204366041](https://github.com/shifter888ai/awakenology/actions/runs/39204366041). This remains a conservative inspector, not a complete HTML sanitizer; production output is not authorized by these tests alone.
