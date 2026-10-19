@@ -49,7 +49,7 @@ const layoutProps = xml => {
   }
   return result;
 };
-const unsupported = xml => children(xml.replace(/<w:rPr\b[^>]*>[\s\S]*?<\/w:rPr>/g,'').replace(/<w:rPr\b[^>]*\/>/g,'')).filter(name=>!['jc','ind','spacing','pStyle','basedOn','pPr'].includes(name));
+const unsupported = xml => children(xml.replace(/<w:rPr\b[^>]*>[\s\S]*?<\/w:rPr>/g,'').replace(/<w:rPr\b[^>]*\/>/g,'')).filter(name=>!['jc','ind','spacing','pStyle','basedOn','pPr','widowControl','numPr'].includes(name));
 export function resolveDocxParagraphLayout({stylesXml,paragraphXml}) {
   const errors=[];
   if (typeof stylesXml!=='string' || typeof paragraphXml!=='string') return {ok:false,errors:['Styles XML and paragraph XML are required.'],layout:null};
