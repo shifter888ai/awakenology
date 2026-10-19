@@ -15,8 +15,8 @@ export function renderStaticShell({ language, title, description, route, alterna
   if (!approvedHeader?.trim() || !approvedFooter?.trim() || !reviewedArticleHtml?.trim()) throw Error("Approved shell components and reviewed content are required.");
   if (!alternates || !["en","ja","zh-Hant"].every(lang => routeOK(alternates[lang]))) throw Error("Complete alternate-language routes required.");
   const canonical = absolute(route);
-  const headerMarkup = approvedHeader.includes('class="theme-toggle"') ? approvedHeader : approvedHeader.replace(/<\\/header>/i, '<button class="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch theme"><span aria-hidden="true">☀</span></button></header>');
-  if (!/<header\\b/i.test(headerMarkup)) throw Error("Approved header must contain a header element.");
+  const headerMarkup = approvedHeader.includes('class="theme-toggle"') ? approvedHeader : approvedHeader.replace(/<\/header>/i, '<button class="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch theme"><span aria-hidden="true">☀</span></button></header>');
+  if (!/<header\b/i.test(headerMarkup)) throw Error("Approved header must contain a header element.");
   const hreflang = ["en","ja","zh-Hant"].map(lang => `<link rel="alternate" hreflang="${lang}" href="${escapeText(absolute(alternates[lang]))}">`).join("\n");
   return `<!doctype html>
 <html lang="${language}">
@@ -44,7 +44,7 @@ main{max-width:900px;margin:0 auto;padding:24px 20px 48px}main h1{line-height:1.
 </style>
 </head>
 <body>
-${approvedHeader}
+${headerMarkup}
 <main><h1>${escapeText(title)}</h1><article class="article">${reviewedArticleHtml}</article></main>
 ${approvedFooter}
 <button class="return-top" type="button" aria-label="Return to top" title="Return to top">↑</button>
