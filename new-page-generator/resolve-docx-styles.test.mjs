@@ -320,3 +320,12 @@ test("does not certify non-self-closing run properties without checking their bo
   assert.equal(result.formatting,null);
  }
 });
+
+test('resolves paragraph-mark font metadata separately from visible text formatting',()=>{
+ const xml=styles('<w:style w:type="paragraph" w:styleId="Base"><w:pPr><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:eastAsia="Yu Gothic" w:cs="Arial"/><w:lang w:val="en-US" w:eastAsia="ja-JP"/></w:rPr></w:pPr></w:style><w:style w:type="paragraph" w:styleId="Derived"><w:basedOn w:val="Base"/></w:style>');
+ const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml:'<w:p><w:pPr><w:pStyle w:val="Derived"/><w:rPr><w:rFonts w:eastAsia="Noto Sans CJK JP"/></w:rPr></w:pPr></w:p>',runXml:run()});
+ assert.equal(result.ok,true,result.errors.join('; '));
+ assert.equal(result.formatting.fontFamily,undefined);
+ assert.deepEqual(result.paragraphMarkFormatting.fontFamily,{eastAsia:'Noto Sans CJK JP'});
+ assert.deepEqual(result.paragraphMarkFormatting.language,{val:'en-US',eastAsia:'ja-JP'});
+});
