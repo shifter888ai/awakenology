@@ -58,6 +58,23 @@ export function compareRichContent(source, output) {
       }
     });
   }
+  // Numbering is a first-class source feature. Until the rendered inspector
+  // independently reconstructs equivalent list semantics, never let a source
+  // list pass merely because its paragraph text happens to match.
+  if (Array.isArray(source.paragraphNumbering) && source.paragraphNumbering.length) {
+    if (!Array.isArray(output.paragraphNumbering)) {
+      issues.push({kind:'numbering-rendered-inventory-missing',expected:source.paragraphNumbering.length,actual:null});
+    } else {
+      if (source.paragraphNumbering.length !== output.paragraphNumbering.length) issues.push({kind:'paragraph-numbering-count',expected:source.paragraphNumbering.length,actual:output.paragraphNumbering.length});
+      for (let i=0;i<Math.min(source.paragraphNumbering.length,output.paragraphNumbering.length);i++) {
+        const a=source.paragraphNumbering[i], b=output.paragraphNumbering[i];
+        for (const field of ['paragraphIndex','numId','abstractNumId','level','format','text','start']) {
+          if (a[field] !== b[field]) issues.push({kind:'paragraph-numbering-mismatch',index:i,field,expected:a[field] ?? null,actual:b[field] ?? null});
+        }
+        if (JSON.stringify(a.indentation ?? {}) !== JSON.stringify(b.indentation ?? {})) issues.push({kind:'paragraph-numbering-indentation-mismatch',index:i,expected:a.indentation ?? {},actual:b.indentation ?? {}});
+      }
+    }
+  }
   // Matching anchor metadata is not proof that HTML reproduces Word floating layout.
   if (source.images.some(image => image.placement.kind === 'floating') || output.images.some(image => image.placement.kind === 'floating')) {
     issues.push({kind:'floating-image-visual-review-required'});
