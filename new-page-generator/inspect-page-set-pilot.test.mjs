@@ -38,12 +38,26 @@ test("real DOCX pilot exposes a non-publishable floating-image preview for visua
  };
  const result=await inspectPageSet(set,inputs);
  assert.equal(result.ok,false);
- assert.equal(result.stage,"visual-review-required",result.errors.join("; "));
+ assert.equal(result.stage,"source-inspection-and-visual-review",result.errors.join("; "));
  assert.equal(result.reviewRequired,true);
  assert.equal(result.pages.en.visualReviewRequired,true);
  assert.equal(result.pages.en.visualReviewApproved,false);
  assert.equal(typeof result.pages.en.previewHtml,"string");
  assert.ok(result.pages.en.previewHtml.includes("<img"));
  assert.match(result.pages.en.sourceSha256,/^[a-f0-9]{64}$/);
- assert.deepEqual(result.errors,["en: "+FLOATING_DRAWING_REVIEW_ERROR]);
+ assert.equal(result.pages.en.imageAltIssues.length,1);
+ assert.match(result.pages.en.imageAltIssues[0].src,/^\\/assets\\/docx-/);
+ assert.ok(result.errors.some(error=>error.includes("image needs src and alt review")));
+ assert.ok(result.errors.includes("en: "+FLOATING_DRAWING_REVIEW_ERROR));
+
+ const imageSrc=result.pages.en.imageAltIssues[0].src;
+ const withAlt=await inspectPageSet(set,{
+  ...inputs,
+  en:{...inputs.en,imageAltTextBySrc:{[imageSrc]:"Pilot image alt-text test override"}}
+ });
+ assert.equal(withAlt.ok,false);
+ assert.equal(withAlt.stage,"visual-review-required",withAlt.errors.join("; "));
+ assert.deepEqual(withAlt.errors,["en: "+FLOATING_DRAWING_REVIEW_ERROR]);
+ assert.equal(withAlt.pages.en.imageAltIssues.length,0);
+ assert.match(withAlt.pages.en.previewHtml,/alt="Pilot image alt-text test override"/);
 });
