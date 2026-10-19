@@ -113,3 +113,10 @@ test('records resolved Word font size in the source rich inventory',async()=>{
  assert.equal(r.ok,true,r.errors.join('; '));
  assert.equal(r.runs[0].fontSizePt,12);
 });
+
+
+test('fails closed on numbering references until numbering.xml semantics are resolved',async()=>{
+ const numbered=await inspectDocxRichContent(await fixture('<w:p><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="7"/></w:numPr></w:pPr><w:r><w:t>List item</w:t></w:r></w:p>'));
+ assert.equal(numbered.ok,false);
+ assert.ok(numbered.errors.length>0,'Numbering must not be approved without mapping its definition and rendered marker.');
+});
