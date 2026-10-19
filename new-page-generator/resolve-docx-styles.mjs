@@ -119,7 +119,13 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
       // OOXML font-family and language properties are attribute-level overrides:
       // a direct ascii value must not erase an inherited eastAsia/cs value.
       if ((key==='fontFamily'||key==='language') && value && typeof value==='object' && !value.unsupported) {
-        target[key]={...(target[key] && typeof target[key]==='object' ? target[key] : {}),...value};
+        const prior=target[key];
+        if (prior?.unsupported && key==='fontFamily' && ['ascii','hAnsi','eastAsia','cs'].every(script=>typeof value[script]==='string'&&value[script])) {
+          // A fully explicit four-script font tuple safely replaces an unresolved inherited theme tuple.
+          target[key]={...value};
+        } else {
+          target[key]={...(prior && typeof prior==='object' ? prior : {}),...value};
+        }
       } else target[key]=value;
     }
   };
