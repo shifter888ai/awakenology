@@ -44,7 +44,7 @@ No site-wide global header/footer migration, no runtime template loading, no aut
 
 ## Latest verification note
 
-The real multilingual illustrated pilot now passes source-map, asset extraction, image-placement inventory, and rich-content fidelity checks. Its converted preview also matches the source paragraph text after omitted empty Word paragraphs are restored. The remaining review gates are floating-image visual fidelity and one image whose Word source has no alt text. The preview shows the floating image inline, which does not prove that Word wrapping and placement match. The preview is explicitly not publishable until a human compares it with the original Word document and supplies reviewed alt text for the image with missing metadata. CI audit: [run 39291052580](https://github.com/shifter888ai/awakenology/actions/runs/39291052580).
+The real multilingual illustrated pilot now passes source-map, asset extraction, image-placement inventory, and rich-content fidelity checks. Its converted preview also matches the source paragraph text after omitted empty Word paragraphs are restored. The remaining review gates are floating-image visual fidelity and one image whose Word source has no alt text. The current renderer maps the source top-and-bottom wrap to a responsive block image with measured Word dimensions; that mapping still needs a human visual comparison against Word. The preview is explicitly not publishable until a human compares it with the original Word document and supplies reviewed alt text for the image with missing metadata. CI audit: [run 39291052580](https://github.com/shifter888ai/awakenology/actions/runs/39291052580).
 
 ## Floating-image review gate
 
