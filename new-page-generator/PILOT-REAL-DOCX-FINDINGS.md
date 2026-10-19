@@ -78,3 +78,10 @@ The unchanged pilot now reports:
 - one ambiguous run/text mapping at paragraph 125 (the known explicit text-wrapping break).
 
 This grouping confirms several distinct preservation requirements: explicit font/size/language metadata, complex-script formatting, capitalization/character spacing, style resolution, and ordered break handling. These should be addressed as separately testable capabilities, not waived together. The conversion adapter still correctly blocks explicit color and the floating drawing; rich-content and conversion remain blocked, and `pilotApproved` remains false.
+
+
+## Extraction fail-closed guard expansion (CI run 39202544960)
+
+The DOCX-to-HTML adapter now explicitly blocks source documents containing formatting/layout properties it does not yet preserve losslessly: explicit font families, font sizes, language metadata, complex-script bold/italic, capitalization/character spacing, paragraph/run style references, list numbering, indentation, and paragraph alignment. These were added as named feature checks in `extract-docx.mjs`, with regression tests proving the adapter returns `html: null` instead of silently flattening the affected formatting.
+
+Validation: **115 automated tests passed**. The real pilot is still blocked, as expected, now with the unsupported properties clearly reported by the conversion stage. This change narrows the risk of accidental loss; it does not claim these features are supported, and no page output has been approved.
