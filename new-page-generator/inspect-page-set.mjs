@@ -6,6 +6,7 @@ import { inspectPastedHtml } from "./inspect-paste.mjs";
 import { validateInventory, compareInventories } from "./content-inventory.mjs";
 import { normalizeHtmlInventory } from "./normalize-html-inventory.mjs";
 import { markdownToHtml } from "./markdown-to-html.mjs";
+import { parseFragment, serialize } from "parse5";
 
 export function isFloatingDrawingReviewOnly(extracted) {
   return Boolean(extracted && extracted.ok===false && typeof extracted.previewHtml==="string" &&
@@ -13,30 +14,71 @@ export function isFloatingDrawingReviewOnly(extracted) {
     extracted.errors[0]===FLOATING_DRAWING_REVIEW_ERROR && typeof extracted.sha256==="string");
 }
 
-export function prepareDocxInspection(extracted, parser, approvedSha256=null) {
-  if(extracted?.ok) return {
-    inspected:inspectPastedHtml(extracted.html,parser),
-    assetFiles:extracted.assetFiles??[],
-    previewHtml:null,sourceSha256:extracted.sha256??null,
-    visualReviewRequired:false,visualReviewApproved:false,reviewWarnings:[]
+export function applyImageAltTextOverrides(html, overrides={}) {
+  const errors=[], applied={};
+  if(!overrides || typeof overrides!=="object" || Array.isArray(overrides)) return {html,applied,errors:["Image alt-text overrides must be an object keyed by exact image src."]};
+  const fragment=parseFragment(html);
+  const used=new Set();
+  const walk=node=>{
+    if(node.nodeName==="img") {
+      const src=node.attrs?.find(item=>item.name==="src")?.value??"";
+      const alt=node.attrs?.find(item=>item.name==="alt");
+      const hasOverride=Object.prototype.hasOwnProperty.call(overrides,src);
+      if(hasOverride) {
+        const value=overrides[src];
+        if(typeof value!=="string"||!value.trim()||value.length>500||/[\\u0000-\\u0008\\u000b\\u000c\\u000e-\\u001f]/.test(value)) {
+          errors.push("Invalid alt-text override for image src "+src+".");
+        } else if(alt?.value?.trim()) {
+          if(alt.value!==value) errors.push("Refusing to replace source-provided alt text for image src "+src+".");
+          used.add(src);
+        } else {
+          if(alt) alt.value=value;
+          else node.attrs.push({name:"alt",value});
+          applied[src]=value; used.add(src);
+        }
+      }
+    }
+    for(const child of node.childNodes??[]) walk(child);
   };
-  if(isFloatingDrawingReviewOnly(extracted)) {
-    const visualReviewApproved=approvedSha256===extracted.sha256;
+  walk(fragment);
+  for(const src of Object.keys(overrides)) if(!used.has(src)) errors.push("Alt-text override does not match a missing-alt image in this preview: "+src+".");
+  return {html:serialize(fragment),applied,errors};
+}
+export function prepareDocxInspection(extracted, parser, approvedSha256=null, imageAltTextBySrc={}) {
+  if(extracted?.ok) {
+    const alt=applyImageAltTextOverrides(extracted.html,imageAltTextBySrc);
+    const inspected=inspectPastedHtml(alt.html,parser);
+    inspected.errors.push(...alt.errors);
     return {
-      inspected:inspectPastedHtml(extracted.previewHtml,parser),
-      assetFiles:extracted.assetFiles??[],
-      previewHtml:extracted.previewHtml,sourceSha256:extracted.sha256,
+      inspected,assetFiles:extracted.assetFiles??[],previewHtml:null,sourceSha256:extracted.sha256??null,
+      visualReviewRequired:false,visualReviewApproved:false,reviewWarnings:[],imageAltTextBySrc:alt.applied,
+      imageAltIssues:findMissingImageAlt(inspected.inventory)
+    };
+  }
+  if(isFloatingDrawingReviewOnly(extracted)) {
+    const alt=applyImageAltTextOverrides(extracted.previewHtml,imageAltTextBySrc);
+    const visualReviewApproved=approvedSha256===extracted.sha256;
+    const inspected=inspectPastedHtml(alt.html,parser);
+    inspected.errors.push(...alt.errors);
+    return {
+      inspected,assetFiles:extracted.assetFiles??[],previewHtml:alt.html,sourceSha256:extracted.sha256,
       visualReviewRequired:!visualReviewApproved,visualReviewApproved,
-      reviewWarnings:visualReviewApproved?[]:[...extracted.errors]
+      reviewWarnings:visualReviewApproved?[]:[...extracted.errors],imageAltTextBySrc:alt.applied,
+      imageAltIssues:findMissingImageAlt(inspected.inventory)
     };
   }
   return {
     inspected:{ok:false,errors:extracted?.errors??["DOCX extraction result is invalid."],inventory:[]},
     assetFiles:[],previewHtml:null,sourceSha256:extracted?.sha256??null,
-    visualReviewRequired:false,visualReviewApproved:false,reviewWarnings:[]
+    visualReviewRequired:false,visualReviewApproved:false,reviewWarnings:[],imageAltTextBySrc:{},imageAltIssues:[]
   };
 }
-
+function findMissingImageAlt(inventory) {
+  return (inventory??[]).filter(item=>item.type==="element"&&item.tag==="IMG").map(item=>{
+    const attrs=Object.fromEntries(item.attributes??[]);
+    return {path:item.path,src:attrs.src??"",alt:attrs.alt??""};
+  }).filter(item=>!item.alt.trim());
+}
 /**
  * Connects the existing validators without inventing a DOCX converter.
  * `inputs` maps language to { markdown, parser }, { html, parser }, or
@@ -76,7 +118,7 @@ export async function inspectPageSet(pageSet, inputs = {}) {
         errors.push(...rich.errors.map(e => `${lang}: original DOCX rich content: ${e}`));
       } else sourceRichInventory = rich;
       const extracted = await extractDocx(input.buffer);
-      const prepared=prepareDocxInspection(extracted,input.parser,input.floatingImageReviewApprovedSha256??null);
+      const prepared=prepareDocxInspection(extracted,input.parser,input.floatingImageReviewApprovedSha256??null,input.imageAltTextBySrc??{});
       inspected=prepared.inspected;
       assetFiles=prepared.assetFiles;
       previewHtml=prepared.previewHtml;
@@ -84,6 +126,8 @@ export async function inspectPageSet(pageSet, inputs = {}) {
       visualReviewRequired=prepared.visualReviewRequired;
       visualReviewApproved=prepared.visualReviewApproved;
       reviewWarnings=prepared.reviewWarnings;
+      const imageAltTextBySrc=prepared.imageAltTextBySrc;
+      const imageAltIssues=prepared.imageAltIssues;
     }
     const pageErrors = [...inspected.errors];
     let normalizedBlocks = [];
@@ -100,7 +144,7 @@ export async function inspectPageSet(pageSet, inputs = {}) {
         if (normalized.ok) normalizedBlocks = normalized.blocks;
       }
     }
-    pages[lang] = { mode: meta.mode, inventory: inspected.inventory, normalizedBlocks, sourceRichInventory, assetFiles, errors: pageErrors, ...(previewHtml ? {previewHtml,sourceSha256:previewSourceSha256,visualReviewRequired,visualReviewApproved,reviewWarnings} : {}) };
+    pages[lang] = { mode: meta.mode, inventory: inspected.inventory, normalizedBlocks, sourceRichInventory, assetFiles, errors: pageErrors, ...(previewHtml ? {previewHtml,sourceSha256:previewSourceSha256,visualReviewRequired,visualReviewApproved,reviewWarnings,imageAltTextBySrc,imageAltIssues} : {}) };
     errors.push(...pageErrors.map(e => `${lang}: ${e}`));
   }
   for(const [lang,page] of Object.entries(pages)) for(const warning of page.reviewWarnings??[]) errors.push(lang+': '+warning);
