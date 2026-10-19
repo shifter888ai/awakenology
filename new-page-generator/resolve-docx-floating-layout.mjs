@@ -18,8 +18,11 @@ export function resolveDocxFloatingLayout(placement, paragraphIndentation={}) {
   const extent=attributes(placement.extent??"");
   const horizontal=position(placement.horizontalPosition,"positionH");
   const vertical=position(placement.verticalPosition,"positionV");
-  if(!placement.wrap?.startsWith("<wp:wrapSquare")||wrap.wrapText!=="bothSides")
-    return {ok:false,error:"Only Word square wrapping with text on both sides is currently mapped."};
+  const wrapTag=/<wp:(wrap\\w+)\\b/.exec(placement.wrap??"")?.[1]??null;
+  if(wrapTag==="wrapSquare"&&wrap.wrapText!=="bothSides")
+    return {ok:false,error:"Square wrapping must allow text on both sides."};
+  if(!["wrapSquare","wrapTopAndBottom"].includes(wrapTag))
+    return {ok:false,error:"This Word floating-image wrap mode is not yet mapped."};
   if(horizontal?.relativeFrom!=="column"||horizontal.offset!==0||vertical?.relativeFrom!=="paragraph"||vertical.offset!==0)
     return {ok:false,error:"Floating image must be anchored at zero offset from the column and paragraph."};
   if(anchor.behindDoc!=="0") return {ok:false,error:"Behind-document floating images require a separate renderer."};
@@ -30,18 +33,18 @@ export function resolveDocxFloatingLayout(placement, paragraphIndentation={}) {
     const value=Number(anchor[name]??"0");
     return Number.isSafeInteger(value)&&value>=0?emuToPt(value):null;
   };
-  const right=distance("distR"),top=distance("distT"),bottom=distance("distB");
-  if([right,top,bottom].some(value=>value===null)) return {ok:false,error:"Floating image text distances are invalid."};
+  const left=distance("distL"),right=distance("distR"),top=distance("distT"),bottom=distance("distB");
+  if([left,right,top,bottom].some(value=>value===null)) return {ok:false,error:"Floating image text distances are invalid."};
   const indentTwips=Number(paragraphIndentation.left??0);
   if(!Number.isFinite(indentTwips)) return {ok:false,error:"Paragraph indentation cannot be resolved for floating image placement."};
-  const style={
-    float:"left",
+  const common={
     width:pt(emuToPt(cx))+"pt",
-    height:pt(emuToPt(cy))+"pt",
     "margin-left":pt(-twipsToPt(indentTwips))+"pt",
-    "margin-right":pt(right)+"pt",
     "margin-top":pt(top)+"pt",
     "margin-bottom":pt(bottom)+"pt"
   };
+  const style=wrapTag==="wrapTopAndBottom"
+    ? {display:"block",clear:"both",...common,"max-width":"100%",height:"auto","margin-right":"auto"}
+    : {float:"left",...common,height:pt(emuToPt(cy))+"pt","margin-right":pt(right)+"pt"};
   return {ok:true,style,css:Object.entries(style).map(([key,value])=>key+":"+value).join(";")};
 }
