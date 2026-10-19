@@ -40,7 +40,7 @@ export function compareRichContent(source, output) {
     }
     value.images.forEach((r, i) => {
       const where = side + '.images[' + i + ']';
-      required(r, ['assetPath', 'paragraphIndex', 'order', 'alt', 'textOffset', 'markerOrder'], where);
+      required(r, ['assetPath', 'paragraphIndex', 'order', 'alt', 'textOffset', 'markerOrder', 'placement'], where);
       if (typeof r.assetPath !== 'string' || !r.assetPath ||
           !Number.isInteger(r.paragraphIndex) || r.paragraphIndex < 0 ||
           !Number.isInteger(r.order) || r.order < 0 || !Number.isInteger(r.textOffset) || r.textOffset < 0 || !Number.isInteger(r.markerOrder) || r.markerOrder < 0 ||
@@ -69,7 +69,7 @@ export function compareRichContent(source, output) {
   for (const key of ['runs', 'images']) {
     if (source[key].length !== output[key].length) issues.push({kind: key + '-count', expected: source[key].length, actual: output[key].length});
     for (let i = 0; i < Math.min(source[key].length, output[key].length); i++) {
-      const fields = key === 'runs' ? ['paragraphIndex', 'text', 'bold', 'italic', 'underline', 'color', 'fontSizePt', 'href'] : ['assetPath', 'paragraphIndex', 'order', 'alt', 'textOffset', 'markerOrder'];
+      const fields = key === 'runs' ? ['paragraphIndex', 'text', 'bold', 'italic', 'underline', 'color', 'fontSizePt', 'href'] : ['assetPath', 'paragraphIndex', 'order', 'alt', 'textOffset', 'markerOrder', 'placement'];
       for (const field of fields) {
         if (typeof source[key][i][field] !== typeof output[key][i][field] || source[key][i][field] !== output[key][i][field]) {
           issues.push({kind: key + '-mismatch', index: i, field, expected: source[key][i][field], actual: output[key][i][field]});
