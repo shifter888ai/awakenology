@@ -61,10 +61,10 @@ test("preserves paragraph and character spacing in inline HTML formatting", asyn
   assert.match(result.html, /line-height:18pt/);
   assert.match(result.html, /letter-spacing:1pt/);
 });
-test("reject style and paragraph layout metadata rather than flattening it", async () => {
+test("reject unresolved Word numbering definitions rather than flattening them", async () => {
   const result = await extractDocx(await fixture('<w:pPr><w:pStyle w:val="Heading1"/><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr><w:ind w:left="720"/><w:jc w:val="center"/></w:pPr><w:t>Heading</w:t>'));
   assert.equal(result.ok, false);
-  assert.match(result.errors.join(" "), /active or unresolved paragraph numbering/);
+  assert.match(result.errors.join(" "), /numbering definition|numbering level/i);
   assert.equal(result.html, null);
 });
 
