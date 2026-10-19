@@ -275,3 +275,12 @@ test("maps Word kerning threshold to CSS when effective font size is known", () 
  assert.equal(result.formatting.fontKerningThresholdPt,1);
  assert.equal(result.formatting.fontKerning,'normal');
 });
+
+
+test("rejects unmodeled Word font and language attributes rather than silently discarding them",()=>{
+ for (const property of ['<w:rFonts w:ascii="Arial" w:asciiTheme="minorHAnsi"/>','<w:rFonts w:ascii="Arial" w:unexpected="value"/>','<w:lang w:val="en-US" w:unexpected="value"/>']) {
+  const result=resolveDocxRunFormatting({stylesXml:styles(),paragraphXml:paragraph(),runXml:run('',property)});
+  assert.equal(result.ok,false,property);
+  assert.equal(result.formatting,null);
+ }
+});
