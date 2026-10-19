@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { generateReviewedPageSet } from "./generate-reviewed-page-set.mjs";
 import JSZip from "jszip";
+import { parseFragment } from "parse5";
 
 const pageSet = { pages: Object.fromEntries(["en", "ja", "zh-Hant"].map((lang, i) => [lang, {
   title: lang, mode: "paste", source: "fixture", route: ["/English/example/", "/Japanese/example/", "/Chinese/example/"][i]
@@ -38,6 +39,19 @@ function mockParser() {
       return { body: { childNodes: [p] } };
     }
   };
+}
+function realisticParser() {
+ return {parseFromString(html) {
+  const fragment=parseFragment(html);
+  const convert=(node,parentNode=null)=>{
+   if(node.nodeName==="#text") return {nodeType:3,textContent:node.value,parentNode};
+   if(node.nodeName==="#comment") return {nodeType:8,textContent:node.data,parentNode};
+   const result={nodeType:1,tagName:node.tagName?.toUpperCase()??node.nodeName.toUpperCase(),attributes:(node.attrs??[]).map(attr=>({name:attr.name,value:attr.value})),childNodes:[],parentNode,getAttribute(name){return this.attributes.find(attr=>attr.name===name)?.value??null;}};
+   result.childNodes=(node.childNodes??[]).map(child=>convert(child,result));
+   return result;
+  };
+  return {head:{childNodes:[]},body:{childNodes:fragment.childNodes.map(node=>convert(node))}};
+ }};
 }
 function completeInputs() {
   return Object.fromEntries(["en", "ja", "zh-Hant"].map(lang => [lang, { html: "<p>Text</p>", parser: mockParser() }]));
