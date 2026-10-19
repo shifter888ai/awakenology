@@ -13,6 +13,30 @@ export function isFloatingDrawingReviewOnly(extracted) {
     extracted.errors[0]===FLOATING_DRAWING_REVIEW_ERROR && typeof extracted.sha256==="string");
 }
 
+export function prepareDocxInspection(extracted, parser, approvedSha256=null) {
+  if(extracted?.ok) return {
+    inspected:inspectPastedHtml(extracted.html,parser),
+    assetFiles:extracted.assetFiles??[],
+    previewHtml:null,sourceSha256:extracted.sha256??null,
+    visualReviewRequired:false,visualReviewApproved:false,reviewWarnings:[]
+  };
+  if(isFloatingDrawingReviewOnly(extracted)) {
+    const visualReviewApproved=approvedSha256===extracted.sha256;
+    return {
+      inspected:inspectPastedHtml(extracted.previewHtml,parser),
+      assetFiles:extracted.assetFiles??[],
+      previewHtml:extracted.previewHtml,sourceSha256:extracted.sha256,
+      visualReviewRequired:!visualReviewApproved,visualReviewApproved,
+      reviewWarnings:visualReviewApproved?[]:[...extracted.errors]
+    };
+  }
+  return {
+    inspected:{ok:false,errors:extracted?.errors??["DOCX extraction result is invalid."],inventory:[]},
+    assetFiles:[],previewHtml:null,sourceSha256:extracted?.sha256??null,
+    visualReviewRequired:false,visualReviewApproved:false,reviewWarnings:[]
+  };
+}
+
 /**
  * Connects the existing validators without inventing a DOCX converter.
  * `inputs` maps language to { markdown, parser }, { html, parser }, or
@@ -52,20 +76,14 @@ export async function inspectPageSet(pageSet, inputs = {}) {
         errors.push(...rich.errors.map(e => `${lang}: original DOCX rich content: ${e}`));
       } else sourceRichInventory = rich;
       const extracted = await extractDocx(input.buffer);
-      const floatingReviewOnly=isFloatingDrawingReviewOnly(extracted);
-      if (extracted.ok || floatingReviewOnly) assetFiles = extracted.assetFiles ?? [];
-      if (extracted.ok) {
-        inspected=inspectPastedHtml(extracted.html,input.parser);
-      } else if (floatingReviewOnly) {
-        previewHtml=extracted.previewHtml;
-        previewSourceSha256=extracted.sha256;
-        inspected=inspectPastedHtml(previewHtml,input.parser);
-        visualReviewApproved=input.floatingImageReviewApprovedSha256===extracted.sha256;
-        visualReviewRequired=!visualReviewApproved;
-        if(visualReviewRequired) reviewWarnings=[...extracted.errors];
-      } else {
-        inspected={ok:false,errors:extracted.errors,inventory:[]};
-      }
+      const prepared=prepareDocxInspection(extracted,input.parser,input.floatingImageReviewApprovedSha256??null);
+      inspected=prepared.inspected;
+      assetFiles=prepared.assetFiles;
+      previewHtml=prepared.previewHtml;
+      previewSourceSha256=prepared.sourceSha256;
+      visualReviewRequired=prepared.visualReviewRequired;
+      visualReviewApproved=prepared.visualReviewApproved;
+      reviewWarnings=prepared.reviewWarnings;
     }
     const pageErrors = [...inspected.errors];
     let normalizedBlocks = [];
