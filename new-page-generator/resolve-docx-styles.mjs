@@ -180,5 +180,5 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
   }
   for(const [key,value] of Object.entries(effective)) if(value?.unsupported) errors.push('Unsupported inherited Word formatting: '+key+'.');
   for(const [key,value] of Object.entries(paragraphMarkFormatting)) if(value?.unsupported) errors.push('Unsupported paragraph-mark formatting: '+key+'.');
-  return {ok:errors.length===0,errors,formatting:errors.length?null:effective,paragraphMarkFormatting:errors.length?null:paragraphMarkFormatting};
+  return {ok:errors.length===0,errors,formatting:errors.length?null:effective,paragraphMarkFormatting};
 }
