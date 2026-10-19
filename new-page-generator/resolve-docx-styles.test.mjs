@@ -71,9 +71,8 @@ test('does not apply paragraph-mark formatting to paragraph text runs',()=>{
   paragraphXml:'<w:p><w:pPr><w:rPr><w:b/></w:rPr></w:pPr></w:p>',
   runXml:run()
  });
- assert.equal(result.ok,false);
- assert.ok(result.errors.some(x=>x.includes('Paragraph-mark run formatting')));
- assert.equal(result.formatting,null);
+ assert.equal(result.ok,true,result.errors.join('; '));
+ assert.equal(result.formatting.b,false);
 });
 
 
