@@ -96,3 +96,21 @@ test("simple DOCX page sets may pass only after independent source and rendered 
  assert.equal(result.ok,true,result.errors.join("; "));
  assert.equal(result.stage,"review-ready-static-output");
 });
+
+test("DOCX reviewed text mismatch blocks every output page",async()=>{
+ const docx=await simpleDocx();
+ const docxPageSet={pages:Object.fromEntries(["en","ja","zh-Hant"].map((lang,i)=>[lang,{
+   title:lang,mode:"docx",source:"fixture",route:["/English/docx-mismatch/","/Japanese/docx-mismatch/","/Chinese/docx-mismatch/"][i]
+ }]))};
+ const inputs=Object.fromEntries(["en","ja","zh-Hant"].map(lang=>[lang,{buffer:docx,parser:mockParser()}]));
+ const outputs=Object.fromEntries(["en","ja","zh-Hant"].map(lang=>[lang,{
+   title:lang,description:"Fixture description",parser:mockParser(),
+   approvedHeader:"<header>Approved header</header>",approvedFooter:"<footer>Approved footer</footer>",
+   reviewedArticleHtml:"<p>Changed</p>"
+ }]));
+ const result=await generateReviewedPageSet({pageSet:docxPageSet,inputs,outputs});
+ assert.equal(result.ok,false);
+ assert.equal(result.stage,"content-integrity");
+ assert.deepEqual(result.pages,{});
+ assert.ok(result.errors.some(error=>/DOCX rich-content mismatch/.test(error)));
+});
