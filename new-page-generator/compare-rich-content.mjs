@@ -24,7 +24,8 @@ export function compareRichContent(source, output) {
           (own(r,'fontSizeCsPt') && !(r.fontSizeCsPt === null || (typeof r.fontSizeCsPt === 'number' && Number.isFinite(r.fontSizeCsPt) && r.fontSizeCsPt > 0))) ||
           (own(r,'allCaps') && typeof r.allCaps !== 'boolean') ||
           (own(r,'letterSpacingPt') && !(r.letterSpacingPt === null || (typeof r.letterSpacingPt === 'number' && Number.isFinite(r.letterSpacingPt)))) ||
-          (own(r,'fontKerning') && !(r.fontKerning === null || ['normal','none','auto'].includes(r.fontKerning))) ) {
+          (own(r,'fontKerning') && !(r.fontKerning === null || ['normal','none','auto'].includes(r.fontKerning))) ||
+          (own(r,'fontHint') && !(r.fontHint === null || ['default','eastAsia','cs'].includes(r.fontHint))) ) {
         throw new Error('Invalid run field types at ' + where);
       }
     });
@@ -83,7 +84,7 @@ export function compareRichContent(source, output) {
   for (const key of ['runs', 'images']) {
     if (source[key].length !== output[key].length) issues.push({kind: key + '-count', expected: source[key].length, actual: output[key].length});
     for (let i = 0; i < Math.min(source[key].length, output[key].length); i++) {
-      const fields = key === 'runs' ? ['paragraphIndex', 'text', 'bold', 'italic', 'underline', 'color', 'fontSizePt', 'href', ...(['fontFamily','language','fontSizeCsPt','allCaps','letterSpacingPt','fontKerning'].filter(field=>own(source[key][i],field)||own(output[key][i],field)))] : ['assetPath', 'paragraphIndex', 'order', 'alt', 'textOffset', 'markerOrder', 'placement'];
+      const fields = key === 'runs' ? ['paragraphIndex', 'text', 'bold', 'italic', 'underline', 'color', 'fontSizePt', 'href', ...(['fontFamily','language','fontSizeCsPt','allCaps','letterSpacingPt','fontKerning','fontHint'].filter(field=>own(source[key][i],field)||own(output[key][i],field)))] : ['assetPath', 'paragraphIndex', 'order', 'alt', 'textOffset', 'markerOrder', 'placement'];
       for (const field of fields) {
         const expected = source[key][i][field], actual = output[key][i][field];
         const equal = ['placement','language','fontFamily'].includes(field) ? JSON.stringify(expected) === JSON.stringify(actual) : (typeof expected === typeof actual && expected === actual);
