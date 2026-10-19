@@ -2,6 +2,7 @@
 // underline, explicit RGB color and half-point font size. It does not resolve font
 // families, language, complex-script sizes, paragraph layout, numbering or themes.
 const attrs = tag => Object.fromEntries([...tag.matchAll(/([\w:.-]+)=[\"']([^\"']*)[\"']/g)].map(m => [m[1], m[2]]));
+const hasDuplicateAttrs = tag => { const keys=[...tag.matchAll(/([\w:.-]+)=[\"'][^\"']*[\"']/g)].map(m=>m[1]); return new Set(keys).size !== keys.length; };
 const inner = (xml, tag) => new RegExp(String.raw`<w:${tag}(?:\s[^>]*)?>([\s\S]*?)<\/w:${tag}>`).exec(xml)?.[1] ?? '';
 const directTag = (xml, tag) => new RegExp(String.raw`<w:${tag}\b[^>]*\/?\s*>`).exec(xml)?.[0] ?? null;
 const propertyValue = (xml, tag) => {
@@ -39,7 +40,7 @@ function runProps(xml) {
   if (fonts) {
     const a = attrs(fonts);
     const allowedFontAttributes = new Set(['w:ascii','w:hAnsi','w:eastAsia','w:cs','w:hint']);
-    const unsupportedTheme = Object.keys(a).some(key => !allowedFontAttributes.has(key));
+    const unsupportedTheme = hasDuplicateAttrs(fonts) || Object.keys(a).some(key => !allowedFontAttributes.has(key));
     const families = {};
     for (const key of ['ascii','hAnsi','eastAsia','cs']) if (a['w:'+key]) families[key] = a['w:'+key];
     result.fontFamily = unsupportedTheme || !Object.keys(families).length ? {unsupported:true} : families;
@@ -49,7 +50,7 @@ function runProps(xml) {
   if (lang) {
     const a = attrs(lang), value = {};
     for (const key of ['val','eastAsia','bidi']) if (a['w:'+key]) value[key] = a['w:'+key];
-    result.language = Object.keys(a).some(key => !['w:val','w:eastAsia','w:bidi'].includes(key)) || !Object.keys(value).length ? {unsupported:true} : value;
+    result.language = hasDuplicateAttrs(lang) || Object.keys(a).some(key => !['w:val','w:eastAsia','w:bidi'].includes(key)) || !Object.keys(value).length ? {unsupported:true} : value;
   }
   const complexSize = directTag(xml,'szCs');
   if (complexSize) {
