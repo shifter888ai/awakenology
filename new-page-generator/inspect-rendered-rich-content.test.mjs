@@ -141,3 +141,29 @@ test("inspects rendered font family, word-language provenance, all-caps and lett
  assert.equal(result.runs[0].letterSpacingPt,1);
  assert.equal(result.runs[0].fontKerning,'normal');
 });
+
+
+test('inspects ordered list items with explicit Word numbering provenance',()=>{
+ const ol=node('OL',{},[]);
+ const li=node('LI',{
+  'data-word-num-id':'7','data-word-abstract-num-id':'2','data-word-level':'0',
+  'data-word-num-format':'decimal','data-word-num-text':'%1.','data-word-num-start':'3',
+  'data-word-indent-left':'720','data-word-indent-hanging':'360'
+ },[text('List item')]);
+ li.parentNode=ol; ol.childNodes.push(li);
+ const listParser={parseFromString:()=>({body:{childNodes:[ol]}})};
+ const r=inspectRenderedRichContent('<ol><li data-word-num-id="7">List item</li></ol>',listParser);
+ assert.equal(r.ok,true,r.errors.join('; '));
+ assert.deepEqual(r.paragraphNumbering,[{
+  paragraphIndex:0,numId:7,abstractNumId:2,level:0,format:'decimal',text:'%1.',start:3,
+  indentation:{left:720,right:undefined,firstLine:undefined,hanging:360}
+ }]);
+ assert.equal(r.paragraphCount,1);
+});
+
+test('blocks rendered list items without explicit Word numbering provenance',()=>{
+ const li=node('LI',{},[text('List item')]), ol=node('OL',{},[li]); li.parentNode=ol;
+ const r=inspectRenderedRichContent('<ol><li>List item</li></ol>',{parseFromString:()=>({body:{childNodes:[ol]}})});
+ assert.equal(r.ok,false);
+ assert.ok(r.errors.some(x=>x.includes('lacks explicit Word numbering provenance')));
+});
