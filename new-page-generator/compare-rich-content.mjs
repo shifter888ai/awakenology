@@ -59,6 +59,10 @@ export function compareRichContent(source, output) {
       const a=source.paragraphLayouts[i], b=output.paragraphLayouts[i];
       for (const field of ['paragraphIndex','alignment']) if (a[field] !== b[field]) issues.push({kind:'paragraph-layout-mismatch',index:i,field,expected:a[field],actual:b[field]});
       for (const field of ['left','right','firstLine','hanging']) if ((a.indentation[field] ?? null) !== (b.indentation[field] ?? null)) issues.push({kind:'paragraph-indentation-mismatch',index:i,field,expected:a.indentation[field] ?? null,actual:b.indentation[field] ?? null});
+      if (a.spacing !== undefined || b.spacing !== undefined) {
+        if (!a.spacing || !b.spacing) issues.push({kind:'paragraph-spacing-missing',index:i});
+        else for (const field of ['beforePt','afterPt','lineHeightPt']) if ((a.spacing[field] ?? null) !== (b.spacing[field] ?? null)) issues.push({kind:'paragraph-spacing-mismatch',index:i,field,expected:a.spacing[field] ?? null,actual:b.spacing[field] ?? null});
+      }
     }
   }
   {
