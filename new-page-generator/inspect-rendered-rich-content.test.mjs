@@ -28,3 +28,11 @@ test('blocks strike-through tags instead of losing formatting',()=>{
  assert.equal(r.ok,false);
  assert.ok(r.errors.some(x=>x.includes('deletion/strike')));
 });
+
+
+test('maps rendered br position within paragraph text',()=>{
+ const breakParser={parseFromString:()=>({body:{childNodes:[node('P',{},[text('A'),node('BR'),text('B')])]}})};
+ const r=inspectRenderedRichContent('<p>A<br>B</p>',breakParser);
+ assert.equal(r.ok,true,r.errors.join('; '));
+ assert.deepEqual(r.lineBreaks,[{paragraphIndex:0,textOffset:1,breakType:'textWrapping'}]);
+});
