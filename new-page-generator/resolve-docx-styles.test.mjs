@@ -326,7 +326,7 @@ test('resolves paragraph-mark font metadata separately from visible text formatt
  const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml:'<w:p><w:pPr><w:pStyle w:val="Derived"/><w:rPr><w:rFonts w:eastAsia="Noto Sans CJK JP"/></w:rPr></w:pPr></w:p>',runXml:run()});
  assert.equal(result.ok,true,result.errors.join('; '));
  assert.equal(result.formatting.fontFamily,undefined);
- assert.deepEqual(result.paragraphMarkFormatting.fontFamily,{eastAsia:'Noto Sans CJK JP'});
+ assert.deepEqual(result.paragraphMarkFormatting.fontFamily,{ascii:'Arial',hAnsi:'Arial',eastAsia:'Noto Sans CJK JP',cs:'Arial'});
  assert.deepEqual(result.paragraphMarkFormatting.language,{val:'en-US',eastAsia:'ja-JP'});
 });
 
