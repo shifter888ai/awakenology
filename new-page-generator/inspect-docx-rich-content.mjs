@@ -11,11 +11,13 @@ export async function inspectDocxRichContent(buffer) {
   const fail = errors => ({ ok: false, errors, runs: [], images: [], lineBreaks: [], paragraphLayouts: [], paragraphNumbering: [], paragraphMarkFormatting: [], paragraphCount: 0 });
   const source = await inspectDocxSourceMap(buffer);
   if (!source.ok) return fail(source.errors);
-  let xml, stylesXml, numberingXml, hasSectionBreak = false;
+  let xml, stylesXml, numberingXml, themeXml = null, hasSectionBreak = false;
   try {
     const zip = await JSZip.loadAsync(buffer, { checkCRC32: true });
     const documentPart = zip.file('word/document.xml');
     const stylesPart = zip.file('word/styles.xml');
+    const themePart = zip.file('word/theme/theme1.xml');
+    themeXml = themePart ? await themePart.async('string') : null;
     const numberingPart = zip.file('word/numbering.xml');
     if (!documentPart) return fail(['Original document OOXML part is missing.']);
     xml = await documentPart.async('string');
@@ -57,7 +59,7 @@ export async function inspectDocxRichContent(buffer) {
         return value===undefined || value===null || Number(value)===0 ? [] : [[key,value]];
       }));
     }
-    const markResolved=resolveDocxRunFormatting({stylesXml,paragraphXml:paragraphs[p][0],runXml:'<w:r/>'});
+    const markResolved=resolveDocxRunFormatting({stylesXml,paragraphXml:paragraphs[p][0],runXml:'<w:r/>',themeXml});
     if(!markResolved.ok) errors.push(...markResolved.errors.filter(error => error.startsWith('Unsupported paragraph-mark')));
     const markFormatting=markResolved.paragraphMarkFormatting;
     if(markFormatting && (Object.keys(markFormatting.fontFamily??{}).length || Object.keys(markFormatting.language??{}).length)) paragraphMarkFormatting.push({paragraphIndex:p,...markFormatting});
@@ -100,7 +102,7 @@ export async function inspectDocxRichContent(buffer) {
         const code = entity.startsWith('&#x') ? parseInt(entity.slice(3, -1), 16) : parseInt(entity.slice(2, -1), 10);
         return Number.isInteger(code) && code >= 0 && code <= 0x10ffff && !(code >= 0xd800 && code <= 0xdfff) ? String.fromCodePoint(code) : entity;
       });
-      const resolved = resolveDocxRunFormatting({stylesXml,paragraphXml:paragraphs[p][0],runXml:match[0]});
+      const resolved = resolveDocxRunFormatting({stylesXml,paragraphXml:paragraphs[p][0],runXml:match[0],themeXml});
       if (!resolved.ok) errors.push(...resolved.errors.map(error => error.startsWith('Unsupported inherited Word formatting:') ? 'Paragraph ' + (p + 1) + ': ' + error : error));
       const formatting = resolved.formatting;
 
