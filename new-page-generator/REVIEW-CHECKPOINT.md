@@ -143,3 +143,8 @@ Source and rendered rich-content inventories now include total paragraph counts,
 ## Expanded OOXML layout guards (2026-10-19)
 
 Conversion now blocks unhandled run effects/hidden text and paragraph pagination, direction and section-layout properties. The independent rich-content inspector also blocks paragraph indentation/alignment, page-flow controls and tables. This aligns the conversion and rich-content gates so unsupported layout cannot pass one stage merely because another stage catches it. CI [39204159713](https://github.com/shifter888ai/awakenology/actions/runs/39204159713) passed **141/141 tests**.
+
+
+## Raw HTML preflight and parser-repair guard (2026-10-19)
+
+The paste adapter now checks every raw HTML tag against the reviewed vocabulary before parsing, then inspects head CSS and linked stylesheets as well as the parsed body. This blocks scripts or document wrappers that parser repair could otherwise hide from body-only inventory. CI [39204366041](https://github.com/shifter888ai/awakenology/actions/runs/39204366041) passed **143/143 tests**. This reduces one blind spot but does not replace a full sanitizer or a trusted rendering boundary.
