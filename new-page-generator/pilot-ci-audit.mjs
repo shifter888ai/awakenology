@@ -3,6 +3,7 @@ import {createHash} from 'node:crypto';
 import JSZip from 'jszip';
 import {inspectDocxSourceMap} from './inspect-docx-source-map.mjs';
 import {segmentTrilingualDocxSource} from './segment-docx-languages.mjs';
+import {segmentConvertedHtml} from './segment-converted-html.mjs';
 import {inspectDocxAssets} from './inspect-docx-assets.mjs';
 import {inspectDocxImagePlacement} from './inspect-docx-image-placement.mjs';
 import {inspectDocxRichContent} from './inspect-docx-rich-content.mjs';
@@ -241,10 +242,29 @@ try {
 } catch(error) {
   languageSegmentation={ok:false,errors:['Language segmentation exception: '+error.message],segments:[]};
 }
-const report = {sourcePath, byteLength:buffer.length, sha256, diagnostic, stages, languageSegmentation,
+let languageHtmlSegmentation={ok:false,errors:['Converted HTML preview was unavailable.'],segments:[]};
+if(typeof conversionCandidate.previewHtml==='string') {
+  try {
+    const split=segmentConvertedHtml(conversionCandidate.previewHtml);
+    languageHtmlSegmentation={
+      ok:split.ok,
+      errors:split.errors,
+      boundaries:split.boundaries??[],
+      segments:(split.segments??[]).map(segment=>({
+        language:segment.language,marker:segment.marker,
+        startNode:segment.startNode,endNodeExclusive:segment.endNodeExclusive,
+        paragraphCount:segment.paragraphCount,imageCount:segment.imageCount,
+        textCharacterCount:segment.textCharacterCount
+      }))
+    };
+  } catch(error) {
+    languageHtmlSegmentation={ok:false,errors:['Converted HTML segmentation exception: '+error.message],segments:[]};
+  }
+}
+const report = {sourcePath, byteLength:buffer.length, sha256, diagnostic, stages, languageSegmentation, languageHtmlSegmentation,
   conversionPreview:{publishable:false,previewAvailable:typeof conversionCandidate.previewHtml==='string',errors:conversionCandidate.errors},
   pilotApproved:false,
-  note:'Diagnostic only. Language ranges are inventoried for review; trilingual output remains unapproved and non-publishable.'};
+  note:'Diagnostic only. Language ranges and converted preview fragments are inventoried for review; trilingual output remains unapproved and non-publishable.'};
 await mkdir('pilot-artifacts',{recursive:true});
 await writeFile(outputPath, JSON.stringify(report,null,2)+'\n');
 
