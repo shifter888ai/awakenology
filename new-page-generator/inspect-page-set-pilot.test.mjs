@@ -61,3 +61,27 @@ test("real DOCX pilot exposes a non-publishable floating-image preview for visua
  assert.equal(withAlt.pages.en.imageAltIssues.length,0);
  assert.match(withAlt.pages.en.previewHtml,/alt="Pilot image alt-text test override"/);
 });
+
+
+test("owner-approved visual review is bound to the exact DOCX hash and reviewed alt text",async()=>{
+ const buffer=await readFile(new URL("./temp/多重時空是什麽 - 繁體 - Copy.docx",import.meta.url));
+ const review=JSON.parse(await readFile(new URL("./pilot-human-review.json",import.meta.url),"utf8"));
+ const inputs={
+  en:{
+   buffer,parser,
+   floatingImageReviewApprovedSha256:review.visualReview.approved?review.sourceSha256:null,
+   imageAltTextBySrc:review.imageAltTextBySrc
+  },
+  ja:{html:"<p>Japanese review placeholder</p>",parser},
+  "zh-Hant":{html:"<p>Traditional Chinese review placeholder</p>",parser}
+ };
+ const result=await inspectPageSet(set,inputs);
+ assert.equal(result.pages.en.sourceSha256,review.sourceSha256,"approval must refer to the actual source bytes");
+ assert.equal(result.pages.en.visualReviewApproved,true);
+ assert.equal(result.pages.en.visualReviewRequired,false);
+ assert.equal(result.pages.en.imageAltIssues.length,0);
+ assert.equal(result.pages.en.imageAltTextBySrc["/assets/docx-b7dba7e21c2441ad.png"],"multi-planes");
+ assert.equal(result.errors.some(error=>error.includes(FLOATING_DRAWING_REVIEW_ERROR)),false);
+ assert.equal(review.publishingAuthorization,false);
+ assert.equal(review.mergeAuthorization,false);
+});
