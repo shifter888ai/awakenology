@@ -88,7 +88,8 @@ function runProps(xml) {
     let invalidTheme=false;
     for(const [script,name] of Object.entries(themeAttrs)) {
       const reference=a[name];
-      if(!reference || families[script]) continue;
+      if(!reference) continue;
+      if(families[script]) { invalidTheme=true; continue; }
       if(!/^(?:major|minor)(?:Ascii|HAnsi|EastAsia|Bidi)$/.test(reference)) invalidTheme=true;
       else themeRefs[script]=reference;
     }
