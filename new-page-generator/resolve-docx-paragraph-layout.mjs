@@ -9,7 +9,7 @@ const children = xml => [...xml.matchAll(/<w:([A-Za-z][A-Za-z0-9]*)\b[^>]*\/?\s*
 const layoutProps = xml => {
   const result = {};
   // Run properties nested under pPr (paragraph-mark formatting) are not paragraph layout.
-  const paragraphOnly=xml.replace(/<w:rPr\\b[^>]*>[\\s\\S]*?<\\/w:rPr>/g,'').replace(/<w:rPr\\b[^>]*\\/>/g,'');
+  const paragraphOnly=xml.replace(/<w:rPr\b[^>]*>[\s\S]*?<\/w:rPr>/g,'').replace(/<w:rPr\b[^>]*\/>/g,'');
   const jc = direct(paragraphOnly,'jc');
   if (jc) {
     const value=attrs(jc)['w:val'];
