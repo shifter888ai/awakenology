@@ -195,3 +195,13 @@ test('inspects paragraph-mark font and language metadata on paragraph containers
   paragraphIndex:0,fontFamily:{ascii:'Arial',eastAsia:'Yu Gothic'},language:{val:'en-US',eastAsia:'ja-JP'}
  }]);
 });
+
+
+test("inspects heading elements as paragraph-level rendered content",()=>{
+ const heading=node("H2",{style:"text-align:center"},[text("Heading")]);
+ const result=inspectRenderedRichContent("<h2 style=\"text-align:center\">Heading</h2>",{parseFromString:()=>({body:{childNodes:[heading]}})});
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.equal(result.paragraphCount,1);
+ assert.deepEqual(result.paragraphLayouts.map(item=>item.alignment),["center"]);
+ assert.equal(result.runs[0].text,"Heading");
+});
