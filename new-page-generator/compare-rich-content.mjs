@@ -75,6 +75,18 @@ export function compareRichContent(source, output) {
       }
     }
   }
+  if (Array.isArray(source.paragraphMarkFormatting) && source.paragraphMarkFormatting.length) {
+    if (!Array.isArray(output.paragraphMarkFormatting)) {
+      issues.push({kind:'paragraph-mark-formatting-rendered-inventory-missing',expected:source.paragraphMarkFormatting.length,actual:null});
+    } else {
+      if (source.paragraphMarkFormatting.length !== output.paragraphMarkFormatting.length) issues.push({kind:'paragraph-mark-formatting-count',expected:source.paragraphMarkFormatting.length,actual:output.paragraphMarkFormatting.length});
+      for(let i=0;i<Math.min(source.paragraphMarkFormatting.length,output.paragraphMarkFormatting.length);i++) {
+        const a=source.paragraphMarkFormatting[i], b=output.paragraphMarkFormatting[i];
+        if(a.paragraphIndex!==b.paragraphIndex) issues.push({kind:'paragraph-mark-formatting-paragraph',index:i,expected:a.paragraphIndex,actual:b.paragraphIndex});
+        for(const field of ['fontFamily','language']) if(JSON.stringify(a[field]??null)!==JSON.stringify(b[field]??null)) issues.push({kind:'paragraph-mark-formatting-'+field,index:i,expected:a[field]??null,actual:b[field]??null});
+      }
+    }
+  }
   // Matching anchor metadata is not proof that HTML reproduces Word floating layout.
   if (source.images.some(image => image.placement.kind === 'floating') || output.images.some(image => image.placement.kind === 'floating')) {
     issues.push({kind:'floating-image-visual-review-required'});
