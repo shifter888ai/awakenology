@@ -112,3 +112,11 @@ test('extracts explicit rendered paragraph alignment and indentation in twips',(
  assert.equal(r.ok,true,r.errors.join('; '));
  assert.deepEqual(r.paragraphLayouts,[{paragraphIndex:0,alignment:'center',indentation:{left:720,right:180,firstLine:360}}]);
 });
+
+
+test('maps negative CSS text-indent to Word hanging indentation',()=>{
+ const hangingParser={parseFromString:()=>({body:{childNodes:[node('P',{style:'margin-left: 24pt; text-indent: -12pt'},[text('Hanging')])]}})};
+ const r=inspectRenderedRichContent('<p style="margin-left:24pt;text-indent:-12pt">Hanging</p>',hangingParser);
+ assert.equal(r.ok,true,r.errors.join('; '));
+ assert.deepEqual(r.paragraphLayouts,[{paragraphIndex:0,alignment:'left',indentation:{left:480,right:0,hanging:240}}]);
+});
