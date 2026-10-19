@@ -6,13 +6,13 @@ const p=(id='',direct='')=>'<w:p><w:pPr>'+(id?'<w:pStyle w:val="'+id+'"/>':'')+d
 test('resolves supported direct alignment and indentation in twips',()=>{
  const r=resolveDocxParagraphLayout({stylesXml:styles(''),paragraphXml:p('', '<w:jc w:val="center"/><w:ind w:left="720" w:right="360" w:firstLine="240"/>')});
  assert.equal(r.ok,true,r.errors.join('; '));
- assert.deepEqual(r.layout,{alignment:'center',indentation:{left:720,right:360,firstLine:240}});
+ assert.deepEqual(r.layout,{alignment:'center',indentation:{left:720,right:360,firstLine:240},spacing:{beforePt:0,afterPt:0,lineHeightPt:null}});
 });
 test('inherits paragraph layout from base to derived style and applies direct overrides',()=>{
  const xml=styles('<w:style w:type="paragraph" w:styleId="Base"><w:pPr><w:jc w:val="right"/><w:ind w:left="720"/></w:pPr></w:style><w:style w:type="paragraph" w:styleId="Derived"><w:basedOn w:val="Base"/><w:pPr><w:ind w:right="240"/></w:pPr></w:style>');
  const r=resolveDocxParagraphLayout({stylesXml:xml,paragraphXml:p('Derived','<w:jc w:val="center"/>')});
  assert.equal(r.ok,true,r.errors.join('; '));
- assert.deepEqual(r.layout,{alignment:'center',indentation:{left:720,right:240}});
+ assert.deepEqual(r.layout,{alignment:'center',indentation:{left:720,right:240},spacing:{beforePt:0,afterPt:0,lineHeightPt:null}});
 });
 test('fails closed on missing/cyclic styles and unsupported paragraph properties',()=>{
  const missing=resolveDocxParagraphLayout({stylesXml:styles(''),paragraphXml:p('NoSuchStyle')});
