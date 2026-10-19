@@ -14,9 +14,9 @@ export async function inspectDocxRichContent(buffer) {
     const zip = await JSZip.loadAsync(buffer, { checkCRC32: true });
     const documentPart = zip.file('word/document.xml');
     const stylesPart = zip.file('word/styles.xml');
-    if (!documentPart || !stylesPart) return fail(['Original document or styles OOXML part is missing.']);
+    if (!documentPart) return fail(['Original document OOXML part is missing.']);
     xml = await documentPart.async('string');
-    stylesXml = await stylesPart.async('string');
+    stylesXml = stylesPart ? await stylesPart.async('string') : '<w:styles></w:styles>';
   } catch { return fail(['Cannot read original OOXML.']); }
 
   const errors = [], runs = [], paragraphLayouts = [];
