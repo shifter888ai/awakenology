@@ -56,3 +56,14 @@ test("blocks tabs, carriage returns, and non-text-wrapping breaks", async () => 
     assert.equal(result.ok, false, construct);
   }
 });
+
+test("records floating drawing anchor metadata without coercing it to inline", async () => {
+  const result = await inspectDocxSourceMap(await fixture('<w:p><w:r><w:drawing><wp:anchor behindDoc="0" allowOverlap="1"><wp:positionH relativeFrom="column"><wp:posOffset>0</wp:posOffset></wp:positionH><wp:positionV relativeFrom="paragraph"><wp:posOffset>0</wp:posOffset></wp:positionV><wp:wrapSquare/><wp:docPr id="28" name="Picture 1" descr="test"/><a:blip r:embed="rId4"/></wp:anchor></w:drawing></w:r></w:p>'));
+  assert.equal(result.ok, true, result.errors.join("; "));
+  assert.equal(result.imageReferences[0].relationshipId, "rId4");
+  assert.equal(result.imageReferences[0].placement.kind, "floating");
+  assert.equal(result.imageReferences[0].placement.anchorAttributes.behindDoc, "0");
+  assert.equal(result.imageReferences[0].placement.docPr.id, "28");
+  assert.match(result.imageReferences[0].placement.horizontalPosition, /relativeFrom="column"/);
+  assert.match(result.imageReferences[0].placement.wrap, /wp:wrapSquare/);
+});
