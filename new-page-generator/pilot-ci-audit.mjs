@@ -1,5 +1,6 @@
 import {readFile, writeFile, mkdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
+import JSZip from 'jszip';
 import {inspectDocxSourceMap} from './inspect-docx-source-map.mjs';
 import {inspectDocxAssets} from './inspect-docx-assets.mjs';
 import {inspectDocxImagePlacement} from './inspect-docx-image-placement.mjs';
@@ -11,6 +12,26 @@ const outputPath = 'pilot-artifacts/pilot-audit.json';
 const buffer = await readFile(sourcePath);
 const sha256 = createHash('sha256').update(buffer).digest('hex');
 const stages = {};
+const diagnostic = {unsupportedTextConstructs:[], drawingKinds:{}, explicitColors:[]};
+try {
+  const zip = await JSZip.loadAsync(buffer,{checkCRC32:true});
+  const xml = await zip.file('word/document.xml').async('string');
+  const textNames = ['txbxContent','altChunk','sdt','ins','del','fldSimple','instrText','hyperlink','tab','br','cr','sym','noBreakHyphen','softHyphen'];
+  for (const name of textNames) {
+    const count = [...xml.matchAll(new RegExp('<w:' + name + '(?=[\\s/>])','g'))].length;
+    if (count) diagnostic.unsupportedTextConstructs.push({name,count});
+  }
+  const alternate = [...xml.matchAll(/<mc:AlternateContent\b/g)].length;
+  if (alternate) diagnostic.unsupportedTextConstructs.push({name:'mc:AlternateContent',count:alternate});
+  for (const name of ['anchor','inline']) diagnostic.drawingKinds[name] = [...xml.matchAll(new RegExp('<wp:' + name + '(?=[\\s/>])','g'))].length;
+  const colors = new Map();
+  for (const tag of xml.matchAll(/<w:color\b[^>]*>/g)) {
+    const value = /\bw:val=["']([^"']+)["']/.exec(tag[0])?.[1] ?? '(no val)';
+    colors.set(value,(colors.get(value) ?? 0)+1);
+  }
+  diagnostic.explicitColors = [...colors].map(([value,count])=>({value,count}));
+} catch(error) {diagnostic.error = 'Cannot inspect pilot XML: ' + error.message;}
+
 for (const [name, inspect] of [
   ['sourceMap', inspectDocxSourceMap],
   ['assets', inspectDocxAssets],
@@ -30,7 +51,7 @@ for (const [name, inspect] of [
     stages[name] = {ok:false, errors:['Inspector exception: ' + error.message]};
   }
 }
-const report = {sourcePath, byteLength:buffer.length, sha256, stages,
+const report = {sourcePath, byteLength:buffer.length, sha256, diagnostic, stages,
   pilotApproved:false,
   note:'Diagnostic only. No language segmentation or reviewed page set has been approved.'};
 await mkdir('pilot-artifacts',{recursive:true});
