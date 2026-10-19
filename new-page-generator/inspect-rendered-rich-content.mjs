@@ -89,13 +89,15 @@ export function inspectRenderedRichContent(html, parser) {
         return Number(match[1]) * (match[2] === 'px' ? 0.75 : 1);
       };
       const rawLineHeight = formatting(node,'line-height');
-      let lineHeightPt = null;
+      let lineHeightPt = null, lineHeight = null;
       if (rawLineHeight !== null) {
-        const match = /^(\d+(?:\.\d+)?)(pt|px)$/.exec(rawLineHeight.toLowerCase());
-        if (!match) errors.push('Unsupported rendered paragraph line-height: '+rawLineHeight);
-        else lineHeightPt = Number(match[1]) * (match[2] === 'px' ? 0.75 : 1);
+        const match = /^(\\d+(?:\\.\\d+)?)(pt|px)$/.exec(rawLineHeight.toLowerCase());
+        if (match) lineHeightPt = Number(match[1]) * (match[2] === 'px' ? 0.75 : 1);
+        else if (/^\\d+(?:\\.\\d+)?$/.test(rawLineHeight) && Number(rawLineHeight)>0) lineHeight = Number(rawLineHeight);
+        else errors.push('Unsupported rendered paragraph line-height: '+rawLineHeight);
       }
       const spacing = {beforePt:readPoints('margin-top'),afterPt:readPoints('margin-bottom'),lineHeightPt};
+      if(lineHeight!==null) spacing.lineHeight=lineHeight;
       paragraphLayouts.push({paragraphIndex,alignment,indentation,spacing});
       const markFonts={};
       for(const [name,key] of [['data-word-mark-font-ascii','ascii'],['data-word-mark-font-hansi','hAnsi'],['data-word-mark-font-east-asia','eastAsia'],['data-word-mark-font-cs','cs']]) {
