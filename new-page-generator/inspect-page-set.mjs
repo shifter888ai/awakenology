@@ -27,6 +27,7 @@ export async function inspectPageSet(pageSet, inputs = {}) {
     }
     let inspected;
     let sourceRichInventory = null;
+    let assetFiles = [];
     if (meta.mode === "paste" || meta.mode === "html") {
       inspected = inspectPastedHtml(input.html, input.parser, { allowDocumentShell: meta.mode === "html" });
     } else if (meta.mode === "markdown") {
@@ -40,6 +41,7 @@ export async function inspectPageSet(pageSet, inputs = {}) {
         errors.push(...rich.errors.map(e => `${lang}: original DOCX rich content: ${e}`));
       } else sourceRichInventory = rich;
       const extracted = await extractDocx(input.buffer);
+      if (extracted.ok) assetFiles = extracted.assetFiles ?? [];
       inspected = extracted.ok
         ? inspectPastedHtml(extracted.html, input.parser)
         : { ok: false, errors: extracted.errors, inventory: [] };
@@ -59,7 +61,7 @@ export async function inspectPageSet(pageSet, inputs = {}) {
         if (normalized.ok) normalizedBlocks = normalized.blocks;
       }
     }
-    pages[lang] = { mode: meta.mode, inventory: inspected.inventory, normalizedBlocks, sourceRichInventory, errors: pageErrors };
+    pages[lang] = { mode: meta.mode, inventory: inspected.inventory, normalizedBlocks, sourceRichInventory, assetFiles, errors: pageErrors };
     errors.push(...pageErrors.map(e => `${lang}: ${e}`));
   }
   return { ok: errors.length === 0, errors, pages };
