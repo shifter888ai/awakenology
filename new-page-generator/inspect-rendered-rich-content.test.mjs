@@ -74,8 +74,8 @@ test('blocks inherited CSS and semantic layout tags until their effects are mapp
  assert.ok(css.errors.some(x=>x.includes('Embedded CSS rules')));
  const headingParser={parseFromString:()=>({body:{childNodes:[node('H1',{},[text('Heading')])]}})};
  const heading=inspectRenderedRichContent('<h1>Heading</h1>',headingParser);
- assert.equal(heading.ok,false);
- assert.ok(heading.errors.some(x=>x.includes('semantic formatting tag: H1')));
+ assert.equal(heading.ok,true,heading.errors.join('; '));
+ assert.deepEqual(heading.paragraphLayouts.map(item=>item.paragraphIndex),[0]);
 });
 test('blocks external stylesheets before assuming inline style inventory is complete',()=>{
  const stylesheetParser={parseFromString:()=>({
