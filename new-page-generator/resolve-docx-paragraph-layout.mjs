@@ -67,5 +67,5 @@ export function resolveDocxParagraphLayout({stylesXml,paragraphXml}) {
     if(key==='indentation' && value && typeof value==='object') for(const [side,n] of Object.entries(value)) if(side!=='unsupported' && n?.unsupported) errors.push('Unsupported paragraph indentation: '+side+'.');
   }
   if(result.indentation?.unsupported) errors.push('Character-based or conflicting Word indentation requires independent resolution.');
-  return {ok:errors.length===0,errors,layout:errors.length?null:result};
+  return {ok:errors.length===0,errors,layout:result};
 }
