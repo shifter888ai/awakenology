@@ -31,3 +31,9 @@ test("allows explicitly supported pixel-based inline layout",()=>{
  const result=reviewPasteInventory(el("P",[["style","font-size:16px;margin-left:12px;line-height:20px"]]));
  assert.equal(result.ok,true,result.errors.join("; "));
 });
+
+
+test("allows approved HTTPS links with paths and queries",()=>{
+ assert.equal(reviewPasteInventory(el("A",[["href","https://example.org/guide/page?q=1"]])).ok,true);
+ assert.equal(reviewPasteInventory(el("A",[["href","tel:+123456789"]])).ok,true);
+});
