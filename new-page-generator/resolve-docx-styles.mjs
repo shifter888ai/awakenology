@@ -9,6 +9,7 @@ const propertyValue = (xml, tag) => {
   const found = directTag(xml, tag);
   if (!found) return undefined;
   const value = attrs(found)['w:val'];
+  if (!/\/\s*>$/.test(found)) return {unsupported:true};
   if (tag !== 'color' && (hasDuplicateAttrs(found) || Object.keys(attrs(found)).some(key => key !== 'w:val'))) return {unsupported:true};
   if (tag === 'color') {
     if (hasDuplicateAttrs(found) || Object.keys(attrs(found)).some(key => !['w:val'].includes(key))) return {unsupported:true};
