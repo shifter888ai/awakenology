@@ -1,3 +1,4 @@
+import { resolveDocxFloatingLayout } from "./resolve-docx-floating-layout.mjs";
 // Independent rendered-HTML inventory. Caller inventories are not trusted.
 // Only explicit formatting is supported; inherited CSS requires separate review.
 const formatting = (node, key) => node.getAttribute?.('style')?.split(';').map(x=>x.trim()).find(x=>x.toLowerCase().startsWith(key+':'))?.split(':').slice(1).join(':').trim() ?? null;
@@ -120,7 +121,7 @@ export function inspectRenderedRichContent(html, parser) {
       lineBreaks.push({paragraphIndex:breakParagraph,textOffset:paragraphOffsets.get(breakParagraph) ?? 0,breakType:'textWrapping',markerOrder:nextMarkerOrder(breakParagraph)});
     }
     const style=node.getAttribute?.('style') ?? '';
-    const allowed=new Set(['color','font-weight','font-style','text-decoration','list-style-type','font-size','text-align','margin-left','margin-right','text-indent','margin-top','margin-bottom','line-height','font-family','text-transform','letter-spacing','font-kerning']);
+    const allowed=new Set(['color','font-weight','font-style','text-decoration','list-style-type','font-size','text-align','margin-left','margin-right','text-indent','margin-top','margin-bottom','float','width','height','line-height','font-family','text-transform','letter-spacing','font-kerning']);
     for(const decl of style.split(';').filter(x=>x.trim())) {
       const index=decl.indexOf(':');
       if(index<0 || !allowed.has(decl.slice(0,index).trim().toLowerCase())) errors.push('Unsupported rendered style: '+decl);
@@ -170,7 +171,26 @@ export function inspectRenderedRichContent(html, parser) {
       if(!assetPath || alt===null) errors.push('Image lacks src or alt.');
       if (thisParagraph === null) errors.push('Rendered image occurs outside a recognized paragraph block.');
       const imageParagraph = Math.max(0,thisParagraph ?? paragraphIndex);
-      images.push({assetPath,paragraphIndex:imageParagraph,order:order++,alt,textOffset:paragraphOffsets.get(imageParagraph) ?? 0,markerOrder:nextMarkerOrder(imageParagraph),placement:{kind:'inline'}});
+      const placementJson=node.getAttribute?.('data-word-image-placement-json');
+      let placement={kind:'inline',requiresVisualReview:false};
+      if(placementJson!==null&&placementJson!==undefined) {
+        try {
+          placement=JSON.parse(placementJson);
+          if(!placement||!['inline','floating'].includes(placement.kind)) throw new Error('invalid placement kind');
+        } catch { errors.push('Rendered image has invalid Word placement provenance metadata.'); placement={kind:'inline',requiresVisualReview:false}; }
+      } else if(formatting(node,'float') && formatting(node,'float')!=='none') {
+        errors.push('Rendered floating image lacks explicit Word placement provenance metadata.');
+      }
+      if(placement.kind==='floating') {
+        const layout=paragraphLayouts.find(item=>item.paragraphIndex===imageParagraph);
+        const expected=resolveDocxFloatingLayout(placement,layout?.indentation??{});
+        if(!expected.ok) errors.push('Rendered floating image placement is unsupported: '+expected.error);
+        else for(const [property,value] of Object.entries(expected.style)) {
+          const actual=formatting(node,property);
+          if(actual!==value) errors.push('Rendered floating image CSS '+property+' differs from the resolved Word anchor mapping.');
+        }
+      }
+      images.push({assetPath,paragraphIndex:imageParagraph,order:order++,alt,textOffset:paragraphOffsets.get(imageParagraph) ?? 0,markerOrder:nextMarkerOrder(imageParagraph),placement});
     }
     for(const child of node.childNodes ?? []) visit(child,next,thisParagraph);
   }
