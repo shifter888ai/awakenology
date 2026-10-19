@@ -34,7 +34,8 @@ function runProps(xml) {
   const size=directTag(xml,'sz');
   if(size) {
     const value=attrs(size)['w:val'];
-    if(value && /^\d+$/.test(value) && Number(value)>0) result.fontSizePt=Number(value)/2;
+    const invalidAttributes=hasDuplicateAttrs(size) || Object.keys(attrs(size)).some(key=>key!=='w:val');
+    if(!invalidAttributes && value && /^\d+$/.test(value) && Number(value)>0) result.fontSizePt=Number(value)/2;
     else result.fontSizePt={unsupported:true};
   }
   const fonts = directTag(xml,'rFonts');
@@ -56,7 +57,7 @@ function runProps(xml) {
   const complexSize = directTag(xml,'szCs');
   if (complexSize) {
     const value = attrs(complexSize)['w:val'];
-    result.fontSizeCsPt = value && /^\d+$/.test(value) && Number(value)>0 ? Number(value)/2 : {unsupported:true};
+    result.fontSizeCsPt = !hasDuplicateAttrs(complexSize) && Object.keys(attrs(complexSize)).every(key=>key==='w:val') && value && /^\d+$/.test(value) && Number(value)>0 ? Number(value)/2 : {unsupported:true};
   }
   for (const key of ['bCs','iCs','caps']) {
     const value = propertyValue(xml,key);
@@ -66,12 +67,12 @@ function runProps(xml) {
   const spacing = directTag(xml,'spacing');
   if (spacing) {
     const value = attrs(spacing)['w:val'];
-    result.letterSpacingPt = value && /^-?\d+$/.test(value) ? Number(value)/20 : {unsupported:true};
+    result.letterSpacingPt = !hasDuplicateAttrs(spacing) && Object.keys(attrs(spacing)).every(key=>key==='w:val') && value && /^-?\d+$/.test(value) ? Number(value)/20 : {unsupported:true};
   }
   const kern = directTag(xml,'kern');
   if (kern) {
     const value = attrs(kern)['w:val'];
-    result.fontKerningThresholdPt = value && /^\d+$/.test(value) ? Number(value)/2 : {unsupported:true};
+    result.fontKerningThresholdPt = !hasDuplicateAttrs(kern) && Object.keys(attrs(kern)).every(key=>key==='w:val') && value && /^\d+$/.test(value) ? Number(value)/2 : {unsupported:true};
   }
   return result;
 }
