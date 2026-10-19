@@ -2,7 +2,7 @@
 // Only explicit formatting is supported; inherited CSS requires separate review.
 const formatting = (node, key) => node.getAttribute?.('style')?.split(';').map(x=>x.trim()).find(x=>x.toLowerCase().startsWith(key+':'))?.split(':').slice(1).join(':').trim() ?? null;
 export function inspectRenderedRichContent(html, parser) {
-  const errors=[], runs=[], images=[], lineBreaks=[], paragraphLayouts=[];
+  const errors=[], runs=[], images=[], lineBreaks=[], paragraphLayouts=[], paragraphNumbering=[];
   const paragraphOffsets = new Map();
   const fontSizePt = node => {
     const value = formatting(node,'font-size');
@@ -36,12 +36,12 @@ export function inspectRenderedRichContent(html, parser) {
     }
     if (node.nodeType!==1) return;
     const tag=node.tagName.toUpperCase();
-    if (['H1','H2','H3','H4','H5','H6','BLOCKQUOTE','UL','OL','LI','TABLE','THEAD','TBODY','TFOOT','TR','TD','TH','HR','PRE','CODE','SUP','SUB','FONT','MARK','SMALL','BIG'].includes(tag)) {
+    if (['H1','H2','H3','H4','H5','H6','BLOCKQUOTE','TABLE','THEAD','TBODY','TFOOT','TR','TD','TH','HR','PRE','CODE','SUP','SUB','FONT','MARK','SMALL','BIG'].includes(tag)) {
       errors.push('Unsupported rendered structural/semantic formatting tag: ' + tag + '.');
     }
     if (tag === 'STYLE') errors.push('Embedded CSS rules are unsupported in rendered rich-content inspection.');
     if (tag === 'LINK' && /stylesheet/i.test(node.getAttribute?.('rel') ?? '')) errors.push('External stylesheets are unsupported in rendered rich-content inspection.');
-    if (['P','H1','H2','H3','H4','H5','H6','LI','TD','TH','BLOCKQUOTE'].includes(tag)) {
+    if (tag === 'LI') {\n      const list=node.parentNode;\n      const ordered=list?.tagName?.toUpperCase()==='OL';\n      const numberAttrs=['data-word-num-id','data-word-abstract-num-id','data-word-level','data-word-num-format','data-word-num-text','data-word-num-start','data-word-indent-left','data-word-indent-right','data-word-indent-first-line','data-word-indent-hanging'];\n      const values=Object.fromEntries(numberAttrs.map(name=>[name,node.getAttribute?.(name)]));\n      if (numberAttrs.some(name=>values[name]!==null && values[name]!==undefined)) {\n        const number=(name)=>values[name]===null||values[name]===undefined?null:values[name];\n        paragraphNumbering.push({paragraphIndex:paragraphIndex+1,numId:number('data-word-num-id')===null?null:Number(number('data-word-num-id')),abstractNumId:number('data-word-abstract-num-id')===null?null:Number(number('data-word-abstract-num-id')),level:number('data-word-level')===null?null:Number(number('data-word-level')),format:number('data-word-num-format')??(ordered?'decimal':'bullet'),text:number('data-word-num-text'),start:number('data-word-num-start')===null?null:Number(number('data-word-num-start')),indentation:{left:number('data-word-indent-left')===null?undefined:Number(number('data-word-indent-left')),right:number('data-word-indent-right')===null?undefined:Number(number('data-word-indent-right')),firstLine:number('data-word-indent-first-line')===null?undefined:Number(number('data-word-indent-first-line')),hanging:number('data-word-indent-hanging')===null?undefined:Number(number('data-word-indent-hanging'))}});\n      } else errors.push('Rendered list item lacks explicit Word numbering provenance metadata.');\n    }\n    if (['P','H1','H2','H3','H4','H5','H6','LI','TD','TH','BLOCKQUOTE'].includes(tag)) {
       paragraphIndex++;
       paragraphOffsets.set(paragraphIndex,0);
       paragraphMarkerOrders.set(paragraphIndex,0);
@@ -145,5 +145,5 @@ export function inspectRenderedRichContent(html, parser) {
   const initial={bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null,fontKerning:null,fontHint:null};
   for(const child of doc.body?.childNodes ?? []) visit(child,initial);
   if(!runs.length) errors.push('No rendered text runs.');
-  return {ok:errors.length===0,errors,runs,images,lineBreaks,paragraphLayouts,paragraphCount:paragraphIndex+1};
+  return {ok:errors.length===0,errors,runs,images,lineBreaks,paragraphLayouts,paragraphNumbering,paragraphCount:paragraphIndex+1};
 }
