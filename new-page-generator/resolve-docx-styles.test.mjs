@@ -10,14 +10,14 @@ test('resolves document defaults and paragraph style inheritance in base-to-deri
  const xml=styles('<w:style w:type="paragraph" w:styleId="Base"><w:rPr><w:i/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="Derived"><w:basedOn w:val="Base"/><w:rPr><w:b/></w:rPr></w:style>');
  const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml:paragraph('Derived'),runXml:run()});
  assert.equal(result.ok,true,result.errors.join('; '));
- assert.deepEqual(result.formatting,{b:true,i:true,u:false,color:'#000000'});
+ assert.deepEqual(result.formatting,{b:true,i:true,u:false,color:'#000000',fontSizePt:null});
 });
 
 test('direct formatting overrides inherited formatting, including explicit off values',()=>{
  const xml=styles('<w:style w:type="paragraph" w:styleId="Emphasis"><w:rPr><w:b/><w:i/><w:color w:val="FF0000"/></w:rPr></w:style>');
  const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml:paragraph('Emphasis'),runXml:run('', '<w:b w:val="0"/><w:i w:val="false"/><w:color w:val="0000FF"/>')});
  assert.equal(result.ok,true,result.errors.join('; '));
- assert.deepEqual(result.formatting,{b:false,i:false,u:false,color:'#0000ff'});
+ assert.deepEqual(result.formatting,{b:false,i:false,u:false,color:'#0000ff',fontSizePt:null});
 });
 
 test('resolves character style over paragraph style and direct run formatting over both',()=>{
@@ -84,4 +84,21 @@ test('rejects a character style used as a paragraph style',()=>{
  });
  assert.equal(result.ok,false);
  assert.ok(result.errors.some(x=>x.includes('expected paragraph')));
+});
+
+
+test('resolves Word font size from half-points and applies direct overrides',()=>{
+ const xml=styles('<w:style w:type="paragraph" w:styleId="P"><w:rPr><w:sz w:val="28"/></w:rPr></w:style>');
+ const inherited=resolveDocxRunFormatting({stylesXml:xml,paragraphXml:paragraph('P'),runXml:run()});
+ assert.equal(inherited.ok,true,inherited.errors.join('; '));
+ assert.equal(inherited.formatting.fontSizePt,14);
+ const direct=resolveDocxRunFormatting({stylesXml:xml,paragraphXml:paragraph('P'),runXml:run('', '<w:sz w:val="20"/>')});
+ assert.equal(direct.ok,true,direct.errors.join('; '));
+ assert.equal(direct.formatting.fontSizePt,10);
+});
+
+test('blocks malformed or zero Word font sizes',()=>{
+ const result=resolveDocxRunFormatting({stylesXml:styles(),paragraphXml:paragraph(),runXml:run('', '<w:sz w:val="0"/>')});
+ assert.equal(result.ok,false);
+ assert.ok(result.errors.some(x=>x.includes('Unsupported inherited Word formatting: fontSizePt')));
 });
