@@ -143,3 +143,13 @@ test('floating image without review status is invalid inventory',()=>{
  const source=sample(); source.images[0].placement={kind:'floating'};
  assert.throws(()=>compareRichContent(source,sample()),/Invalid image field types/);
 });
+
+
+test('matching floating image metadata still requires visual review',()=>{
+ const source=sample(), output=sample();
+ source.images[0].placement={kind:'floating',requiresVisualReview:true,anchorAttributes:{allowOverlap:'1'}};
+ output.images[0].placement={kind:'floating',requiresVisualReview:true,anchorAttributes:{allowOverlap:'1'}};
+ const result=compareRichContent(source,output);
+ assert.equal(result.ok,false);
+ assert.ok(result.issues.some(x=>x.kind==='floating-image-visual-review-required'));
+});
