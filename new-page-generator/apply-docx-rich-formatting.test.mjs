@@ -18,7 +18,7 @@ test("applies independently resolved run and paragraph formatting without changi
  assert.match(result.html,/line-height:18pt/);
  assert.match(result.html,/font-weight:bold/);
  assert.match(result.html,/color:#ff0000/);
- assert.match(result.html,/font-family:"Microsoft YaHei"/);
+ assert.match(result.html,/font-family:&quot;Microsoft YaHei&quot;/);
  assert.match(result.html,/data-word-lang-east-asia="zh-CN"/);
  assert.match(result.html,/letter-spacing:1pt/);
  assert.match(result.html,/text-transform:uppercase/);
