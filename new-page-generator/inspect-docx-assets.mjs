@@ -143,7 +143,7 @@ export async function inspectDocxAssets(buffer) {
       relationshipId: id,
       placement,
       sourcePath: target,
-      outputPath: `assets/docx-${sha256(bytes).slice(0, 16)}.${extension}`,
+      outputPath: `/assets/docx-${sha256(bytes).slice(0, 16)}.${extension}`,
       altText,
       contentType,
       byteLength: bytes.length,
