@@ -55,6 +55,7 @@ test("complete page set is generated from parsed HTML inventories", async () => 
   const result = await generateReviewedPageSet({ pageSet, inputs: completeInputs(), outputs: completeOutputs() });
   assert.equal(result.ok, true, result.errors.join("; "));
   assert.equal(result.stage, "review-ready-static-output");
+  assert.deepEqual(result.assets, []);
   assert.match(result.pages.en.html, /<article class="article"><p>Text<\/p><\/article>/);
 });
 test("rendered text changes block the whole page set", async () => {
