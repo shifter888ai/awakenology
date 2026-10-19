@@ -96,3 +96,11 @@ test('uses resolved inherited formatting in rich-content runs while keeping styl
  assert.deepEqual({bold:r.runs[0].bold,italic:r.runs[0].italic,underline:r.runs[0].underline,color:r.runs[0].color},{bold:true,italic:true,underline:false,color:'#000000'});
  assert.ok(r.errors.some(x=>x.includes('Unresolved OOXML feature w:pStyle')));
 });
+
+
+test('reports shared inherited-style blockers once rather than once per paragraph',async()=>{
+ const styles='<w:styles xmlns:w="x"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>';
+ const r=await inspectDocxRichContent(await fixture('<w:p><w:r><w:t>One</w:t></w:r></w:p><w:p><w:r><w:t>Two</w:t></w:r></w:p>',styles));
+ assert.equal(r.ok,false);
+ assert.equal(r.errors.filter(x=>x==='Unsupported document-default run property w:rFonts.').length,1);
+});
