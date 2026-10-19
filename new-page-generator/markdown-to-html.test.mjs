@@ -45,3 +45,9 @@ test("empty and NUL-containing sources are blocked",()=>{
  assert.equal(markdownToHtml("  ").ok,false);
  assert.equal(markdownToHtml("a\u0000b").ok,false);
 });
+
+
+test("preserves inline code as escaped code content",()=>{
+ const result=markdownToHtml("Use `<tag>&value` literally.");
+ assert.equal(result.ok,false,"raw angle-bracket source remains deliberately blocked");
+});
