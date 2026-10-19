@@ -1,5 +1,5 @@
 /**
- * Additional review gate for HTML paste inventories. This does not sanitize HTML.
+ * Additional review gate for inspected HTML inventories. This does not sanitize HTML.
  * Restricts attributes by element and rejects CSS or URL forms that need review.
  */
 const WORD_RUN_ATTRS = [
