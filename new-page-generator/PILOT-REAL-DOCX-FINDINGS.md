@@ -138,3 +138,10 @@ Validation: **129 tests passed, 0 failed** in [CI run 39203460322](https://githu
 The rendered rich-content inspector now rejects embedded CSS rules, linked external stylesheets, and structural/semantic tags whose browser-default layout or formatting is not yet represented in the comparison (including headings, lists, tables, blockquotes, preformatted/code, superscript/subscript, and legacy font/mark tags). The inspector also blocks text outside recognized paragraph containers. This closes a gap where CSS or built-in browser styling could affect the page without appearing in the inline-format inventory.
 
 Regression coverage verifies embedded CSS, external stylesheets and heading semantics. Validation: **131 tests passed, 0 failed** in [CI run 39203529462](https://github.com/shifter888ai/awakenology/actions/runs/39203529462). This is a conservative validation boundary, not support for these HTML structures.
+
+
+## Image position relative to paragraph text (CI run 39203712577)
+
+The source-map content stream now includes image anchors interleaved with text and line breaks in original XML order. Both the DOCX and rendered-HTML rich-content inventories record each image's character offset within its paragraph, and the comparator checks that offset along with image order, paragraph index, asset path and alt text. This closes a gap where text and image inventories could each pass independently even if the image had moved before or after the surrounding text.
+
+Regression tests verify source sequence `text → image → text`, the extracted image offset, rendered image offset, and rejection of a relocated image. Validation: **134 tests passed, 0 failed** in [CI run 39203712577](https://github.com/shifter888ai/awakenology/actions/runs/39203712577). Floating-image conversion is still blocked; this comparison does not claim to preserve its actual page-relative coordinates or wrapping.
