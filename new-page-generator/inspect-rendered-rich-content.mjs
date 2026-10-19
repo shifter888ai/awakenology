@@ -25,17 +25,21 @@ export function inspectRenderedRichContent(html, parser) {
     }
   };
   for (const child of doc.head?.childNodes ?? []) inspectHead(child);
-  function visit(node, state) {
+  function visit(node, state, activeParagraph = null) {
     if (node.nodeType===3) {
       if (node.textContent) {
-        if (paragraphIndex < 0) errors.push('Rendered text occurs outside a recognized paragraph block.');
-        runs.push({paragraphIndex:Math.max(0,paragraphIndex),text:node.textContent,...state});
-        if (paragraphIndex >= 0) paragraphOffsets.set(paragraphIndex,(paragraphOffsets.get(paragraphIndex) ?? 0)+node.textContent.length);
+        if (activeParagraph === null) {
+          if (node.textContent.trim()) errors.push('Rendered text occurs outside a recognized paragraph block.');
+          return;
+        }
+        runs.push({paragraphIndex:activeParagraph,text:node.textContent,...state});
+        paragraphOffsets.set(activeParagraph,(paragraphOffsets.get(activeParagraph) ?? 0)+node.textContent.length);
       }
       return;
     }
     if (node.nodeType!==1) return;
     const tag=node.tagName.toUpperCase();
+    let thisParagraph = activeParagraph;
     if (['BLOCKQUOTE','TABLE','THEAD','TBODY','TFOOT','TR','TD','TH','HR','PRE','CODE','SUP','SUB','FONT','MARK','SMALL','BIG'].includes(tag)) {
       errors.push('Unsupported rendered structural/semantic formatting tag: ' + tag + '.');
     }
@@ -53,6 +57,7 @@ export function inspectRenderedRichContent(html, parser) {
     }
     if (['P','H1','H2','H3','H4','H5','H6','LI','TD','TH','BLOCKQUOTE'].includes(tag)) {
       paragraphIndex++;
+      thisParagraph = paragraphIndex;
       paragraphOffsets.set(paragraphIndex,0);
       paragraphMarkerOrders.set(paragraphIndex,0);
       const alignmentValue = formatting(node,'text-align');
@@ -109,7 +114,11 @@ export function inspectRenderedRichContent(html, parser) {
       }
       if(Object.keys(markFonts).length || Object.keys(markLanguage).length) paragraphMarkFormatting.push({paragraphIndex,fontFamily:Object.keys(markFonts).length?markFonts:null,language:Object.keys(markLanguage).length?markLanguage:null});
     }
-    if (tag === 'BR') lineBreaks.push({paragraphIndex:Math.max(0,paragraphIndex),textOffset:paragraphOffsets.get(paragraphIndex) ?? 0,breakType:'textWrapping',markerOrder:nextMarkerOrder(Math.max(0,paragraphIndex))});
+    if (tag === 'BR') {
+      if (thisParagraph === null) errors.push('Rendered line break occurs outside a recognized paragraph block.');
+      const breakParagraph = Math.max(0,thisParagraph ?? paragraphIndex);
+      lineBreaks.push({paragraphIndex:breakParagraph,textOffset:paragraphOffsets.get(breakParagraph) ?? 0,breakType:'textWrapping',markerOrder:nextMarkerOrder(breakParagraph)});
+    }
     const style=node.getAttribute?.('style') ?? '';
     const allowed=new Set(['color','font-weight','font-style','text-decoration','list-style-type','font-size','text-align','margin-left','margin-right','text-indent','margin-top','margin-bottom','line-height','font-family','text-transform','letter-spacing','font-kerning']);
     for(const decl of style.split(';').filter(x=>x.trim())) {
@@ -159,9 +168,11 @@ export function inspectRenderedRichContent(html, parser) {
     if(tag==='IMG') {
       const assetPath=node.getAttribute('src'), alt=node.getAttribute('alt');
       if(!assetPath || alt===null) errors.push('Image lacks src or alt.');
-      images.push({assetPath,paragraphIndex,order:order++,alt,textOffset:paragraphOffsets.get(paragraphIndex) ?? 0,markerOrder:nextMarkerOrder(Math.max(0,paragraphIndex)),placement:{kind:'inline'}});
+      if (thisParagraph === null) errors.push('Rendered image occurs outside a recognized paragraph block.');
+      const imageParagraph = Math.max(0,thisParagraph ?? paragraphIndex);
+      images.push({assetPath,paragraphIndex:imageParagraph,order:order++,alt,textOffset:paragraphOffsets.get(imageParagraph) ?? 0,markerOrder:nextMarkerOrder(imageParagraph),placement:{kind:'inline'}});
     }
-    for(const child of node.childNodes ?? []) visit(child,next);
+    for(const child of node.childNodes ?? []) visit(child,next,thisParagraph);
   }
   const initial={bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null,fontKerning:null,fontHint:null};
   for(const child of doc.body?.childNodes ?? []) visit(child,initial);
