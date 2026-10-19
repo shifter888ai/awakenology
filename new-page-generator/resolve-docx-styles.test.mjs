@@ -111,3 +111,17 @@ test('direct unsupported run formatting cannot be silently dropped',()=>{
   assert.ok(result.errors.some(x=>x.includes('Unsupported direct run property')),result.errors.join('; '));
  }
 });
+
+test('rejects unsupported formatting in an inherited base even when a derived style overrides it',()=>{
+ const xml=styles('<w:style w:type="paragraph" w:styleId="Base"><w:rPr><w:rFonts w:ascii="Arial"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="Derived"><w:basedOn w:val="Base"/><w:rPr><w:b/></w:rPr></w:style>');
+ const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml:paragraph('Derived'),runXml:run()});
+ assert.equal(result.ok,false);
+ assert.equal(result.formatting,null);
+ assert.ok(result.errors.some(x=>x.includes('Unsupported run property w:rFonts in Word style Base')));
+});
+test('rejects unsupported direct formatting even when its value resembles an inherited supported property',()=>{
+ const result=resolveDocxRunFormatting({stylesXml:styles(),paragraphXml:paragraph(),runXml:run('', '<w:sz w:val="24"/><w:lang w:val="en-US"/>')});
+ assert.equal(result.ok,false);
+ assert.equal(result.formatting,null);
+ assert.ok(result.errors.some(x=>x.includes('Unsupported direct run property w:lang')));
+});
