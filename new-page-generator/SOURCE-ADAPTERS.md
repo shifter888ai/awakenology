@@ -29,7 +29,7 @@ Required browser fixture matrix:
 - Unsupported iframes/scripts/forms/events, style URL/expression, unsafe protocols, malformed HTML, comments
 - Content that browser DOMParser repairs unexpectedly must be detected by source-to-normalized comparison before acceptance
 
-## Shared output model (not implemented yet)
+## Shared output model (implemented contract; adapters remain partial)
 
 Every normalized block should carry `language`, `sourceMode`, `sourceLocation`, `type`, `orderedChildren`, `text`, `formatting`, `links`, `assets`, and `issues`. Generator is blocked whenever issues contain an unresolved warning about possible loss or ambiguity.
 
