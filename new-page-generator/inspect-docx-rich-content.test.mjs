@@ -40,13 +40,13 @@ test('blocks unrecognized Word formatting values rather than flattening them',as
 });
 
 
-test('blocks paragraph and run styles until inherited formatting is resolved',async()=>{
+test('blocks missing paragraph and run style definitions',async()=>{
  const paragraph=await inspectDocxRichContent(await fixture('<w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:t>Heading</w:t></w:r></w:p>'));
  assert.equal(paragraph.ok,false);
- assert.ok(paragraph.errors.some(x=>x.includes('Unresolved OOXML feature w:pStyle')));
+ assert.ok(paragraph.errors.some(x=>x.includes('Missing Word style Heading1')));
  const run=await inspectDocxRichContent(await fixture('<w:p><w:r><w:rPr><w:rStyle w:val="Emphasis"/></w:rPr><w:t>Emphasized</w:t></w:r></w:p>'));
  assert.equal(run.ok,false);
- assert.ok(run.errors.some(x=>x.includes('Unresolved OOXML feature w:rStyle')));
+ assert.ok(run.errors.some(x=>x.includes('Missing Word style Emphasis')));
 });
 
 
@@ -90,12 +90,12 @@ test('resolves supported paragraph layout and still blocks unsupported flow/tabl
 });
 
 
-test('uses resolved inherited formatting in rich-content runs while keeping style review blocked',async()=>{
+test('uses resolved inherited formatting without duplicate style-reference blockers',async()=>{
  const styles='<w:styles xmlns:w="x"><w:docDefaults><w:rPrDefault><w:rPr><w:color w:val="000000"/></w:rPr></w:rPrDefault></w:docDefaults><w:style w:type="paragraph" w:styleId="Base"><w:rPr><w:i/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="List"><w:basedOn w:val="Base"/><w:rPr><w:b/></w:rPr></w:style></w:styles>';
  const r=await inspectDocxRichContent(await fixture('<w:p><w:pPr><w:pStyle w:val="List"/></w:pPr><w:r><w:t>Styled</w:t></w:r></w:p>',styles));
- assert.equal(r.ok,false);
+ assert.equal(r.ok,true,r.errors.join('; '));
  assert.deepEqual({bold:r.runs[0].bold,italic:r.runs[0].italic,underline:r.runs[0].underline,color:r.runs[0].color},{bold:true,italic:true,underline:false,color:'#000000'});
- assert.ok(r.errors.some(x=>x.includes('Unresolved OOXML feature w:pStyle')));
+ assert.ok(!r.errors.some(x=>x.includes('Unresolved OOXML feature w:pStyle')));
 });
 
 
