@@ -189,3 +189,10 @@ The DOCX rich-content inspector now uses resolved formatting values for its run 
 Style-resolution diagnostics now report shared document-default and style-chain blockers once rather than repeating them for every paragraph, while retaining paragraph-specific reports for effective-formatting failures. This makes the remaining blockers easier to act on without weakening the gate. The unchanged pilot still reports unsupported document-default `rFonts`; `List Paragraph` indentation; `Normal` style font family, kerning, sizes, language, widow control and alignment; direct run fonts/sizes/language/complex-script flags/capitalization/character spacing; paragraph alignment/indentation/numbering; and section layout. Rich-content and conversion remain blocked.
 
 Validation: **154 tests passed, 0 failed** in [CI run 39205573952](https://github.com/shifter888ai/awakenology/actions/runs/39205573952). No pilot output is approved.
+
+
+## Word font-size fidelity (CI run 39206257271)
+
+The rich-content pipeline now resolves Word `w:sz` half-point values into point sizes through document defaults, paragraph-style inheritance, character styles, and direct run formatting. The independent rendered-HTML inventory reads explicit `font-size` declarations in `pt` or `px` (converting CSS px at 0.75 pt per px), rejects relative/unknown units, and the comparator requires font-size provenance for every run. This allows source-to-output size differences to be caught rather than silently ignored. Validation: **160 tests passed, 0 failed** in [CI run 39206257271](https://github.com/shifter888ai/awakenology/actions/runs/39206257271).
+
+The real pilot remains blocked: document-default and inherited font families, complex-script sizes, language, kerning, paragraph alignment/indentation, numbering, section layout, paragraph-mark formatting and floating-image rendering still need independently faithful handling. Font-size support alone does not approve the pilot.
