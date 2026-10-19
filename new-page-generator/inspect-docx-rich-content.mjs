@@ -2,10 +2,11 @@ import JSZip from 'jszip';
 import { inspectDocxSourceMap } from './inspect-docx-source-map.mjs';
 import { inspectDocxImagePlacement } from './inspect-docx-image-placement.mjs';
 import { resolveDocxRunFormatting } from './resolve-docx-styles.mjs';
+import { resolveDocxParagraphLayout } from './resolve-docx-paragraph-layout.mjs';
 
 // Conservative OOXML extractor. Anything not mapped with certainty blocks approval.
 export async function inspectDocxRichContent(buffer) {
-  const fail = errors => ({ ok: false, errors, runs: [], images: [], lineBreaks: [], paragraphCount: 0 });
+  const fail = errors => ({ ok: false, errors, runs: [], images: [], lineBreaks: [], paragraphLayouts: [], paragraphCount: 0 });
   const source = await inspectDocxSourceMap(buffer);
   if (!source.ok) return fail(source.errors);
   let xml, stylesXml;
@@ -18,12 +19,12 @@ export async function inspectDocxRichContent(buffer) {
     stylesXml = await stylesPart.async('string');
   } catch { return fail(['Cannot read original OOXML.']); }
 
-  const errors = [], runs = [];
+  const errors = [], runs = [], paragraphLayouts = [];
   const unknownRunProperties = new Map();
   const advancedTags = new Map();
   const placement = await inspectDocxImagePlacement(buffer);
   if (!placement.ok) errors.push(...placement.errors);
-  for (const match of xml.matchAll(/<w:(pStyle|rStyle|basedOn|hyperlink|object|pict|fldChar|highlight|shd|ind|jc|numPr|keepNext|keepLines|pageBreakBefore|widowControl|outlineLvl|contextualSpacing|bidi|textDirection|mirrorIndents|snapToGrid|adjustRightInd|autoSpaceDE|autoSpaceDN|sectPr|tbl|vertAlign|position|vanish|specVanish|smallCaps|emboss|imprint|shadow|outline|effect|fitText|rtl|cs)\b/g)) {
+  for (const match of xml.matchAll(/<w:(pStyle|rStyle|basedOn|hyperlink|object|pict|fldChar|highlight|shd|numPr|keepNext|keepLines|pageBreakBefore|widowControl|outlineLvl|contextualSpacing|bidi|textDirection|mirrorIndents|snapToGrid|adjustRightInd|autoSpaceDE|autoSpaceDN|sectPr|tbl|vertAlign|position|vanish|specVanish|smallCaps|emboss|imprint|shadow|outline|effect|fitText|rtl|cs)\b/g)) {
     const name = match[1];
     advancedTags.set(name, (advancedTags.get(name) ?? 0) + 1);
   }
@@ -33,6 +34,9 @@ export async function inspectDocxRichContent(buffer) {
   const paragraphs = [...xml.matchAll(/<w:p(?=[\s>])[^>]*>([\s\S]*?)<\/w:p>/g)];
   for (let p = 0; p < paragraphs.length; p++) {
     const raw = paragraphs[p][1];
+    const layout = resolveDocxParagraphLayout({stylesXml, paragraphXml: paragraphs[p][0]});
+    if (!layout.ok) errors.push(...layout.errors.map(error => 'Paragraph ' + (p + 1) + ' layout: ' + error));
+    paragraphLayouts.push({paragraphIndex:p, ...(layout.ok ? layout.layout : {unsupported:true})});
     for (const match of raw.matchAll(/<w:r(?=[\s>])[^>]*>([\s\S]*?)<\/w:r>/g)) {
       const body = match[1];
       if (/<w:drawing\b/.test(body) && !/<w:t(?=[\s>])/.test(body)) continue;
@@ -101,5 +105,5 @@ export async function inspectDocxRichContent(buffer) {
     if (!position) errors.push('No ordered content position for image relationship ' + relationshipId + '.');
     return {assetPath, paragraphIndex, order, alt, textOffset:position?.textOffset ?? 0, markerOrder:position?.markerOrder ?? -1};
   }) : [];
-  return errors.length ? {...fail([...new Set(errors)]), runs, images, lineBreaks, paragraphCount:source.paragraphs.length} : {ok:true, errors:[], runs, images, lineBreaks, paragraphCount:source.paragraphs.length};
+  return errors.length ? {...fail([...new Set(errors)]), runs, images, lineBreaks, paragraphLayouts, paragraphCount:source.paragraphs.length} : {ok:true, errors:[], runs, images, lineBreaks, paragraphLayouts, paragraphCount:source.paragraphs.length};
 }
