@@ -25,7 +25,7 @@ export async function inspectDocxSourceMap(buffer) {
   const errors = [];
   // Reject ambiguous XML constructs rather than silently assigning wrong
   // offsets, including nested text containers and alternative content.
-  if (/<w:(?:txbxContent|altChunk|sdt|ins|del|fldSimple|instrText|hyperlink|tab|br|cr|sym|noBreakHyphen|softHyphen)\b|<mc:AlternateContent\b/.test(xml)) {
+  if (/<w:(?:txbxContent|altChunk|sdt|ins|del|fldSimple|instrText|hyperlink|tab|cr|sym|noBreakHyphen|softHyphen)\b|<mc:AlternateContent\b/.test(xml)) {
     errors.push("Source map contains an unsupported or ambiguous text construct.");
   }
   const paragraphs = [];
@@ -46,9 +46,9 @@ export async function inspectDocxSourceMap(buffer) {
     }
     // Only Word's explicit text-wrapping break is mapped here. Page/column
     // breaks and other controls remain unsupported and fail closed.
-    for (const br of raw.matchAll(/<w:br(?=[\\s/>])[^>]*\\/?\\s*>/g)) {
+    for (const br of raw.matchAll(/<w:br(?=[\s/>])[^>]*\/?\s*>/g)) {
       const tag = br[0];
-      const type = /\\bw:type=["']([^"']+)["']/.exec(tag)?.[1] ?? "textWrapping";
+      const type = /\bw:type=["']([^"']+)["']/.exec(tag)?.[1] ?? "textWrapping";
       if (type !== "textWrapping") {
         errors.push(`Paragraph ${paragraphs.length + 1}: unsupported Word break type "${type}".`);
         continue;
