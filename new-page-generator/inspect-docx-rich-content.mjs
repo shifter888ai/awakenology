@@ -119,5 +119,5 @@ export async function inspectDocxRichContent(buffer) {
     if (!position) errors.push('No ordered content position for image relationship ' + relationshipId + '.');
     return {assetPath, paragraphIndex, order, alt, textOffset:position?.textOffset ?? 0, markerOrder:position?.markerOrder ?? -1, placement:imagePlacement};
   }) : [];
-  return errors.length ? {...fail([...new Set(errors)]), runs, images, lineBreaks, paragraphLayouts, paragraphNumbering, paragraphCount:source.paragraphs.length} : {ok:true, errors:[], runs, images, lineBreaks, paragraphLayouts, paragraphCount:source.paragraphs.length};
+  return errors.length ? {...fail([...new Set(errors)]), runs, images, lineBreaks, paragraphLayouts, paragraphNumbering, paragraphCount:source.paragraphs.length} : {ok:true, errors:[], runs, images, lineBreaks, paragraphLayouts, paragraphNumbering, paragraphCount:source.paragraphs.length};
 }
