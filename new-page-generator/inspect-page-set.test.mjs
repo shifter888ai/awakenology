@@ -55,3 +55,17 @@ test("blocks CSS hidden in the head of pasted HTML",async()=>{
  assert.equal(result.ok,false);
  assert.ok(result.errors.some(x=>x.includes("Embedded CSS in the HTML head")));
 });
+
+
+test("rejects scripts in the raw HTML head even if the parser omits them from body",async()=>{
+ const textNode={nodeType:3,textContent:"Article text"};
+ const parser={parseFromString:()=>({head:{childNodes:[]},body:{childNodes:[textNode]}})};
+ const set={pages:Object.fromEntries(["en","ja","zh-Hant"].map(lang=>[lang,{
+  title:lang,mode:"paste",source:"source-"+lang,route:"/"+lang+"/"
+ }]))};
+ const inputs=Object.fromEntries(["en","ja","zh-Hant"].map(lang=>[lang,{html:"<html><head><script>run()</script></head><body><p>Article text</p></body></html>",parser}]));
+ const result=await inspectPageSet(set,inputs);
+ assert.equal(result.ok,false);
+ assert.ok(result.errors.some(x=>x.includes("Raw HTML contains unsupported element <script>")));
+ assert.ok(result.errors.some(x=>x.includes("Raw HTML contains unsupported element <html>")));
+});
