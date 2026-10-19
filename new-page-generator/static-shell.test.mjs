@@ -15,7 +15,7 @@ const fixture = () => ({
 });
 test("renders complete static document with escaped metadata and language alternates", () => {
   const html = renderStaticShell(fixture());
-  assert.match(html, /<html lang="zh-Hant">/);
+  assert.match(html, /<html lang="zh-Hant" data-aw-theme="dark">/);
   assert.match(html, /繁體中文 &amp; &quot;Article&quot;/);
   assert.match(html, /Description &lt;safe&gt;/);
   assert.match(html, /hreflang="en"/);
