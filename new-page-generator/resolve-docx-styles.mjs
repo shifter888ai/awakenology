@@ -139,6 +139,10 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
       markChain.unshift(style); markId=style.basedOn;
     }
     for(const style of markChain) {
+      for(const key of ['fontFamily','language']) {
+        const value=style.run?.[key];
+        if(value && typeof value==='object' && !value.unsupported) paragraphMarkFormatting[key]={...(paragraphMarkFormatting[key]??{}),...value};
+      }
       const markRun=style.paragraphMarkRun ?? '';
       for(const name of unsupportedRunProps(markRun)) errors.push('Unsupported paragraph-mark run property w:'+name+' in Word style '+style.id+'.');
       for(const [key,value] of Object.entries(runProps(markRun))) {
