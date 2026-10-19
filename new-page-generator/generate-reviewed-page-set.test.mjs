@@ -144,3 +144,20 @@ test("unsupported DOCX font metadata blocks the page set before any HTML is emit
  assert.deepEqual(result.pages,{});
  assert.ok(result.errors.some(error=>/fontFamily/.test(error)));
 });
+
+
+test("DOCX source formatting is applied inside the generation pipeline before rich comparison",async()=>{
+ const docx=await simpleDocx("Text","<w:rPr><w:b/></w:rPr>");
+ const docxPageSet={pages:Object.fromEntries(["en","ja","zh-Hant"].map((lang,i)=>[lang,{
+  title:lang,mode:"docx",source:"fixture",route:["/English/docx-bold/","/Japanese/docx-bold/","/Chinese/docx-bold/"][i]
+ }]))};
+ const inputs=Object.fromEntries(["en","ja","zh-Hant"].map(lang=>[lang,{buffer:docx,parser:realisticParser()}]));
+ const outputs=Object.fromEntries(["en","ja","zh-Hant"].map(lang=>[lang,{
+  title:lang,description:"Fixture description",parser:realisticParser(),
+  approvedHeader:"<header>Approved header</header>",approvedFooter:"<footer>Approved footer</footer>",
+  reviewedArticleHtml:"<p><strong>Text</strong></p>"
+ }]));
+ const result=await generateReviewedPageSet({pageSet:docxPageSet,inputs,outputs});
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.match(result.pages.en.html,/<strong><span style="[^"]*font-weight:bold/);
+});
