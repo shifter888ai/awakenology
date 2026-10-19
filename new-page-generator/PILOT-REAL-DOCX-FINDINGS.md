@@ -258,3 +258,17 @@ Two human decisions remain before the page-set generator can be approved:
 2. **Missing image alt text:** `/assets/docx-b7dba7e21c2441ad.png` (PNG, 311,382 bytes; SHA-256 `b7dba7e21c2441ada87821f01380c2b8e6d5e0031fec00b8538270f7a0f0c32d`) has no alt text in the Word source. Inspect the image and provide a human-reviewed description via `imageAltTextBySrc` using that exact `src`.
 
 The integration path now exposes a non-publishable preview, flags the missing alt text, accepts a source-specific alt-text override, and still blocks generation until the floating-image review is approved for the same source hash. `pilotApproved` remains false. No PR, merge, or production deployment has been authorized.
+
+## Language-boundary inventory and source-bound review (2026-10-20)
+
+- Added a fail-closed language segmenter using the three exact title markers in the unchanged source DOCX. It requires each marker to occur exactly once and in source order; it does not translate, rewrite, or fill gaps.
+- The real source-map test confirms 184 ordered paragraphs divide into contiguous, non-overlapping ranges:
+  - Traditional Chinese: paragraphs 1–58 (58 paragraphs; 1 image)
+  - English: paragraphs 59–125 (67 paragraphs; 1 image)
+  - Japanese: paragraphs 126–184 (59 paragraphs; 1 image)
+- Latest CI diagnostic report records marker paragraph indices 0, 58, and 125, and reports all three ranges cover the complete source paragraph map. The report records each range's paragraph count, image count, and text-character count for subsequent source/output comparison.
+- CI run: https://github.com/shifter888ai/awakenology/actions/runs/39344809858 — passed. Automated regression tests also cover missing/duplicated markers, source order, and the real DOCX ranges.
+- The source-bound human visual review remains tied to SHA-256 `b9b8e15366fbbdb2e4d921335315c26ce56c6eb83678f8a1306b7c5cc8116ea1`; the approved missing-alt override remains `multi-planes`.
+
+**Scope:** this is a validated paragraph-range inventory, not yet three generated article pages. The audit's conversion stage remains explicitly non-publishable because the floating-image renderer returns a review preview rather than ordinary final HTML. Next, the generator must split the converted article at these verified language boundaries and compare each language's own text, formatting, and image inventory independently before any page set can be marked review-ready. No PR, merge, or deployment is authorized.
+
