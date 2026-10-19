@@ -90,3 +90,16 @@ test("Markdown inputs normalize through the same inspected HTML inventory",async
  assert.equal(result.pages.en.normalizedBlocks[0].sourceMode,"markdown");
  assert.equal(result.pages.en.normalizedBlocks[0].sourceLocation.part,"markdown-source");
 });
+
+
+test("HTML file mode shares the strict inspector while retaining file provenance",async()=>{
+ const parser={parseFromString:()=>({head:{childNodes:[]},body:{childNodes:[{nodeType:3,textContent:"HTML file article"}]}})};
+ const set={pages:Object.fromEntries(["en","ja","zh-Hant"].map(lang=>[lang,{
+  title:lang,mode:"html",source:lang+".html",route:"/"+lang+"/"
+ }]))};
+ const inputs=Object.fromEntries(["en","ja","zh-Hant"].map(lang=>[lang,{html:"<p>HTML file article</p>",parser}]));
+ const result=await inspectPageSet(set,inputs);
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.equal(result.pages.en.normalizedBlocks[0].sourceMode,"html");
+ assert.equal(result.pages.en.normalizedBlocks[0].sourceLocation.part,"html-file");
+});
