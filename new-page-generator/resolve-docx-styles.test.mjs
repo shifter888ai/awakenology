@@ -131,10 +131,10 @@ test("resolves consistent Word font families, language metadata, complex-script 
  assert.equal(result.formatting.caps,true);
  assert.equal(result.formatting.letterSpacingPt,1);
 });
-test("blocks font-family fallback differences and script-specific style divergence", () => {
+test("preserves script-specific font families and blocks script-style divergence", () => {
  const fonts=resolveDocxRunFormatting({stylesXml:styles(),paragraphXml:paragraph(),runXml:run('', '<w:rFonts w:ascii="Arial" w:eastAsia="Yu Gothic"/>')});
- assert.equal(fonts.ok,false);
- assert.ok(fonts.errors.some(x=>x.includes('fontFamily')));
+ assert.equal(fonts.ok,true,fonts.errors.join('; '));
+ assert.deepEqual(fonts.formatting.fontFamily,{ascii:'Arial',eastAsia:'Yu Gothic'});
  const script=resolveDocxRunFormatting({stylesXml:styles(),paragraphXml:paragraph(),runXml:run('', '<w:bCs/>')});
  assert.equal(script.ok,false);
  assert.ok(script.errors.some(x=>x.includes('Complex-script bold differs')));
