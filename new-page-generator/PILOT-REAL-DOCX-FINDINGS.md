@@ -214,3 +214,7 @@ Validation: [run 39238117016](https://github.com/shifter888ai/awakenology/action
 The pilot audit's dynamic XML-tag counting now uses a dedicated, tested helper with exact qualified-name boundaries. The tests cover self-closing and opening tags, whitespace boundaries, namespace-qualified names, similarly prefixed names, and invalid inputs. This prevents diagnostic tag counts from being skewed by incorrectly escaped whitespace in a dynamically constructed regular expression.
 
 Validation: [run 39238529558](https://github.com/shifter888ai/awakenology/actions/runs/39238529558) passed the helper tests; [run 39238519698](https://github.com/shifter888ai/awakenology/actions/runs/39238519698) passed the implementation. This corrects diagnostics only; it does not resolve the actual formatting blockers or approve the pilot.
+
+## Pilot break-location diagnostic corrected (2026-10-19)
+
+The audit now records the pilot's explicit line break at zero-based paragraph 124 (paragraph 125), after `------`, with no following text in that paragraph. The diagnostic had only matched self-closing tags and therefore failed to record the break when its actual syntax did not fit that narrow pattern. It now accepts both self-closing and paired Word break tag syntax. Validation: [CI run 39238651095](https://github.com/shifter888ai/awakenology/actions/runs/39238651095) passed; the report now shows the exact break tag and paragraph location. Source map, assets, and image-placement inspections pass; rich-content and conversion remain blocked.
