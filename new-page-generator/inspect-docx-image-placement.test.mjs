@@ -18,3 +18,19 @@ test('preserves per-occurrence alt text when the same media relationship is reus
  assert.deepEqual(result.images.map(x=>x.alt),['first alt','second alt']);
  assert.equal(result.images[0].assetPath,result.images[1].assetPath);
 });
+
+
+test('floating anchor retains explicit visual-review gate and geometry',async()=>{
+ const z=new JSZip();
+ z.file('word/document.xml','<w:document xmlns:w="w" xmlns:r="r" xmlns:wp="wp" xmlns:a="a"><w:body><w:p><w:r><w:drawing><wp:anchor distL="114300" distR="114300" behindDoc="0" allowOverlap="1"><wp:positionH relativeFrom="column"><wp:posOffset>0</wp:posOffset></wp:positionH><wp:positionV relativeFrom="paragraph"><wp:posOffset>0</wp:posOffset></wp:positionV><wp:wrapSquare/><wp:docPr id="28" name="Picture 1"/><a:blip r:embed="rId1"/></wp:anchor></w:drawing></w:r></w:p></w:body></w:document>');
+ z.file('word/_rels/document.xml.rels','<Relationships><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/diagram.png"/></Relationships>');
+ z.file('[Content_Types].xml','<Types><Default Extension="png" ContentType="image/png"/></Types>');
+ z.file('word/media/diagram.png',Buffer.from([137,80,78,71,13,10,26,10]));
+ const result=await inspectDocxImagePlacement(await z.generateAsync({type:'nodebuffer'}));
+ assert.equal(result.ok,true,result.errors.join('; '));
+ assert.equal(result.images[0].placement.kind,'floating');
+ assert.equal(result.images[0].placement.requiresVisualReview,true);
+ assert.equal(result.images[0].placement.anchorAttributes.allowOverlap,'1');
+ assert.match(result.images[0].placement.horizontalPosition, /<wp:positionH/);
+ assert.match(result.images[0].placement.wrap, /wp:wrapSquare/);
+});
