@@ -3,6 +3,24 @@ const emuToPt = value => Number(value)/12700;
 const twipsToPt = value => Number(value)/20;
 const pt = value => Number(value.toFixed(4)).toString();
 
+export function normalizeDocxImagePlacement(placement) {
+  if(!placement||placement.kind!=="floating") return {kind:"inline",requiresVisualReview:false};
+  const anchorAttributes={...(placement.anchorAttributes??{})};
+  const horizontalPosition=typeof placement.horizontalPosition==="string"
+    ? position(placement.horizontalPosition,"positionH") : placement.horizontalPosition??null;
+  const verticalPosition=typeof placement.verticalPosition==="string"
+    ? position(placement.verticalPosition,"positionV") : placement.verticalPosition??null;
+  const extent=typeof placement.extent==="string" ? attributes(placement.extent) : placement.extent??{};
+  const wrapAttributes=typeof placement.wrap==="string" ? attributes(placement.wrap) : placement.wrap??{};
+  const wrapTag=typeof placement.wrap==="string" ? /<wp:(wrap\w+)\b/.exec(placement.wrap)?.[1]??null : placement.wrap?.tag??null;
+  return {
+    kind:"floating",anchorAttributes,horizontalPosition,verticalPosition,
+    extent:{cx:extent.cx===undefined?null:Number(extent.cx),cy:extent.cy===undefined?null:Number(extent.cy)},
+    wrap:{tag:wrapTag,wrapText:wrapAttributes.wrapText??null},
+    requiresVisualReview:placement.requiresVisualReview===true
+  };
+}
+
 function position(xml, tag) {
   const match=new RegExp("<wp:"+tag+"\\b([^>]*)>([\\s\\S]*?)</wp:"+tag+">").exec(xml??"");
   if(!match) return null;
@@ -14,11 +32,11 @@ function position(xml, tag) {
 export function resolveDocxFloatingLayout(placement, paragraphIndentation={}) {
   if(!placement||placement.kind!=="floating") return {ok:true,css:null,style:null};
   const anchor=placement.anchorAttributes??{};
-  const wrap=attributes(placement.wrap??"");
-  const extent=attributes(placement.extent??"");
-  const horizontal=position(placement.horizontalPosition,"positionH");
-  const vertical=position(placement.verticalPosition,"positionV");
-  const wrapTag=/<wp:(wrap\w+)\b/.exec(placement.wrap??"")?.[1]??null;
+  const wrap=typeof placement.wrap==="string" ? attributes(placement.wrap) : placement.wrap??{};
+  const extent=typeof placement.extent==="string" ? attributes(placement.extent) : placement.extent??{};
+  const horizontal=typeof placement.horizontalPosition==="string" ? position(placement.horizontalPosition,"positionH") : placement.horizontalPosition;
+  const vertical=typeof placement.verticalPosition==="string" ? position(placement.verticalPosition,"positionV") : placement.verticalPosition;
+  const wrapTag=typeof placement.wrap==="string" ? /<wp:(wrap\w+)\b/.exec(placement.wrap??"")?.[1]??null : placement.wrap?.tag??null;
   if(wrapTag==="wrapSquare"&&wrap.wrapText!=="bothSides")
     return {ok:false,error:"Square wrapping must allow text on both sides."};
   if(!["wrapSquare","wrapTopAndBottom"].includes(wrapTag))
