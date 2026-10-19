@@ -32,14 +32,14 @@ const FEATURES = [
 const xmlText = bytes => new TextDecoder("utf-8", { fatal: true }).decode(bytes);
 const digest = buffer => createHash("sha256").update(buffer).digest("hex");
 export function isResolvedListParagraphWarning(message, stylesXml, documentXml) {
-  const match=/^Unrecognised paragraph style: 'List Paragraph' \\(Style ID: ([^)]+)\\)$/.exec(message??'');
+  const match=/^Unrecognised paragraph style: 'List Paragraph' \(Style ID: ([^)]+)\)$/.exec(message??'');
   if(!match || typeof stylesXml!=='string' || typeof documentXml!=='string') return false;
   const styleId=match[1];
-  const style=[...stylesXml.matchAll(/<w:style\\b([^>]*)>([\\s\\S]*?)<\\/w:style>/g)].find(item=>{
-    const id=/\\bw:styleId=["']([^"']+)["']/.exec(item[1])?.[1];
-    return id===styleId && /<w:name\\b[^>]*\\bw:val=["']List Paragraph["']/.test(item[2]);
+  const style=[...stylesXml.matchAll(/<w:style\b([^>]*)>([\s\S]*?)<\/w:style>/g)].find(item=>{
+    const id=/\bw:styleId=["']([^"']+)["']/.exec(item[1])?.[1];
+    return id===styleId && /<w:name\b[^>]*\bw:val=["']List Paragraph["']/.test(item[2]);
   });
-  const referenced=[...documentXml.matchAll(/<w:pStyle\\b[^>]*\\bw:val=["']([^"']+)["'][^>]*\\/?\\s*>/g)].some(item=>item[1]===styleId);
+  const referenced=[...documentXml.matchAll(/<w:pStyle\b[^>]*\bw:val=["']([^"']+)["'][^>]*\/?\s*>/g)].some(item=>item[1]===styleId);
   return Boolean(style&&referenced);
 }
 const blocked = (errors, buffer) => ({
