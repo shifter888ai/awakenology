@@ -10,7 +10,7 @@ const required = (o, keys, where) => {
 export function compareRichContent(source, output) {
   const issues = [];
   for (const [side, value] of [['source', source], ['output', output]]) {
-    required(value, ['runs', 'images', 'lineBreaks', 'paragraphCount'], side);
+    required(value, ['runs', 'images', 'lineBreaks', 'paragraphLayouts', 'paragraphCount'], side);
     if (!Array.isArray(value.runs) || !Array.isArray(value.images) || !Number.isInteger(value.paragraphCount) || value.paragraphCount < 0) throw new Error('Invalid inventory: ' + side);
     value.runs.forEach((r, i) => {
       const where = side + '.runs[' + i + ']';
@@ -24,6 +24,12 @@ export function compareRichContent(source, output) {
     });
     {
       if (!Array.isArray(value.lineBreaks)) throw new Error('Invalid line-break inventory: ' + side);
+      if (!Array.isArray(value.paragraphLayouts)) throw new Error('Invalid paragraph-layout inventory: ' + side);
+      value.paragraphLayouts.forEach((item, i) => {
+        const where = side + '.paragraphLayouts[' + i + ']';
+        required(item, ['paragraphIndex','alignment','indentation'], where);
+        if (!Number.isInteger(item.paragraphIndex) || item.paragraphIndex < 0 || typeof item.alignment !== 'string' || !item.indentation || typeof item.indentation !== 'object') throw new Error('Invalid paragraph-layout fields at ' + where);
+      });
       value.lineBreaks.forEach((item, i) => {
         const where = side + '.lineBreaks[' + i + ']';
         required(item, ['paragraphIndex', 'textOffset', 'breakType', 'markerOrder'], where);
@@ -42,6 +48,14 @@ export function compareRichContent(source, output) {
         throw new Error('Invalid image field types at ' + where);
       }
     });
+  }
+  {
+    if (source.paragraphLayouts.length !== output.paragraphLayouts.length) issues.push({kind:'paragraph-layout-count',expected:source.paragraphLayouts.length,actual:output.paragraphLayouts.length});
+    for (let i=0;i<Math.min(source.paragraphLayouts.length,output.paragraphLayouts.length);i++) {
+      const a=source.paragraphLayouts[i], b=output.paragraphLayouts[i];
+      for (const field of ['paragraphIndex','alignment']) if (a[field] !== b[field]) issues.push({kind:'paragraph-layout-mismatch',index:i,field,expected:a[field],actual:b[field]});
+      for (const field of ['left','right','firstLine','hanging']) if ((a.indentation[field] ?? null) !== (b.indentation[field] ?? null)) issues.push({kind:'paragraph-indentation-mismatch',index:i,field,expected:a.indentation[field] ?? null,actual:b.indentation[field] ?? null});
+    }
   }
   {
     if (source.lineBreaks.length !== output.lineBreaks.length) issues.push({kind:'line-break-count',expected:source.lineBreaks.length,actual:output.lineBreaks.length});
