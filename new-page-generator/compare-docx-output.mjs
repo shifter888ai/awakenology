@@ -42,7 +42,7 @@ export function compareDocxSourceToHtml(sourceMap, html) {
     }
     imageSourceOffset += paragraph.text.length;
   }
-  const actualImageOffsets = [...html.matchAll(/<img\\b[^>]*\\/?\\s*>/gi)].map(match =>
+  const actualImageOffsets = [...html.matchAll(/<img\b[^>]*\/?\s*>/gi)].map(match =>
     decode(html.slice(0, match.index).replace(/<\\/?[a-z][\\w-]*\\b[^>]*>/gi, "")).length
   );
   if (expectedImageOffsets.length !== actualImageOffsets.length ||
