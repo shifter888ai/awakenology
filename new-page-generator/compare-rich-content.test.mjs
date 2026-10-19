@@ -2,13 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {compareRichContent} from './compare-rich-content.mjs';
 const sample = () => ({
-  runs: [{paragraphIndex:0,text:'什麽',bold:true,italic:false,underline:false,color:'#ff0000',href:'https://example.org'}],
+  runs: [{paragraphIndex:0,text:'什麽',bold:true,italic:false,underline:false,color:'#ff0000',fontSizePt:null,href:'https://example.org'}],
   images: [{assetPath:'assets/one.png',paragraphIndex:2,order:0,alt:'diagram',textOffset:12,markerOrder:0}],
   lineBreaks: [],
   paragraphCount: 3
 });
 test('identical inventory passes', () => assert.equal(compareRichContent(sample(), sample()).ok, true));
-for (const field of ['paragraphIndex','text','bold','italic','underline','color','href']) {
+for (const field of ['paragraphIndex','text','bold','italic','underline','color','fontSizePt','href']) {
   test('changed run ' + field + ' blocks', () => {
     const a=sample(), b=sample(); b.runs[0][field] = field === 'bold' || field === 'italic' || field === 'underline' ? !b.runs[0][field] : field === 'paragraphIndex' ? 99 : 'changed';
     assert.equal(compareRichContent(a,b).ok,false);
@@ -25,7 +25,7 @@ test('incomplete source inventory throws', () => {const a=sample(); delete a.run
 
 
 test('reordered text runs block even when the same text is present',()=>{
- const source={runs:[{paragraphIndex:0,text:'A',bold:false,italic:false,underline:false,color:null,href:null},{paragraphIndex:0,text:'B',bold:false,italic:false,underline:false,color:null,href:null}],images:[],lineBreaks:[],paragraphCount:1};
+ const source={runs:[{paragraphIndex:0,text:'A',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null},{paragraphIndex:0,text:'B',bold:false,italic:false,underline:false,color:null,href:null}],images:[],lineBreaks:[],paragraphCount:1};
  const output={runs:[source.runs[1],source.runs[0]],images:[],lineBreaks:[],paragraphCount:1};
  const result=compareRichContent(source,output);
  assert.equal(result.ok,false);
