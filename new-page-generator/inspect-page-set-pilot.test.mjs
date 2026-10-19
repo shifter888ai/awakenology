@@ -38,7 +38,7 @@ test("real DOCX pilot exposes a non-publishable floating-image preview for visua
  };
  const result=await inspectPageSet(set,inputs);
  assert.equal(result.ok,false);
- assert.equal(result.stage,"source-inspection-and-visual-review",result.errors.join("; ")+"\nPLACEMENT="+JSON.stringify(result.pages.en.sourceRichInventory?.images?.map(image=>image.placement)));
+ assert.equal(result.stage,"source-inspection-and-visual-review",result.errors.join("; "));
  assert.equal(result.reviewRequired,true);
  assert.equal(result.pages.en.visualReviewRequired,true);
  assert.equal(result.pages.en.visualReviewApproved,false);
