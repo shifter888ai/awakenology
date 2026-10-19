@@ -39,6 +39,8 @@ jobs:
         run: |
           test -s pilot-artifacts/pilot-visual-review.html
           grep -q 'All source paragraphs (184)' pilot-artifacts/pilot-visual-review.html
+          grep -q 'Linear source sequence (text and images)' pilot-artifacts/pilot-visual-review.html
+          grep -q 'Source image 1' pilot-artifacts/pilot-visual-review.html
           grep -q 'Paragraph 184:' pilot-artifacts/pilot-visual-review.html
           grep -q 'manual visual review required' pilot-artifacts/pilot-visual-review.html
       - name: Upload pilot diagnostic report
