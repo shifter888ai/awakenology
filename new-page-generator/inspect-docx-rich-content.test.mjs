@@ -5,7 +5,7 @@ import {inspectDocxRichContent} from './inspect-docx-rich-content.mjs';
 async function fixture(body,stylesXml='<w:styles xmlns:w="x"><w:docDefaults><w:rPrDefault><w:rPr/></w:rPrDefault></w:docDefaults></w:styles>'){const z=new JSZip();z.file('word/document.xml','<w:document xmlns:w="x"><w:body>'+body+'</w:body></w:document>');z.file('word/_rels/document.xml.rels','<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>');z.file('word/styles.xml',stylesXml);z.file('[Content_Types].xml','<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="xml" ContentType="application/xml"/></Types>');return z.generateAsync({type:'nodebuffer'});}
 test('reads exact Traditional Chinese and explicit run formatting',async()=>{
  const r=await inspectDocxRichContent(await fixture('<w:p><w:r><w:rPr><w:b/><w:color w:val="FF0000"/></w:rPr><w:t>什麽</w:t></w:r></w:p>'));
- assert.equal(r.ok,true,r.errors.join('; '));assert.deepEqual(r.runs,[{paragraphIndex:0,text:'什麽',bold:true,italic:false,underline:false,color:'#ff0000',fontSizePt:null,href:null}]);
+ assert.equal(r.ok,true,r.errors.join('; '));assert.deepEqual(r.runs,[{paragraphIndex:0,text:'什麽',bold:true,italic:false,underline:false,color:'#ff0000',fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null}]);
 });
 test('does not guess hyperlink inheritance',async()=>assert.equal((await inspectDocxRichContent(await fixture('<w:p><w:hyperlink r:id="rId1"><w:r><w:t>link</w:t></w:r></w:hyperlink></w:p>'))).ok,false));
 test('does not certify embedded drawings without asset mapping',async()=>assert.equal((await inspectDocxRichContent(await fixture('<w:p><w:r><w:drawing><a:blip r:embed="rId2"/></w:drawing></w:r></w:p>'))).ok,false));
@@ -22,7 +22,7 @@ test('decodes decimal and hexadecimal XML character references exactly',async()=
 test('honors explicitly disabled bold, italic, and underline flags',async()=>{
  const r=await inspectDocxRichContent(await fixture('<w:p><w:r><w:rPr><w:b w:val="0"/><w:i w:val="false"/><w:u w:val="none"/></w:rPr><w:t>Plain</w:t></w:r></w:p>'));
  assert.equal(r.ok,true,r.errors.join('; '));
- assert.deepEqual(r.runs,[{paragraphIndex:0,text:'Plain',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null}]);
+ assert.deepEqual(r.runs,[{paragraphIndex:0,text:'Plain',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null}]);
 });
 
 
@@ -50,12 +50,12 @@ test('blocks missing paragraph and run style definitions',async()=>{
 });
 
 
-test('reports exact unsupported run property names and paragraph locations',async()=>{
- const r=await inspectDocxRichContent(await fixture('<w:p><w:r><w:rPr><w:rFonts w:ascii="Arial"/><w:sz w:val="24"/></w:rPr><w:t>Styled</w:t></w:r></w:p><w:p><w:r><w:rPr><w:rFonts w:ascii="Arial"/></w:rPr><w:t>Again</w:t></w:r></w:p>'));
- assert.equal(r.ok,false);
- assert.ok(r.errors.some(x=>x.includes('Unresolved run property w:rFonts in 2 paragraph(s): 1, 2')));
- assert.ok(!r.errors.some(x=>x.includes('Unresolved run property w:sz'))); assert.equal(r.runs[0].fontSizePt,null); // Blocked run formatting must not be represented as verified.
- assert.ok(!r.errors.some(x=>x==='Unresolved run property in paragraph 1.'));
+test('resolves consistent font families and font sizes in source inventory',async()=>{
+ const r=await inspectDocxRichContent(await fixture('<w:p><w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="24"/></w:rPr><w:t>Styled</w:t></w:r></w:p><w:p><w:r><w:rPr><w:rFonts w:ascii="Arial"/></w:rPr><w:t>Again</w:t></w:r></w:p>'));
+ assert.equal(r.ok,true,r.errors.join('; '));
+ assert.equal(r.runs[0].fontFamily,'Arial');
+ assert.equal(r.runs[0].fontSizePt,12);
+ assert.equal(r.runs[1].fontFamily,'Arial');
 });
 
 
@@ -99,11 +99,11 @@ test('uses resolved inherited formatting without duplicate style-reference block
 });
 
 
-test('reports shared inherited-style blockers once rather than once per paragraph',async()=>{
+test('resolves shared inherited font metadata once for all paragraphs',async()=>{
  const styles='<w:styles xmlns:w="x"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>';
  const r=await inspectDocxRichContent(await fixture('<w:p><w:r><w:t>One</w:t></w:r></w:p><w:p><w:r><w:t>Two</w:t></w:r></w:p>',styles));
- assert.equal(r.ok,false);
- assert.equal(r.errors.filter(x=>x==='Unsupported document-default run property w:rFonts.').length,1);
+ assert.equal(r.ok,true,r.errors.join('; '));
+ assert.deepEqual(r.runs.map(x=>x.fontFamily),['Arial','Arial']);
 });
 
 
@@ -135,7 +135,7 @@ test('rejects cyclic paragraph-style inheritance without generic style-reference
  assert.ok(r.errors.some(x=>x.includes('Cyclic Word style inheritance')));
  assert.ok(!r.errors.some(x=>x.includes('Unresolved OOXML feature w:pStyle')));
 });
-test('rejects unsupported inherited font families after style-reference resolution',async()=>{
+test('rejects conflicting inherited font families after style-reference resolution',async()=>{
  const styles='<w:styles xmlns:w="x"><w:docDefaults><w:rPrDefault><w:rPr/></w:rPrDefault></w:docDefaults><w:style w:type="paragraph" w:styleId="Styled"><w:rPr><w:rFonts w:ascii="Arial"/></w:rPr></w:style></w:styles>';
  const r=await inspectDocxRichContent(await fixture('<w:p><w:pPr><w:pStyle w:val="Styled"/></w:pPr><w:r><w:t>Font</w:t></w:r></w:p>',styles));
  assert.equal(r.ok,false);
