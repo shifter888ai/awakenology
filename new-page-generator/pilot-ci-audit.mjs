@@ -16,7 +16,7 @@ const buffer = await readFile(sourcePath);
 const conversionCandidate = await extractDocx(buffer);
 const sha256 = createHash('sha256').update(buffer).digest('hex');
 const stages = {};
-const diagnostic = {unsupportedTextConstructs:[], drawingKinds:{}, explicitColors:[], lineBreaks:[], floatingDrawings:[], runPropertyInventory:{counts:{},samples:{}}, paragraphPropertyInventory:{counts:{},samples:{}},fontFamilyVariants:[],numberingInventory:null,styleResolutionInventory:{references:[],definitions:[],docDefaults:{}}};
+const diagnostic = {unsupportedTextConstructs:[], drawingKinds:{}, explicitColors:[], lineBreaks:[], floatingDrawings:[], runPropertyInventory:{counts:{},samples:{}}, paragraphPropertyInventory:{counts:{},samples:{}},fontFamilyVariants:[],fontResolutionSamples:[],numberingInventory:null,styleResolutionInventory:{references:[],definitions:[],docDefaults:{}}};
 try {
   const zip = await JSZip.loadAsync(buffer,{checkCRC32:true});
   const xml = await zip.file('word/document.xml').async('string');
@@ -147,6 +147,14 @@ try {
         if (!tag[0].startsWith('</')) recordProperties(diagnostic.runPropertyInventory,tag[1],i,tag[0]);
       }
     }
+    const paragraphStyleId=/<w:pStyle\\b[^>]*\\bw:val=["']([^"']+)["']/.exec(raw)?.[1]??null;
+    const markFont=/<w:pPr\\b[^>]*>[\\s\\S]*?<w:rPr\\b[^>]*>[\\s\\S]*?<w:rFonts\\b[^>]*\\/?\\s*>[\\s\\S]*?<\\/w:rPr>[\\s\\S]*?<\\/w:pPr>/.exec(raw)?.[0]?.match(/<w:rFonts\\b[^>]*\\/?\\s*>/)?.[0]??null;
+    const runFontDetails=[...raw.matchAll(/<w:r(?=[\\s>])[^>]*>([\\s\\S]*?)<\\/w:r>/g)].map(run=>{
+      const body=run[1], rPr=/<w:rPr(?=[\\s>])[^>]*>([\\s\\S]*?)<\\/w:rPr>/.exec(body)?.[1]??'';
+      const texts=[...body.matchAll(/<w:t(?=[\\s>])[^>]*>([\\s\\S]*?)<\\/w:t>/g)].map(x=>x[1]).join('');
+      return {text:texts.slice(0,100),fontTag:/<w:rFonts\\b[^>]*\\/?\\s*>/.exec(rPr)?.[0]??null,style:/<w:rStyle\\b[^>]*\\bw:val=["']([^"']+)["']/.exec(rPr)?.[1]??null};
+    }).filter(run=>run.text.trim());
+    if(runFontDetails.some(run=>!run.fontTag||!/(?:w:ascii|w:hAnsi|w:eastAsia|w:cs)=/.test(run.fontTag))) diagnostic.fontResolutionSamples.push({paragraphIndex:i,paragraphStyleId,paragraphMarkFont:markFont,runs:runFontDetails});
     const breaks = [...raw.matchAll(/<w:br(?=[\s/>])[^>]*\/?\s*>/g)];
     for (const br of breaks) diagnostic.lineBreaks.push({paragraphIndex:i, tag:br[0], textBefore:raw.slice(0,br.index).replace(/<[^>]*>/g,'').slice(-60), textAfter:raw.slice(br.index+br[0].length).replace(/<[^>]*>/g,'').slice(0,60)});
     for (const anchor of raw.matchAll(/<wp:anchor(?=[\s>])[^>]*>[\s\S]*?<\/wp:anchor>/g)) {
