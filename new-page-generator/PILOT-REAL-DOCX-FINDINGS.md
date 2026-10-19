@@ -218,3 +218,7 @@ Validation: [run 39238529558](https://github.com/shifter888ai/awakenology/action
 ## Pilot break-location diagnostic corrected (2026-10-19)
 
 The audit now records the pilot's explicit line break at zero-based paragraph 124 (paragraph 125), after `------`, with no following text in that paragraph. The diagnostic had only matched self-closing tags and therefore failed to record the break when its actual syntax did not fit that narrow pattern. It now accepts both self-closing and paired Word break tag syntax. Validation: [CI run 39238651095](https://github.com/shifter888ai/awakenology/actions/runs/39238651095) passed; the report now shows the exact break tag and paragraph location. Source map, assets, and image-placement inspections pass; rich-content and conversion remain blocked.
+
+## Inherited color and complex-script guard coverage (2026-10-19)
+
+Regression coverage now confirms that explicit color and complex-script bold/italic in `word/styles.xml` are blocking even when the visible document run contains plain text only. This complements the existing inherited font, language, and paragraph-spacing tests. CI: [run 39238732431](https://github.com/shifter888ai/awakenology/actions/runs/39238732431) passed. The behavior is deliberately fail-closed; it does not yet render these properties into output HTML.
