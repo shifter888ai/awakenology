@@ -271,6 +271,9 @@ try {
 const convertedPreviewPath = 'pilot-artifacts/pilot-converted-preview.html';
 try {
   let candidate = conversionCandidate.previewHtml ?? '';
+  // Apply path-based reviewed corrections before replacing asset paths with data URLs.
+  // Once inlined, the content-addressed src path is no longer available for exact matching.
+  candidate = correctPilotPreview(candidate);
   const imageCheck = await inspectDocxAssets(buffer);
   if (conversionCandidate.previewHtml && imageCheck.ok) {
     for (const asset of imageCheck.assets) {
@@ -278,7 +281,6 @@ try {
       candidate = candidate.split('src="' + asset.outputPath + '"').join('src="' + dataUrl + '"');
     }
   }
-  candidate = correctPilotPreview(candidate);
   const header = '<header class="site-header"><div class="header-inner"><a class="brand" href="/" aria-label="Awakenology home"><svg viewBox="0 0 100 100" role="img" aria-label="Circled A" style="width:34px;height:34px;transform:rotate(5deg)"><circle cx="50" cy="50" r="43" fill="none" stroke="currentColor" stroke-width="7"/><path d="M27 72 L50 24 L73 72 M37 55 H63" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/></svg><span>Awakenology</span></a><nav class="nav" aria-label="Site navigation"><a href="/English/">English</a><a href="/Japanese/">日本語</a><a href="/Chinese/">中文</a><a href="/ai-search/">Search / Ask</a></nav></div></header>';
   const footer = '<footer class="footer"><div class="footer-inner"><span class="footer-links"><a class="contact-icon" href="mailto:contact@awakenology.org" aria-label="Contact" title="Contact">✉</a><a class="reddit-icon" href="https://www.reddit.com/r/EscapeReincarnation/" aria-label="Reddit: Escape Reincarnation"><img src="/assets/reddit-one.svg" alt=""></a><a class="reddit-icon" href="https://www.reddit.com/r/EscapePrisonPlanet/" aria-label="Reddit: Escape Prison Planet"><img src="/assets/reddit-two.svg" alt=""></a><a class="reddit-icon" href="https://www.reddit.com/user/Lower-Lingonberry-40/" aria-label="Reddit profile"><img src="/assets/reddit-three.svg" alt=""></a><a class="disclaimer-icon" href="/Disclaimer/" aria-label="Disclaimer" title="Disclaimer">ⓘ</a></span><span>© 2017 Awakenology</span></div></footer>';
   const warning = '<aside class="preview-note" role="note"><strong>CONVERSION REVIEW ONLY — NOT APPROVED FOR PUBLICATION</strong><p>This candidate applies mapped source typography and paragraph layout. The original floating image is displayed inline here; its Word wrapping and position have not been certified. Do not publish this preview.</p></aside>';
