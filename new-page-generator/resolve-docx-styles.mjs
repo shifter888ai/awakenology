@@ -32,7 +32,7 @@ function runProps(xml) {
   const size=directTag(xml,'sz');
   if(size) {
     const value=attrs(size)['w:val'];
-    if(value && /^\\d+$/.test(value) && Number(value)>0) result.fontSizePt=Number(value)/2;
+    if(value && /^\d+$/.test(value) && Number(value)>0) result.fontSizePt=Number(value)/2;
     else result.fontSizePt={unsupported:true};
   }
   return result;
