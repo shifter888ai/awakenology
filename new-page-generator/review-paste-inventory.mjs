@@ -16,7 +16,7 @@ const WORD_PARAGRAPH_ATTRS = [
 ];
 const attrs = {
   A: ["href", "title", "style", "lang"],
-  IMG: ["src", "alt", "title", "style"],
+  IMG: ["src", "alt", "title", "style", "data-word-image-placement-json"],
   TH: ["colspan", "rowspan", "style"], TD: ["colspan", "rowspan", "style"],
   SPAN: ["style", "lang", ...WORD_RUN_ATTRS],
   P: ["style", ...WORD_PARAGRAPH_ATTRS],
@@ -38,6 +38,9 @@ const styles = {
   "margin-right": /^-?\d+(?:\.\d+)?(?:pt|px)$/i,
   "margin-top": /^-?\d+(?:\.\d+)?(?:pt|px)$/i,
   "margin-bottom": /^-?\d+(?:\.\d+)?(?:pt|px)$/i,
+  "float": /^(?:left|right|none)$/i,
+  "width": /^\d+(?:\.\d+)?(?:pt|px)$/i,
+  "height": /^\d+(?:\.\d+)?(?:pt|px)$/i,
   "text-indent": /^-?\d+(?:\.\d+)?(?:pt|px)$/i,
   "line-height": /^(?:\d+(?:\.\d+)?(?:pt|px)|\d+(?:\.\d+)?)$/i,
   "letter-spacing": /^-?\d+(?:\.\d+)?(?:pt|px)$/i,
