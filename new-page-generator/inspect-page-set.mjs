@@ -26,7 +26,7 @@ export function applyImageAltTextOverrides(html, overrides={}) {
       const hasOverride=Object.prototype.hasOwnProperty.call(overrides,src);
       if(hasOverride) {
         const value=overrides[src];
-        if(typeof value!=="string"||!value.trim()||value.length>500||/[\\u0000-\\u0008\\u000b\\u000c\\u000e-\\u001f]/.test(value)) {
+        if(typeof value!=="string"||!value.trim()||value.length>500||/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(value)) {
           errors.push("Invalid alt-text override for image src "+src+".");
         } else if(alt?.value?.trim()) {
           if(alt.value!==value) errors.push("Refusing to replace source-provided alt text for image src "+src+".");
@@ -105,6 +105,8 @@ export async function inspectPageSet(pageSet, inputs = {}) {
     let visualReviewRequired = false;
     let visualReviewApproved = false;
     let reviewWarnings = [];
+    let imageAltTextBySrc = {};
+    let imageAltIssues = [];
     if (meta.mode === "paste" || meta.mode === "html") {
       inspected = inspectPastedHtml(input.html, input.parser, { allowDocumentShell: meta.mode === "html" });
     } else if (meta.mode === "markdown") {
@@ -126,8 +128,8 @@ export async function inspectPageSet(pageSet, inputs = {}) {
       visualReviewRequired=prepared.visualReviewRequired;
       visualReviewApproved=prepared.visualReviewApproved;
       reviewWarnings=prepared.reviewWarnings;
-      const imageAltTextBySrc=prepared.imageAltTextBySrc;
-      const imageAltIssues=prepared.imageAltIssues;
+      imageAltTextBySrc=prepared.imageAltTextBySrc;
+      imageAltIssues=prepared.imageAltIssues;
     }
     const pageErrors = [...inspected.errors];
     let normalizedBlocks = [];
@@ -144,7 +146,7 @@ export async function inspectPageSet(pageSet, inputs = {}) {
         if (normalized.ok) normalizedBlocks = normalized.blocks;
       }
     }
-    pages[lang] = { mode: meta.mode, inventory: inspected.inventory, normalizedBlocks, sourceRichInventory, assetFiles, errors: pageErrors, ...(previewHtml ? {previewHtml,sourceSha256:previewSourceSha256,visualReviewRequired,visualReviewApproved,reviewWarnings,imageAltTextBySrc,imageAltIssues} : {}) };
+    pages[lang] = { mode: meta.mode, inventory: inspected.inventory, normalizedBlocks, sourceRichInventory, assetFiles, errors: pageErrors, ...(meta.mode==="docx" ? {sourceSha256:previewSourceSha256,visualReviewRequired,visualReviewApproved,reviewWarnings,imageAltTextBySrc,imageAltIssues,...(previewHtml ? {previewHtml} : {})} : {}) };
     errors.push(...pageErrors.map(e => `${lang}: ${e}`));
   }
   for(const [lang,page] of Object.entries(pages)) for(const warning of page.reviewWarnings??[]) errors.push(lang+': '+warning);
