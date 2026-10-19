@@ -66,7 +66,7 @@ export async function inspectDocxRichContent(buffer) {
         const code = entity.startsWith('&#x') ? parseInt(entity.slice(3, -1), 16) : parseInt(entity.slice(2, -1), 10);
         return Number.isInteger(code) && code >= 0 && code <= 0x10ffff && !(code >= 0xd800 && code <= 0xdfff) ? String.fromCodePoint(code) : entity;
       });
-      for (const text of texts) runs.push({ text: decode(text[1]), bold: flag('b'), italic: flag('i'), underline: flag('u'), color: color ? '#' + color.toLowerCase() : null, href: null });
+      for (const text of texts) runs.push({ paragraphIndex: p, text: decode(text[1]), bold: flag('b'), italic: flag('i'), underline: flag('u'), color: color ? '#' + color.toLowerCase() : null, href: null });
     }
   }
   for (const [name, paragraphSet] of unknownRunProperties) {
