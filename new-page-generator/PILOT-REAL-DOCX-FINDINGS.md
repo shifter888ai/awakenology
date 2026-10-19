@@ -154,3 +154,10 @@ The rich-content inventory now records a shared per-paragraph marker order for i
 Image asset mapping also pairs source image references with asset records by occurrence order, not merely relationship ID. This preserves per-occurrence alt text when the same media relationship is reused more than once. Regression tests cover swapping an image and break at a shared offset and reusing one image relationship with different alt text.
 
 Validation: **136 tests passed, 0 failed** in [CI run 39203905399](https://github.com/shifter888ai/awakenology/actions/runs/39203905399). Floating image page-relative placement/wrapping and the pilot's inherited formatting remain blocked.
+
+
+## Total paragraph-count integrity (CI run 39204047613)
+
+The DOCX and rendered-HTML rich inventories now expose their total recognized paragraph count, and the comparator requires and compares it. This catches missing empty paragraphs—including trailing or otherwise textless paragraphs—that run indices alone cannot reliably detect. Missing paragraph-count metadata now blocks comparison.
+
+Regression coverage verifies that dropping an empty paragraph fails even when all text runs are identical. Validation: **138 tests passed, 0 failed** in [CI run 39204047613](https://github.com/shifter888ai/awakenology/actions/runs/39204047613). The rendered inspector counts only recognized paragraph-like blocks; unsupported semantic structures and CSS remain blocked rather than counted as equivalent.
