@@ -14,10 +14,10 @@ const sourcePath = 'temp/多重時空是什麽 - 繁體 - Copy.docx';
 const outputPath = 'pilot-artifacts/pilot-audit.json';
 const buffer = await readFile(sourcePath);
 const conversionCandidate = await extractDocx(buffer);
-diagnostic.missingAltAssets=(conversionCandidate.assetFiles??[]).filter(asset=>!asset.alt?.trim()).map(asset=>({outputPath:asset.outputPath,sha256:asset.sha256,contentType:asset.contentType,byteLength:asset.byteLength}));
 const sha256 = createHash('sha256').update(buffer).digest('hex');
 const stages = {};
 const diagnostic = {unsupportedTextConstructs:[], drawingKinds:{}, explicitColors:[], lineBreaks:[], floatingDrawings:[], missingAltAssets:[], runPropertyInventory:{counts:{},samples:{}}, paragraphPropertyInventory:{counts:{},samples:{}},fontFamilyVariants:[],fontResolutionSamples:[],paragraphSpacingVariants:[],paragraphIndentationVariants:[],numberingInventory:null,styleResolutionInventory:{references:[],definitions:[],docDefaults:{}}};
+diagnostic.missingAltAssets=(conversionCandidate.assetFiles??[]).filter(asset=>!asset.alt?.trim()).map(asset=>({outputPath:asset.outputPath,sha256:asset.sha256,contentType:asset.contentType,byteLength:asset.byteLength}));
 try {
   const zip = await JSZip.loadAsync(buffer,{checkCRC32:true});
   const xml = await zip.file('word/document.xml').async('string');
