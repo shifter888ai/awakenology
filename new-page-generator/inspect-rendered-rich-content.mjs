@@ -90,7 +90,7 @@ export function inspectRenderedRichContent(html, parser) {
     }
     if (tag === 'BR') lineBreaks.push({paragraphIndex:Math.max(0,paragraphIndex),textOffset:paragraphOffsets.get(paragraphIndex) ?? 0,breakType:'textWrapping',markerOrder:nextMarkerOrder(Math.max(0,paragraphIndex))});
     const style=node.getAttribute?.('style') ?? '';
-    const allowed=new Set(['color','font-weight','font-style','text-decoration','font-size','text-align','margin-left','margin-right','text-indent','margin-top','margin-bottom','line-height','font-family','text-transform','letter-spacing']);
+    const allowed=new Set(['color','font-weight','font-style','text-decoration','font-size','text-align','margin-left','margin-right','text-indent','margin-top','margin-bottom','line-height','font-family','text-transform','letter-spacing','font-kerning']);
     for(const decl of style.split(';').filter(x=>x.trim())) {
       const index=decl.indexOf(':');
       if(index<0 || !allowed.has(decl.slice(0,index).trim().toLowerCase())) errors.push('Unsupported rendered style: '+decl);
@@ -103,6 +103,7 @@ export function inspectRenderedRichContent(html, parser) {
     if(transform!==null && !['uppercase','none'].includes(transform.toLowerCase())) errors.push('Unsupported rendered text-transform: '+transform);
     const family=formatting(node,'font-family');
     const letterSpacing=formatting(node,'letter-spacing');
+    const fontKerning=formatting(node,'font-kerning');
     if(['S','STRIKE','DEL'].includes(tag)) errors.push('Unsupported rendered deletion/strike formatting: '+tag);
     const next={...state};
     const size=fontSizePt(node); if(size!==null) {next.fontSizePt=size;next.fontSizeCsPt=size;}
@@ -115,6 +116,7 @@ export function inspectRenderedRichContent(html, parser) {
     if(Object.keys(language).length) next.language=language;
     else if(node.getAttribute?.('lang')) next.language={val:node.getAttribute('lang')};
     if(transform!==null) next.allCaps=transform.toLowerCase()==='uppercase';
+    if(fontKerning!==null) {if(!['normal','none','auto'].includes(fontKerning.toLowerCase())) errors.push('Unsupported rendered font-kerning: '+fontKerning);else next.fontKerning=fontKerning.toLowerCase();}
     if(letterSpacing!==null) {
       const match=/^(-?\d+(?:\.\d+)?)(pt|px)$/.exec(letterSpacing.toLowerCase());
       if(letterSpacing==='0') next.letterSpacingPt=0;
@@ -136,7 +138,7 @@ export function inspectRenderedRichContent(html, parser) {
     }
     for(const child of node.childNodes ?? []) visit(child,next);
   }
-  const initial={bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null};
+  const initial={bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null,fontKerning:null};
   for(const child of doc.body?.childNodes ?? []) visit(child,initial);
   if(!runs.length) errors.push('No rendered text runs.');
   return {ok:errors.length===0,errors,runs,images,lineBreaks,paragraphLayouts,paragraphCount:paragraphIndex+1};
