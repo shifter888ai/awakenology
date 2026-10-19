@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { inspectPageSet, verifyRenderedInventory } from "./inspect-page-set.mjs";
+import { inspectPageSet, verifyRenderedInventory, isFloatingDrawingReviewOnly } from "./inspect-page-set.mjs";
+import { FLOATING_DRAWING_REVIEW_ERROR } from "./extract-docx.mjs";
+s += ""
 
 const pageSet = () => ({ pages: Object.fromEntries(["en","ja","zh-Hant"].map((lang, i) => [lang, {
   title: lang, mode: i === 0 ? "docx" : "paste", source: "source-" + lang, route: "/" + lang + "/"
@@ -102,4 +104,13 @@ test("HTML file mode shares the strict inspector while retaining file provenance
  assert.equal(result.ok,true,result.errors.join("; "));
  assert.equal(result.pages.en.normalizedBlocks[0].sourceMode,"html");
  assert.equal(result.pages.en.normalizedBlocks[0].sourceLocation.part,"html-file");
+});
+
+
+test("identifies only a verified floating-image preview as requiring visual review",()=>{
+ const preview={ok:false,errors:[FLOATING_DRAWING_REVIEW_ERROR],previewHtml:"<p>preview</p>",sha256:"a".repeat(64)};
+ assert.equal(isFloatingDrawingReviewOnly(preview),true);
+ assert.equal(isFloatingDrawingReviewOnly({...preview,errors:[...preview.errors,"other blocker"]}),false);
+ assert.equal(isFloatingDrawingReviewOnly({...preview,previewHtml:undefined}),false);
+ assert.equal(isFloatingDrawingReviewOnly({...preview,sha256:undefined}),false);
 });
