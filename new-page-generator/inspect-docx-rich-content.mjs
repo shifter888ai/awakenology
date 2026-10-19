@@ -72,7 +72,7 @@ export async function inspectDocxRichContent(buffer) {
         return Number.isInteger(code) && code >= 0 && code <= 0x10ffff && !(code >= 0xd800 && code <= 0xdfff) ? String.fromCodePoint(code) : entity;
       });
       const resolved = resolveDocxRunFormatting({stylesXml,paragraphXml:paragraphs[p][0],runXml:match[0]});
-      if (!resolved.ok) errors.push(...resolved.errors.map(error => 'Paragraph ' + (p + 1) + ': ' + error));
+      if (!resolved.ok) errors.push(...resolved.errors.map(error => error.startsWith('Unsupported inherited Word formatting:') ? 'Paragraph ' + (p + 1) + ': ' + error : error));
       const formatting = resolved.formatting;
       for (const text of texts) runs.push({ paragraphIndex: p, text: decode(text[1]), bold: formatting?.b ?? flag('b'), italic: formatting?.i ?? flag('i'), underline: formatting?.u ?? flag('u'), color: formatting?.color ?? (color ? '#' + color.toLowerCase() : null), href: null });
     }
