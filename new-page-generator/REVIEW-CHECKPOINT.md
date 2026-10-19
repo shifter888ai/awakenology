@@ -158,3 +158,8 @@ The source rich-content inventory now uses a conservative resolver for supported
 ## Inherited-style diagnostics made actionable (2026-10-19)
 
 Repeated document-default and style-chain warnings are now deduplicated, while paragraph-specific formatting errors retain their locations. The real DOCX pilot remains blocked by unsupported font family/size/language, complex-script properties, character spacing, paragraph alignment/indentation/numbering, section layout and floating-image conversion. CI [39205573952](https://github.com/shifter888ai/awakenology/actions/runs/39205573952) passed **154/154 tests**.
+
+
+## Font-size provenance added (2026-10-19)
+
+The source resolver now captures inherited/direct Word `w:sz` half-point sizes; the independent HTML inventory captures explicit `pt`/`px` sizes and the comparator checks them run-by-run. Unsupported units fail closed. CI [39206257271](https://github.com/shifter888ai/awakenology/actions/runs/39206257271) passed **160/160 tests**. Pilot status remains blocked on inherited fonts, complex-script sizes, language/kerning, paragraph layout/numbering, section properties, paragraph-mark formatting and floating-image rendering.
