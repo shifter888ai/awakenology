@@ -43,7 +43,7 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
   for (const match of stylesXml.matchAll(/<w:style\b([^>]*)>([\s\S]*?)<\/w:style>/g)) {
     const a=attrs(match[1]), body=match[2], id=a['w:styleId'];
     if (!id || styleMap.has(id)) { errors.push('Missing or duplicate Word style ID.'); continue; }
-    styleMap.set(id,{id,basedOn:/<w:basedOn\b[^>]*\bw:val=["']([^"']+)["']/.exec(body)?.[1] ?? null,run:runProps(inner(body,'rPr')),unsupportedRun:unsupportedRunProps(inner(body,'rPr')),unsupportedParagraph:unsupportedParagraphProps(inner(body,'pPr'))});
+    styleMap.set(id,{id,basedOn:/<w:basedOn\b[^>]*\bw:val=["']([^"']+)["']/.exec(body)?.[1] ?? null,run:runProps(inner(body,'rPr')),unsupportedRun:unsupportedRunProps(inner(body,'rPr')),unsupportedParagraph:unsupportedParagraphProps(inner(body,'pPr')),paragraphMarkRun:inner(inner(body,'pPr'),'rPr')});
   }
   const chain=(id,label)=>{
     const found=[], seen=new Set();
@@ -54,6 +54,7 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
       if(!style){errors.push('Missing Word style '+id+' referenced by '+label+'.');break;}
       for(const name of style.unsupportedRun) errors.push('Unsupported run property w:'+name+' in Word style '+style.id+'.');
       for(const name of style.unsupportedParagraph) errors.push('Unsupported paragraph property w:'+name+' in Word style '+style.id+'.');
+      if(style.paragraphMarkRun.trim()) errors.push('Paragraph-mark run formatting in Word style '+style.id+' requires independent handling.');
       found.unshift(style.run);
       id=style.basedOn;
     }
@@ -65,7 +66,7 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
   const pStyle=/<w:pStyle\b[^>]*\bw:val=[\"']([^\"']+)[\"']/.exec(paragraphXml)?.[1] ?? null;
   if(pStyle) for(const props of chain(pStyle,'paragraph style')) merge(effective,props);
   const pRun=inner(inner(paragraphXml,'pPr'),'rPr');
-  merge(effective,runProps(pRun));
+  if(pRun.trim()) errors.push('Paragraph-mark run formatting requires independent handling.');
   const rStyle=/<w:rStyle\b[^>]*\bw:val=[\"']([^\"']+)[\"']/.exec(runXml)?.[1] ?? null;
   if(rStyle) for(const props of chain(rStyle,'character style')) merge(effective,props);
   merge(effective,runProps(inner(runXml,'rPr')));
