@@ -1,10 +1,10 @@
 // Conservative resolver for the supported Word paragraph-layout subset.
 // Values remain in OOXML twips so a later renderer can convert units explicitly.
 // This module does not certify page/section layout, numbering, or floating objects.
-const attrs = tag => Object.fromEntries([...tag.matchAll(/([\\w:.-]+)=["']([^"']*)["']/g)].map(m => [m[1],m[2]]));
-const bodyOf = (xml, tag) => new RegExp(String.raw`<w:${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/w:${tag}>`).exec(xml)?.[1] ?? '';
-const direct = (xml, tag) => new RegExp(String.raw`<w:${tag}\\b[^>]*\\/?\\s*>`).exec(xml)?.[0] ?? null;
-const children = xml => [...xml.matchAll(/<w:([A-Za-z][A-Za-z0-9]*)\\b[^>]*\\/?\\s*>/g)].map(m=>m[1]);
+const attrs = tag => Object.fromEntries([...tag.matchAll(/([\w:.-]+)=["']([^"']*)["']/g)].map(m => [m[1],m[2]]));
+const bodyOf = (xml, tag) => new RegExp(String.raw`<w:${tag}(?:\s[^>]*)?>([\s\S]*?)<\/w:${tag}>`).exec(xml)?.[1] ?? '';
+const direct = (xml, tag) => new RegExp(String.raw`<w:${tag}\b[^>]*\/?\s*>`).exec(xml)?.[0] ?? null;
+const children = xml => [...xml.matchAll(/<w:([A-Za-z][A-Za-z0-9]*)\b[^>]*\/?\s*>/g)].map(m=>m[1]);
 const layoutProps = xml => {
   const result = {};
   const jc = direct(xml,'jc');
@@ -19,7 +19,7 @@ const layoutProps = xml => {
     for (const [name,key] of [['left','left'],['right','right'],['firstLine','firstLine'],['hanging','hanging']]) {
       const raw=a['w:'+name];
       if (raw !== undefined) {
-        if (!/^-?\\d+$/.test(raw)) parsed[key]={unsupported:true};
+        if (!/^-?\d+$/.test(raw)) parsed[key]={unsupported:true};
         else parsed[key]=Number(raw);
       }
     }
@@ -34,10 +34,10 @@ export function resolveDocxParagraphLayout({stylesXml,paragraphXml}) {
   const errors=[];
   if (typeof stylesXml!=='string' || typeof paragraphXml!=='string') return {ok:false,errors:['Styles XML and paragraph XML are required.'],layout:null};
   const map=new Map();
-  for(const m of stylesXml.matchAll(/<w:style\\b([^>]*)>([\\s\\S]*?)<\\/w:style>/g)) {
+  for(const m of stylesXml.matchAll(/<w:style\b([^>]*)>([\s\S]*?)<\/w:style>/g)) {
     const a=attrs(m[1]), id=a['w:styleId'];
     if(!id || map.has(id)){errors.push('Missing or duplicate Word style ID.');continue;}
-    map.set(id,{type:a['w:type']??null,basedOn:/<w:basedOn\\b[^>]*\\bw:val=["']([^"']+)["']/.exec(m[2])?.[1]??null,pPr:bodyOf(m[2],'pPr')});
+    map.set(id,{type:a['w:type']??null,basedOn:/<w:basedOn\b[^>]*\bw:val=["']([^"']+)["']/.exec(m[2])?.[1]??null,pPr:bodyOf(m[2],'pPr')});
   }
   const merge=(target,source)=>{for(const [k,v] of Object.entries(source)) target[k]=v;};
   const result={alignment:'left',indentation:{left:0,right:0}};
@@ -45,7 +45,7 @@ export function resolveDocxParagraphLayout({stylesXml,paragraphXml}) {
   const defaultsP=bodyOf(defaults,'pPr');
   for(const name of unsupported(defaultsP)) errors.push('Unsupported document-default paragraph property w:'+name+'.');
   merge(result,layoutProps(defaultsP));
-  const id=/<w:pStyle\\b[^>]*\\bw:val=["']([^"']+)["']/.exec(paragraphXml)?.[1]??null;
+  const id=/<w:pStyle\b[^>]*\bw:val=["']([^"']+)["']/.exec(paragraphXml)?.[1]??null;
   if(id) {
     const chain=[], seen=new Set(); let current=id;
     while(current) {
@@ -59,7 +59,6 @@ export function resolveDocxParagraphLayout({stylesXml,paragraphXml}) {
     }
     for(const style of chain) merge(result,layoutProps(style.pPr));
   }
-  const directP=bodyOf(bodyOf(paragraphXml,'pPr'),'pPr');
   const pPr=bodyOf(paragraphXml,'pPr');
   for(const name of unsupported(pPr)) errors.push('Unsupported direct paragraph property w:'+name+'.');
   merge(result,layoutProps(pPr));
