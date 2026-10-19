@@ -90,3 +90,13 @@ test("does not confuse paragraph-mark character spacing with paragraph spacing",
  assert.equal(result.ok,true,result.errors.join("; "));
  assert.deepEqual(result.layout.spacing,{beforePt:0,afterPt:0,lineHeightPt:18});
 });
+
+
+test("a direct zero character-indent overrides an inherited nonzero character-indent",()=>{
+ const stylesXml='<w:styles><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:pPr><w:ind w:left="840" w:leftChars="400"/></w:pPr></w:style></w:styles>';
+ const paragraphXml='<w:p><w:pPr><w:pStyle w:val="Normal"/><w:ind w:leftChars="0"/></w:pPr></w:p>';
+ const result=resolveDocxParagraphLayout({stylesXml,paragraphXml});
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.equal(result.layout.indentation.left,840);
+ assert.equal(result.layout.indentation.leftChars,0);
+});
