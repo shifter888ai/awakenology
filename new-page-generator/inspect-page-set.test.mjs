@@ -78,7 +78,7 @@ test("Markdown inputs normalize through the same inspected HTML inventory",async
  },{
   nodeType:1,tagName:"P",attributes:[],childNodes:[{nodeType:3,textContent:"Keep 日本語 and 繁體中文"}],
   getAttribute:()=>null
- }]})};
+ ]}})};
  const set={pages:Object.fromEntries(["en","ja","zh-Hant"].map(lang=>[lang,{
   title:lang,mode:"markdown",source:lang+".md",route:"/"+lang+"/"
  }]))};
