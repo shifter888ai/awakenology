@@ -41,3 +41,17 @@ test("successful paste inspection also returns normalized blocks", async () => {
     assert.equal(result.pages[lang].normalizedBlocks[0].sourceLocation.part, "pasted-html");
   }
 });
+
+
+test("blocks CSS hidden in the head of pasted HTML",async()=>{
+ const textNode={nodeType:3,textContent:"Article text"};
+ const styleNode={nodeType:1,tagName:"STYLE",childNodes:[],getAttribute:()=>null};
+ const parser={parseFromString:()=>({head:{childNodes:[styleNode]},body:{childNodes:[textNode]}})};
+ const set={pages:Object.fromEntries(["en","ja","zh-Hant"].map(lang=>[lang,{
+  title:lang,mode:"paste",source:"source-"+lang,route:"/"+lang+"/"
+ }]))};
+ const inputs=Object.fromEntries(["en","ja","zh-Hant"].map(lang=>[lang,{html:"<html><head><style>p{color:red}</style></head><body><p>Article text</p></body></html>",parser}]));
+ const result=await inspectPageSet(set,inputs);
+ assert.equal(result.ok,false);
+ assert.ok(result.errors.some(x=>x.includes("Embedded CSS in the HTML head")));
+});
