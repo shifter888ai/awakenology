@@ -18,6 +18,8 @@ const FEATURES = [
   ["explicit language metadata (requires lossless language mapping)", /<w:lang(?:\s|\/?>)/],
   ["complex-script bold or italic (requires lossless mapping)", /<w:(?:bCs|iCs)(?:\s|\/?>)/],
   ["capitalization (requires lossless mapping)", /<w:caps(?:\s|\/?>)/],
+  ["unsupported run effects or hidden text", /<w:(?:vertAlign|position|vanish|specVanish|smallCaps|emboss|imprint|shadow|outline|effect|fitText|rtl|cs)(?:\s|\/?>)/],
+  ["paragraph pagination, direction, or section layout", /<w:(?:sectPr|pageBreakBefore|keepNext|keepLines|widowControl|outlineLvl|contextualSpacing|bidi|textDirection|mirrorIndents|snapToGrid|adjustRightInd|autoSpaceDE|autoSpaceDN)(?:\s|\/?>)/],
   ["character spacing (requires lossless mapping)", /<w:rPr\b(?:(?!<\/w:rPr>)[\s\S])*?<w:spacing(?:\s|\/?>)/],
   ["paragraph or line spacing (requires lossless mapping)", /<w:pPr\b(?:(?!<\/w:pPr>)[\s\S])*?<w:spacing(?:\s|\/?>)/],
   ["paragraph or run style inheritance", /<w:(?:pStyle|rStyle)(?:\s|\/?>)/],
