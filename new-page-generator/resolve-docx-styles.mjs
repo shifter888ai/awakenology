@@ -104,7 +104,7 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
       if(style.type!==expectedType) errors.push('Word style '+style.id+' has type '+style.type+'; expected '+expectedType+' for '+label+'.');
       for(const name of style.unsupportedRun) errors.push('Unsupported run property w:'+name+' in Word style '+style.id+'.');
       for(const name of style.unsupportedParagraph) errors.push('Unsupported paragraph property w:'+name+' in Word style '+style.id+'.');
-      if(style.paragraphMarkRun.trim()) errors.push('Paragraph-mark run formatting in Word style '+style.id+' requires independent handling.');
+
       found.unshift(style.run);
       id=style.basedOn;
     }
@@ -115,6 +115,23 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
   merge(effective,runProps(defaultsRun));
   const pStyle=/<w:pStyle\b[^>]*\bw:val=[\"']([^\"']+)[\"']/.exec(paragraphXml)?.[1] ?? null;
   if(pStyle) for(const props of chain(pStyle,'paragraph style','paragraph')) merge(effective,props);
+  const paragraphMarkFormatting={};
+  if(pStyle) {
+    const markChain=[], markSeen=new Set(); let markId=pStyle;
+    while(markId && !markSeen.has(markId)) {
+      markSeen.add(markId);
+      const style=styleMap.get(markId); if(!style) break;
+      markChain.unshift(style); markId=style.basedOn;
+    }
+    for(const style of markChain) {
+      const markRun=style.paragraphMarkRun ?? '';
+      for(const name of unsupportedRunProps(markRun)) errors.push('Unsupported paragraph-mark run property w:'+name+' in Word style '+style.id+'.');
+      for(const [key,value] of Object.entries(runProps(markRun))) {
+        if(value?.unsupported) errors.push('Unsupported paragraph-mark formatting: '+key+' in Word style '+style.id+'.');
+        else paragraphMarkFormatting[key]=value;
+      }
+    }
+  }
   const pRun=inner(inner(paragraphXml,'pPr'),'rPr');
   if(pRun.trim()) {
     for(const name of unsupportedRunProps(pRun)) errors.push('Unsupported paragraph-mark run property w:'+name+'.');
@@ -130,5 +147,10 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
     else effective.fontKerning = effective.fontSizePt >= effective.fontKerningThresholdPt ? 'normal' : 'none';
   }
   for(const [key,value] of Object.entries(effective)) if(value?.unsupported) errors.push('Unsupported inherited Word formatting: '+key+'.');
-  return {ok:errors.length===0,errors,formatting:errors.length?null:effective};
+  if(pRun.trim()) for(const [key,value] of Object.entries(runProps(pRun))) {
+    if(value?.unsupported) errors.push('Unsupported paragraph-mark formatting: '+key+'.');
+    else paragraphMarkFormatting[key]=value;
+  }
+  for(const [key,value] of Object.entries(paragraphMarkFormatting)) if(value?.unsupported) errors.push('Unsupported paragraph-mark formatting: '+key+'.');
+  return {ok:errors.length===0,errors,formatting:errors.length?null:effective,paragraphMarkFormatting:errors.length?null:paragraphMarkFormatting};
 }
