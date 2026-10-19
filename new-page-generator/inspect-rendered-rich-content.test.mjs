@@ -233,3 +233,22 @@ test("preserves blockquote structure without counting it as a second paragraph",
  assert.equal(result.paragraphCount,1);
  assert.equal(result.runs[0].text,"Quoted text");
 });
+
+
+test("validates CSS float geometry against serialized Word placement metadata",()=>{
+ const placement={
+  kind:"floating",anchorAttributes:{behindDoc:"0",distL:"114300",distR:"114300",distT:"0",distB:"0"},
+  horizontalPosition:'<wp:positionH relativeFrom="column"><wp:posOffset>0</wp:posOffset></wp:positionH>',
+  verticalPosition:'<wp:positionV relativeFrom="paragraph"><wp:posOffset>0</wp:posOffset></wp:positionV>',
+  extent:'<wp:extent cx="1270000" cy="635000"/>',wrap:'<wp:wrapSquare wrapText="bothSides"/>',requiresVisualReview:true
+ };
+ const style='float:left;width:100pt;height:50pt;margin-left:-42pt;margin-right:9pt;margin-top:0pt;margin-bottom:0pt';
+ const validParser={parseFromString:()=>({body:{childNodes:[node('P',{style:'margin-left:42pt'},[node('IMG',{src:'/assets/a.png',alt:'Diagram',style,'data-word-image-placement-json':JSON.stringify(placement)})])]}})};
+ const valid=inspectRenderedRichContent('<p>fixture</p>',validParser);
+ assert.equal(valid.ok,true,valid.errors.join('; '));
+ assert.equal(valid.images[0].placement.kind,'floating');
+ const badParser={parseFromString:()=>({body:{childNodes:[node('P',{style:'margin-left:42pt'},[node('IMG',{src:'/assets/a.png',alt:'Diagram',style:style.replace('float:left','float:right'),'data-word-image-placement-json':JSON.stringify(placement)})])]}})};
+ const bad=inspectRenderedRichContent('<p>fixture</p>',badParser);
+ assert.equal(bad.ok,false);
+ assert.ok(bad.errors.some(error=>error.includes('CSS float differs')));
+});
