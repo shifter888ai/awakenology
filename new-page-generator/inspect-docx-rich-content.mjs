@@ -82,14 +82,14 @@ export async function inspectDocxRichContent(buffer) {
       if (item.type === 'lineBreak') {
         lineBreaks.push({paragraphIndex:paragraph.index,textOffset,breakType:item.breakType,markerOrder:markerOrder++});
       } else if (item.type === 'image') {
-        imagePositions.set(item.relationshipId,{textOffset,markerOrder:markerOrder++});
+        imagePositions.set(item.relationshipId + ':' + item.sourceLocation.start,{textOffset,markerOrder:markerOrder++});
       } else if (item.type === 'text') textOffset += item.text.length;
     }
   }
   if (runs.map(r => r.text).join('') !== source.paragraphs.map(p => p.text).join('')) errors.push('Rich runs do not reproduce exact source-map text.');
   if (!runs.length) errors.push('No rich text runs extracted.');
   const images = placement.ok ? placement.images.map(({assetPath, paragraphIndex, order, alt, relationshipId}) => {
-    const position = imagePositions.get(relationshipId);
+    const position = imagePositions.get(relationshipId + ':' + arguments[0]?.sourceLocation?.start);
     if (!position) errors.push('No ordered content position for image relationship ' + relationshipId + '.');
     return {assetPath, paragraphIndex, order, alt, textOffset:position?.textOffset ?? 0, markerOrder:position?.markerOrder ?? -1};
   }) : [];
