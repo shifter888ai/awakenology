@@ -28,3 +28,11 @@ test("uses Word font hint for ambiguous punctuation", () => {
   {text:"B",fontFamily:"Arial"}
  ]);
 });
+
+test("uses complex-script font size independently from general font size", () => {
+ const segments=splitWordScriptSegments("Aع",{fontSizePt:11,fontSizeCsPt:14,bold:false,italic:false});
+ assert.deepEqual(segments.map(x=>({text:x.text,fontSizePt:x.fontSizePt})),[
+  {text:"A",fontSizePt:11},
+  {text:"ع",fontSizePt:14}
+ ]);
+});
