@@ -45,3 +45,7 @@ The paste inspector now rejects URL schemes outside the explicit link/image allo
 ## Supported style-reference resolution (2026-10-19)
 
 The extractor no longer rejects paragraph/character style references solely because a reference exists. The rich-content resolver applies document defaults, paragraph-style inheritance, character-style inheritance, and direct run overrides in the supported formatting subset, and rejects missing/cyclic/wrong-type references or unsupported properties. The extractor still blocks unsupported font metadata, language, complex-script typography, spacing, list semantics, and floating image fidelity. CI passed: [run 39240300513](https://github.com/shifter888ai/awakenology/actions/runs/39240300513). This removes an over-broad gate; it does not make the real pilot ready.
+
+## Static shell baseline (2026-10-19)
+
+Generated pages now include a dark-by-default theme at initial HTML render (avoiding a light-mode flash), one accessible sun/moon theme control injected into the approved header, a compact responsive article layout, responsive images, and a return-to-top control. The CSS and controls are static in each page; there is no runtime shell fetch. This is isolated to generated output and does not change existing pages. Shell tests verify the controls and responsive rules; the real DOCX content-fidelity gate remains independent.
