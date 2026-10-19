@@ -35,6 +35,7 @@ export async function inspectPageSet(pageSet, inputs = {}) {
     let sourceRichInventory = null;
     let assetFiles = [];
     let previewHtml = null;
+    let previewSourceSha256 = null;
     let visualReviewRequired = false;
     let visualReviewApproved = false;
     let reviewWarnings = [];
@@ -57,6 +58,7 @@ export async function inspectPageSet(pageSet, inputs = {}) {
         inspected=inspectPastedHtml(extracted.html,input.parser);
       } else if (floatingReviewOnly) {
         previewHtml=extracted.previewHtml;
+        previewSourceSha256=extracted.sha256;
         inspected=inspectPastedHtml(previewHtml,input.parser);
         visualReviewApproved=input.floatingImageReviewApprovedSha256===extracted.sha256;
         visualReviewRequired=!visualReviewApproved;
@@ -80,7 +82,7 @@ export async function inspectPageSet(pageSet, inputs = {}) {
         if (normalized.ok) normalizedBlocks = normalized.blocks;
       }
     }
-    pages[lang] = { mode: meta.mode, inventory: inspected.inventory, normalizedBlocks, sourceRichInventory, assetFiles, errors: pageErrors, ...(previewHtml ? {previewHtml,sourceSha256:input.floatingImageReviewApprovedSha256??null,visualReviewRequired,visualReviewApproved,reviewWarnings} : {}) };
+    pages[lang] = { mode: meta.mode, inventory: inspected.inventory, normalizedBlocks, sourceRichInventory, assetFiles, errors: pageErrors, ...(previewHtml ? {previewHtml,sourceSha256:previewSourceSha256,visualReviewRequired,visualReviewApproved,reviewWarnings} : {}) };
     errors.push(...pageErrors.map(e => `${lang}: ${e}`));
   }
   for(const [lang,page] of Object.entries(pages)) for(const warning of page.reviewWarnings??[]) errors.push(lang+': '+warning);
