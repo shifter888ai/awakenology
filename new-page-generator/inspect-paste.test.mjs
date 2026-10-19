@@ -68,3 +68,19 @@ test("HTML-file mode still blocks embedded stylesheets and scripts",()=>{
  assert.ok(result.errors.some(error=>error.includes("Embedded CSS")));
  assert.ok(result.errors.some(error=>error.includes("unsupported element <script>")));
 });
+
+
+test("accepts explicit Word numbering and paragraph-mark provenance attributes",()=>{
+ const attrs={
+  "data-word-num-id":"7","data-word-abstract-num-id":"2","data-word-level":"0",
+  "data-word-num-format":"decimal","data-word-num-text":"%1.","data-word-num-start":"3",
+  "data-word-indent-left":"720","data-word-indent-hanging":"360",
+  "data-word-mark-font-ascii":"Arial","data-word-mark-lang-val":"en-US"
+ };
+ const html='<ol start="3"><li '+Object.entries(attrs).map(([key,value])=>key+'="'+value+'"').join(" ")+'>List item</li></ol>';
+ const text={nodeType:3,textContent:"List item"};
+ const li=element("li",attrs,[text]), ol=element("ol",{start:"3"},[li]);
+ const parser={parseFromString:()=>({head:{childNodes:[]},body:{childNodes:[ol]}})};
+ const result=inspectPastedHtml(html,parser);
+ assert.equal(result.ok,true,result.errors.join("; "));
+});
