@@ -42,7 +42,10 @@ export async function generateReviewedPageSet({ pageSet, inputs, outputs }) {
         if (!original?.ok) throw new Error("Original DOCX rich inventory unavailable.");
         const derived = inspectRenderedRichContent(output.reviewedArticleHtml, output.parser);
         if (!derived.ok) throw new Error(derived.errors.join("; "));
-        const rich = compareRichContent(original, derived);
+        const rich = compareRichContent(original, derived, {
+          floatingImageReviewApproved: inspection.pages[lang].visualReviewApproved === true,
+          imageAltTextBySrc: inspection.pages[lang].imageAltTextBySrc ?? {}
+        });
         errors.push(...rich.issues.map(issue => lang + ": DOCX rich-content mismatch: " + JSON.stringify(issue)));
       } catch (error) {
         errors.push(lang + ": DOCX rich-content verification blocked: " + String(error?.message ?? error));
