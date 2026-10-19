@@ -102,7 +102,10 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
   const pStyle=/<w:pStyle\b[^>]*\bw:val=[\"']([^\"']+)[\"']/.exec(paragraphXml)?.[1] ?? null;
   if(pStyle) for(const props of chain(pStyle,'paragraph style','paragraph')) merge(effective,props);
   const pRun=inner(inner(paragraphXml,'pPr'),'rPr');
-  if(pRun.trim()) errors.push('Paragraph-mark run formatting requires independent handling.');
+  if(pRun.trim()) {
+    for(const name of unsupportedRunProps(pRun)) errors.push('Unsupported paragraph-mark run property w:'+name+'.');
+    for(const [key,value] of Object.entries(runProps(pRun))) if(value?.unsupported) errors.push('Unsupported paragraph-mark formatting: '+key+'.');
+  }
   const rStyle=/<w:rStyle\b[^>]*\bw:val=[\"']([^\"']+)[\"']/.exec(runXml)?.[1] ?? null;
   if(rStyle) for(const props of chain(rStyle,'character style','character')) merge(effective,props);
   const directRun=inner(runXml,'rPr');
