@@ -55,7 +55,7 @@ test('blocks unmodeled inherited font and paragraph-layout properties',()=>{
  });
  assert.equal(fonts.ok,false);
  assert.ok(fonts.errors.some(x=>x.includes('Unsupported run property w:rFonts')));
- assert.ok(fonts.errors.some(x=>x.includes('Unsupported run property w:sz')));
+ assert.equal(fonts.formatting,null); assert.ok(fonts.errors.some(x=>x.includes('Unsupported run property w:rFonts')));
  const layout=resolveDocxRunFormatting({
   stylesXml:styles('<w:style w:type="paragraph" w:styleId="P"><w:pPr><w:ind w:left="720"/></w:pPr></w:style>'),
   paragraphXml:paragraph('P'),runXml:run()
