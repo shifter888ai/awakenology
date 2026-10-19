@@ -16,7 +16,7 @@ export async function inspectDocxRichContent(buffer) {
     const stylesPart = zip.file('word/styles.xml');
     if (!documentPart) return fail(['Original document OOXML part is missing.']);
     xml = await documentPart.async('string');
-    hasSectionBreak = /<w:pPr\b[^>]*>[\s\S]*?<w:sectPr\b/.test(xml);
+    hasSectionBreak = [...xml.matchAll(/<w:p\b[^>]*>[\s\S]*?<\/w:p>/g)].some(paragraph => /<w:pPr\b[^>]*>[\s\S]*?<w:sectPr\b/.test(paragraph[0]));
     stylesXml = stylesPart ? await stylesPart.async('string') : '<w:styles></w:styles>';
   } catch { return fail(['Cannot read original OOXML.']); }
 
