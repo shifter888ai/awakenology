@@ -24,9 +24,10 @@ export function splitWordScriptSegments(text, run = {}) {
   const scriptSensitive = Boolean(families && typeof families === "object" && !Array.isArray(families)) ||
     (run.boldCs !== undefined && run.boldCs !== run.bold) ||
     (run.italicCs !== undefined && run.italicCs !== run.italic) ||
+    (run.fontSizeCsPt !== undefined && run.fontSizeCsPt !== run.fontSizePt) ||
     Boolean(run.fontHint);
   if (!scriptSensitive || !text.length) {
-    return [{text,fontFamily:wordFontFamily(families,"ascii"),script:"ascii",bold:run.bold,italic:run.italic}];
+    return [{text,fontFamily:wordFontFamily(families,"ascii"),script:"ascii",bold:run.bold,italic:run.italic,fontSizePt:run.fontSizePt}];
   }
   const result=[];
   for(const character of text) {
@@ -34,9 +35,10 @@ export function splitWordScriptSegments(text, run = {}) {
     const fontFamily=wordFontFamily(families,script);
     const bold=script==="cs" ? (run.boldCs ?? run.bold) : run.bold;
     const italic=script==="cs" ? (run.italicCs ?? run.italic) : run.italic;
+    const fontSizePt=script==="cs" ? (run.fontSizeCsPt ?? run.fontSizePt) : run.fontSizePt;
     const last=result[result.length-1];
-    if(last && last.fontFamily===fontFamily && last.bold===bold && last.italic===italic) last.text+=character;
-    else result.push({text:character,fontFamily,script,bold,italic});
+    if(last && last.fontFamily===fontFamily && last.bold===bold && last.italic===italic && last.fontSizePt===fontSizePt) last.text+=character;
+    else result.push({text:character,fontFamily,script,bold,italic,fontSizePt});
   }
   return result;
 }
