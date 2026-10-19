@@ -48,3 +48,15 @@ test("retains ordered-list starts and Word numbering provenance in normalized bl
  assert.ok(result.blocks[0].formatting.some(item=>item.kind==="list-marker-type"&&item.value==="I"));
  assert.ok(result.blocks[1].formatting.some(item=>item.kind==="word-metadata"&&item.property==="data-word-num-id"&&item.value==="7"));
 });
+
+
+test("retains blockquote semantics in normalized formatting metadata",()=>{
+ const inventory=[
+  {type:"element",path:"/0",tag:"BLOCKQUOTE",attributes:[]},
+  {type:"element",path:"/0/0",tag:"P",attributes:[]},
+  {type:"text",path:"/0/0/0",value:"Quoted text"}
+ ];
+ const result=normalizeHtmlInventory(inventory,{language:"en",sourceMode:"markdown",sourcePart:"markdown-source"});
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.ok(result.blocks[0].formatting.some(item=>item.kind==="semantic-tag"&&item.value==="BLOCKQUOTE"));
+});
