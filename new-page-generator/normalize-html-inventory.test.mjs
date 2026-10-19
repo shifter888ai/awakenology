@@ -16,6 +16,7 @@ test("normalizes text, elements, formatting, links, assets and child order", () 
   assert.equal(result.ok, true, result.errors.join("; "));
   assert.deepEqual(result.blocks[0].orderedChildren, ["n1","n2"]);
   assert.equal(result.blocks[2].formatting[0].kind, "bold");
+  assert.equal(result.blocks[2].type, "text");
   assert.deepEqual(result.blocks[4].links, [{ href: "https://example.org", title: "source" }]);
   assert.deepEqual(result.blocks[6].assets, [{ src: "assets/pic.png", alt: "Diagram" }]);
   assert.equal(result.blocks[1].text, "Exact ");
