@@ -88,6 +88,7 @@ export async function inspectDocxAssets(buffer) {
       docPr: docPr ? tagAttrs(docPr) : {},
       horizontalPosition: block.match(/<wp:positionH\b[^>]*>[\s\S]*?<\/wp:positionH>/)?.[0] ?? null,
       verticalPosition: block.match(/<wp:positionV\b[^>]*>[\s\S]*?<\/wp:positionV>/)?.[0] ?? null,
+      extent: block.match(/<wp:extent\b[^>]*\/?\s*>/)?.[0] ?? null,
       wrap: block.match(/<wp:wrap\w+\b[^>]*\/?\s*>/)?.[0] ?? null,
       requiresVisualReview: true
     } : { kind: "inline", requiresVisualReview: false };
