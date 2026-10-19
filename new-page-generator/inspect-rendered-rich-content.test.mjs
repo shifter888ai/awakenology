@@ -10,7 +10,7 @@ test('extracts formatting, links, image position from parsed HTML',()=>{
  assert.equal(r.runs[0].bold,true);
  assert.equal(r.runs[0].text,'什麽');
  assert.equal(r.runs[1].href,'/target');
- assert.deepEqual(r.images,[{assetPath:'asset.png',paragraphIndex:0,order:0,alt:'Diagram',textOffset:7,markerOrder:0}]);
+ assert.deepEqual(r.images,[{assetPath:'asset.png',paragraphIndex:0,order:0,alt:'Diagram',textOffset:7,markerOrder:0,placement:{kind:'inline'}}]);
 });
 test('requires parser rather than trusting a caller inventory',()=>assert.equal(inspectRenderedRichContent('<p>x</p>',null).ok,false));
 
