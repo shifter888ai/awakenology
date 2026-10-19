@@ -8,7 +8,7 @@ const required = (o, keys, where) => {
     throw new Error('Incomplete rich-content inventory at ' + where);
   }
 };
-export function compareRichContent(source, output) {
+export function compareRichContent(source, output, options = {}) {
   const issues = [];
   for (const [side, value] of [['source', source], ['output', output]]) {
     required(value, ['runs', 'images', 'lineBreaks', 'paragraphLayouts', 'paragraphCount'], side);
@@ -88,7 +88,7 @@ export function compareRichContent(source, output) {
     }
   }
   // Matching anchor metadata is not proof that HTML reproduces Word floating layout.
-  if (source.images.some(image => image.placement.kind === 'floating') || output.images.some(image => image.placement.kind === 'floating')) {
+  if ((source.images.some(image => image.placement.kind === 'floating') || output.images.some(image => image.placement.kind === 'floating')) && options.floatingImageReviewApproved !== true) {
     issues.push({kind:'floating-image-visual-review-required'});
   }
   {
@@ -118,7 +118,8 @@ export function compareRichContent(source, output) {
       const fields = key === 'runs' ? ['paragraphIndex', 'text', 'bold', 'italic', 'underline', 'color', 'fontSizePt', 'href', ...(['fontFamily','language','fontSizeCsPt','allCaps','letterSpacingPt','fontKerning','fontHint','boldCs','italicCs'].filter(field=>own(source[key][i],field)||own(output[key][i],field)))] : ['assetPath', 'paragraphIndex', 'order', 'alt', 'textOffset', 'markerOrder', 'placement'];
       for (const field of fields) {
         const expected = source[key][i][field], actual = output[key][i][field];
-        const equal = ['placement','language','fontFamily'].includes(field) ? stable(expected) === stable(actual) : (typeof expected === typeof actual && expected === actual);
+        const approvedAltOverride=key==='images'&&field==='alt'&&(expected===null||expected==='')&&typeof options.imageAltTextBySrc?.[source[key][i].assetPath]==='string'&&options.imageAltTextBySrc[source[key][i].assetPath]===actual;
+        const equal = approvedAltOverride || (['placement','language','fontFamily'].includes(field) ? stable(expected) === stable(actual) : (typeof expected === typeof actual && expected === actual));
         if (!equal) {
           issues.push({kind: key + '-mismatch', index: i, field, expected: source[key][i][field], actual: output[key][i][field]});
         }
