@@ -58,9 +58,8 @@ export function compareRichContent(source, output) {
       }
     });
   }
-  // Numbering is a first-class source feature. Until the rendered inspector
-  // independently reconstructs equivalent list semantics, never let a source
-  // list pass merely because its paragraph text happens to match.
+  // Numbering is a first-class source feature. Compare independently inspected
+  // rendered list semantics so matching paragraph text alone cannot pass.
   if (Array.isArray(source.paragraphNumbering) && source.paragraphNumbering.length) {
     if (!Array.isArray(output.paragraphNumbering)) {
       issues.push({kind:'numbering-rendered-inventory-missing',expected:source.paragraphNumbering.length,actual:null});
