@@ -1,3 +1,5 @@
+import { classifyWordScript } from './word-script-segments.mjs';
+
 // Fail-closed Word run-formatting resolver. It inventories inherited typography,
 // including script-specific fonts, language and spacing; fidelity still requires
 // independent rendered-output comparison. Numbering and themes are not resolved here.
@@ -23,6 +25,41 @@ const propertyValue = (xml, tag) => {
   return undefined;
 };
 const childProperties = xml => [...xml.matchAll(/<w:([A-Za-z][A-Za-z0-9]*)\b[^>]*\/?\s*>/g)].map(match => match[1]);
+const themeTypeface = (themeXml, reference, script, languageHint) => {
+  const ref=/^(major|minor)(?:Ascii|HAnsi|EastAsia|Bidi)$/.exec(reference ?? '');
+  if(!ref || typeof themeXml!=='string') return null;
+  const familyTag=ref[1]+'Font';
+  const section=new RegExp('<a:'+familyTag+'\\b[^>]*>([\\s\\S]*?)<\\/a:'+familyTag+'>').exec(themeXml)?.[1]??'';
+  const childTag=script==='ascii'||script==='hAnsi'?'latin':script==='eastAsia'?'ea':'cs';
+  const child=new RegExp('<a:'+childTag+'\\b[^>]*>').exec(section)?.[0]??'';
+  const directTypeface=attrs(child)['typeface'];
+  if(directTypeface) return directTypeface;
+  const lang=String(languageHint??'').toLowerCase();
+  const scriptCode=script==='eastAsia'
+    ? (/^ja(?:-|$)/.test(lang)?'Jpan':/^ko(?:-|$)/.test(lang)?'Hang':/^zh-(?:tw|hk|mo|hant)(?:-|$)/.test(lang)?'Hant':/^zh-(?:cn|sg|hans)(?:-|$)/.test(lang)?'Hans':null)
+    : script==='cs'
+      ? (/^ar(?:-|$)/.test(lang)?'Arab':/^he(?:-|$)/.test(lang)?'Hebr':/^th(?:-|$)/.test(lang)?'Thai':/^hi(?:-|$)/.test(lang)?'Deva':null)
+      : null;
+  if(!scriptCode) return null;
+  const scriptTag=[...section.matchAll(/<a:font\\b[^>]*\\/?\\s*>/g)].map(match=>match[0]).find(tag=>attrs(tag)['script']===scriptCode);
+  return scriptTag ? (attrs(scriptTag)['typeface'] || null) : null;
+};
+const resolveThemeReferences = (target, themeXml, language) => {
+  const refs=target.fontFamilyThemeRefs;
+  if(!refs || typeof refs!=='object') return [];
+  const families={...(target.fontFamily && typeof target.fontFamily==='object' && !target.fontFamily.unsupported ? target.fontFamily : {})};
+  const unresolved=[];
+  for(const [script,reference] of Object.entries(refs)) {
+    const hint=script==='eastAsia' ? (language?.eastAsia??language?.val) : script==='cs' ? (language?.bidi??language?.val) : language?.val;
+    const resolved=themeTypeface(themeXml,reference,script,hint);
+    if(resolved) families[script]=resolved;
+    else unresolved.push(script);
+  }
+  if(Object.keys(families).length) target.fontFamily=families;
+  delete target.fontFamilyThemeRefs;
+  return unresolved;
+};
+
 const unsupportedRunProps = xml => childProperties(xml).filter(name => !['b','i','u','color','sz','rFonts','lang','szCs','bCs','iCs','caps','spacing','kern','rStyle'].includes(name));
 const unsupportedParagraphProps = xml => childProperties(xml.replace(/<w:rPr\b[^>]*>[\s\S]*?<\/w:rPr>/g,'')).filter(name => !['rPr','spacing','ind','jc','widowControl','numPr'].includes(name));
 function runProps(xml) {
@@ -42,12 +79,23 @@ function runProps(xml) {
   const fonts = directTag(xml,'rFonts');
   if (fonts) {
     const a = attrs(fonts);
-    const allowedFontAttributes = new Set(['w:ascii','w:hAnsi','w:eastAsia','w:cs','w:hint']);
-    const unsupportedTheme = hasDuplicateAttrs(fonts) || Object.keys(a).some(key => !allowedFontAttributes.has(key));
-    const families = {};
+    const allowedFontAttributes = new Set(['w:ascii','w:hAnsi','w:eastAsia','w:cs','w:hint','w:asciiTheme','w:hAnsiTheme','w:eastAsiaTheme','w:cstheme']);
+    const unknownAttributes = hasDuplicateAttrs(fonts) || Object.keys(a).some(key => !allowedFontAttributes.has(key));
+    const families = {}, themeRefs = {};
     for (const key of ['ascii','hAnsi','eastAsia','cs']) if (a['w:'+key]) families[key] = a['w:'+key];
-    if (unsupportedTheme) result.fontFamily = {unsupported:true};
-    else if (Object.keys(families).length) result.fontFamily = families;
+    const themeAttrs={ascii:'w:asciiTheme',hAnsi:'w:hAnsiTheme',eastAsia:'w:eastAsiaTheme',cs:'w:cstheme'};
+    let invalidTheme=false;
+    for(const [script,name] of Object.entries(themeAttrs)) {
+      const reference=a[name];
+      if(!reference || families[script]) continue;
+      if(!/^(?:major|minor)(?:Ascii|HAnsi|EastAsia|Bidi)$/.test(reference)) invalidTheme=true;
+      else themeRefs[script]=reference;
+    }
+    if (unknownAttributes || invalidTheme) result.fontFamily = {unsupported:true};
+    else {
+      if (Object.keys(families).length) result.fontFamily = families;
+      if (Object.keys(themeRefs).length) result.fontFamilyThemeRefs = themeRefs;
+    }
     // A hint without an explicit family changes script selection, not the font family itself.
     if (a['w:hint'] !== undefined) result.fontHint = ['default','eastAsia','cs'].includes(a['w:hint']) ? a['w:hint'] : {unsupported:true};
   }
@@ -116,16 +164,16 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
   };
   const merge=(target,source)=>{
     for(const [key,value] of Object.entries(source)) {
-      // OOXML font-family and language properties are attribute-level overrides:
-      // a direct ascii value must not erase an inherited eastAsia/cs value.
+      // Font families, theme references, and languages override by script/language attribute.
       if ((key==='fontFamily'||key==='language') && value && typeof value==='object' && !value.unsupported) {
         const prior=target[key];
         if (prior?.unsupported && key==='fontFamily' && ['ascii','hAnsi','eastAsia','cs'].every(script=>typeof value[script]==='string'&&value[script])) {
-          // A fully explicit four-script font tuple safely replaces an unresolved inherited theme tuple.
           target[key]={...value};
-        } else {
-          target[key]={...(prior && typeof prior==='object' ? prior : {}),...value};
-        }
+        } else target[key]={...(prior && typeof prior==='object' ? prior : {}),...value};
+        if(key==='fontFamily' && target.fontFamilyThemeRefs) for(const script of Object.keys(value)) delete target.fontFamilyThemeRefs[script];
+      } else if(key==='fontFamilyThemeRefs' && value && typeof value==='object') {
+        target.fontFamilyThemeRefs={...(target.fontFamilyThemeRefs??{}),...value};
+        if(target.fontFamily && typeof target.fontFamily==='object' && !target.fontFamily.unsupported) for(const script of Object.keys(value)) delete target.fontFamily[script];
       } else target[key]=value;
     }
   };
@@ -178,6 +226,16 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
     if (effective.fontSizePt === null || effective.fontKerningThresholdPt?.unsupported) errors.push('Word font kerning threshold requires an explicit supported font size.');
     else effective.fontKerning = effective.fontSizePt >= effective.fontKerningThresholdPt ? 'normal' : 'none';
   }
+  const language=effective.language && typeof effective.language==='object' ? effective.language : {};
+  const runText=[...runXml.matchAll(/<w:t(?=[\s>])[^>]*>([\s\S]*?)<\/w:t>/g)].map(match=>match[1]).join('');
+  const unresolvedFonts=resolveThemeReferences(effective,arguments[0]?.themeXml,language);
+  const usedScripts=new Set([...runText].map(character=>classifyWordScript(character,effective.fontHint)));
+  for(const script of unresolvedFonts) if(usedScripts.has(script)) errors.push('Unsupported inherited Word formatting: fontFamily ('+script+' theme unresolved).');
+  const markLanguage=paragraphMarkFormatting.language && typeof paragraphMarkFormatting.language==='object' ? paragraphMarkFormatting.language : {};
+  const unresolvedMarkFonts=resolveThemeReferences(paragraphMarkFormatting,arguments[0]?.themeXml,markLanguage);
+  for(const script of unresolvedMarkFonts) errors.push('Unsupported paragraph-mark formatting: fontFamily ('+script+' theme unresolved).');
+  delete effective.fontFamilyThemeRefs;
+  delete paragraphMarkFormatting.fontFamilyThemeRefs;
   for(const [key,value] of Object.entries(effective)) if(value?.unsupported) errors.push('Unsupported inherited Word formatting: '+key+'.');
   for(const [key,value] of Object.entries(paragraphMarkFormatting)) if(value?.unsupported) errors.push('Unsupported paragraph-mark formatting: '+key+'.');
   return {ok:errors.length===0,errors,formatting:errors.length?null:effective,paragraphMarkFormatting};
