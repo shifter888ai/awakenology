@@ -7,10 +7,12 @@ import {inspectDocxImagePlacement} from './inspect-docx-image-placement.mjs';
 import {inspectDocxRichContent} from './inspect-docx-rich-content.mjs';
 import {extractDocx} from './extract-docx.mjs';
 import {countXmlTag} from './pilot-xml-diagnostics.mjs';
+import {renderStaticShell} from './static-shell.mjs';
 
 const sourcePath = 'temp/多重時空是什麽 - 繁體 - Copy.docx';
 const outputPath = 'pilot-artifacts/pilot-audit.json';
 const buffer = await readFile(sourcePath);
+const conversionCandidate = await extractDocx(buffer);
 const sha256 = createHash('sha256').update(buffer).digest('hex');
 const stages = {};
 const diagnostic = {unsupportedTextConstructs:[], drawingKinds:{}, explicitColors:[], lineBreaks:[], floatingDrawings:[], runPropertyInventory:{counts:{},samples:{}}, paragraphPropertyInventory:{counts:{},samples:{}},fontFamilyVariants:[],numberingInventory:null,styleResolutionInventory:{references:[],definitions:[],docDefaults:{}}};
@@ -176,6 +178,7 @@ for (const [name, inspect] of [
   }
 }
 const report = {sourcePath, byteLength:buffer.length, sha256, diagnostic, stages,
+  conversionPreview:{publishable:false,previewAvailable:typeof conversionCandidate.previewHtml==='string',errors:conversionCandidate.errors},
   pilotApproved:false,
   note:'Diagnostic only. No language segmentation or reviewed page set has been approved.'};
 await mkdir('pilot-artifacts',{recursive:true});
@@ -221,5 +224,40 @@ try {
   }
 } catch(error) {
   await writeFile(visualReviewPath, '<!doctype html><meta charset="utf-8"><title>Pilot visual review unavailable</title><h1>Visual review unavailable</h1><pre>' + String(error?.message ?? error).replace(/[&<>]/g,'') + '</pre>');
+}
+// Render a separate, visibly unapproved HTML conversion candidate when source fidelity
+// checks permit it. Floating Word images are intentionally inline in this candidate
+// until their original wrapping and position are reviewed.
+const convertedPreviewPath = 'pilot-artifacts/pilot-converted-preview.html';
+try {
+  let candidate = conversionCandidate.previewHtml ?? '';
+  const imageCheck = await inspectDocxAssets(buffer);
+  if (conversionCandidate.previewHtml && imageCheck.ok) {
+    for (const asset of imageCheck.assets) {
+      const dataUrl = 'data:' + asset.contentType + ';base64,' + asset.bytes.toString('base64');
+      candidate = candidate.split('src="' + asset.outputPath + '"').join('src="' + dataUrl + '"');
+    }
+  }
+  const header = '<header class="site-header"><div class="header-inner"><a class="brand" href="/" aria-label="Awakenology home"><svg viewBox="0 0 100 100" role="img" aria-label="Circled A" style="width:34px;height:34px;transform:rotate(5deg)"><circle cx="50" cy="50" r="43" fill="none" stroke="currentColor" stroke-width="7"/><path d="M27 72 L50 24 L73 72 M37 55 H63" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/></svg><span>Awakenology</span></a><nav class="nav" aria-label="Site navigation"><a href="/English/">English</a><a href="/Japanese/">日本語</a><a href="/Chinese/">中文</a><a href="/ai-search/">Search / Ask</a></nav></div></header>';
+  const footer = '<footer class="footer"><div class="footer-inner"><span class="footer-links"><a class="contact-icon" href="mailto:contact@awakenology.org" aria-label="Contact" title="Contact">✉</a><a class="reddit-icon" href="https://www.reddit.com/r/EscapeReincarnation/" aria-label="Reddit: Escape Reincarnation"><img src="/assets/reddit-one.svg" alt=""></a><a class="reddit-icon" href="https://www.reddit.com/r/EscapePrisonPlanet/" aria-label="Reddit: Escape Prison Planet"><img src="/assets/reddit-two.svg" alt=""></a><a class="reddit-icon" href="https://www.reddit.com/user/Lower-Lingonberry-40/" aria-label="Reddit profile"><img src="/assets/reddit-three.svg" alt=""></a><a class="disclaimer-icon" href="/Disclaimer/" aria-label="Disclaimer" title="Disclaimer">ⓘ</a></span><span>© 2017 Awakenology</span></div></footer>';
+  const warning = '<aside class="preview-note" role="note"><strong>CONVERSION REVIEW ONLY — NOT APPROVED FOR PUBLICATION</strong><p>This candidate applies mapped source typography and paragraph layout. The original floating image is displayed inline here; its Word wrapping and position have not been certified. Do not publish this preview.</p></aside>';
+  const body = conversionCandidate.previewHtml
+    ? warning + candidate
+    : '<aside class="preview-note"><strong>CONVERSION PREVIEW UNAVAILABLE</strong><p>The source rich-content gate has not passed, so no converted HTML candidate was emitted.</p><pre>' + conversionCandidate.errors.map(error=>String(error).replace(/[&<>]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[char]))).join('\n') + '</pre></aside>';
+  const preview = renderStaticShell({
+    language:'zh-Hant',
+    title:'DOCX Conversion Review — Not Approved',
+    description:'Non-publishing source conversion review preview.',
+    route:'/pilot-conversion-review/',
+    alternates:{en:'/pilot-conversion-review-en/',ja:'/pilot-conversion-review-ja/','zh-Hant':'/pilot-conversion-review/'},
+    approvedHeader:header,
+    approvedFooter:footer,
+    reviewedArticleHtml:body,
+    integrityApproved:true
+  });
+  await writeFile(convertedPreviewPath,preview);
+  console.log('Wrote ' + convertedPreviewPath + ' (review only; never publish).');
+} catch(error) {
+  await writeFile(convertedPreviewPath,'<!doctype html><meta charset="utf-8"><title>Conversion preview unavailable</title><h1>Conversion preview unavailable</h1><pre>'+String(error?.message??error).replace(/[&<>]/g,'')+'</pre>');
 }
 console.log(JSON.stringify(report,null,2));
