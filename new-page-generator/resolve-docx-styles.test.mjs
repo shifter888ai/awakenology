@@ -391,3 +391,21 @@ test("returns paragraph-mark metadata even when visible text inherits an unresol
  assert.equal(result.ok,false);
  assert.deepEqual(result.paragraphMarkFormatting.fontFamily,{ascii:"Arial",hAnsi:"Arial",eastAsia:"Yu Gothic",cs:"Arial"});
 });
+
+
+test("resolves Word theme fonts by language and script",()=>{
+ const stylesXml='<w:styles><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:rPr><w:rFonts w:asciiTheme="minorHAnsi" w:hAnsiTheme="minorHAnsi" w:eastAsiaTheme="minorEastAsia" w:cstheme="minorBidi"/><w:lang w:val="en-US" w:eastAsia="ja-JP" w:bidi="ar-SA"/></w:rPr></w:style></w:styles>';
+ const themeXml='<a:theme><a:themeElements><a:fontScheme><a:majorFont><a:latin typeface="Arial"/><a:ea typeface=""/><a:cs typeface=""/><a:font script="Jpan" typeface="MS Gothic"/></a:majorFont><a:minorFont><a:latin typeface="Century"/><a:ea typeface=""/><a:cs typeface=""/><a:font script="Jpan" typeface="MS Mincho"/><a:font script="Hans" typeface="SimSun"/><a:font script="Hant" typeface="MingLiU"/><a:font script="Arab" typeface="Arial"/></a:minorFont></a:fontScheme></a:themeElements></a:theme>';
+ const result=resolveDocxRunFormatting({stylesXml,paragraphXml:paragraph("Normal"),runXml:run(),themeXml});
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.deepEqual(result.formatting.fontFamily,{ascii:"Century",hAnsi:"Century",eastAsia:"MS Mincho",cs:"Arial"});
+});
+
+test("blocks an unresolved East Asian theme font when the source run uses East Asian text",()=>{
+ const stylesXml='<w:styles><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:rPr><w:rFonts w:asciiTheme="minorHAnsi" w:hAnsiTheme="minorHAnsi" w:eastAsiaTheme="minorEastAsia"/><w:lang w:val="en-US"/></w:rPr></w:style></w:styles>';
+ const themeXml='<a:theme><a:themeElements><a:fontScheme><a:minorFont><a:latin typeface="Century"/><a:ea typeface=""/><a:cs typeface=""/></a:minorFont></a:fontScheme></a:themeElements></a:theme>';
+ const japaneseRun='<w:r><w:t>日本語</w:t></w:r>';
+ const result=resolveDocxRunFormatting({stylesXml,paragraphXml:paragraph("Normal"),runXml:japaneseRun,themeXml});
+ assert.equal(result.ok,false);
+ assert.ok(result.errors.some(error=>error.includes("fontFamily (eastAsia theme unresolved)")));
+});
