@@ -85,3 +85,10 @@ test("accepts safe path-bearing links and only reviewed root-relative image asse
   assert.equal(result.ok,false,source);
  }
 });
+
+
+test("preserves Markdown blockquotes as explicit semantic HTML",()=>{
+ const result=markdownToHtml("> A quoted passage with 繁體中文.");
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.match(result.html,/<blockquote><p>A quoted passage with 繁體中文\.<\/p><\/blockquote>/);
+});
