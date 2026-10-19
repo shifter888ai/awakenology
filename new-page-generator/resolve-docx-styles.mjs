@@ -39,9 +39,9 @@ function runProps(xml) {
   if (fonts) {
     const a = attrs(fonts);
     const unsupportedTheme = Object.keys(a).some(key => /Theme$/i.test(key) && key.startsWith('w:'));
-    const families = ['ascii','hAnsi','eastAsia','cs'].map(key=>a['w:'+key]).filter(Boolean);
-    const unique = [...new Set(families)];
-    result.fontFamily = unsupportedTheme || unique.length > 1 || !unique.length ? {unsupported:true} : unique[0];
+    const families = {};
+    for (const key of ['ascii','hAnsi','eastAsia','cs']) if (a['w:'+key]) families[key] = a['w:'+key];
+    result.fontFamily = unsupportedTheme || !Object.keys(families).length ? {unsupported:true} : families;
   }
   const lang = directTag(xml,'lang');
   if (lang) {
