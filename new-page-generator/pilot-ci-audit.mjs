@@ -131,4 +131,31 @@ const report = {sourcePath, byteLength:buffer.length, sha256, diagnostic, stages
   note:'Diagnostic only. No language segmentation or reviewed page set has been approved.'};
 await mkdir('pilot-artifacts',{recursive:true});
 await writeFile(outputPath, JSON.stringify(report,null,2)+'\n');
+
+// Produce a review aid for source-image inspection, never a generated article.
+// Inline image bytes are embedded only in this CI artifact so reviewers can see
+// the source images and surrounding source paragraphs without changing the DOCX.
+const visualReviewPath = 'pilot-artifacts/pilot-visual-review.html';
+try {
+  const [sourceForReview, assetsForReview, placementsForReview] = await Promise.all([
+    inspectDocxSourceMap(buffer), inspectDocxAssets(buffer), inspectDocxImagePlacement(buffer)
+  ]);
+  const esc = value => String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  if (!sourceForReview.ok || !assetsForReview.ok || !placementsForReview.ok) {
+    await writeFile(visualReviewPath, '<!doctype html><meta charset="utf-8"><title>Pilot visual review blocked</title><h1>Visual review artifact blocked</h1><pre>' + esc(JSON.stringify({source:sourceForReview.errors,assets:assetsForReview.errors,placements:placementsForReview.errors},null,2)) + '</pre>');
+  } else {
+    const assetById = new Map(assetsForReview.assets.map(asset => [asset.relationshipId, asset]));
+    const sections = placementsForReview.images.map((item,index) => {
+      const asset = assetById.get(item.relationshipId);
+      const paragraphIndex = item.paragraphIndex;
+      const paragraphs = sourceForReview.paragraphs;
+      const context = [paragraphs[paragraphIndex-1],paragraphs[paragraphIndex],paragraphs[paragraphIndex+1]].filter(Boolean);
+      const image = asset ? '<img alt="' + esc(asset.altText || ('Source image ' + (index+1))) + '" src="data:' + esc(asset.contentType) + ';base64,' + asset.bytes.toString('base64') + '">' : '<p>Embedded source image unavailable.</p>';
+      return '<section><h2>Image ' + (index+1) + ' — paragraph ' + (paragraphIndex+1) + '</h2><p><strong>Placement:</strong> ' + esc(item.placement.kind) + (item.placement.requiresVisualReview ? ' — manual visual review required' : '') + '</p><p><strong>Relationship:</strong> ' + esc(item.relationshipId) + ' · <strong>SHA-256:</strong> ' + esc(item.sha256) + '</p>' + image + '<h3>Source paragraph context</h3>' + context.map((p,i)=>'<p class="context"><strong>' + (p.index===paragraphIndex?'Image paragraph':p.index<paragraphIndex?'Previous paragraph':'Next paragraph') + ':</strong> ' + esc(p.text) + '</p>').join('') + '<details><summary>Raw placement metadata</summary><pre>' + esc(JSON.stringify(item.placement,null,2)) + '</pre></details></section>';
+    }).join('\n');
+    await writeFile(visualReviewPath, '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DOCX pilot source image review</title><style>body{font:16px/1.55 system-ui,sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem;color:#222}section{border-top:1px solid #aaa;padding:1.5rem 0}img{display:block;max-width:100%;max-height:600px;object-fit:contain;margin:1rem auto}pre{white-space:pre-wrap;overflow-wrap:anywhere}.context{padding:.6rem;border-left:3px solid #bbb}.warning{padding:1rem;background:#fff2cc}</style><h1>DOCX pilot — source image review</h1><p class="warning">This is a source inspection aid, not a converted page preview. Floating image metadata cannot prove visual fidelity. Compare the floating image against its original position and wrapping in Word before approving the page generator.</p>' + sections + '</html>');
+  }
+} catch(error) {
+  await writeFile(visualReviewPath, '<!doctype html><meta charset="utf-8"><title>Pilot visual review unavailable</title><h1>Visual review unavailable</h1><pre>' + String(error?.message ?? error).replace(/[&<>]/g,'') + '</pre>');
+}
 console.log(JSON.stringify(report,null,2));
