@@ -1,0 +1,49 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import { parse } from "parse5";
+import { inspectPageSet } from "./inspect-page-set.mjs";
+import { FLOATING_DRAWING_REVIEW_ERROR } from "./extract-docx.mjs";
+
+const toDom = node => {
+  if(node.nodeName==="#text") return {nodeType:3,textContent:node.value??node.data??""};
+  if(node.nodeName==="#comment") return {nodeType:8,textContent:node.data??""};
+  if(!node.tagName) return {nodeType:9,childNodes:(node.childNodes??[]).map(toDom)};
+  const attributes=(node.attrs??[]).map(item=>({name:item.name,value:item.value}));
+  return {
+    nodeType:1,tagName:node.tagName.toUpperCase(),attributes,
+    childNodes:(node.childNodes??[]).map(toDom),
+    getAttribute(name){return attributes.find(item=>item.name.toLowerCase()===name.toLowerCase())?.value??null;}
+  };
+};
+const parser={
+  parseFromString(html){
+    const document=parse(html);
+    const htmlNode=document.childNodes.find(node=>node.tagName==="html");
+    const head=htmlNode?.childNodes.find(node=>node.tagName==="head");
+    const body=htmlNode?.childNodes.find(node=>node.tagName==="body");
+    return {head:toDom(head??{nodeName:"#document-fragment",childNodes:[]}),body:toDom(body??{nodeName:"#document-fragment",childNodes:[]})};
+  }
+};
+const set={pages:Object.fromEntries(["en","ja","zh-Hant"].map(lang=>[lang,{
+  title:lang,mode:lang==="en"?"docx":"paste",source:lang==="en"?"pilot.docx":lang+".html",route:"/"+lang+"/"
+}]))};
+
+test("real DOCX pilot exposes a non-publishable floating-image preview for visual review",async()=>{
+ const buffer=await readFile(new URL("./temp/多重時空是什麽 - 繁體 - Copy.docx",import.meta.url));
+ const inputs={
+  en:{buffer,parser},
+  ja:{html:"<p>Japanese review placeholder</p>",parser},
+  "zh-Hant":{html:"<p>Traditional Chinese review placeholder</p>",parser}
+ };
+ const result=await inspectPageSet(set,inputs);
+ assert.equal(result.ok,false);
+ assert.equal(result.stage,"visual-review-required",result.errors.join("; "));
+ assert.equal(result.reviewRequired,true);
+ assert.equal(result.pages.en.visualReviewRequired,true);
+ assert.equal(result.pages.en.visualReviewApproved,false);
+ assert.equal(typeof result.pages.en.previewHtml,"string");
+ assert.ok(result.pages.en.previewHtml.includes("<img"));
+ assert.match(result.pages.en.sourceSha256,/^[a-f0-9]{64}$/);
+ assert.deepEqual(result.errors,["en: "+FLOATING_DRAWING_REVIEW_ERROR]);
+});
