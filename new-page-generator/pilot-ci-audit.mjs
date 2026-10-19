@@ -43,7 +43,7 @@ try {
       styles:[...stylesXml.matchAll(/<w:style\b([^>]*)>([\s\S]*?)<\/w:style>/g)].map(m=>{
         const id=/w:styleId=["']([^"']+)["']/.exec(m[1])?.[1]??null;
         const body=m[2], runBody=body.replace(/<w:pPr\b[^>]*>[\s\S]*?<\/w:pPr>/g,'');
-        return {id,run:[...runBody.matchAll(/<w:rFonts\b[^>]*\/?\s*>/g)].map(x=>x[0]),paragraphMark:[...body.matchAll(/<w:pPr\b[^>]*>[\s\S]*?<w:rFonts\b[^>]*\/?\s*>/g)].map(x=>x[0].match(/<w:rFonts\b[^>]*\/?\s*>/)?.[0]??null).filter(Boolean)};
+        return {id,run:[...runBody.matchAll(/<w:rFonts\b[^>]*\/?\s*>/g)].map(x=>x[0]),paragraphMark:[...body.matchAll(/<w:pPr\b[^>]*>[\s\S]*?<w:rFonts\b[^>]*\/?\s*>/g)].map(x=>x[0].match(/<w:rFonts\b[^>]*\/?\s*>/)?.[0]??null).filter(Boolean),indentTags:[...body.matchAll(/<w:pPr\b[^>]*>[\s\S]*?<w:ind\b[^>]*\/?\s*>/g)].map(x=>x[0].match(/<w:ind\b[^>]*\/?\s*>/)?.[0]??null).filter(Boolean)};
       })
     };
     const themePart=zip.file('word/theme/theme1.xml');
