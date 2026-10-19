@@ -162,3 +162,16 @@ test("paragraph spacing mismatch blocks even when text and other layout fields m
  assert.equal(result.ok,false);
  assert.ok(result.issues.some(x=>x.kind==="paragraph-spacing-mismatch" && x.field==="lineHeightPt"));
 });
+
+test("extended typography metadata participates in source-output fidelity comparison", () => {
+ const source=sample(), output=sample();
+ Object.assign(source.runs[0],{fontFamily:"Microsoft YaHei",language:{val:"en-US",eastAsia:"zh-CN"},fontSizeCsPt:11,allCaps:true,letterSpacingPt:1});
+ Object.assign(output.runs[0],{fontFamily:"Microsoft YaHei",language:{val:"en-US",eastAsia:"zh-CN"},fontSizeCsPt:11,allCaps:true,letterSpacingPt:1});
+ assert.equal(compareRichContent(source,output).ok,true);
+ output.runs[0].language={val:"ja-JP"};
+ output.runs[0].allCaps=false;
+ const result=compareRichContent(source,output);
+ assert.equal(result.ok,false);
+ assert.ok(result.issues.some(x=>x.field==="language"));
+ assert.ok(result.issues.some(x=>x.field==="allCaps"));
+});
