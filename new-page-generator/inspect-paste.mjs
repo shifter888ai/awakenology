@@ -17,6 +17,15 @@ export function inspectPastedHtml(html, parser = globalThis.DOMParser && new DOM
   if (!parser) return { ok: false, errors: ["DOMParser unavailable; use a browser context."], inventory: [] };
   const doc = parser.parseFromString(html, "text/html");
   const inventory = [];
+  const inspectHead = node => {
+    if (node?.nodeType === 1) {
+      const tag = node.tagName.toUpperCase();
+      if (tag === "STYLE") errors.push("Embedded CSS in the HTML head requires review.");
+      if (tag === "LINK" && /stylesheet/i.test(node.getAttribute?.("rel") ?? "")) errors.push("External stylesheet in the HTML head requires review.");
+      for (const child of node.childNodes ?? []) inspectHead(child);
+    }
+  };
+  for (const child of doc.head?.childNodes ?? []) inspectHead(child);
   const visit = (node, path) => {
     if (node.nodeType === 8) { errors.push(`${path}: HTML comment requires review.`); return; }
     if (node.nodeType === 3) {
