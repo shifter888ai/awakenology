@@ -116,7 +116,7 @@ test("identifies only a verified floating-image preview as requiring visual revi
 
 
 test("requires approval bound to the exact source hash for floating-image previews",()=>{
- const paragraph={nodeType:1,tagName:"P",childNodes:[{nodeType:3,textContent:"Preview text"}],getAttribute:()=>null};
+ const paragraph={nodeType:1,tagName:"P",attributes:[],childNodes:[{nodeType:3,textContent:"Preview text"}],getAttribute:()=>null};
  const parser={parseFromString:()=>({head:{childNodes:[]},body:{childNodes:[paragraph]}})};
  const extracted={ok:false,errors:[FLOATING_DRAWING_REVIEW_ERROR],previewHtml:"<p>Preview text</p>",sha256:"a".repeat(64),assetFiles:[{path:"/assets/a.png"}]};
  const pending=prepareDocxInspection(extracted,parser);
