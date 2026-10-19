@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { parse } from "parse5";
 import { inspectPageSet } from "./inspect-page-set.mjs";
+import { applySourceBoundHumanReview } from "./generate-reviewed-page-set.mjs";
 import { FLOATING_DRAWING_REVIEW_ERROR } from "./extract-docx.mjs";
 
 const toDom = node => {
@@ -84,4 +85,35 @@ test("owner-approved visual review is bound to the exact DOCX hash and reviewed 
  assert.equal(result.errors.some(error=>error.includes(FLOATING_DRAWING_REVIEW_ERROR)),false);
  assert.equal(review.publishingAuthorization,false);
  assert.equal(review.mergeAuthorization,false);
+});
+
+
+test("generation gate applies only repository-recorded review matching source path and bytes",async()=>{
+ const buffer=await readFile(new URL("./temp/多重時空是什麽 - 繁體 - Copy.docx",import.meta.url));
+ const review=JSON.parse(await readFile(new URL("./pilot-human-review.json",import.meta.url),"utf8"));
+ const approvedSet={pages:{...set.pages,en:{...set.pages.en,source:review.sourcePath}}};
+ const inputs={
+  en:{buffer,parser,floatingImageReviewApprovedSha256:"caller-forged-hash",imageAltTextBySrc:{"/assets/fake.png":"fake"}},
+  ja:{html:"<p>Japanese review placeholder</p>",parser},
+  "zh-Hant":{html:"<p>Traditional Chinese review placeholder</p>",parser}
+ };
+ const prepared=await applySourceBoundHumanReview(approvedSet,inputs);
+ assert.equal(prepared.en.floatingImageReviewApprovedSha256,review.sourceSha256);
+ assert.equal(prepared.en.imageAltTextBySrc["/assets/docx-b7dba7e21c2441ad.png"],"multi-planes");
+ assert.equal(prepared.en.imageAltTextBySrc["/assets/fake.png"],undefined);
+ const inspected=await inspectPageSet(approvedSet,prepared);
+ assert.equal(inspected.pages.en.sourceSha256,review.sourceSha256);
+ assert.equal(inspected.pages.en.visualReviewApproved,true);
+ assert.equal(inspected.pages.en.visualReviewRequired,false);
+ assert.equal(inspected.pages.en.imageAltIssues.length,0);
+ assert.equal(inspected.errors.some(error=>error.includes(FLOATING_DRAWING_REVIEW_ERROR)),false);
+
+ const wrongSourceSet={pages:{...set.pages,en:{...set.pages.en,source:"different.docx"}}};
+ const blocked=await applySourceBoundHumanReview(wrongSourceSet,inputs);
+ assert.equal(blocked.en.floatingImageReviewApprovedSha256,undefined,"caller-supplied approval must be removed");
+ assert.deepEqual(blocked.en.imageAltTextBySrc, {"/assets/fake.png":"fake"},"review overrides are not injected for another source");
+ const wrongSourceResult=await inspectPageSet(wrongSourceSet,blocked);
+ assert.equal(wrongSourceResult.pages.en.visualReviewApproved,false);
+ assert.equal(wrongSourceResult.pages.en.visualReviewRequired,true);
+ assert.ok(wrongSourceResult.errors.includes("en: "+FLOATING_DRAWING_REVIEW_ERROR));
 });
