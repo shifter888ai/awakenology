@@ -50,12 +50,12 @@ test('requires all source components',()=>{
 
 test('blocks unmodeled inherited font and paragraph-layout properties',()=>{
  const fonts=resolveDocxRunFormatting({
-  stylesXml:styles('<w:style w:type="paragraph" w:styleId="P"><w:rPr><w:rFonts w:ascii="Arial"/><w:sz w:val="24"/></w:rPr></w:style>'),
+  stylesXml:styles('<w:style w:type="paragraph" w:styleId="P"><w:rPr><w:rFonts w:ascii="Arial" w:eastAsia="Yu Gothic"/><w:sz w:val="24"/></w:rPr></w:style>'),
   paragraphXml:paragraph('P'),runXml:run()
  });
  assert.equal(fonts.ok,false);
- assert.ok(fonts.errors.some(x=>x.includes('Unsupported run property w:rFonts')));
- assert.equal(fonts.formatting,null); assert.ok(fonts.errors.some(x=>x.includes('Unsupported run property w:rFonts')));
+ assert.ok(fonts.errors.some(x=>x.includes('Unsupported inherited Word formatting: fontFamily')));
+ assert.equal(fonts.formatting,null);
  const layout=resolveDocxRunFormatting({
   stylesXml:styles('<w:style w:type="paragraph" w:styleId="P"><w:pPr><w:ind w:left="720"/></w:pPr></w:style>'),
   paragraphXml:paragraph('P'),runXml:run()
@@ -105,25 +105,25 @@ test('blocks malformed or zero Word font sizes',()=>{
 
 
 test('direct unsupported run formatting cannot be silently dropped',()=>{
- for(const property of ['<w:rFonts w:ascii="Arial"/>','<w:lang w:val="en-US"/>','<w:spacing w:val="20"/>','<w:szCs w:val="24"/>']) {
+ for(const property of ['<w:rFonts w:ascii="Arial" w:eastAsia="Yu Gothic"/>','<w:lang/>','<w:spacing/>','<w:szCs w:val="0"/>']) {
   const result=resolveDocxRunFormatting({stylesXml:styles(),paragraphXml:paragraph(),runXml:run('',property)});
   assert.equal(result.ok,false,property);
-  assert.ok(result.errors.some(x=>x.includes('Unsupported direct run property')),result.errors.join('; '));
+  assert.ok(result.errors.some(x=>x.includes('Unsupported direct run property') || x.includes('Unsupported inherited Word formatting')),result.errors.join('; '));
  }
 });
 
 test('rejects unsupported formatting in an inherited base even when a derived style overrides it',()=>{
- const xml=styles('<w:style w:type="paragraph" w:styleId="Base"><w:rPr><w:rFonts w:ascii="Arial"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="Derived"><w:basedOn w:val="Base"/><w:rPr><w:b/></w:rPr></w:style>');
+ const xml=styles('<w:style w:type="paragraph" w:styleId="Base"><w:rPr><w:rFonts w:ascii="Arial" w:eastAsia="Yu Gothic"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="Derived"><w:basedOn w:val="Base"/><w:rPr><w:b/></w:rPr></w:style>');
  const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml:paragraph('Derived'),runXml:run()});
  assert.equal(result.ok,false);
  assert.equal(result.formatting,null);
- assert.ok(result.errors.some(x=>x.includes('Unsupported run property w:rFonts in Word style Base')));
+ assert.ok(result.errors.some(x=>x.includes('Unsupported inherited Word formatting: fontFamily')));
 });
 test('rejects unsupported direct formatting even when its value resembles an inherited supported property',()=>{
- const result=resolveDocxRunFormatting({stylesXml:styles(),paragraphXml:paragraph(),runXml:run('', '<w:sz w:val="24"/><w:lang w:val="en-US"/>')});
+ const result=resolveDocxRunFormatting({stylesXml:styles(),paragraphXml:paragraph(),runXml:run('', '<w:sz w:val="24"/><w:lang/>')});
  assert.equal(result.ok,false);
  assert.equal(result.formatting,null);
- assert.ok(result.errors.some(x=>x.includes('Unsupported direct run property w:lang')));
+ assert.ok(result.errors.some(x=>x.includes('Unsupported inherited Word formatting: language')));
 });
 
 test("resolves consistent Word font families, language metadata, complex-script aliases, caps and character spacing", () => {
