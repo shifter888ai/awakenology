@@ -115,6 +115,10 @@ test("integrate an inline image and expose its verified asset record", async () 
   assert.match(result.html, /Fixture illustration/);
   assert.equal(result.assets.length, 1);
   assert.equal(result.assets[0].sha256.length, 64);
+  assert.equal(result.assets[0].outputPath, "/assets/docx-" + result.assets[0].sha256.slice(0,16) + ".png");
+  assert.equal(result.assetFiles.length, 1);
+  assert.equal(result.assetFiles[0].sha256, result.assets[0].sha256);
+  assert.ok(Buffer.isBuffer(result.assetFiles[0].bytes));
   assert.equal(result.sourceMap.imageReferences.length, 1);
   assert.equal(result.sourceMap.imageReferences[0].relationshipId, result.assets[0].relationshipId);
 });
