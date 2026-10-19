@@ -125,6 +125,12 @@ export function applyDocxRichFormatting(html, sourceInventory) {
         if (listTag !== expectedTag && numbering.format !== "none") errors.push("Rendered list type at paragraph "+(p+1)+" does not match Word numbering format "+numbering.format+".");
         const markerFormats = {decimal:null,upperRoman:"I",lowerRoman:"i",upperLetter:"A",lowerLetter:"a"};
         if (list && numbering.format in markerFormats && numbering.format !== "decimal") setAttr(list,"type",markerFormats[numbering.format]);
+        if (numbering.format === "bullet") {
+          const bulletMarkers = {"•":"disc","◦":"circle","▪":"square"};
+          const marker = bulletMarkers[numbering.text];
+          if (!marker) errors.push("Word bullet marker at paragraph "+(p+1)+" cannot be represented faithfully by a native HTML list.");
+          else if (list) setAttr(list,"style",mergeStyles(attr(list,"style"),"list-style-type:"+marker));
+        }
         if (numbering.format === "decimal" && numbering.text !== "%1.") errors.push("Word decimal marker pattern at paragraph "+(p+1)+" cannot be represented faithfully by a native HTML list.");
         if (["upperRoman","lowerRoman","upperLetter","lowerLetter"].includes(numbering.format) && numbering.text !== "%1.") errors.push("Word list marker pattern at paragraph "+(p+1)+" cannot be represented faithfully by a native HTML list.");
         if (list && numbering.format === "none") setAttr(list,"style",mergeStyles(attr(list,"style"),"list-style-type:none"));
