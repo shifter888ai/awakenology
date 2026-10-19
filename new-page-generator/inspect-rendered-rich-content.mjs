@@ -36,7 +36,7 @@ export function inspectRenderedRichContent(html, parser) {
     }
     if (node.nodeType!==1) return;
     const tag=node.tagName.toUpperCase();
-    if (['H1','H2','H3','H4','H5','H6','BLOCKQUOTE','TABLE','THEAD','TBODY','TFOOT','TR','TD','TH','HR','PRE','CODE','SUP','SUB','FONT','MARK','SMALL','BIG'].includes(tag)) {
+    if (['BLOCKQUOTE','TABLE','THEAD','TBODY','TFOOT','TR','TD','TH','HR','PRE','CODE','SUP','SUB','FONT','MARK','SMALL','BIG'].includes(tag)) {
       errors.push('Unsupported rendered structural/semantic formatting tag: ' + tag + '.');
     }
     if (tag === 'STYLE') errors.push('Embedded CSS rules are unsupported in rendered rich-content inspection.');
