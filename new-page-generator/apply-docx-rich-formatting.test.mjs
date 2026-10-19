@@ -93,3 +93,16 @@ test("applies source paragraph formatting to rendered heading elements",()=>{
  assert.match(result.html,/<span style="[^"]*font-weight:bold/);
  assert.match(result.html,/>Heading<\/span>/);
 });
+
+
+test("source layout overrides conflicting pre-existing inline layout declarations",()=>{
+ const source={
+  paragraphCount:1,
+  paragraphLayouts:[{paragraphIndex:0,alignment:"center",indentation:{},spacing:{beforePt:0,afterPt:0,lineHeightPt:null}}],
+  runs:[{paragraphIndex:0,text:"Heading",bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null}]
+ };
+ const result=applyDocxRichFormatting('<p style="text-align:right">Heading</p>',source);
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.match(result.html,/style="text-align:center"/);
+ assert.doesNotMatch(result.html,/text-align:right/);
+});
