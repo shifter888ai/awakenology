@@ -85,3 +85,10 @@ This grouping confirms several distinct preservation requirements: explicit font
 The DOCX-to-HTML adapter now explicitly blocks source documents containing formatting/layout properties it does not yet preserve losslessly: explicit font families, font sizes, language metadata, complex-script bold/italic, capitalization/character spacing, paragraph/run style references, list numbering, indentation, and paragraph alignment. These were added as named feature checks in `extract-docx.mjs`, with regression tests proving the adapter returns `html: null` instead of silently flattening the affected formatting.
 
 Validation: **115 automated tests passed**. The real pilot is still blocked, as expected, now with the unsupported properties clearly reported by the conversion stage. This change narrows the risk of accidental loss; it does not claim these features are supported, and no page output has been approved.
+
+
+## Source-to-HTML line-break integrity (CI run 39202613055)
+
+The source-to-converted-HTML comparison now checks explicit Word text-wrapping breaks in addition to exact text. It compares the count and UTF-16 character offsets of each source break against each rendered `<br>`, so a break that is missing, added, or moved fails the comparison even when the concatenated text remains identical.
+
+Regression coverage verifies correct placement, missing breaks, relocated breaks, and extra HTML breaks. Validation: **117 automated tests passed**. The real pilot did not produce a line-break mismatch in this run; conversion remains blocked by the separately identified typography/style/list properties and floating image.
