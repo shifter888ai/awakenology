@@ -42,6 +42,7 @@ function runProps(xml) {
     const families = {};
     for (const key of ['ascii','hAnsi','eastAsia','cs']) if (a['w:'+key]) families[key] = a['w:'+key];
     result.fontFamily = unsupportedTheme || !Object.keys(families).length ? {unsupported:true} : families;
+    if (a['w:hint'] !== undefined) result.fontHint = ['default','eastAsia','cs'].includes(a['w:hint']) ? a['w:hint'] : {unsupported:true};
   }
   const lang = directTag(xml,'lang');
   if (lang) {
