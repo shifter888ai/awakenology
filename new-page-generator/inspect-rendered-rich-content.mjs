@@ -4,6 +4,13 @@ const formatting = (node, key) => node.getAttribute?.('style')?.split(';').map(x
 export function inspectRenderedRichContent(html, parser) {
   const errors=[], runs=[], images=[], lineBreaks=[];
   const paragraphOffsets = new Map();
+  const fontSizePt = node => {
+    const value = formatting(node,'font-size');
+    if (value === null) return null;
+    const match = /^(\\d+(?:\\.\\d+)?)(pt|px)$/.exec(value.toLowerCase());
+    if (!match || Number(match[1]) <= 0) { errors.push('Unsupported rendered font-size: ' + value); return null; }
+    return Number(match[1]) * (match[2] === 'px' ? 0.75 : 1);
+  };
   const paragraphMarkerOrders = new Map();
   const nextMarkerOrder = index => { const value=paragraphMarkerOrders.get(index) ?? 0; paragraphMarkerOrders.set(index,value+1); return value; };
   if (typeof html !== 'string' || !parser?.parseFromString) return {ok:false,errors:['HTML and a parser are required.'],runs,images,lineBreaks,paragraphCount:0};
@@ -41,7 +48,7 @@ export function inspectRenderedRichContent(html, parser) {
     }
     if (tag === 'BR') lineBreaks.push({paragraphIndex:Math.max(0,paragraphIndex),textOffset:paragraphOffsets.get(paragraphIndex) ?? 0,breakType:'textWrapping',markerOrder:nextMarkerOrder(Math.max(0,paragraphIndex))});
     const style=node.getAttribute?.('style') ?? '';
-    const allowed=new Set(['color','font-weight','font-style','text-decoration']);
+    const allowed=new Set(['color','font-weight','font-style','text-decoration','font-size']);
     for(const decl of style.split(';').filter(x=>x.trim())) {
       const index=decl.indexOf(':');
       if(index<0 || !allowed.has(decl.slice(0,index).trim().toLowerCase())) errors.push('Unsupported rendered style: '+decl);
@@ -52,6 +59,7 @@ export function inspectRenderedRichContent(html, parser) {
     if(decoration!==null && !['underline','none'].includes(decoration.toLowerCase())) errors.push('Unsupported rendered text-decoration: '+decoration);
     if(['S','STRIKE','DEL'].includes(tag)) errors.push('Unsupported rendered deletion/strike formatting: '+tag);
     const next={...state};
+    const size=fontSizePt(node); if(size!==null) next.fontSizePt=size;
     if(['B','STRONG'].includes(tag) || ['bold','700'].includes((weight ?? '').toLowerCase())) next.bold=true;
     if(['I','EM'].includes(tag) || (fontStyle ?? '').toLowerCase()==='italic') next.italic=true;
     if(tag==='U' || (decoration ?? '').toLowerCase()==='underline') next.underline=true;
@@ -64,7 +72,7 @@ export function inspectRenderedRichContent(html, parser) {
     }
     for(const child of node.childNodes ?? []) visit(child,next);
   }
-  const initial={bold:false,italic:false,underline:false,color:null,href:null};
+  const initial={bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null};
   for(const child of doc.body?.childNodes ?? []) visit(child,initial);
   if(!runs.length) errors.push('No rendered text runs.');
   return {ok:errors.length===0,errors,runs,images,lineBreaks,paragraphCount:paragraphIndex+1};
