@@ -29,3 +29,9 @@ test("missing source blocks", () => {
   const input = valid(); input.pages.en.source = " ";
   assert.equal(validatePageSet(input).ok, false);
 });
+
+
+test("Markdown is an accepted explicit source mode",()=>{
+ const input=valid(); input.pages.en.mode="markdown"; input.pages.en.source="english.md";
+ assert.equal(validatePageSet(input).ok,true);
+});
