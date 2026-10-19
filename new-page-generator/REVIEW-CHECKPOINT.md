@@ -153,3 +153,8 @@ The paste adapter now checks every raw HTML tag against the reviewed vocabulary 
 ## Word run-style inheritance resolver (2026-10-19)
 
 The source rich-content inventory now uses a conservative resolver for supported bold, italic, underline and explicit colors, applying document defaults, paragraph styles, character styles and direct formatting in precedence order. It blocks cyclic/missing or wrong-type styles, theme colors, unmodeled inherited font/size/language or paragraph-layout properties, and paragraph-mark formatting. CI [39205462857](https://github.com/shifter888ai/awakenology/actions/runs/39205462857) passed **153/153 tests**. The pilot is still not approved; inherited typography/layout, numbering and floating-image conversion remain unresolved.
+
+
+## Inherited-style diagnostics made actionable (2026-10-19)
+
+Repeated document-default and style-chain warnings are now deduplicated, while paragraph-specific formatting errors retain their locations. The real DOCX pilot remains blocked by unsupported font family/size/language, complex-script properties, character spacing, paragraph alignment/indentation/numbering, section layout and floating-image conversion. CI [39205573952](https://github.com/shifter888ai/awakenology/actions/runs/39205573952) passed **154/154 tests**.
