@@ -9,7 +9,14 @@ const CONTAINERS = new Set(["DIV","SECTION","ARTICLE"]);
 const ALLOWED = new Set([...BLOCKS, ...INLINE, ...CONTAINERS]);
 const SAFE_STYLES = new Set(["color","font-weight","font-style","text-decoration","text-align"]);
 const SAFE_ATTRS = new Set(["href","src","alt","title","colspan","rowspan","style"]);
-const BAD_URL = /^(?:javascript|data|vbscript|file):/i;
+function unsafeUrl(value, attribute) {
+  const compact = value.replace(/[\u0000-\u0020\u007f]/g, "");
+  if (!compact || compact.startsWith("//")) return true;
+  const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(compact)?.[1]?.toLowerCase();
+  if (!scheme) return false;
+  const allowed = attribute === "href" ? ["http", "https", "mailto", "tel"] : ["http", "https"];
+  return !allowed.includes(scheme);
+}
 
 export function inspectPastedHtml(html, parser = globalThis.DOMParser && new DOMParser()) {
   const errors = [];
@@ -42,7 +49,7 @@ export function inspectPastedHtml(html, parser = globalThis.DOMParser && new DOM
     for (const attr of node.attributes) {
       const key = attr.name.toLowerCase();
       if (!SAFE_ATTRS.has(key)) errors.push(`${path}: unsupported attribute ${key}.`);
-      if ((key === "href" || key === "src") && (BAD_URL.test(attr.value.trim()) || attr.value.startsWith("//"))) errors.push(`${path}: unsafe URL.`);
+      if ((key === "href" || key === "src") && unsafeUrl(attr.value, key)) errors.push(path + ": unsafe URL.");
       if (key === "style") {
         for (const declaration of attr.value.split(";").filter(Boolean)) {
           const separator = declaration.indexOf(":");
