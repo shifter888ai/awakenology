@@ -188,3 +188,22 @@ test('requires rendered list semantics when the source contains numbering',()=>{
  assert.equal(result.ok,false);
  assert.ok(result.issues.some(x=>x.kind==='paragraph-numbering-mismatch'&&x.field==='text'));
 });
+
+
+test('compares paragraph-mark font and language metadata independently',()=>{
+ const source={...sample(),paragraphMarkFormatting:[{paragraphIndex:0,fontFamily:{ascii:'Arial',eastAsia:'Yu Gothic'},language:{val:'en-US',eastAsia:'ja-JP'}}]};
+ const output={...sample(),paragraphMarkFormatting:structuredClone(source.paragraphMarkFormatting)};
+ assert.equal(compareRichContent(source,output).ok,true);
+ output.paragraphMarkFormatting[0].fontFamily.eastAsia='Different Font';
+ const result=compareRichContent(source,output);
+ assert.equal(result.ok,false);
+ assert.ok(result.issues.some(issue=>issue.kind==='paragraph-mark-formatting-fontFamily'));
+});
+
+test('blocks source paragraph-mark metadata missing from rendered inspection',()=>{
+ const source={...sample(),paragraphMarkFormatting:[{paragraphIndex:0,fontFamily:{ascii:'Arial'},language:null}]};
+ const output=sample();
+ const result=compareRichContent(source,output);
+ assert.equal(result.ok,false);
+ assert.ok(result.issues.some(issue=>issue.kind==='paragraph-mark-formatting-rendered-inventory-missing'));
+});
