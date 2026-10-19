@@ -28,3 +28,11 @@ test('blocks invalid alignment, character-based indentation and conflicting inde
   assert.equal(r.ok,false,direct);
  }
 });
+
+
+test('paragraph-mark run formatting is not misclassified as paragraph layout',()=>{
+ const xml=styles('<w:style w:type="paragraph" w:styleId="Normal"><w:pPr><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="Arial"/><w:sz w:val="24"/></w:rPr></w:pPr></w:style>');
+ const result=resolveDocxParagraphLayout({stylesXml:xml,paragraphXml:p('Normal','<w:rPr><w:b/><w:szCs w:val="24"/></w:rPr>')});
+ assert.equal(result.ok,true,result.errors.join('; '));
+ assert.equal(result.layout.alignment,'center');
+});
