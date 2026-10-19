@@ -86,7 +86,9 @@ export async function inspectDocxRichContent(buffer) {
       if (!resolved.ok) errors.push(...resolved.errors.map(error => error.startsWith('Unsupported inherited Word formatting:') ? 'Paragraph ' + (p + 1) + ': ' + error : error));
       const formatting = resolved.formatting;
       for (const text of texts) {
-      const baseRun = { paragraphIndex:p, text:decode(text[1]), bold:formatting?.b ?? flag('b'), italic:formatting?.i ?? flag('i'), underline:formatting?.u ?? flag('u'), color:formatting?.color ?? (color ? '#'+color.toLowerCase() : null), fontSizePt:formatting?.fontSizePt ?? null, href:null, fontFamily:formatting?.fontFamily ?? null, language:formatting?.language ?? null, fontSizeCsPt:formatting?.fontSizeCsPt ?? formatting?.fontSizePt ?? null, allCaps:formatting?.caps ?? false, letterSpacingPt:formatting?.letterSpacingPt ?? null, fontKerning:formatting?.fontKerning ?? null, fontHint:formatting?.fontHint ?? null, boldCs:formatting?.bCs, italicCs:formatting?.iCs };
+      const baseRun = { paragraphIndex:p, text:decode(text[1]), bold:formatting?.b ?? flag('b'), italic:formatting?.i ?? flag('i'), underline:formatting?.u ?? flag('u'), color:formatting?.color ?? (color ? '#'+color.toLowerCase() : null), fontSizePt:formatting?.fontSizePt ?? null, href:null, fontFamily:formatting?.fontFamily ?? null, language:formatting?.language ?? null, fontSizeCsPt:formatting?.fontSizeCsPt ?? formatting?.fontSizePt ?? null, allCaps:formatting?.caps ?? false, letterSpacingPt:formatting?.letterSpacingPt ?? null, fontKerning:formatting?.fontKerning ?? null, fontHint:formatting?.fontHint ?? null };
+      if (formatting?.bCs !== undefined) baseRun.boldCs = formatting.bCs;
+      if (formatting?.iCs !== undefined) baseRun.italicCs = formatting.iCs;
       for (const segment of splitWordScriptSegments(baseRun.text,baseRun)) runs.push({...baseRun,text:segment.text,bold:segment.bold,italic:segment.italic});
     }
     }
