@@ -225,3 +225,20 @@ test("compares script-specific font metadata independent of object key order",()
  const output={...sample(),paragraphMarkFormatting:[{paragraphIndex:0,fontFamily:{hAnsi:"Arial",ascii:"Arial"},language:{eastAsia:"ja-JP",val:"en-US"}}]};
  assert.equal(compareRichContent(source,output).ok,true);
 });
+
+
+test("accepts explicit floating-image approval and reviewed alt text for a source image without alt",()=>{
+ const source=sample(), output=sample();
+ source.images[0].assetPath="/assets/a.png";
+ output.images[0].assetPath="/assets/a.png";
+ source.images[0].alt=null;
+ output.images[0].alt="A diagram illustrating the process";
+ source.images[0].placement={kind:"floating",requiresVisualReview:true};
+ output.images[0].placement={kind:"floating",requiresVisualReview:true};
+ assert.equal(compareRichContent(source,output).ok,false);
+ const reviewed=compareRichContent(source,output,{
+  floatingImageReviewApproved:true,
+  imageAltTextBySrc:{"/assets/a.png":"A diagram illustrating the process"}
+ });
+ assert.equal(reviewed.ok,true,JSON.stringify(reviewed.issues));
+});
