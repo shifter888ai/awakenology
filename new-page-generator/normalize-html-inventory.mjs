@@ -51,6 +51,9 @@ export function normalizeHtmlInventory(inventory, { language, sourceMode, source
     const attributes = Object.fromEntries(record.attributes);
     const formatting = [];
     if (attributes.style) formatting.push({ source: "style", value: attributes.style });
+    if (record.tag === "OL" && attributes.start !== undefined) formatting.push({kind:"list-start",value:attributes.start});
+    if (record.tag === "OL" && attributes.type !== undefined) formatting.push({kind:"list-marker-type",value:attributes.type});
+    for (const [name,value] of Object.entries(attributes)) if (name.startsWith("data-word-")) formatting.push({kind:"word-metadata",property:name,value});
     if (record.tag === "STRONG" || record.tag === "B") formatting.push({ kind: "bold", value: true });
     if (record.tag === "EM" || record.tag === "I") formatting.push({ kind: "italic", value: true });
     if (record.tag === "U") formatting.push({ kind: "underline", value: true });
