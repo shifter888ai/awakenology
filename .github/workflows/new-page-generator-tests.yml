@@ -46,6 +46,8 @@ jobs:
           grep -q 'Paragraph 184:' pilot-artifacts/pilot-visual-review.html
           grep -q 'manual visual review required' pilot-artifacts/pilot-visual-review.html
           test -s pilot-artifacts/shell-layout-preview.html
+          test -s pilot-artifacts/pilot-converted-preview.html
+          grep -q 'NOT APPROVED FOR PUBLICATION' pilot-artifacts/pilot-converted-preview.html
           grep -q 'LAYOUT PREVIEW ONLY' pilot-artifacts/shell-layout-preview.html
           grep -q 'class="theme-toggle"' pilot-artifacts/shell-layout-preview.html
           grep -q 'class="return-top"' pilot-artifacts/shell-layout-preview.html
@@ -58,6 +60,7 @@ jobs:
             new-page-generator/pilot-artifacts/pilot-audit.json
             new-page-generator/pilot-artifacts/pilot-visual-review.html
             new-page-generator/pilot-artifacts/shell-layout-preview.html
+            new-page-generator/pilot-artifacts/pilot-converted-preview.html
           if-no-files-found: warn
       - name: Publish pilot findings in job summary
         if: always()
