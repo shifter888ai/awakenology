@@ -167,3 +167,18 @@ test('blocks rendered list items without explicit Word numbering provenance',()=
  assert.equal(r.ok,false);
  assert.ok(r.errors.some(x=>x.includes('lacks explicit Word numbering provenance')));
 });
+
+
+test('keeps list numbering paragraph indexes aligned after preceding paragraphs',()=>{
+ const p=node('P',{},[text('Before')]);
+ const ol=node('OL',{},[]);
+ const li=node('LI',{
+  'data-word-num-id':'7','data-word-abstract-num-id':'2','data-word-level':'0',
+  'data-word-num-format':'decimal','data-word-num-text':'%1.','data-word-num-start':'1'
+ },[text('List item')]);
+ li.parentNode=ol; ol.childNodes.push(li);
+ const r=inspectRenderedRichContent('<p>Before</p><ol><li>List item</li></ol>',{parseFromString:()=>({body:{childNodes:[p,ol]}})});
+ assert.equal(r.ok,true,r.errors.join('; '));
+ assert.deepEqual(r.paragraphNumbering.map(item=>item.paragraphIndex),[1]);
+ assert.equal(r.paragraphCount,2);
+});
