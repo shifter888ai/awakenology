@@ -182,3 +182,16 @@ test('keeps list numbering paragraph indexes aligned after preceding paragraphs'
  assert.deepEqual(r.paragraphNumbering.map(item=>item.paragraphIndex),[1]);
  assert.equal(r.paragraphCount,2);
 });
+
+
+test('inspects paragraph-mark font and language metadata on paragraph containers',()=>{
+ const paragraph=node('P',{
+  'data-word-mark-font-ascii':'Arial','data-word-mark-font-east-asia':'Yu Gothic',
+  'data-word-mark-lang-val':'en-US','data-word-mark-lang-east-asia':'ja-JP'
+ },[text('Marked')]);
+ const result=inspectRenderedRichContent('<p data-word-mark-font-ascii="Arial">Marked</p>',{parseFromString:()=>({body:{childNodes:[paragraph]}})});
+ assert.equal(result.ok,true,result.errors.join('; '));
+ assert.deepEqual(result.paragraphMarkFormatting,[{
+  paragraphIndex:0,fontFamily:{ascii:'Arial',eastAsia:'Yu Gothic'},language:{val:'en-US',eastAsia:'ja-JP'}
+ }]);
+});
