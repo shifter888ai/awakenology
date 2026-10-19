@@ -39,7 +39,7 @@ const styles = {
   "margin-top": /^-?\d+(?:\.\d+)?(?:pt|px)$/i,
   "margin-bottom": /^-?\d+(?:\.\d+)?(?:pt|px)$/i,
   "text-indent": /^-?\d+(?:\.\d+)?(?:pt|px)$/i,
-  "line-height": /^\d+(?:\.\d+)?(?:pt|px)$/i,
+  "line-height": /^(?:\d+(?:\.\d+)?(?:pt|px)|\d+(?:\.\d+)?)$/i,
   "letter-spacing": /^-?\d+(?:\.\d+)?(?:pt|px)$/i,
   "font-kerning": /^(?:normal|none|auto)$/i,
   "text-transform": /^(?:uppercase|none)$/i,
