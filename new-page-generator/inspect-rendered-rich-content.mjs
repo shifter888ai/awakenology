@@ -2,18 +2,26 @@
 // Only explicit formatting is supported; inherited CSS requires separate review.
 const formatting = (node, key) => node.getAttribute?.('style')?.split(';').map(x=>x.trim()).find(x=>x.toLowerCase().startsWith(key+':'))?.split(':').slice(1).join(':').trim() ?? null;
 export function inspectRenderedRichContent(html, parser) {
-  const errors=[], runs=[], images=[];
-  if (typeof html !== 'string' || !parser?.parseFromString) return {ok:false,errors:['HTML and a parser are required.'],runs,images};
+  const errors=[], runs=[], images=[], lineBreaks=[];
+  const paragraphOffsets = new Map();
+  if (typeof html !== 'string' || !parser?.parseFromString) return {ok:false,errors:['HTML and a parser are required.'],runs,images,lineBreaks};
   const doc=parser.parseFromString(html,'text/html');
   let paragraphIndex=-1, order=0;
   function visit(node, state) {
     if (node.nodeType===3) {
-      if (node.textContent) runs.push({text:node.textContent,...state});
+      if (node.textContent) {
+        runs.push({text:node.textContent,...state});
+        if (paragraphIndex >= 0) paragraphOffsets.set(paragraphIndex,(paragraphOffsets.get(paragraphIndex) ?? 0)+node.textContent.length);
+      }
       return;
     }
     if (node.nodeType!==1) return;
     const tag=node.tagName.toUpperCase();
-    if (['P','H1','H2','H3','H4','H5','H6','LI','TD','TH','BLOCKQUOTE'].includes(tag)) paragraphIndex++;
+    if (['P','H1','H2','H3','H4','H5','H6','LI','TD','TH','BLOCKQUOTE'].includes(tag)) {
+      paragraphIndex++;
+      paragraphOffsets.set(paragraphIndex,0);
+    }
+    if (tag === 'BR') lineBreaks.push({paragraphIndex:Math.max(0,paragraphIndex),textOffset:paragraphOffsets.get(paragraphIndex) ?? 0,breakType:'textWrapping'});
     const style=node.getAttribute?.('style') ?? '';
     const allowed=new Set(['color','font-weight','font-style','text-decoration']);
     for(const decl of style.split(';').filter(x=>x.trim())) {
@@ -41,5 +49,5 @@ export function inspectRenderedRichContent(html, parser) {
   const initial={bold:false,italic:false,underline:false,color:null,href:null};
   for(const child of doc.body?.childNodes ?? []) visit(child,initial);
   if(!runs.length) errors.push('No rendered text runs.');
-  return {ok:errors.length===0,errors,runs,images};
+  return {ok:errors.length===0,errors,runs,images,lineBreaks};
 }
