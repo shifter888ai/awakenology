@@ -79,3 +79,17 @@ test('blocks a numbered source paragraph rendered as an ordinary paragraph',()=>
  assert.equal(result.ok,false);
  assert.ok(result.errors.some(error=>error.includes('does not use a list item')));
 });
+
+
+test("applies source paragraph formatting to rendered heading elements",()=>{
+ const source={
+  paragraphCount:1,
+  paragraphLayouts:[{paragraphIndex:0,alignment:"center",indentation:{},spacing:{beforePt:0,afterPt:0,lineHeightPt:null}}],
+  runs:[{paragraphIndex:0,text:"Heading",bold:true,italic:false,underline:false,color:null,fontSizePt:16,href:null,fontFamily:null,language:null,fontSizeCsPt:16,allCaps:false,letterSpacingPt:null}]
+ };
+ const result=applyDocxRichFormatting("<h2>Heading</h2>",source);
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.match(result.html,/<h2 style="text-align:center">/);
+ assert.match(result.html,/<strong><span/);
+ assert.match(result.html,/>Heading<\/span><\/strong>/);
+});
