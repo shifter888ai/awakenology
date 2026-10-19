@@ -32,3 +32,33 @@ No page generation, PR, merge, or deployment is authorized by this audit.
 1. Add a tested source-map representation of text-wrapping breaks with source offsets and order, while continuing to reject unsupported tabs, carriage returns, and non-text-wrapping break types.
 2. Add an explicit anchor inventory and placement-review status for `rId4`, with no automatic inline fallback; keep the generation gate closed until reviewed.
 3. Validate color handling and exact text/image order in each of the three languages, rerunning the real pilot in CI after each change.
+
+
+## Detailed run/paragraph property inventory (CI run 39200218682; source SHA-256 unchanged)
+
+The property-inventory diagnostic now runs successfully, alongside all **111 automated tests passing**. It confirms the remaining rich-content blocker is substantive, not merely an overly broad unknown-property regex.
+
+Run-level properties observed:
+
+| OOXML property | Count | Preservation implication |
+|---|---:|---|
+| `rFonts` | 259 | Explicit font-family/hint metadata; needs a rendering policy or a reviewed decision that the relevant attributes are non-authorial. |
+| `b` | 165 | Bold flags, including explicit off values. |
+| `sz` / `szCs` | 254 each | Explicit font sizes; both normal and complex-script size properties need coherent mapping. |
+| `lang` | 112 | Language metadata across Chinese, English, and Japanese runs. |
+| `bCs` | 163 | Complex-script bold flags. |
+| `i` / `iCs` | 132 each | Italic and complex-script italic flags, including explicit off values. |
+| `caps` | 131 | Explicit capitalization flags; off values occur in the source. |
+| `color` | 131 | Explicit color `333333` is frequent; color mapping is still not implemented in the conversion adapter. |
+| `spacing` | 131 | Character-spacing metadata; currently not represented in the rich-run schema. |
+
+Paragraph-level properties observed include `pStyle` (2), `numPr`/`ilvl`/`numId` (3 each), `ind` (3), `jc` (11), and `spacing` (119). These mean style inheritance, numbering/list semantics, indentation, alignment, and paragraph spacing cannot safely be flattened without explicit handling. The XML also contains hyperlink and advanced-formatting constructs that are blocked by the current conservative inspector.
+
+Pilot stages after the diagnostic fix:
+- source map: PASS — 184 paragraphs;
+- assets: PASS — 3 assets extracted;
+- image placement: PASS — 3 images mapped, including the floating drawing metadata;
+- rich content: BLOCKED — inherited/advanced formatting and unsupported run properties remain unresolved;
+- conversion: BLOCKED — explicit Word text color and floating drawing conversion remain unsupported.
+
+**Decision:** do not whitelist these tags simply to turn the gate green. Next engineering work must either model and compare these properties end-to-end (source OOXML → extracted inventory → rendered HTML) or clearly scope a reviewed lossless mapping for the pilot. The generation gate remains closed; no HTML generation, PR, merge, or deployment is authorized.
