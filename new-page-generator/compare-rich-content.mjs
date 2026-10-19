@@ -10,8 +10,8 @@ const required = (o, keys, where) => {
 export function compareRichContent(source, output) {
   const issues = [];
   for (const [side, value] of [['source', source], ['output', output]]) {
-    required(value, ['runs', 'images', 'lineBreaks'], side);
-    if (!Array.isArray(value.runs) || !Array.isArray(value.images)) throw new Error('Invalid inventory: ' + side);
+    required(value, ['runs', 'images', 'lineBreaks', 'paragraphCount'], side);
+    if (!Array.isArray(value.runs) || !Array.isArray(value.images) || !Number.isInteger(value.paragraphCount) || value.paragraphCount < 0) throw new Error('Invalid inventory: ' + side);
     value.runs.forEach((r, i) => {
       const where = side + '.runs[' + i + ']';
       required(r, ['paragraphIndex', 'text', 'bold', 'italic', 'underline', 'color', 'href'], where);
@@ -51,6 +51,7 @@ export function compareRichContent(source, output) {
       }
     }
   }
+  if (source.paragraphCount !== output.paragraphCount) issues.push({kind:'paragraph-count',expected:source.paragraphCount,actual:output.paragraphCount});
   for (const key of ['runs', 'images']) {
     if (source[key].length !== output[key].length) issues.push({kind: key + '-count', expected: source[key].length, actual: output[key].length});
     for (let i = 0; i < Math.min(source[key].length, output[key].length); i++) {
