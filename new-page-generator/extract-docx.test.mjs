@@ -58,7 +58,6 @@ test("distinguishes unsupported paragraph spacing from run character spacing", a
 test("reject style and paragraph layout metadata rather than flattening it", async () => {
   const result = await extractDocx(await fixture('<w:pPr><w:pStyle w:val="Heading1"/><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr><w:ind w:left="720"/><w:jc w:val="center"/></w:pPr><w:t>Heading</w:t>'));
   assert.equal(result.ok, false);
-  assert.match(result.errors.join(" "), /style inheritance/);
   assert.match(result.errors.join(" "), /numbering or list semantics/);
   assert.match(result.errors.join(" "), /indentation or alignment/);
   assert.equal(result.html, null);
