@@ -2,13 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {compareRichContent} from './compare-rich-content.mjs';
 const sample = () => ({
-  runs: [{text:'什麽',bold:true,italic:false,underline:false,color:'#ff0000',href:'https://example.org'}],
+  runs: [{paragraphIndex:0,text:'什麽',bold:true,italic:false,underline:false,color:'#ff0000',href:'https://example.org'}],
   images: [{assetPath:'assets/one.png',paragraphIndex:2,order:0,alt:'diagram'}]
 });
 test('identical inventory passes', () => assert.equal(compareRichContent(sample(), sample()).ok, true));
-for (const field of ['text','bold','italic','underline','color','href']) {
+for (const field of ['paragraphIndex','text','bold','italic','underline','color','href']) {
   test('changed run ' + field + ' blocks', () => {
-    const a=sample(), b=sample(); b.runs[0][field] = field === 'bold' || field === 'italic' || field === 'underline' ? !b.runs[0][field] : 'changed';
+    const a=sample(), b=sample(); b.runs[0][field] = field === 'bold' || field === 'italic' || field === 'underline' ? !b.runs[0][field] : field === 'paragraphIndex' ? 99 : 'changed';
     assert.equal(compareRichContent(a,b).ok,false);
   });
 }
@@ -23,7 +23,7 @@ test('incomplete source inventory throws', () => {const a=sample(); delete a.run
 
 
 test('reordered text runs block even when the same text is present',()=>{
- const source={runs:[{text:'A',bold:false,italic:false,underline:false,color:null,href:null},{text:'B',bold:false,italic:false,underline:false,color:null,href:null}],images:[]};
+ const source={runs:[{paragraphIndex:0,text:'A',bold:false,italic:false,underline:false,color:null,href:null},{paragraphIndex:0,text:'B',bold:false,italic:false,underline:false,color:null,href:null}],images:[]};
  const output={runs:[source.runs[1],source.runs[0]],images:[]};
  const result=compareRichContent(source,output);
  assert.equal(result.ok,false);
@@ -32,7 +32,7 @@ test('reordered text runs block even when the same text is present',()=>{
 
 test('extra output text run blocks',()=>{
  const source={runs:[],images:[]};
- const output={runs:[{text:'invented',bold:false,italic:false,underline:false,color:null,href:null}],images:[]};
+ const output={runs:[{paragraphIndex:0,text:'invented',bold:false,italic:false,underline:false,color:null,href:null}],images:[]};
  assert.equal(compareRichContent(source,output).ok,false);
 });
 
@@ -70,4 +70,18 @@ test('blocks when one side omits line-break provenance',()=>{
  const a={runs:[],images:[],lineBreaks:[]};
  const b={runs:[],images:[]};
  assert.equal(compareRichContent(a,b).ok,false);
+});
+
+
+test('blocks identical text and styling moved to a different paragraph',()=>{
+ const source={runs:[
+  {paragraphIndex:0,text:'First',bold:false,italic:false,underline:false,color:null,href:null},
+  {paragraphIndex:1,text:'Second',bold:false,italic:false,underline:false,color:null,href:null}
+ ],images:[]};
+ const output={runs:[
+  {paragraphIndex:0,text:'FirstSecond',bold:false,italic:false,underline:false,color:null,href:null}
+ ],images:[]};
+ const result=compareRichContent(source,output);
+ assert.equal(result.ok,false);
+ assert.ok(result.issues.some(x=>x.kind==='runs-mismatch'));
 });
