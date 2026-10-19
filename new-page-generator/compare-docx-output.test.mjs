@@ -53,3 +53,17 @@ test("detects extra HTML line breaks even when all text characters match", () =>
   assert.equal(result.ok, false);
   assert.match(result.errors.join(" "), /line-break mismatch/);
 });
+
+
+test("requires original DOCX images to remain at exact text offsets",()=>{
+ const map={ok:true,paragraphs:[{
+  index:0,text:"AB",sourceLocation:{start:1,end:20},
+  content:[{type:"text",text:"A",textOffset:0,markerOrder:0},{type:"image",relationshipId:"rId7",textOffset:1,markerOrder:1},{type:"text",text:"B",textOffset:1,markerOrder:2}]
+ }]};
+ assert.equal(compareDocxSourceToHtml(map,'<p>A<img src="/assets/a.png" alt="">B</p>').ok,true);
+ const moved=compareDocxSourceToHtml(map,'<p><img src="/assets/a.png" alt="">AB</p>');
+ assert.equal(moved.ok,false);
+ assert.match(moved.errors.join(" "),/image-position mismatch/);
+ const missing=compareDocxSourceToHtml(map,"<p>AB</p>");
+ assert.match(missing.errors.join(" "),/image-position mismatch/);
+});
