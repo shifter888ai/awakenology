@@ -104,3 +104,11 @@ test('reports shared inherited-style blockers once rather than once per paragrap
  assert.equal(r.ok,false);
  assert.equal(r.errors.filter(x=>x==='Unsupported document-default run property w:rFonts.').length,1);
 });
+
+
+test('records resolved Word font size in the source rich inventory',async()=>{
+ const styles='<w:styles xmlns:w="x"><w:docDefaults><w:rPrDefault><w:rPr><w:sz w:val="24"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>';
+ const r=await inspectDocxRichContent(await fixture('<w:p><w:r><w:t>Sized</w:t></w:r></w:p>',styles));
+ assert.equal(r.ok,true,r.errors.join('; '));
+ assert.equal(r.runs[0].fontSizePt,12);
+});
