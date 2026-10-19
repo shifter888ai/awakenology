@@ -26,7 +26,7 @@ test('incomplete source inventory throws', () => {const a=sample(); delete a.run
 
 test('reordered text runs block even when the same text is present',()=>{
  const source={runs:[{paragraphIndex:0,text:'A',bold:false,italic:false,underline:false,color:null,href:null},{paragraphIndex:0,text:'B',bold:false,italic:false,underline:false,color:null,href:null}],images:[],lineBreaks:[],paragraphCount:1};
- const output={runs:[source.runs[1],source.runs[0]],images:[],lineBreaks:[]};
+ const output={runs:[source.runs[1],source.runs[0]],images:[],lineBreaks:[],paragraphCount:1};
  const result=compareRichContent(source,output);
  assert.equal(result.ok,false);
  assert.ok(result.issues.some(x=>x.kind==='runs-mismatch' && x.field==='text'));
@@ -117,4 +117,13 @@ test('detects image and line-break swaps when both share the same text offset',(
  const result=compareRichContent(source,output);
  assert.equal(result.ok,false);
  assert.ok(result.issues.some(x=>x.field==='markerOrder'));
+});
+
+
+test('detects lost empty paragraphs even when text runs are unchanged',()=>{
+ const source={runs:[{paragraphIndex:0,text:'Start',bold:false,italic:false,underline:false,color:null,href:null}],images:[],lineBreaks:[],paragraphCount:2};
+ const output={runs:[{paragraphIndex:0,text:'Start',bold:false,italic:false,underline:false,color:null,href:null}],images:[],lineBreaks:[],paragraphCount:1};
+ const result=compareRichContent(source,output);
+ assert.equal(result.ok,false);
+ assert.ok(result.issues.some(x=>x.kind==='paragraph-count'));
 });
