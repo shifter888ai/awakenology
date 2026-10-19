@@ -78,7 +78,7 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
   if(rStyle) for(const props of chain(rStyle,'character style','character')) merge(effective,props);
   const directRun=inner(runXml,'rPr');
   for(const name of unsupportedRunProps(directRun).filter(name=>name!=='rStyle')) errors.push('Unsupported direct run property w:'+name+'.');
-  merge(effective,runProps(inner(runXml,'rPr')));
+  merge(effective,runProps(directRun));
   for(const [key,value] of Object.entries(effective)) if(value?.unsupported) errors.push('Unsupported inherited Word formatting: '+key+'.');
   return {ok:errors.length===0,errors,formatting:errors.length?null:effective};
 }
