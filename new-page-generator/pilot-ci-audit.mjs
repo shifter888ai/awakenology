@@ -187,7 +187,7 @@ try {
       const position=[...body.matchAll(/<wp:position(?:H|V)\b[^>]*>[\s\S]*?<\/wp:position(?:H|V)>/g)].map(x=>x[0]);
       const embeds=[...body.matchAll(/\br:embed=["']([^"']+)["']/g)].map(x=>x[1]);
       const docPr=/<wp:docPr\b[^>]*\/>/.exec(body)?.[0] ?? null;
-      diagnostic.floatingDrawings.push({paragraphIndex:i, anchorAttributes:firstTag, position, relationshipIds:embeds, docPr, hasWrap:/<wp:wrap\w+\b/.test(body)});
+      diagnostic.floatingDrawings.push({paragraphIndex:i, anchorAttributes:firstTag, position, relationshipIds:embeds, docPr, extent:/<wp:extent\b[^>]*\/?\s*>/.exec(body)?.[0]??null, wrap:/<wp:wrap\w+\b[^>]*\/?\s*>/.exec(body)?.[0]??null, hasWrap:/<wp:wrap\w+\b/.test(body)});
     }
   }
   diagnostic.paragraphSpacingVariants=[...paragraphSpacingVariants.values()];
