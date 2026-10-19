@@ -12,7 +12,7 @@ const propertyValue = (xml, tag) => {
     if (attrs(found)['w:themeColor'] || attrs(found)['w:themeTint'] || attrs(found)['w:themeShade']) return {unsupported:true};
     return value && /^[0-9a-f]{6}$/i.test(value) ? {value:'#'+value.toLowerCase()} : {unsupported:true};
   }
-  if (tag === 'b' || tag === 'i' || tag === 'u') {
+  if (['b','i','u','bCs','iCs','caps'].includes(tag)) {
     if (tag === 'u' && value && !['single','0','false','off','none'].includes(value.toLowerCase())) return {unsupported:true};
     if (value && !['1','true','on','0','false','off','none','single'].includes(value.toLowerCase())) return {unsupported:true};
     return {value: !value || !['0','false','off','none'].includes(value.toLowerCase())};
@@ -20,7 +20,7 @@ const propertyValue = (xml, tag) => {
   return undefined;
 };
 const childProperties = xml => [...xml.matchAll(/<w:([A-Za-z][A-Za-z0-9]*)\b[^>]*\/?\s*>/g)].map(match => match[1]);
-const unsupportedRunProps = xml => childProperties(xml).filter(name => !['b','i','u','color','sz'].includes(name));
+const unsupportedRunProps = xml => childProperties(xml).filter(name => !['b','i','u','color','sz','rFonts','lang','szCs','bCs','iCs','caps','spacing','rStyle'].includes(name));
 const unsupportedParagraphProps = xml => childProperties(xml.replace(/<w:rPr\b[^>]*>[\s\S]*?<\/w:rPr>/g,'')).filter(name => name !== 'rPr');
 function runProps(xml) {
   const result={};
@@ -34,6 +34,35 @@ function runProps(xml) {
     const value=attrs(size)['w:val'];
     if(value && /^\d+$/.test(value) && Number(value)>0) result.fontSizePt=Number(value)/2;
     else result.fontSizePt={unsupported:true};
+  }
+  const fonts = directTag(xml,'rFonts');
+  if (fonts) {
+    const a = attrs(fonts);
+    const unsupportedTheme = Object.keys(a).some(key => /Theme$/i.test(key) && key.startsWith('w:'));
+    const families = ['ascii','hAnsi','eastAsia','cs'].map(key=>a['w:'+key]).filter(Boolean);
+    const unique = [...new Set(families)];
+    result.fontFamily = unsupportedTheme || unique.length > 1 || !unique.length ? {unsupported:true} : unique[0];
+  }
+  const lang = directTag(xml,'lang');
+  if (lang) {
+    const a = attrs(lang), value = {};
+    for (const key of ['val','eastAsia','bidi']) if (a['w:'+key]) value[key] = a['w:'+key];
+    result.language = Object.keys(value).length ? value : {unsupported:true};
+  }
+  const complexSize = directTag(xml,'szCs');
+  if (complexSize) {
+    const value = attrs(complexSize)['w:val'];
+    result.fontSizeCsPt = value && /^\d+$/.test(value) && Number(value)>0 ? Number(value)/2 : {unsupported:true};
+  }
+  for (const key of ['bCs','iCs','caps']) {
+    const value = propertyValue(xml,key);
+    if (value?.unsupported) result[key] = {unsupported:true};
+    else if (value) result[key] = value.value;
+  }
+  const spacing = directTag(xml,'spacing');
+  if (spacing) {
+    const value = attrs(spacing)['w:val'];
+    result.letterSpacingPt = value && /^-?\d+$/.test(value) ? Number(value)/20 : {unsupported:true};
   }
   return result;
 }
@@ -79,6 +108,9 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
   const directRun=inner(runXml,'rPr');
   for(const name of unsupportedRunProps(directRun).filter(name=>name!=='rStyle')) errors.push('Unsupported direct run property w:'+name+'.');
   merge(effective,runProps(directRun));
+  if (effective.bCs !== undefined && effective.bCs !== effective.b) errors.push('Complex-script bold differs from general bold and requires script-aware rendering.');
+  if (effective.iCs !== undefined && effective.iCs !== effective.i) errors.push('Complex-script italic differs from general italic and requires script-aware rendering.');
+  if (effective.fontSizeCsPt !== undefined && effective.fontSizePt !== null && effective.fontSizeCsPt !== effective.fontSizePt) errors.push('Complex-script font size differs from general font size and requires script-aware rendering.');
   for(const [key,value] of Object.entries(effective)) if(value?.unsupported) errors.push('Unsupported inherited Word formatting: '+key+'.');
   return {ok:errors.length===0,errors,formatting:errors.length?null:effective};
 }
