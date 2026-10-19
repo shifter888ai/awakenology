@@ -120,7 +120,6 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
   const directRun=inner(runXml,'rPr');
   for(const name of unsupportedRunProps(directRun).filter(name=>name!=='rStyle')) errors.push('Unsupported direct run property w:'+name+'.');
   merge(effective,runProps(directRun));
-  if (effective.fontSizeCsPt !== undefined && effective.fontSizePt !== null && effective.fontSizeCsPt !== effective.fontSizePt) errors.push('Complex-script font size differs from general font size and requires script-aware rendering.');
   if (effective.fontKerningThresholdPt !== undefined) {
     if (effective.fontSizePt === null || effective.fontKerningThresholdPt?.unsupported) errors.push('Word font kerning threshold requires an explicit supported font size.');
     else effective.fontKerning = effective.fontSizePt >= effective.fontKerningThresholdPt ? 'normal' : 'none';
