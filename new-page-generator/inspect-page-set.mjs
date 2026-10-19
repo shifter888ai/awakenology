@@ -9,8 +9,8 @@ import { markdownToHtml } from "./markdown-to-html.mjs";
 
 /**
  * Connects the existing validators without inventing a DOCX converter.
- * `inputs` maps language to { html, parser } for paste, or
- * { buffer, parser } for DOCX. DOCX extraction runs before HTML inspection.
+ * `inputs` maps language to { markdown, parser }, { html, parser }, or
+ * { buffer, parser } for DOCX. Every route ends in strict HTML inspection.
  * The returned result is a review artifact, never publishable HTML.
  */
 export async function inspectPageSet(pageSet, inputs = {}) {
