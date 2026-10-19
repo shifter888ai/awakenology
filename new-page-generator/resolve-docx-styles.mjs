@@ -20,7 +20,7 @@ const propertyValue = (xml, tag) => {
   return undefined;
 };
 const childProperties = xml => [...xml.matchAll(/<w:([A-Za-z][A-Za-z0-9]*)\b[^>]*\/?\s*>/g)].map(match => match[1]);
-const unsupportedRunProps = xml => childProperties(xml).filter(name => !['b','i','u','color'].includes(name));
+const unsupportedRunProps = xml => childProperties(xml).filter(name => !['b','i','u','color','sz'].includes(name));
 const unsupportedParagraphProps = xml => childProperties(xml.replace(/<w:rPr\b[^>]*>[\s\S]*?<\/w:rPr>/g,'')).filter(name => name !== 'rPr');
 function runProps(xml) {
   const result={};
@@ -28,6 +28,12 @@ function runProps(xml) {
     const value=propertyValue(xml,key);
     if (value?.unsupported) result[key]={unsupported:true};
     else if (value) result[key]=value.value;
+  }
+  const size=directTag(xml,'sz');
+  if(size) {
+    const value=attrs(size)['w:val'];
+    if(value && /^\\d+$/.test(value) && Number(value)>0) result.fontSizePt=Number(value)/2;
+    else result.fontSizePt={unsupported:true};
   }
   return result;
 }
@@ -62,7 +68,7 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
     return found;
   };
   const merge=(target,source)=>{for(const [key,value] of Object.entries(source)) target[key]=value;};
-  const effective={b:false,i:false,u:false,color:null};
+  const effective={b:false,i:false,u:false,color:null,fontSizePt:null};
   merge(effective,runProps(defaultsRun));
   const pStyle=/<w:pStyle\b[^>]*\bw:val=[\"']([^\"']+)[\"']/.exec(paragraphXml)?.[1] ?? null;
   if(pStyle) for(const props of chain(pStyle,'paragraph style','paragraph')) merge(effective,props);
