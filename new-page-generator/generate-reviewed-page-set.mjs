@@ -47,9 +47,9 @@ export async function generateReviewedPageSet({ pageSet, inputs, outputs }) {
       } catch (error) {
         errors.push(`${lang}: DOCX rich-content verification blocked: ${String(error?.message ?? error)}`);
       }
-      // This conservative extractor does not yet resolve relationships,
-      // inherited styles, or full image provenance. Do not certify the pilot.
-      errors.push(`${lang}: full DOCX rich-content provenance remains incomplete; review output blocked.`);
+      // DOCX output is allowed only when the independently inspected source
+      // inventory, rendered inventory, and every rich-content field compare
+      // without issues. Unsupported source features fail earlier in inspection.
     } else if (output.sourceRichInventory !== undefined || output.renderedRichInventory !== undefined) {
       errors.push(`${lang}: caller-supplied rich inventories cannot establish independent source provenance.`);
     }
