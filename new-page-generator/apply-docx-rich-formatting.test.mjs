@@ -25,7 +25,7 @@ test("applies independently resolved run and paragraph formatting without changi
  assert.match(result.html,/letter-spacing:1pt/);
  assert.match(result.html,/font-kerning:normal/);
  assert.match(result.html,/text-transform:uppercase/);
- assert.match(result.html,/src="\\/assets\/one.png"/);
+ assert.match(result.html,/src="\/assets\/one.png"/);
  assert.match(result.html,/<span style="[^"]*font-weight:bold/);
  assert.match(result.html,/>plain<\/span>/);
 });
