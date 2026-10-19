@@ -33,3 +33,7 @@ Status: work in progress. This directory is **not a publishing endpoint**. Nothi
 ## Explicit non-goals
 
 No site-wide global header/footer migration, no runtime template loading, no automatic translation, no silent DOCX feature dropping, no changes to the private editor, no production release during Phase 3.
+
+## Latest verification note
+
+The coordinator has a tested positive path for a minimal, supported synthetic DOCX: it emits static HTML only after independently comparing source and rendered rich-content inventories. It also has fail-closed tests for changed reviewed text and unsupported font metadata. This is not equivalent to supporting every DOCX feature; the real multilingual illustrated pilot remains blocked until its typography, language boundaries, and floating-image placement are losslessly handled and reviewed.
