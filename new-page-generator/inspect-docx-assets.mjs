@@ -13,10 +13,10 @@ const attributes = source => Object.fromEntries(
 const attr = (tag, name) => attributes(tag)[name];
 
 /**
- * Inspect and extract inline raster/vector image parts from a DOCX package.
- * This is a separate, fail-closed asset stage; it does not convert document text.
- * Floating drawings, VML pictures, linked/external images and unsupported
- * drawing content are blocked instead of silently omitted.
+ * Inspect and extract embedded image parts from inline or floating DOCX drawings.
+ * Floating placement metadata is retained for manual visual review; it is never
+ * converted to inline flow. VML, linked images and unsupported drawing content
+ * remain blocked rather than silently omitted.
  */
 export async function inspectDocxAssets(buffer) {
   const fail = errors => ({ ok: false, errors, assets: [] });
@@ -59,34 +59,53 @@ export async function inspectDocxAssets(buffer) {
     if (match[1] === "Override" && a.PartName && a.ContentType) overrides.set(a.PartName.replace(/^\//, ""), a.ContentType);
   }
 
-  if (/<wp:anchor\b/.test(xml)) errors.push("Floating drawings (wp:anchor) require manual placement review.");
   if (/<w:pict\b/.test(xml) || /<v:imagedata\b/.test(xml)) errors.push("VML pictures require a separate adapter.");
   if (/<c:chart\b|<mc:AlternateContent\b|<w:object\b|<o:OLEObject\b/.test(xml)) {
     errors.push("Charts, embedded objects, or alternate drawing content require manual review.");
   }
 
   const drawingCount = [...xml.matchAll(/<w:drawing\b/g)].length;
-  const inlineBlocks = [...xml.matchAll(/<wp:inline\b[^>]*>[\s\S]*?<\/wp:inline>/g)];
-  if (drawingCount !== inlineBlocks.length) errors.push("A Word drawing is not a recognized inline image drawing.");
-  const inlineBlips = [];
-  for (const block of inlineBlocks) {
-    const blockBlips = [...block[0].matchAll(/<a:blip\b[^>]*\/?\s*>/g)];
-    if (!blockBlips.length) errors.push("An inline drawing contains no recognized image; shape content requires review.");
+  const drawingBlocks = [...xml.matchAll(/<w:drawing\b[^>]*>[\s\S]*?<\/w:drawing>/g)];
+  if (drawingCount !== drawingBlocks.length) errors.push("A Word drawing block could not be parsed safely.");
+  const imageRefs = [];
+  for (const drawing of drawingBlocks) {
+    const rawDrawing = drawing[0];
+    const inline = [...rawDrawing.matchAll(/<wp:inline\b[^>]*>[\s\S]*?<\/wp:inline>/g)];
+    const anchors = [...rawDrawing.matchAll(/<wp:anchor\b[^>]*>[\s\S]*?<\/wp:anchor>/g)];
+    if (inline.length + anchors.length !== 1) {
+      errors.push("Drawing must contain exactly one recognized inline or floating placement.");
+      continue;
+    }
+    const isAnchor = anchors.length === 1;
+    const block = (isAnchor ? anchors[0] : inline[0])[0];
+    const blockBlips = [...block.matchAll(/<a:blip\b[^>]*\/?\s*>/g)];
+    if (!blockBlips.length) errors.push("A drawing contains no recognized image; shape content requires review.");
+    const tagAttrs = tag => attributes(tag);
+    const docPr = block.match(/<wp:docPr\b[^>]*\/?\s*>/)?.[0] ?? null;
+    const placement = isAnchor ? {
+      kind: "floating",
+      anchorAttributes: tagAttrs(block.match(/^<wp:anchor\b[^>]*>/)?.[0] ?? ""),
+      docPr: docPr ? tagAttrs(docPr) : {},
+      horizontalPosition: block.match(/<wp:positionH\b[^>]*>[\s\S]*?<\/wp:positionH>/)?.[0] ?? null,
+      verticalPosition: block.match(/<wp:positionV\b[^>]*>[\s\S]*?<\/wp:positionV>/)?.[0] ?? null,
+      wrap: block.match(/<wp:wrap\w+\b[^>]*\/?\s*>/)?.[0] ?? null,
+      requiresVisualReview: true
+    } : { kind: "inline", requiresVisualReview: false };
     for (const blip of blockBlips) {
       const tag = blip[0];
       if (attr(tag, "r:link")) errors.push("Externally linked image is unsupported.");
       const id = attr(tag, "r:embed");
-      if (!id) errors.push("Inline image has no embedded relationship ID.");
-      else inlineBlips.push({ id, block: block[0] });
+      if (!id) errors.push("Image has no embedded relationship ID.");
+      else imageRefs.push({ id, block, placement, sourceOffset: drawing.index });
     }
   }
   const allBlips = [...xml.matchAll(/<a:blip\b[^>]*\/?\s*>/g)];
-  if (allBlips.length !== inlineBlips.length) errors.push("An image reference occurs outside a recognized inline drawing.");
+  if (allBlips.length !== imageRefs.length) errors.push("An image reference occurs outside a recognized inline or floating drawing.");
   if (errors.length) return fail([...new Set(errors)]);
 
   const assets = [];
-  for (let i = 0; i < inlineBlips.length; i++) {
-    const { id, block } = inlineBlips[i];
+  for (let i = 0; i < imageRefs.length; i++) {
+    const { id, block, placement } = imageRefs[i];
     const rel = relationships.get(id);
     if (!rel) {
       errors.push(`Image relationship ${id} is missing.`);
@@ -122,6 +141,7 @@ export async function inspectDocxAssets(buffer) {
     assets.push({
       sourceOrder: i + 1,
       relationshipId: id,
+      placement,
       sourcePath: target,
       outputPath: `assets/docx-${sha256(bytes).slice(0, 16)}.${extension}`,
       altText,
