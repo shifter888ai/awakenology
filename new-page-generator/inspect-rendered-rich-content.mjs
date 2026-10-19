@@ -7,7 +7,7 @@ export function inspectRenderedRichContent(html, parser) {
   const fontSizePt = node => {
     const value = formatting(node,'font-size');
     if (value === null) return null;
-    const match = /^(\\d+(?:\\.\\d+)?)(pt|px)$/.exec(value.toLowerCase());
+    const match = /^(\d+(?:\.\d+)?)(pt|px)$/.exec(value.toLowerCase());
     if (!match || Number(match[1]) <= 0) { errors.push('Unsupported rendered font-size: ' + value); return null; }
     return Number(match[1]) * (match[2] === 'px' ? 0.75 : 1);
   };
