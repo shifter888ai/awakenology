@@ -11,6 +11,7 @@ import { compareDocxSourceToHtml } from "./compare-docx-output.mjs";
  */
 const MAX_INPUT_BYTES = 25 * 1024 * 1024;
 const MAX_DOCUMENT_XML_BYTES = 20 * 1024 * 1024;
+const MAX_STYLES_XML_BYTES = 5 * 1024 * 1024;
 const FEATURES = [
   ["explicit Word text color (requires lossless color mapping)", /<w:color(?:\s|>)/],
   ["explicit font family (requires lossless font mapping)", /<w:rFonts(?:\s|\/?>)/],
@@ -84,8 +85,11 @@ export async function extractDocx(buffer) {
   const stylesPart = zip.file("word/styles.xml");
   if (stylesPart) {
     let stylesXml;
-    try { stylesXml = xmlText(await stylesPart.async("uint8array")); }
-    catch { errors.push("Word styles part is unreadable or is not valid UTF-8."); }
+    try {
+      const styleBytes = await stylesPart.async("uint8array");
+      if (styleBytes.byteLength > MAX_STYLES_XML_BYTES) errors.push("Word styles part exceeds the 5 MiB limit.");
+      else stylesXml = xmlText(styleBytes);
+    } catch { errors.push("Word styles part is unreadable or is not valid UTF-8."); }
     if (stylesXml) {
       for (const [name, pattern] of FEATURES) {
         if (pattern.test(stylesXml)) errors.push(`Unsupported or ambiguous inherited Word feature: ${name}.`);
