@@ -2,6 +2,7 @@
 // Values remain in OOXML twips so a later renderer can convert units explicitly.
 // This module does not certify page/section layout, numbering, or floating objects.
 const attrs = tag => Object.fromEntries([...tag.matchAll(/([\w:.-]+)=["']([^"']*)["']/g)].map(m => [m[1],m[2]]));
+const invalidAttrs = (tag, allowed) => { const keys=[...tag.matchAll(/([\w:.-]+)=["'][^"']*["']/g)].map(m=>m[1]); return new Set(keys).size!==keys.length || keys.some(key=>!allowed.includes(key)); };
 const bodyOf = (xml, tag) => new RegExp(String.raw`<w:${tag}(?:\s[^>]*)?>([\s\S]*?)<\/w:${tag}>`).exec(xml)?.[1] ?? '';
 const direct = (xml, tag) => new RegExp(String.raw`<w:${tag}\b[^>]*\/?\s*>`).exec(xml)?.[0] ?? null;
 const children = xml => [...xml.matchAll(/<w:([A-Za-z][A-Za-z0-9]*)\b[^>]*\/?\s*>/g)].map(m=>m[1]);
@@ -10,12 +11,13 @@ const layoutProps = xml => {
   const jc = direct(xml,'jc');
   if (jc) {
     const value=attrs(jc)['w:val'];
-    if (!['left','right','center','both','start','end','distribute'].includes(value)) result.alignment={unsupported:true};
+    if (invalidAttrs(jc,['w:val']) || !['left','right','center','both','start','end','distribute'].includes(value)) result.alignment={unsupported:true};
     else result.alignment=value;
   }
   const spacing = direct(xml,'spacing');
   if (spacing) {
     const a = attrs(spacing), parsed = {};
+    if (invalidAttrs(spacing,['w:before','w:after','w:line','w:lineRule','w:beforeAutospacing','w:afterAutospacing','w:beforeLines','w:afterLines'])) parsed.unsupported={unsupported:true};
     for (const key of ['before','after']) {
       if (a['w:'+key] !== undefined) {
         if (!/^\d+$/.test(a['w:'+key])) parsed[key+'Pt'] = {unsupported:true};
@@ -39,6 +41,7 @@ const layoutProps = xml => {
   const ind = direct(xml,'ind');
   if (ind) {
     const a=attrs(ind), parsed={};
+    if (invalidAttrs(ind,['w:left','w:right','w:firstLine','w:hanging','w:start','w:end','w:leftChars','w:rightChars','w:firstLineChars','w:hangingChars'])) parsed.unsupported={unsupported:true};
     for (const [name,key] of [['left','left'],['right','right'],['firstLine','firstLine'],['hanging','hanging']]) {
       const raw=a['w:'+name];
       if (raw !== undefined) {
