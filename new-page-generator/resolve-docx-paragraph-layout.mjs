@@ -53,7 +53,7 @@ const layoutProps = xml => {
     for (const key of ['leftChars','rightChars','firstLineChars','hangingChars']) {
       const raw=a['w:'+key];
       // Explicit zero character indentation has no layout effect; nonzero values need font-metric resolution.
-      if (raw !== undefined && (!/^-?\\d+$/.test(raw) || Number(raw)!==0)) parsed.unsupported={unsupported:true};
+      if (raw !== undefined && (!/^-?\d+$/.test(raw) || Number(raw)!==0)) parsed.unsupported={unsupported:true};
     }
     if (parsed.firstLine !== undefined && parsed.hanging !== undefined) parsed.unsupported={unsupported:true};
     result.indentation=parsed;
