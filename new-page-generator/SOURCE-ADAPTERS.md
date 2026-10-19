@@ -18,7 +18,7 @@ The remaining pilot blocker is floating-image visual fidelity. The generated pre
 
 When floating-image layout is the only remaining extraction blocker, `inspectPageSet` exposes `previewHtml` and the exact `sourceSha256` with `stage: "visual-review-required"`. After visual comparison, pass `floatingImageReviewApprovedSha256` equal to that exact checksum. This clears only the visual-review gate for that unchanged file; all other source/content/fidelity blockers remain blocking.
 
-The adapter remains fail-closed for unsupported or ambiguous features, including unresolved character-based indentation, unrepresented nested list boundaries, and source structures it cannot map unambiguously. No content may be silently discarded.
+The adapter maps the pilot's zero-offset, top-and-bottom floating anchor to a responsive block image and still requires visual approval. It remains fail-closed for unsupported or ambiguous features, including other wrap modes, nonzero anchor offsets, unresolved character-based indentation, unrepresented nested list boundaries, and source structures it cannot map unambiguously. No content may be silently discarded.
 
 ## Formatted HTML file or paste (supported-markup route)
 
