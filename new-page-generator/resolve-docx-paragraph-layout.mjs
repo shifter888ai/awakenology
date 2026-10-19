@@ -57,15 +57,18 @@ export function resolveDocxParagraphLayout({stylesXml,paragraphXml}) {
   for(const m of stylesXml.matchAll(/<w:style\b([^>]*)>([\s\S]*?)<\/w:style>/g)) {
     const a=attrs(m[1]), id=a['w:styleId'];
     if(!id || map.has(id)){errors.push('Missing or duplicate Word style ID.');continue;}
-    map.set(id,{type:a['w:type']??null,basedOn:/<w:basedOn\b[^>]*\bw:val=["']([^"']+)["']/.exec(m[2])?.[1]??null,pPr:bodyOf(m[2],'pPr')});
+    map.set(id,{type:a['w:type']??null,isDefault:['1','true','on'].includes((a['w:default']??'').toLowerCase()),basedOn:/<w:basedOn\b[^>]*\bw:val=["']([^"']+)["']/.exec(m[2])?.[1]??null,pPr:bodyOf(m[2],'pPr')});
   }
+  const defaultParagraphStyles=[...map.entries()].filter(([,style])=>style.type==='paragraph'&&style.isDefault);
+  if(defaultParagraphStyles.length>1) errors.push('Multiple default Word paragraph styles are defined.');
+  const defaultParagraphId=defaultParagraphStyles[0]?.[0]??null;
   const merge=(target,source)=>{for(const [k,v] of Object.entries(source)){if(k==='indentation' && v && typeof v==='object' && !v.unsupported){target.indentation={...(target.indentation??{}),...v};}else if(k==='spacing' && v && typeof v==='object' && !v.unsupported){target.spacing={...(target.spacing??{}),...v};}else target[k]=v;}};
   const result={alignment:'left',indentation:{left:0,right:0},spacing:{beforePt:0,afterPt:0,lineHeightPt:null}};
   const defaults=bodyOf(bodyOf(stylesXml,'docDefaults'),'pPrDefault');
   const defaultsP=bodyOf(defaults,'pPr');
   for(const name of unsupported(defaultsP)) errors.push('Unsupported document-default paragraph property w:'+name+'.');
   merge(result,layoutProps(defaultsP));
-  const id=/<w:pStyle\b[^>]*\bw:val=["']([^"']+)["']/.exec(paragraphXml)?.[1]??null;
+  const id=/<w:pStyle\b[^>]*\bw:val=["']([^"']+)["']/.exec(paragraphXml)?.[1]??defaultParagraphId;
   if(id) {
     const chain=[], seen=new Set(); let current=id;
     while(current) {
