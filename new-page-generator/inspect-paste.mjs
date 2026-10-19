@@ -18,13 +18,14 @@ function unsafeUrl(value, attribute) {
   return !allowed.includes(scheme);
 }
 
-export function inspectPastedHtml(html, parser = globalThis.DOMParser && new DOMParser()) {
+export function inspectPastedHtml(html, parser = globalThis.DOMParser && new DOMParser(), { allowDocumentShell = false } = {}) {
   const errors = [];
   if (typeof html !== "string" || !html.trim()) return { ok: false, errors: ["Empty HTML paste."], inventory: [] };
   if (!parser) return { ok: false, errors: ["DOMParser unavailable; use a browser context."], inventory: [] };
   for (const match of html.matchAll(/<\/?\s*([a-z][\w-]*)\b[^>]*>/gi)) {
     const tag = match[1].toUpperCase();
-    if (!ALLOWED.has(tag)) errors.push(`Raw HTML contains unsupported element <${tag.toLowerCase()}>.`);
+    const documentShell = allowDocumentShell && ["HTML","HEAD","BODY","TITLE","META","LINK"].includes(tag);
+    if (!ALLOWED.has(tag) && !documentShell) errors.push(`Raw HTML contains unsupported element <${tag.toLowerCase()}>.`);
   }
   const doc = parser.parseFromString(html, "text/html");
   const inventory = [];
