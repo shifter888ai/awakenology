@@ -241,7 +241,7 @@ test("validates CSS float geometry against serialized Word placement metadata",(
   horizontalPosition:'<wp:positionH relativeFrom="column"><wp:posOffset>0</wp:posOffset></wp:positionH>',
   verticalPosition:'<wp:positionV relativeFrom="paragraph"><wp:posOffset>0</wp:posOffset></wp:positionV>',
   extent:'<wp:extent cx="1270000" cy="635000"/>',wrap:'<wp:wrapSquare wrapText="bothSides"/>',requiresVisualReview:true
- };
+ });
  const style='float:left;width:100pt;height:50pt;margin-left:-42pt;margin-right:9pt;margin-top:0pt;margin-bottom:0pt';
  const validParser={parseFromString:()=>({body:{childNodes:[node('P',{style:'margin-left:42pt'},[node('#text',{},[], 'text'),node('IMG',{src:'/assets/a.png',alt:'Diagram',style,'data-word-image-placement-json':JSON.stringify(placement)})])]}})};
  const valid=inspectRenderedRichContent('<p>fixture</p>',validParser);
