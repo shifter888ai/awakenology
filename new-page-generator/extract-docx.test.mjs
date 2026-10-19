@@ -15,6 +15,14 @@ test("reject tracked deletion", async () => assert.match((await extractDocx(awai
 test("reject explicit Word colors rather than drop them", async () => assert.match((await extractDocx(await fixture('<w:rPr><w:color w:val="FF0000"/></w:rPr><w:t>Red</w:t>'))).errors.join(" "), /text color/));
 test("reject malformed drawings instead of silently dropping them", async () => assert.match((await extractDocx(await fixture("<w:drawing/>"))).errors.join(" "), /DOCX image adapter/));
 
+test("rejects even simple Word tables until cell and paragraph structure is mapped", async () => {
+  const result = await extractDocx(await fixture('<w:tbl><w:tr><w:tc><w:p><w:r><w:t>Cell</w:t></w:r></w:p></w:tc></w:tr></w:tbl>'));
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join(" "), /Word table structure/);
+  assert.equal(result.html, null);
+});
+
+
 test("reject font-family and font-size metadata until rendered mapping is lossless", async () => {
   const fonts = await extractDocx(await fixture('<w:rPr><w:rFonts w:ascii="Arial" w:eastAsia="Yu Gothic"/><w:sz w:val="24"/></w:rPr><w:t>Styled</w:t>'));
   assert.equal(fonts.ok, false);
