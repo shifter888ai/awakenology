@@ -1,3 +1,34 @@
+import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+
+const PILOT_REVIEW_RECORD_URL = new URL("./pilot-human-review.json", import.meta.url);
+
+/**
+ * Applies the checked-in owner review only to the exact reviewed source bytes.
+ * Caller-supplied approval hashes are never accepted by this generation path.
+ * This is a workflow control, not a security boundary against repository changes.
+ */
+export async function applySourceBoundHumanReview(pageSet, inputs) {
+  const prepared = Object.fromEntries(Object.entries(inputs ?? {}).map(([lang, input]) => [lang, input && typeof input === "object" ? { ...input } : input]));
+  for (const [lang, meta] of Object.entries(pageSet?.pages ?? {})) {
+    if (meta.mode !== "docx" || !prepared[lang] || typeof prepared[lang] !== "object") continue;
+    delete prepared[lang].floatingImageReviewApprovedSha256;
+    let review = null;
+    try {
+      review = JSON.parse(await readFile(PILOT_REVIEW_RECORD_URL, "utf8"));
+    } catch {
+      continue;
+    }
+    const buffer = prepared[lang].buffer;
+    if (meta.source !== review.sourcePath || !Buffer.isBuffer(buffer)) continue;
+    const actualSha256 = createHash("sha256").update(buffer).digest("hex");
+    if (actualSha256 !== review.sourceSha256 || review.visualReview?.approved !== true) continue;
+    prepared[lang].floatingImageReviewApprovedSha256 = actualSha256;
+    prepared[lang].imageAltTextBySrc = review.imageAltTextBySrc ?? {};
+  }
+  return prepared;
+}
+
 import { LANGUAGES } from "./validate-page-set.mjs";
 import { inspectPageSet } from "./inspect-page-set.mjs";
 import { buildLanguageRouteManifest, verifyLanguageRouteManifest } from "./language-route-manifest.mjs";
@@ -16,7 +47,8 @@ import { inspectRenderedRichContent } from "./inspect-rendered-rich-content.mjs"
  * This remains a review gate, not a security boundary or a full HTML sanitizer.
  */
 export async function generateReviewedPageSet({ pageSet, inputs, outputs }) {
-  const inspection = await inspectPageSet(pageSet, inputs);
+  const reviewedInputs = await applySourceBoundHumanReview(pageSet, inputs);
+  const inspection = await inspectPageSet(pageSet, reviewedInputs);
   if (!inspection.ok) {
     const hasReviewablePages=Object.values(inspection.pages??{}).some(page=>Boolean(page.previewHtml)||(page.imageAltIssues??[]).length>0);
     return { ok:false,stage:inspection.stage??"source-inspection",errors:inspection.errors,pages:inspection.reviewRequired||hasReviewablePages?inspection.pages:{},reviewRequired:inspection.reviewRequired===true,reviewablePagesAvailable:hasReviewablePages };
