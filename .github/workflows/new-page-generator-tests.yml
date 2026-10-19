@@ -33,3 +33,12 @@ jobs:
         run: npm install
       - name: Run generator tests
         run: npm test
+      - name: Audit uploaded pilot DOCX without approving generation
+        run: node pilot-ci-audit.mjs
+      - name: Upload pilot diagnostic report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trilingual-docx-pilot-audit
+          path: new-page-generator/pilot-artifacts/pilot-audit.json
+          if-no-files-found: warn
