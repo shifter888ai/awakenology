@@ -4,6 +4,8 @@ const formatting = (node, key) => node.getAttribute?.('style')?.split(';').map(x
 export function inspectRenderedRichContent(html, parser) {
   const errors=[], runs=[], images=[], lineBreaks=[];
   const paragraphOffsets = new Map();
+  const paragraphMarkerOrders = new Map();
+  const nextMarkerOrder = index => { const value=paragraphMarkerOrders.get(index) ?? 0; paragraphMarkerOrders.set(index,value+1); return value; };
   if (typeof html !== 'string' || !parser?.parseFromString) return {ok:false,errors:['HTML and a parser are required.'],runs,images,lineBreaks};
   const doc=parser.parseFromString(html,'text/html');
   let paragraphIndex=-1, order=0;
@@ -35,8 +37,9 @@ export function inspectRenderedRichContent(html, parser) {
     if (['P','H1','H2','H3','H4','H5','H6','LI','TD','TH','BLOCKQUOTE'].includes(tag)) {
       paragraphIndex++;
       paragraphOffsets.set(paragraphIndex,0);
+      paragraphMarkerOrders.set(paragraphIndex,0);
     }
-    if (tag === 'BR') lineBreaks.push({paragraphIndex:Math.max(0,paragraphIndex),textOffset:paragraphOffsets.get(paragraphIndex) ?? 0,breakType:'textWrapping'});
+    if (tag === 'BR') lineBreaks.push({paragraphIndex:Math.max(0,paragraphIndex),textOffset:paragraphOffsets.get(paragraphIndex) ?? 0,breakType:'textWrapping',markerOrder:nextMarkerOrder(Math.max(0,paragraphIndex))});
     const style=node.getAttribute?.('style') ?? '';
     const allowed=new Set(['color','font-weight','font-style','text-decoration']);
     for(const decl of style.split(';').filter(x=>x.trim())) {
@@ -57,7 +60,7 @@ export function inspectRenderedRichContent(html, parser) {
     if(tag==='IMG') {
       const assetPath=node.getAttribute('src'), alt=node.getAttribute('alt');
       if(!assetPath || alt===null) errors.push('Image lacks src or alt.');
-      images.push({assetPath,paragraphIndex,order:order++,alt,textOffset:paragraphOffsets.get(paragraphIndex) ?? 0});
+      images.push({assetPath,paragraphIndex,order:order++,alt,textOffset:paragraphOffsets.get(paragraphIndex) ?? 0,markerOrder:nextMarkerOrder(Math.max(0,paragraphIndex))});
     }
     for(const child of node.childNodes ?? []) visit(child,next);
   }
