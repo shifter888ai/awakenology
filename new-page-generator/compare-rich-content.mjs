@@ -2,6 +2,7 @@
 // Expected runs: [{paragraphIndex, text, bold, italic, underline, color, href}] in document order.
 // Expected images: [{assetPath, paragraphIndex, order, alt, textOffset, markerOrder}] in document order.
 const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+const stable = value => Array.isArray(value) ? "["+value.map(stable).join(",")+"]" : value && typeof value==="object" ? "{"+Object.keys(value).sort().map(key=>JSON.stringify(key)+":"+stable(value[key])).join(",")+"}" : JSON.stringify(value);
 const required = (o, keys, where) => {
   if (!o || typeof o !== 'object' || keys.some(k => !own(o, k))) {
     throw new Error('Incomplete rich-content inventory at ' + where);
@@ -70,7 +71,7 @@ export function compareRichContent(source, output) {
         for (const field of ['paragraphIndex','numId','abstractNumId','level','format','text','start']) {
           if (a[field] !== b[field]) issues.push({kind:'paragraph-numbering-mismatch',index:i,field,expected:a[field] ?? null,actual:b[field] ?? null});
         }
-        if (JSON.stringify(a.indentation ?? {}) !== JSON.stringify(b.indentation ?? {})) issues.push({kind:'paragraph-numbering-indentation-mismatch',index:i,expected:a.indentation ?? {},actual:b.indentation ?? {}});
+        if (stable(a.indentation ?? {}) !== stable(b.indentation ?? {})) issues.push({kind:'paragraph-numbering-indentation-mismatch',index:i,expected:a.indentation ?? {},actual:b.indentation ?? {}});
       }
     }
   }
@@ -82,7 +83,7 @@ export function compareRichContent(source, output) {
       for(let i=0;i<Math.min(source.paragraphMarkFormatting.length,output.paragraphMarkFormatting.length);i++) {
         const a=source.paragraphMarkFormatting[i], b=output.paragraphMarkFormatting[i];
         if(a.paragraphIndex!==b.paragraphIndex) issues.push({kind:'paragraph-mark-formatting-paragraph',index:i,expected:a.paragraphIndex,actual:b.paragraphIndex});
-        for(const field of ['fontFamily','language']) if(JSON.stringify(a[field]??null)!==JSON.stringify(b[field]??null)) issues.push({kind:'paragraph-mark-formatting-'+field,index:i,expected:a[field]??null,actual:b[field]??null});
+        for(const field of ['fontFamily','language']) if(stable(a[field]??null)!==stable(b[field]??null)) issues.push({kind:'paragraph-mark-formatting-'+field,index:i,expected:a[field]??null,actual:b[field]??null});
       }
     }
   }
@@ -117,7 +118,7 @@ export function compareRichContent(source, output) {
       const fields = key === 'runs' ? ['paragraphIndex', 'text', 'bold', 'italic', 'underline', 'color', 'fontSizePt', 'href', ...(['fontFamily','language','fontSizeCsPt','allCaps','letterSpacingPt','fontKerning','fontHint','boldCs','italicCs'].filter(field=>own(source[key][i],field)||own(output[key][i],field)))] : ['assetPath', 'paragraphIndex', 'order', 'alt', 'textOffset', 'markerOrder', 'placement'];
       for (const field of fields) {
         const expected = source[key][i][field], actual = output[key][i][field];
-        const equal = ['placement','language','fontFamily'].includes(field) ? JSON.stringify(expected) === JSON.stringify(actual) : (typeof expected === typeof actual && expected === actual);
+        const equal = ['placement','language','fontFamily'].includes(field) ? stable(expected) === stable(actual) : (typeof expected === typeof actual && expected === actual);
         if (!equal) {
           issues.push({kind: key + '-mismatch', index: i, field, expected: source[key][i][field], actual: output[key][i][field]});
         }
