@@ -75,3 +75,12 @@ test("keeps image anchors in the same ordered content stream as text",async()=>{
  assert.deepEqual(result.paragraphs[0].content.map(x=>x.type),['text','image','text']);
  assert.equal(result.paragraphs[0].content[1].relationshipId,'rId7');
 });
+
+
+test("exposes exact text offsets and marker order for mixed text, breaks, and images",async()=>{
+ const result=await inspectDocxSourceMap(await fixture('<w:p><w:r><w:t>AB</w:t><w:br w:type="textWrapping"/><w:t>CD</w:t></w:r><w:r><w:drawing><wp:inline><a:blip r:embed="rId7"/></wp:inline></w:drawing></w:r><w:r><w:t>EF</w:t></w:r></w:p>'));
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.deepEqual(result.paragraphs[0].content.map(item=>[item.type,item.textOffset,item.markerOrder]),[
+  ["text",0,0],["lineBreak",2,1],["text",2,2],["image",4,3],["text",4,4]
+ ]);
+});
