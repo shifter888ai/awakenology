@@ -1,0 +1,15 @@
+{
+  "sourcePath": "new-page-generator/temp/多重時空是什麽 - 繁體 - Copy.docx",
+  "sourceSha256": "b9b8e15366fbbdb2e4d921335315c26ce56c6eb83678f8a1306b7c5cc8116ea1",
+  "visualReview": {
+    "approved": true,
+    "approvalBasis": "Owner confirmed: all text, images and layout look OK visually.",
+    "scope": "This exact source DOCX only; any changed source hash invalidates the approval."
+  },
+  "imageAltTextBySrc": {
+    "/assets/docx-b7dba7e21c2441ad.png": "multi-planes"
+  },
+  "publishingAuthorization": false,
+  "mergeAuthorization": false,
+  "recordedOn": "2026-10-20"
+}
