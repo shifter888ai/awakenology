@@ -13,6 +13,26 @@ const layoutProps = xml => {
     if (!['left','right','center','both','start','end','distribute'].includes(value)) result.alignment={unsupported:true};
     else result.alignment=value;
   }
+  const spacing = direct(xml,'spacing');
+  if (spacing) {
+    const a = attrs(spacing), parsed = {};
+    for (const key of ['before','after']) {
+      if (a['w:'+key] !== undefined) {
+        if (!/^\d+$/.test(a['w:'+key])) parsed[key+'Pt'] = {unsupported:true};
+        else parsed[key+'Pt'] = Number(a['w:'+key]) / 20;
+      }
+    }
+    if (a['w:line'] !== undefined) {
+      const rule = a['w:lineRule'] ?? 'auto';
+      if (!/^\d+$/.test(a['w:line']) || rule !== 'exact') parsed.lineHeightPt = {unsupported:true};
+      else parsed.lineHeightPt = Number(a['w:line']) / 20;
+    }
+    for (const key of ['beforeAutospacing','afterAutospacing','beforeLines','afterLines']) {
+      if (a['w:'+key] !== undefined) parsed.unsupported = {unsupported:true};
+    }
+    if (a['w:lineRule'] !== undefined && !['exact','auto','atLeast'].includes(a['w:lineRule'])) parsed.unsupported = {unsupported:true};
+    result.spacing = parsed;
+  }
   const ind = direct(xml,'ind');
   if (ind) {
     const a=attrs(ind), parsed={};
@@ -29,7 +49,7 @@ const layoutProps = xml => {
   }
   return result;
 };
-const unsupported = xml => children(xml.replace(/<w:rPr\b[^>]*>[\s\S]*?<\/w:rPr>/g,'').replace(/<w:rPr\b[^>]*\/>/g,'')).filter(name=>!['jc','ind','pStyle','basedOn','pPr'].includes(name));
+const unsupported = xml => children(xml.replace(/<w:rPr\b[^>]*>[\s\S]*?<\/w:rPr>/g,'').replace(/<w:rPr\b[^>]*\/>/g,'')).filter(name=>!['jc','ind','spacing','pStyle','basedOn','pPr'].includes(name));
 export function resolveDocxParagraphLayout({stylesXml,paragraphXml}) {
   const errors=[];
   if (typeof stylesXml!=='string' || typeof paragraphXml!=='string') return {ok:false,errors:['Styles XML and paragraph XML are required.'],layout:null};
@@ -39,8 +59,8 @@ export function resolveDocxParagraphLayout({stylesXml,paragraphXml}) {
     if(!id || map.has(id)){errors.push('Missing or duplicate Word style ID.');continue;}
     map.set(id,{type:a['w:type']??null,basedOn:/<w:basedOn\b[^>]*\bw:val=["']([^"']+)["']/.exec(m[2])?.[1]??null,pPr:bodyOf(m[2],'pPr')});
   }
-  const merge=(target,source)=>{for(const [k,v] of Object.entries(source)){if(k==='indentation' && v && typeof v==='object' && !v.unsupported){target.indentation={...(target.indentation??{}),...v};}else target[k]=v;}};
-  const result={alignment:'left',indentation:{left:0,right:0}};
+  const merge=(target,source)=>{for(const [k,v] of Object.entries(source)){if(k==='indentation' && v && typeof v==='object' && !v.unsupported){target.indentation={...(target.indentation??{}),...v};}else if(k==='spacing' && v && typeof v==='object' && !v.unsupported){target.spacing={...(target.spacing??{}),...v};}else target[k]=v;}};
+  const result={alignment:'left',indentation:{left:0,right:0},spacing:{beforePt:0,afterPt:0,lineHeightPt:null}};
   const defaults=bodyOf(bodyOf(stylesXml,'docDefaults'),'pPrDefault');
   const defaultsP=bodyOf(defaults,'pPr');
   for(const name of unsupported(defaultsP)) errors.push('Unsupported document-default paragraph property w:'+name+'.');
@@ -67,5 +87,7 @@ export function resolveDocxParagraphLayout({stylesXml,paragraphXml}) {
     if(key==='indentation' && value && typeof value==='object') for(const [side,n] of Object.entries(value)) if(side!=='unsupported' && n?.unsupported) errors.push('Unsupported paragraph indentation: '+side+'.');
   }
   if(result.indentation?.unsupported) errors.push('Character-based or conflicting Word indentation requires independent resolution.');
+  if(result.spacing?.unsupported) errors.push('Unsupported Word paragraph spacing requires independent resolution.');
+  for (const [key,value] of Object.entries(result.spacing ?? {})) if (value?.unsupported) errors.push('Unsupported Word paragraph spacing: '+key+'.');
   return {ok:errors.length===0,errors,layout:result};
 }
