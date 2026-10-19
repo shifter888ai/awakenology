@@ -48,11 +48,14 @@ try {
       const content = new RegExp('<w:' + tag + '\\b[^>]*>([\\s\\S]*?)<\\/w:' + tag + '>').exec(body)?.[1] ?? '';
       return [...content.matchAll(/<w:([A-Za-z][A-Za-z0-9]*)\b[^>]*\/?\s*>/g)].map(x=>x[1]);
     };
-    for (const ref of diagnostic.styleResolutionInventory.references.slice(0,30)) {
-      const found = styleTags.find(m => attributes(m[1])['w:styleId'] === ref.id);
+    const visitedStyles = new Set();
+    const appendStyleChain = (id, referenceKind, depth=0) => {
+      if (visitedStyles.has(id) || depth > 12) return;
+      visitedStyles.add(id);
+      const found = styleTags.find(m => attributes(m[1])['w:styleId'] === id);
       if (!found) {
-        diagnostic.styleResolutionInventory.definitions.push({id:ref.id,kind:ref.kind,missing:true});
-        continue;
+        diagnostic.styleResolutionInventory.definitions.push({id,kind:referenceKind,missing:true});
+        return;
       }
       const attrs = attributes(found[1]);
       const body = found[2];
@@ -62,7 +65,9 @@ try {
         id:attrs['w:styleId'],type:attrs['w:type'],name,basedOn,
         runProperties:propNames(body,'rPr'),paragraphProperties:propNames(body,'pPr')
       });
-    }
+      if (basedOn) appendStyleChain(basedOn, referenceKind, depth+1);
+    };
+    for (const ref of diagnostic.styleResolutionInventory.references.slice(0,30)) appendStyleChain(ref.id,ref.kind);
     const defaults = /<w:docDefaults\b[^>]*>([\s\S]*?)<\/w:docDefaults>/.exec(stylesXml)?.[1] ?? '';
     diagnostic.styleResolutionInventory.docDefaults = {
       runProperties:propNames(defaults,'rPrDefault'),
