@@ -7,7 +7,7 @@ const BLOCKS = new Set(["P","H1","H2","H3","H4","H5","H6","UL","OL","LI","BLOCKQ
 const INLINE = new Set(["STRONG","B","EM","I","U","S","SPAN","A","BR","SUP","SUB","CODE","IMG"]);
 const CONTAINERS = new Set(["DIV","SECTION","ARTICLE"]);
 const ALLOWED = new Set([...BLOCKS, ...INLINE, ...CONTAINERS]);
-const SAFE_STYLES = new Set(["color","font-weight","font-style","text-decoration","text-align","font-size","font-family","text-transform","letter-spacing","margin-left","margin-right","text-indent","margin-top","margin-bottom","line-height"]);
+const SAFE_STYLES = new Set(["color","font-weight","font-style","text-decoration","text-align","font-size","font-family","text-transform","letter-spacing","margin-left","margin-right","text-indent","margin-top","margin-bottom","line-height","font-kerning"]);
 const SAFE_ATTRS = new Set(["href","src","alt","title","colspan","rowspan","style","lang","data-word-lang-val","data-word-lang-east-asia","data-word-lang-bidi","data-word-font-ascii","data-word-font-hansi","data-word-font-east-asia","data-word-font-cs"]);
 function unsafeUrl(value, attribute) {
   const compact = value.replace(/[\u0000-\u0020\u007f]/g, "");
