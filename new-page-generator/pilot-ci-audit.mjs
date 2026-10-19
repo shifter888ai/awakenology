@@ -13,7 +13,7 @@ const outputPath = 'pilot-artifacts/pilot-audit.json';
 const buffer = await readFile(sourcePath);
 const sha256 = createHash('sha256').update(buffer).digest('hex');
 const stages = {};
-const diagnostic = {unsupportedTextConstructs:[], drawingKinds:{}, explicitColors:[], lineBreaks:[], floatingDrawings:[], runPropertyInventory:{counts:{},samples:{}}, paragraphPropertyInventory:{counts:{},samples:{}},fontFamilyVariants:[],styleResolutionInventory:{references:[],definitions:[],docDefaults:{}}};
+const diagnostic = {unsupportedTextConstructs:[], drawingKinds:{}, explicitColors:[], lineBreaks:[], floatingDrawings:[], runPropertyInventory:{counts:{},samples:{}}, paragraphPropertyInventory:{counts:{},samples:{}},fontFamilyVariants:[],numberingInventory:null,styleResolutionInventory:{references:[],definitions:[],docDefaults:{}}};
 try {
   const zip = await JSZip.loadAsync(buffer,{checkCRC32:true});
   const xml = await zip.file('word/document.xml').async('string');
@@ -87,6 +87,36 @@ try {
   }
   diagnostic.fontFamilyVariants=[...fontFamilyVariants.values()];
   const paragraphs = [...xml.matchAll(/<w:p(?=[\s>])[^>]*>[\s\S]*?<\/w:p>/g)];
+  const numberingPart = zip.file('word/numbering.xml');
+  if (numberingPart) {
+    const numberingXml = await numberingPart.async('string');
+    const abstract = new Map();
+    for (const match of numberingXml.matchAll(/<w:abstractNum\b([^>]*)>([\s\S]*?)<\/w:abstractNum>/g)) {
+      const id = /w:abstractNumId=["']([^"']+)["']/.exec(match[1])?.[1] ?? null;
+      const levels = [...match[2].matchAll(/<w:lvl\b([^>]*)>([\s\S]*?)<\/w:lvl>/g)].map(level => ({
+        ilvl: /w:ilvl=["']([^"']+)["']/.exec(level[1])?.[1] ?? null,
+        numFmt: /<w:numFmt\b[^>]*\bw:val=["']([^"']+)["']/.exec(level[2])?.[1] ?? null,
+        lvlText: /<w:lvlText\b[^>]*\bw:val=["']([^"']*)["']/.exec(level[2])?.[1] ?? null,
+        start: /<w:start\b[^>]*\bw:val=["']([^"']+)["']/.exec(level[2])?.[1] ?? null
+      }));
+      abstract.set(id, levels);
+    }
+    const nums = new Map([...numberingXml.matchAll(/<w:num\b([^>]*)>([\s\S]*?)<\/w:num>/g)].map(match => [
+      /w:numId=["']([^"']+)["']/.exec(match[1])?.[1] ?? null,
+      /<w:abstractNumId\b[^>]*\bw:val=["']([^"']+)["']/.exec(match[2])?.[1] ?? null
+    ]));
+    const refs = [];
+    paragraphs.forEach((match,index) => {
+      const numPr = /<w:numPr\b[^>]*>([\s\S]*?)<\/w:numPr>/.exec(match[0])?.[1];
+      if (!numPr) return;
+      const numId = /<w:numId\b[^>]*\bw:val=["']([^"']+)["']/.exec(numPr)?.[1] ?? null;
+      const ilvl = /<w:ilvl\b[^>]*\bw:val=["']([^"']+)["']/.exec(numPr)?.[1] ?? '0';
+      const abstractNumId = nums.get(numId) ?? null;
+      const level = (abstract.get(abstractNumId) ?? []).find(item => item.ilvl === ilvl) ?? null;
+      refs.push({paragraphIndex:index,numId,ilvl,abstractNumId,level});
+    });
+    diagnostic.numberingInventory = {definedNumIds:[...nums.entries()].map(([numId,abstractNumId])=>({numId,abstractNumId,levels:abstract.get(abstractNumId)??[]})),paragraphReferences:refs};
+  } else diagnostic.numberingInventory = {definedNumIds:[],paragraphReferences:[],warning:'word/numbering.xml is missing'};
   const recordProperties = (inventory, tag, paragraphIndex, sample) => {
     inventory.counts[tag] = (inventory.counts[tag] ?? 0) + 1;
     if (!inventory.samples[tag]) inventory.samples[tag] = [];
