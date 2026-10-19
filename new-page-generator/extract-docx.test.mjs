@@ -114,3 +114,21 @@ test("integrate an inline image and expose its verified asset record", async () 
   assert.equal(result.sourceMap.imageReferences.length, 1);
   assert.equal(result.sourceMap.imageReferences[0].relationshipId, result.assets[0].relationshipId);
 });
+
+test("rejects inherited font and language metadata even when document runs are plain", async () => {
+ const zip=await JSZip.loadAsync(await fixture("<w:t>Plain-looking text</w:t>"));
+ zip.file("word/styles.xml", '<w:styles><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial"/><w:lang w:val="en-US"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>');
+ const result=await extractDocx(await zip.generateAsync({type:"nodebuffer"}));
+ assert.equal(result.ok,false);
+ assert.equal(result.html,null);
+ assert.match(result.errors.join(" "),/inherited Word feature: explicit font family/);
+ assert.match(result.errors.join(" "),/inherited Word feature: explicit language metadata/);
+});
+test("rejects inherited paragraph spacing even without direct paragraph spacing", async () => {
+ const zip=await JSZip.loadAsync(await fixture("<w:t>Plain-looking text</w:t>"));
+ zip.file("word/styles.xml", '<w:styles><w:style w:type="paragraph" w:styleId="Normal"><w:pPr><w:spacing w:after="120"/></w:pPr></w:style></w:styles>');
+ const result=await extractDocx(await zip.generateAsync({type:"nodebuffer"}));
+ assert.equal(result.ok,false);
+ assert.equal(result.html,null);
+ assert.match(result.errors.join(" "),/inherited Word feature: paragraph or line spacing/);
+});
