@@ -57,3 +57,11 @@ test('reports exact unsupported run property names and paragraph locations',asyn
  assert.ok(r.errors.some(x=>x.includes('Unresolved run property w:sz in 1 paragraph(s): 1')));
  assert.ok(!r.errors.some(x=>x==='Unresolved run property in paragraph 1.'));
 });
+
+
+test('maps text segments and line-break offset within a Word run',async()=>{
+ const r=await inspectDocxRichContent(await fixture('<w:p><w:r><w:t>A</w:t><w:br/><w:t>B</w:t></w:r></w:p>'));
+ assert.equal(r.ok,true,r.errors.join('; '));
+ assert.deepEqual(r.runs.map(x=>x.text),['A','B']);
+ assert.deepEqual(r.lineBreaks,[{paragraphIndex:0,textOffset:1,breakType:'textWrapping'}]);
+});
