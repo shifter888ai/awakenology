@@ -176,6 +176,26 @@ export function applyDocxRichFormatting(html, sourceInventory) {
       }
       blocks.splice(blockIndex,0,placeholder); previousMatchedBlock=placeholder; sourceIndex++; continue;
     }
+    if(expected==="" && actual==="" && !sourceImgs.length && !sourceBrs.length && !renderedImage && !renderedBreak) {
+      let sourceEmptyRun=0;
+      for(let index=sourceIndex;index<sourceInventory.paragraphCount;index++) {
+        const text=runsByParagraph[index].map(run=>run.text).join("");
+        if(text!==""||imagesByParagraph[index].length||breaksByParagraph[index].length||sourceNumbering.some(item=>item.paragraphIndex===index)) break;
+        sourceEmptyRun++;
+      }
+      let renderedEmptyRun=0;
+      for(let index=blockIndex;index<blocks.length;index++) {
+        const candidate=blocks[index];
+        if(nodeText(candidate)!==""||hasDescendant(candidate,'img')||hasDescendant(candidate,'br')) break;
+        renderedEmptyRun++;
+      }
+      if(sourceEmptyRun>renderedEmptyRun) {
+        if(sourceNumbering.some(item=>item.paragraphIndex===sourceIndex)) { errors.push("Empty numbered source paragraph requires explicit list-boundary mapping at paragraph "+(sourceIndex+1)+"."); break; }
+        const placeholder=createEmptyParagraph([],[]);
+        if(!insertBeforeBlock(fragment,block,placeholder,previousMatchedBlock)) { errors.push("Cannot restore consecutive empty source paragraphs near a list boundary."); break; }
+        blocks.splice(blockIndex,0,placeholder); previousMatchedBlock=placeholder; sourceIndex++; continue;
+      }
+    }
     if(expected==="" && actual==="" && (sourceImgs.length||sourceBrs.length)) {
       if((renderedImage&&!sourceImgs.length)||(renderedBreak&&!sourceBrs.length)) {
         if(sourceNumbering.some(item=>item.paragraphIndex===sourceIndex)) { errors.push("Empty numbered paragraph has ambiguous rendered markers at paragraph "+(sourceIndex+1)+"."); break; }
@@ -196,7 +216,7 @@ export function applyDocxRichFormatting(html, sourceInventory) {
   if(blocks.length!==sourceInventory.paragraphCount) errors.push("Rendered paragraph count "+blocks.length+" differs from source count "+sourceInventory.paragraphCount+".");
   for(let p=0;p<Math.min(blocks.length,sourceInventory.paragraphCount);p++) {
     const block=blocks[p], expected=runsByParagraph[p].map(run=>run.text).join(""), actual=nodeText(block);
-    if(actual!==expected) {errors.push("Paragraph "+(p+1)+" text differs between source runs and converted HTML.");continue;}
+    if(actual!==expected) {errors.push("Paragraph "+(p+1)+" text differs between source runs and converted HTML (source="+JSON.stringify(expected.slice(0,80))+"; rendered="+JSON.stringify(actual.slice(0,80))+").");continue;}
     const layout=sourceInventory.paragraphLayouts.find(item=>item.paragraphIndex===p);
     if(!layout) {errors.push("Missing source paragraph layout for paragraph "+(p+1)+".");continue;}
     const existingStyle=attr(block,"style");
