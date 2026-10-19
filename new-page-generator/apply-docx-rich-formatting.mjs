@@ -63,12 +63,21 @@ export function applyDocxRichFormatting(html, sourceInventory) {
   }
   const fragment=parseFragment(html);
   const blocks=[];
-  const walk=node=>{
-    if (node.nodeName === "p") { blocks.push(node); return; }
-    if (["h1","h2","h3","h4","h5","h6","li","td","th","blockquote"].includes(node.nodeName)) {
+  const walk=(node, insideListItem=false)=>{
+    if (node.nodeName === "p" || node.nodeName === "li") {
+      if (insideListItem) {
+        errors.push("Nested list content inside a list item requires explicit paragraph-boundary mapping.");
+        return;
+      }
+      blocks.push(node);
+      const nested = node.childNodes?.some(child => child.nodeName === "ol" || child.nodeName === "ul");
+      if (nested) errors.push("Nested lists require explicit source-to-rendered paragraph mapping.");
+      return;
+    }
+    if (["h1","h2","h3","h4","h5","h6","td","th","blockquote"].includes(node.nodeName)) {
       errors.push("Unsupported rendered paragraph container <"+node.nodeName+"> for source formatting alignment.");
     }
-    for(const child of node.childNodes??[]) walk(child);
+    for(const child of node.childNodes??[]) walk(child, insideListItem || node.nodeName === "li");
   };
   walk(fragment);
   if(blocks.length!==sourceInventory.paragraphCount) errors.push("Rendered paragraph count "+blocks.length+" differs from source count "+sourceInventory.paragraphCount+".");
@@ -85,6 +94,24 @@ export function applyDocxRichFormatting(html, sourceInventory) {
     const existingStyle=attr(block,"style");
     const mappedStyle=paragraphStyle(layout);
     if(existingStyle || mappedStyle) setAttr(block,"style",[existingStyle,mappedStyle].filter(Boolean).join(";"));
+    if (block.nodeName === "li") {
+      const numbering = sourceInventory.paragraphNumbering?.find(item => item.paragraphIndex === p);
+      if (!numbering) {
+        errors.push("Rendered list item at paragraph "+(p+1)+" has no corresponding source numbering definition.");
+      } else {
+        const listTag = block.parentNode?.nodeName;
+        const expectedTag = numbering.format === "bullet" ? "ul" : numbering.format === "none" ? null : "ol";
+        if (expectedTag && listTag !== expectedTag) errors.push("Rendered list type at paragraph "+(p+1)+" does not match Word numbering format "+numbering.format+".");
+        for (const [key,name] of [["numId","data-word-num-id"],["abstractNumId","data-word-abstract-num-id"],["level","data-word-level"],["format","data-word-num-format"],["text","data-word-num-text"],["start","data-word-num-start"]]) {
+          if (numbering[key] !== undefined && numbering[key] !== null) setAttr(block,name,String(numbering[key]));
+        }
+        for (const [key,name] of [["left","data-word-indent-left"],["right","data-word-indent-right"],["firstLine","data-word-indent-first-line"],["hanging","data-word-indent-hanging"]]) {
+          if (numbering.indentation?.[key] !== undefined && numbering.indentation[key] !== null) setAttr(block,name,String(numbering.indentation[key]));
+        }
+      }
+    } else if (sourceInventory.paragraphNumbering?.some(item => item.paragraphIndex === p)) {
+      errors.push("Source paragraph "+(p+1)+" is numbered but the rendered HTML does not use a list item.");
+    }
     // Paragraph-mark properties are not run properties: preserve them as
     // explicit metadata instead of incorrectly applying them to every text run.
     const mark=sourceInventory.paragraphMarkFormatting?.find(item=>item.paragraphIndex===p);
