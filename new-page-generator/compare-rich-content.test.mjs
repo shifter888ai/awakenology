@@ -175,3 +175,16 @@ test("extended typography metadata participates in source-output fidelity compar
  assert.ok(result.issues.some(x=>x.field==="language"));
  assert.ok(result.issues.some(x=>x.field==="allCaps"));
 });
+
+
+test('requires rendered list semantics when the source contains numbering',()=>{
+ const source=sample(), output=sample();
+ source.paragraphNumbering=[{paragraphIndex:0,numId:2,abstractNumId:1,level:0,format:'decimal',text:'%1.',start:1,indentation:{left:720,hanging:360}}];
+ let result=compareRichContent(source,output);
+ assert.equal(result.ok,false);
+ assert.ok(result.issues.some(x=>x.kind==='numbering-rendered-inventory-missing'));
+ output.paragraphNumbering=[{...source.paragraphNumbering[0],text:'%1)',indentation:{left:720,hanging:360}}];
+ result=compareRichContent(source,output);
+ assert.equal(result.ok,false);
+ assert.ok(result.issues.some(x=>x.kind==='paragraph-numbering-mismatch'&&x.field==='text'));
+});
