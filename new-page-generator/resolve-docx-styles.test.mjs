@@ -331,11 +331,13 @@ test('resolves paragraph-mark font metadata separately from visible text formatt
 });
 
 test('uses the document default paragraph style when a paragraph has no explicit pStyle',()=>{
- const xml=styles('<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:eastAsia="Yu Gothic"/><w:sz w:val="24"/></w:rPr></w:style>');
+ const xml=styles('<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:eastAsia="Yu Gothic"/><w:lang w:val="en-US"/><w:sz w:val="24"/></w:rPr></w:style>');
  const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml:'<w:p><w:pPr/><w:r><w:t>Text</w:t></w:r></w:p>',runXml:run()});
  assert.equal(result.ok,true,result.errors.join('; '));
  assert.deepEqual(result.formatting.fontFamily,{ascii:'Arial',hAnsi:'Arial',eastAsia:'Yu Gothic'});
  assert.equal(result.formatting.fontSizePt,12);
+ assert.deepEqual(result.paragraphMarkFormatting.fontFamily,{ascii:'Arial',hAnsi:'Arial',eastAsia:'Yu Gothic'});
+ assert.deepEqual(result.paragraphMarkFormatting.language,{val:'en-US'});
 });
 
 
