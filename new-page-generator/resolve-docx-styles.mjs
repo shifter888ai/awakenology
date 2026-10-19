@@ -110,7 +110,15 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
     }
     return found;
   };
-  const merge=(target,source)=>{for(const [key,value] of Object.entries(source)) target[key]=value;};
+  const merge=(target,source)=>{
+    for(const [key,value] of Object.entries(source)) {
+      // OOXML font-family and language properties are attribute-level overrides:
+      // a direct ascii value must not erase an inherited eastAsia/cs value.
+      if ((key==='fontFamily'||key==='language') && value && typeof value==='object' && !value.unsupported) {
+        target[key]={...(target[key] && typeof target[key]==='object' ? target[key] : {}),...value};
+      } else target[key]=value;
+    }
+  };
   const effective={b:false,i:false,u:false,color:null,fontSizePt:null};
   merge(effective,runProps(defaultsRun));
   const pStyle=/<w:pStyle\b[^>]*\bw:val=[\"']([^\"']+)[\"']/.exec(paragraphXml)?.[1] ?? defaultParagraphId;
