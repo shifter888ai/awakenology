@@ -50,3 +50,15 @@ test('records separate paragraph indices even when adjacent text has no styling 
   {paragraphIndex:1,text:'Second'}
  ]);
 });
+
+
+test('blocks text outside recognized paragraph containers',()=>{
+ const looseText={parseFromString:()=>({body:{childNodes:[text('unwrapped text')]}})};
+ const r=inspectRenderedRichContent('unwrapped text',looseText);
+ assert.equal(r.ok,false);
+ assert.ok(r.errors.some(x=>x.includes('outside a recognized paragraph block')));
+ const divText={parseFromString:()=>({body:{childNodes:[node('DIV',{},[text('div text')])]}})};
+ const d=inspectRenderedRichContent('<div>div text</div>',divText);
+ assert.equal(d.ok,false);
+ assert.ok(d.errors.some(x=>x.includes('outside a recognized paragraph block')));
+});
