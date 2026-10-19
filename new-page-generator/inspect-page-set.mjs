@@ -52,7 +52,7 @@ export async function inspectPageSet(pageSet, inputs = {}) {
       if (!pageErrors.length) {
         const normalized = normalizeHtmlInventory(inspected.inventory, {
           language: lang,
-          sourceMode: meta.mode === "docx" ? "docx" : meta.mode === "markdown" ? "markdown" : "html-paste",
+          sourceMode: meta.mode === "docx" ? "docx" : meta.mode === "markdown" ? "markdown" : meta.mode === "html" ? "html" : "html-paste",
           sourcePart: meta.mode === "docx" ? "converted-html" : meta.mode === "markdown" ? "markdown-source" : meta.mode === "html" ? "html-file" : "pasted-html"
         });
         pageErrors.push(...normalized.errors);
