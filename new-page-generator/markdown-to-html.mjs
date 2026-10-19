@@ -52,11 +52,8 @@ export function markdownToHtml(markdown) {
       flushParagraph();flushQuote();
       const type=ordered?"ol":"ul";
       if(listType && listType!==type) flushList();
-      listType=type;listItems.push({text:(ordered??unordered)[2],line});
-      if((ordered && Number(ordered[1])!==listItems.length && listItems.length===1 && Number(ordered[1])!==1)) {
-        // Preserve a non-default start marker explicitly.
-        listType="ol";
-      }
+      if(!listType){listType=type;listStart=ordered?Number(ordered[1]):null;}
+      listItems.push({text:(ordered??unordered)[2],line});
       continue;
     }
     if(quoteLine){flushParagraph();flushList();quote.push({text:quoteLine[1],line});continue;}
