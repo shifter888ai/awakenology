@@ -106,7 +106,10 @@ export function inspectRenderedRichContent(html, parser) {
     if(['S','STRIKE','DEL'].includes(tag)) errors.push('Unsupported rendered deletion/strike formatting: '+tag);
     const next={...state};
     const size=fontSizePt(node); if(size!==null) {next.fontSizePt=size;next.fontSizeCsPt=size;}
-    if(family!==null) next.fontFamily=family.replace(/^['"]|['"]$/g,'');
+    const fontFamilies={};
+    for(const [attr,key] of [['data-word-font-ascii','ascii'],['data-word-font-hansi','hAnsi'],['data-word-font-east-asia','eastAsia'],['data-word-font-cs','cs']]) {const value=node.getAttribute?.(attr);if(value)fontFamilies[key]=value;}
+    if(Object.keys(fontFamilies).length) next.fontFamily=fontFamilies;
+    else if(family!==null) next.fontFamily=family.replace(/^['"]|['"]$/g,'');
     const language={};
     for(const [attr,key] of [['data-word-lang-val','val'],['data-word-lang-east-asia','eastAsia'],['data-word-lang-bidi','bidi']]) {const value=node.getAttribute?.(attr);if(value)language[key]=value;}
     if(Object.keys(language).length) next.language=language;
