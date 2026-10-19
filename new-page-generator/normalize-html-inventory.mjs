@@ -58,6 +58,7 @@ export function normalizeHtmlInventory(inventory, { language, sourceMode, source
     if (record.tag === "EM" || record.tag === "I") formatting.push({ kind: "italic", value: true });
     if (record.tag === "U") formatting.push({ kind: "underline", value: true });
     if (record.tag === "S") formatting.push({ kind: "strikethrough", value: true });
+    if (record.tag === "BLOCKQUOTE") formatting.push({ kind: "semantic-tag", value: "BLOCKQUOTE" });
     const links = record.tag === "A" ? [{ href: attributes.href ?? "", title: attributes.title ?? "" }] : [];
     const assets = record.tag === "IMG" ? [{ src: attributes.src ?? "", alt: attributes.alt ?? "" }] : [];
     const orderedChildren = records
