@@ -11,7 +11,9 @@ const inventory = () => ({
   ]
 });
 test("applies independently resolved run and paragraph formatting without changing text", () => {
- const result=applyDocxRichFormatting('<p><strong>Bold </strong>plain<img src="assets/one.png" alt="diagram"></p>', inventory());
+ const source=inventory();
+ source.images=[{paragraphIndex:0,order:0,assetPath:"/assets/one.png",alt:"diagram",textOffset:10,placement:{kind:"inline",requiresVisualReview:false}}];
+ const result=applyDocxRichFormatting('<p><strong>Bold </strong>plain<img src="/assets/one.png" alt="diagram"></p>', source);
  assert.equal(result.ok,true,result.errors.join("; "));
  assert.match(result.html,/text-align:center/);
  assert.match(result.html,/margin-left:36pt/);
