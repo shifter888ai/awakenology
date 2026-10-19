@@ -6,7 +6,7 @@ export function inspectRenderedRichContent(html, parser) {
   const paragraphOffsets = new Map();
   const paragraphMarkerOrders = new Map();
   const nextMarkerOrder = index => { const value=paragraphMarkerOrders.get(index) ?? 0; paragraphMarkerOrders.set(index,value+1); return value; };
-  if (typeof html !== 'string' || !parser?.parseFromString) return {ok:false,errors:['HTML and a parser are required.'],runs,images,lineBreaks};
+  if (typeof html !== 'string' || !parser?.parseFromString) return {ok:false,errors:['HTML and a parser are required.'],runs,images,lineBreaks,paragraphCount:0};
   const doc=parser.parseFromString(html,'text/html');
   let paragraphIndex=-1, order=0;
   const inspectHead = node => {
@@ -67,5 +67,5 @@ export function inspectRenderedRichContent(html, parser) {
   const initial={bold:false,italic:false,underline:false,color:null,href:null};
   for(const child of doc.body?.childNodes ?? []) visit(child,initial);
   if(!runs.length) errors.push('No rendered text runs.');
-  return {ok:errors.length===0,errors,runs,images,lineBreaks};
+  return {ok:errors.length===0,errors,runs,images,lineBreaks,paragraphCount:paragraphIndex+1};
 }
