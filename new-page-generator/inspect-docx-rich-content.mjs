@@ -71,11 +71,6 @@ export async function inspectDocxRichContent(buffer) {
     const preview = locations.slice(0, 12).join(', ') + (locations.length > 12 ? ', …' : '');
     errors.push('Unresolved run property w:' + name + ' in ' + locations.length + ' paragraph(s): ' + preview + '.');
   }
-  for (const [name, paragraphSet] of unknownRunProperties) {
-    const locations = [...paragraphSet].sort((a,b) => a-b);
-    const preview = locations.slice(0, 12).join(', ') + (locations.length > 12 ? ', …' : '');
-    errors.push('Unresolved run property w:' + name + ' in ' + locations.length + ' paragraph(s): ' + preview + '.');
-  }
   if (runs.map(r => r.text).join('') !== source.paragraphs.map(p => p.text).join('')) errors.push('Rich runs do not reproduce exact source-map text.');
   if (!runs.length) errors.push('No rich text runs extracted.');
   const images = placement.ok ? placement.images.map(({assetPath, paragraphIndex, order, alt}) => ({assetPath, paragraphIndex, order, alt})) : [];
