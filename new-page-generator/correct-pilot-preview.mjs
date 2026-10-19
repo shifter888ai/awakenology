@@ -12,7 +12,7 @@ export function correctPilotPreview(html) {
     return "<" + tag + next + ">" + inner + "</" + tag + ">";
   });
   // Replace only dark neutral six-digit hex text colours. Keep chromatic emphasis.
-  candidate = candidate.replace(/(^|[;{]\\s*)color\\s*:\\s*#([0-9a-f]{6})\\b/gi, (whole, prefix, hex) => {
+  candidate = candidate.replace(/(^|[;{\s"'])color\s*:\s*#([0-9a-f]{6})\b/gi, (whole, prefix, hex) => {
     const rgb = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16));
     return Math.max(...rgb) - Math.min(...rgb) <= 8 && Math.max(...rgb) < 128
       ? prefix + "color:var(--fg)"
