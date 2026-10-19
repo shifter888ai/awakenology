@@ -20,7 +20,7 @@ const propertyValue = (xml, tag) => {
   return undefined;
 };
 const childProperties = xml => [...xml.matchAll(/<w:([A-Za-z][A-Za-z0-9]*)\b[^>]*\/?\s*>/g)].map(match => match[1]);
-const unsupportedRunProps = xml => childProperties(xml).filter(name => !['b','i','u','color','sz','rFonts','lang','szCs','bCs','iCs','caps','spacing','rStyle'].includes(name));
+const unsupportedRunProps = xml => childProperties(xml).filter(name => !['b','i','u','color','sz','rFonts','lang','szCs','bCs','iCs','caps','spacing','kern','rStyle'].includes(name));
 const unsupportedParagraphProps = xml => childProperties(xml.replace(/<w:rPr\b[^>]*>[\s\S]*?<\/w:rPr>/g,'')).filter(name => !['rPr','spacing','ind','jc','widowControl'].includes(name));
 function runProps(xml) {
   const result={};
@@ -63,6 +63,11 @@ function runProps(xml) {
   if (spacing) {
     const value = attrs(spacing)['w:val'];
     result.letterSpacingPt = value && /^-?\d+$/.test(value) ? Number(value)/20 : {unsupported:true};
+  }
+  const kern = directTag(xml,'kern');
+  if (kern) {
+    const value = attrs(kern)['w:val'];
+    result.fontKerningThresholdPt = value && /^\d+$/.test(value) ? Number(value)/2 : {unsupported:true};
   }
   return result;
 }
@@ -117,6 +122,10 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
   if (effective.bCs !== undefined && effective.bCs !== effective.b) errors.push('Complex-script bold differs from general bold and requires script-aware rendering.');
   if (effective.iCs !== undefined && effective.iCs !== effective.i) errors.push('Complex-script italic differs from general italic and requires script-aware rendering.');
   if (effective.fontSizeCsPt !== undefined && effective.fontSizePt !== null && effective.fontSizeCsPt !== effective.fontSizePt) errors.push('Complex-script font size differs from general font size and requires script-aware rendering.');
+  if (effective.fontKerningThresholdPt !== undefined) {
+    if (effective.fontSizePt === null || effective.fontKerningThresholdPt?.unsupported) errors.push('Word font kerning threshold requires an explicit supported font size.');
+    else effective.fontKerning = effective.fontSizePt >= effective.fontKerningThresholdPt ? 'normal' : 'none';
+  }
   for(const [key,value] of Object.entries(effective)) if(value?.unsupported) errors.push('Unsupported inherited Word formatting: '+key+'.');
   return {ok:errors.length===0,errors,formatting:errors.length?null:effective};
 }
