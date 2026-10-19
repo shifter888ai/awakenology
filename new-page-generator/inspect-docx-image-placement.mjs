@@ -7,11 +7,13 @@ export async function inspectDocxImagePlacement(buffer) {
   const [assets,source]=await Promise.all([inspectDocxAssets(buffer),inspectDocxSourceMap(buffer)]);
   const errors=[...assets.errors,...source.errors];
   if(!assets.ok || !source.ok) return fail([...new Set(errors)]);
-  const byRelationship=new Map(assets.assets.map(asset=>[asset.relationshipId,asset]));
   const images=[];
-  for(const ref of source.imageReferences) {
-    const asset=byRelationship.get(ref.relationshipId);
+  if(assets.assets.length!==source.imageReferences.length) errors.push('Image asset occurrence count differs from source drawing references.');
+  for(let i=0;i<source.imageReferences.length;i++) {
+    const ref=source.imageReferences[i];
+    const asset=assets.assets[i];
     if(!asset) {errors.push('No validated asset for source relationship '+ref.relationshipId+'.');continue;}
+    if(asset.relationshipId!==ref.relationshipId) {errors.push('Image relationship order mismatch at occurrence '+(i+1)+'.');continue;}
     images.push({
       assetPath:asset.outputPath,
       paragraphIndex:ref.paragraphIndex,
