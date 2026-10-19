@@ -9,7 +9,7 @@ function safeUrl(value, image=false) {
   return scheme ? (image ? ["https"].includes(scheme) : ["http","https","mailto","tel"].includes(scheme)) : !url.startsWith("\\");
 }
 function inline(source, errors, line) {
-  if(/<\/?[A-Za-z][^>]*>/.test(source)) errors.push(`Line ${line}: raw HTML is unsupported in Markdown input.`);
+  if(/<\/?[A-Za-z][^>]*>/.test(source.replace(/`[^`\n]+`/g,""))) errors.push(`Line ${line}: raw HTML is unsupported in Markdown input.`);
   const tokens=[];
   const tokenise=html=>{const key="@@TOKEN"+tokens.length+"@@";tokens.push(html);return key;};
   // Protect code spans before parsing emphasis or links.
