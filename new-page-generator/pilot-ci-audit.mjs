@@ -94,7 +94,7 @@ try {
         if (!tag[0].startsWith('</')) recordProperties(diagnostic.runPropertyInventory,tag[1],i,tag[0]);
       }
     }
-    const breaks = [...raw.matchAll(/<w:br(?=[\\s/>])[^>]*\/>/g)];
+    const breaks = [...raw.matchAll(/<w:br(?=[\s/>])[^>]*\/?\s*>/g)];
     for (const br of breaks) diagnostic.lineBreaks.push({paragraphIndex:i, tag:br[0], textBefore:raw.slice(0,br.index).replace(/<[^>]*>/g,'').slice(-60), textAfter:raw.slice(br.index+br[0].length).replace(/<[^>]*>/g,'').slice(0,60)});
     for (const anchor of raw.matchAll(/<wp:anchor(?=[\s>])[^>]*>[\s\S]*?<\/wp:anchor>/g)) {
       const body=anchor[0], firstTag=/^<wp:anchor[^>]*>/.exec(body)?.[0] ?? '';
