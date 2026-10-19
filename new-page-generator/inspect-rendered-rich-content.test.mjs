@@ -110,7 +110,7 @@ test('extracts explicit rendered paragraph alignment and indentation in twips',(
  ]}})};
  const r=inspectRenderedRichContent('<p style="text-align:center;margin-left:36pt;margin-right:12px;text-indent:18pt">Layout</p>',layoutParser);
  assert.equal(r.ok,true,r.errors.join('; '));
- assert.deepEqual(r.paragraphLayouts,[{paragraphIndex:0,alignment:'center',indentation:{left:720,right:180,firstLine:360}}]);
+ assert.deepEqual(r.paragraphLayouts,[{paragraphIndex:0,alignment:'center',indentation:{left:720,right:180,firstLine:360},spacing:{beforePt:0,afterPt:0,lineHeightPt:null}}]);
 });
 
 
@@ -118,5 +118,12 @@ test('maps negative CSS text-indent to Word hanging indentation',()=>{
  const hangingParser={parseFromString:()=>({body:{childNodes:[node('P',{style:'margin-left: 24pt; text-indent: -12pt'},[text('Hanging')])]}})};
  const r=inspectRenderedRichContent('<p style="margin-left:24pt;text-indent:-12pt">Hanging</p>',hangingParser);
  assert.equal(r.ok,true,r.errors.join('; '));
- assert.deepEqual(r.paragraphLayouts,[{paragraphIndex:0,alignment:'left',indentation:{left:480,right:0,hanging:240}}]);
+ assert.deepEqual(r.paragraphLayouts,[{paragraphIndex:0,alignment:'left',indentation:{left:480,right:0,hanging:240},spacing:{beforePt:0,afterPt:0,lineHeightPt:null}}]);
+});
+
+test("extracts rendered before/after and exact line spacing in point units", () => {
+ const parserWithSpacing={parseFromString:()=>({body:{childNodes:[node('P',{style:'margin-top: 6pt; margin-bottom: 12pt; line-height: 18pt'},[text('Spaced')])]}})};
+ const result=inspectRenderedRichContent('<p style="margin-top:6pt;margin-bottom:12pt;line-height:18pt">Spaced</p>',parserWithSpacing);
+ assert.equal(result.ok,true,result.errors.join('; '));
+ assert.deepEqual(result.paragraphLayouts[0].spacing,{beforePt:6,afterPt:12,lineHeightPt:18});
 });
