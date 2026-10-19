@@ -91,6 +91,8 @@ export function applyDocxRichFormatting(html, sourceInventory) {
   };
   walk(fragment);
   if(blocks.length!==sourceInventory.paragraphCount) errors.push("Rendered paragraph count "+blocks.length+" differs from source count "+sourceInventory.paragraphCount+".");
+  const listContainerByNumId = new Map();
+  const numIdByListContainer = new Map();
   const runsByParagraph=Array.from({length:sourceInventory.paragraphCount},()=>[]);
   for(const run of sourceInventory.runs) {
     if(!Number.isInteger(run.paragraphIndex)||run.paragraphIndex<0||run.paragraphIndex>=runsByParagraph.length) {errors.push("Source run has an invalid paragraph index.");continue;}
@@ -122,6 +124,12 @@ export function applyDocxRichFormatting(html, sourceInventory) {
       } else {
         const list = block.parentNode;
         const listTag = list?.nodeName;
+        const priorList = listContainerByNumId.get(numbering.numId);
+        const priorNumId = numIdByListContainer.get(list);
+        if (priorList && priorList !== list) errors.push("Word list continuation across separate HTML list containers requires explicit restart mapping.");
+        else listContainerByNumId.set(numbering.numId,list);
+        if (priorNumId !== undefined && priorNumId !== numbering.numId) errors.push("One HTML list container mixes different Word numbering IDs.");
+        else numIdByListContainer.set(list,numbering.numId);
         const expectedTag = numbering.format === "bullet" ? "ul" : "ol";
         if (listTag !== expectedTag && numbering.format !== "none") errors.push("Rendered list type at paragraph "+(p+1)+" does not match Word numbering format "+numbering.format+".");
         const markerFormats = {decimal:null,upperRoman:"I",lowerRoman:"i",upperLetter:"A",lowerLetter:"a"};
