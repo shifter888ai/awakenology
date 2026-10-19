@@ -7,7 +7,7 @@ const BLOCKS = new Set(["P","H1","H2","H3","H4","H5","H6","UL","OL","LI","BLOCKQ
 const INLINE = new Set(["STRONG","B","EM","I","U","S","SPAN","A","BR","SUP","SUB","CODE","IMG"]);
 const CONTAINERS = new Set(["DIV","SECTION","ARTICLE"]);
 const ALLOWED = new Set([...BLOCKS, ...INLINE, ...CONTAINERS]);
-const SAFE_STYLES = new Set(["color","font-weight","font-style","text-decoration","text-align","font-size","font-family","text-transform","letter-spacing","margin-left","margin-right","text-indent","margin-top","margin-bottom","line-height","font-kerning"]);
+const SAFE_STYLES = new Set(["color","font-weight","font-style","text-decoration","text-align","list-style-type","font-size","font-family","text-transform","letter-spacing","margin-left","margin-right","text-indent","margin-top","margin-bottom","line-height","font-kerning"]);
 const SAFE_ATTRS = new Set(["href","src","alt","title","colspan","rowspan","start","type","style","lang","data-word-lang-val","data-word-lang-east-asia","data-word-lang-bidi","data-word-font-ascii","data-word-font-hansi","data-word-font-east-asia","data-word-font-cs","data-word-font-hint","data-word-bold-cs","data-word-italic-cs","data-word-font-size-cs","data-word-mark-font-ascii","data-word-mark-font-hansi","data-word-mark-font-east-asia","data-word-mark-font-cs","data-word-mark-lang-val","data-word-mark-lang-east-asia","data-word-mark-lang-bidi","data-word-num-id","data-word-abstract-num-id","data-word-level","data-word-num-format","data-word-num-text","data-word-num-start","data-word-indent-left","data-word-indent-right","data-word-indent-first-line","data-word-indent-hanging"]);
 function unsafeUrl(value, attribute) {
   const compact = value.replace(/[\u0000-\u0020\u007f]/g, "");
