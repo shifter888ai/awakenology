@@ -2,19 +2,48 @@
  * Additional review gate for HTML paste inventories. This does not sanitize HTML.
  * Restricts attributes by element and rejects CSS or URL forms that need review.
  */
+const WORD_RUN_ATTRS = [
+  "data-word-lang-val","data-word-lang-east-asia","data-word-lang-bidi",
+  "data-word-font-ascii","data-word-font-hansi","data-word-font-east-asia","data-word-font-cs",
+  "data-word-font-hint","data-word-bold-cs","data-word-italic-cs","data-word-font-size-cs"
+];
+const WORD_PARAGRAPH_ATTRS = [
+  "data-word-mark-font-ascii","data-word-mark-font-hansi","data-word-mark-font-east-asia","data-word-mark-font-cs",
+  "data-word-mark-lang-val","data-word-mark-lang-east-asia","data-word-mark-lang-bidi",
+  "data-word-num-id","data-word-abstract-num-id","data-word-level","data-word-num-format",
+  "data-word-num-text","data-word-num-start","data-word-indent-left","data-word-indent-right",
+  "data-word-indent-first-line","data-word-indent-hanging"
+];
 const attrs = {
-  A: ["href", "title"], IMG: ["src", "alt", "title"],
+  A: ["href", "title", "style", "lang"],
+  IMG: ["src", "alt", "title", "style"],
   TH: ["colspan", "rowspan", "style"], TD: ["colspan", "rowspan", "style"],
-  SPAN: ["style"], P: ["style"], DIV: ["style"],
-  H1: ["style"], H2: ["style"], H3: ["style"],
-  H4: ["style"], H5: ["style"], H6: ["style"]
+  SPAN: ["style", ...WORD_RUN_ATTRS],
+  P: ["style", ...WORD_PARAGRAPH_ATTRS],
+  LI: ["style", ...WORD_PARAGRAPH_ATTRS],
+  OL: ["start", "type", "style"], UL: ["style"],
+  DIV: ["style"], BLOCKQUOTE: ["style"],
+  H1: ["style", ...WORD_PARAGRAPH_ATTRS], H2: ["style", ...WORD_PARAGRAPH_ATTRS],
+  H3: ["style", ...WORD_PARAGRAPH_ATTRS], H4: ["style", ...WORD_PARAGRAPH_ATTRS],
+  H5: ["style", ...WORD_PARAGRAPH_ATTRS], H6: ["style", ...WORD_PARAGRAPH_ATTRS]
 };
 const styles = {
   color: /^(?:#[a-f0-9]{3}|#[a-f0-9]{6}|red|blue|black|white)$/i,
   "font-weight": /^(?:bold|normal|[1-9]00)$/i,
   "font-style": /^(?:italic|normal)$/i,
   "text-decoration": /^(?:underline|line-through|none)$/i,
-  "text-align": /^(?:left|right|center|justify)$/i
+  "text-align": /^(?:left|right|center|justify|start|end)$/i,
+  "font-size": /^\d+(?:\.\d+)?pt$/i,
+  "margin-left": /^-?\d+(?:\.\d+)?pt$/i,
+  "margin-right": /^-?\d+(?:\.\d+)?pt$/i,
+  "margin-top": /^-?\d+(?:\.\d+)?pt$/i,
+  "margin-bottom": /^-?\d+(?:\.\d+)?pt$/i,
+  "text-indent": /^-?\d+(?:\.\d+)?pt$/i,
+  "line-height": /^\d+(?:\.\d+)?pt$/i,
+  "letter-spacing": /^-?\d+(?:\.\d+)?pt$/i,
+  "font-kerning": /^(?:normal|none|auto)$/i,
+  "text-transform": /^(?:uppercase|none)$/i,
+  "font-family": /^(?:"(?:[^"\\]|\\.)+"|[A-Za-z0-9 _-]+)$/i
 };
 export function reviewPasteInventory(inventory) {
   const errors = [];
