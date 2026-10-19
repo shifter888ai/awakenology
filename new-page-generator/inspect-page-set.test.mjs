@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { inspectPageSet, verifyRenderedInventory, isFloatingDrawingReviewOnly } from "./inspect-page-set.mjs";
+import { inspectPageSet, verifyRenderedInventory, isFloatingDrawingReviewOnly, prepareDocxInspection } from "./inspect-page-set.mjs";
 import { FLOATING_DRAWING_REVIEW_ERROR } from "./extract-docx.mjs";
 
 const pageSet = () => ({ pages: Object.fromEntries(["en","ja","zh-Hant"].map((lang, i) => [lang, {
@@ -112,4 +112,26 @@ test("identifies only a verified floating-image preview as requiring visual revi
  assert.equal(isFloatingDrawingReviewOnly({...preview,errors:[...preview.errors,"other blocker"]}),false);
  assert.equal(isFloatingDrawingReviewOnly({...preview,previewHtml:undefined}),false);
  assert.equal(isFloatingDrawingReviewOnly({...preview,sha256:undefined}),false);
+});
+
+
+test("requires approval bound to the exact source hash for floating-image previews",()=>{
+ const paragraph={nodeType:1,tagName:"P",childNodes:[{nodeType:3,textContent:"Preview text"}],getAttribute:()=>null};
+ const parser={parseFromString:()=>({head:{childNodes:[]},body:{childNodes:[paragraph]}})};
+ const extracted={ok:false,errors:[FLOATING_DRAWING_REVIEW_ERROR],previewHtml:"<p>Preview text</p>",sha256:"a".repeat(64),assetFiles:[{path:"/assets/a.png"}]};
+ const pending=prepareDocxInspection(extracted,parser);
+ assert.equal(pending.inspected.ok,true,pending.inspected.errors.join("; "));
+ assert.equal(pending.visualReviewRequired,true);
+ assert.equal(pending.visualReviewApproved,false);
+ assert.equal(pending.sourceSha256,extracted.sha256);
+ assert.equal(pending.reviewWarnings[0],FLOATING_DRAWING_REVIEW_ERROR);
+ const approved=prepareDocxInspection(extracted,parser,extracted.sha256);
+ assert.equal(approved.inspected.ok,true,approved.inspected.errors.join("; "));
+ assert.equal(approved.visualReviewRequired,false);
+ assert.equal(approved.visualReviewApproved,true);
+ assert.deepEqual(approved.reviewWarnings,[]);
+ assert.deepEqual(approved.assetFiles,extracted.assetFiles);
+ const blocked=prepareDocxInspection({...extracted,errors:[FLOATING_DRAWING_REVIEW_ERROR,"other blocker"]},parser,extracted.sha256);
+ assert.equal(blocked.visualReviewApproved,false);
+ assert.equal(blocked.inspected.ok,false);
 });
