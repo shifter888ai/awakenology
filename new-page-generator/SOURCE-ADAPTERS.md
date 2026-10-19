@@ -1,6 +1,6 @@
 # Source adapters: conversion acceptance criteria
 
-## DOCX (primary)
+## Markdown (simple article structure)\n\nA conservative `markdownToHtml` adapter supports headings, paragraphs, inline code, bold/italic/strikethrough, simple ordered/unordered lists, blockquotes, links, and images. Unsafe URLs and unsupported constructs (including raw HTML, tables, task lists, fenced code blocks, and reference-style links) block conversion. This is intentionally not full CommonMark; unsupported syntax must not be silently flattened.\n\n## DOCX (source-fidelity route)
 
 DOCX must be parsed from the actual package, not inferred from a filename or pasted plain text. Implement using a reviewed DOCX parser in a subsequent slice; do not treat this document as evidence that conversion is already working.
 
@@ -19,7 +19,7 @@ Rules:
 5. Record original source checksum and an ordered inventory for source-to-output verification.
 6. No conversion of tracked changes without explicit editorial resolution.
 
-## Formatted HTML paste (alternative)
+## Formatted HTML file or paste (CSS-sensitive route)
 
 `inspect-paste.mjs` currently performs strict browser inspection only. It does not sanitize, transform or render the input. Passing inspection must never mean it is safe to inject with innerHTML; generation must construct approved DOM/HTML with escaping and URL policy. The initial allowlist is deliberately narrow. Inline CSS is reviewed, not automatically trusted.
 
