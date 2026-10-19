@@ -82,6 +82,8 @@ export function applyDocxRichFormatting(html, sourceInventory) {
       blocks.push(node);
       const nested = node.childNodes?.some(child => child.nodeName === "ol" || child.nodeName === "ul");
       if (nested) errors.push("Nested lists require explicit source-to-rendered paragraph mapping.");
+      const nestedParagraph = node.nodeName === "li" && node.childNodes?.some(child => ["p","h1","h2","h3","h4","h5","h6"].includes(child.nodeName));
+      if (nestedParagraph) errors.push("List items containing nested paragraph elements require explicit source-to-rendered paragraph mapping.");
       return;
     }
     if (["td","th","blockquote"].includes(node.nodeName)) {
