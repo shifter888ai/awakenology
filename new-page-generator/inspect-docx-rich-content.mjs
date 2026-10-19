@@ -46,7 +46,7 @@ export async function inspectDocxRichContent(buffer) {
     paragraphLayouts.push({paragraphIndex:p, ...(layout.layout ?? {unsupported:true})});
     const numbered = resolveDocxNumbering({numberingXml,paragraphXml:paragraphs[p][0]});
     if (!numbered.ok) errors.push(...numbered.errors.map(error => 'Paragraph '+(p+1)+' numbering: '+error));
-    if (numbered.numbering) { paragraphNumbering.push({paragraphIndex:p,...numbered.numbering}); errors.push('Resolved Word list numbering at paragraph '+(p+1)+' still requires verified HTML list rendering.'); }
+    if (numbered.numbering) paragraphNumbering.push({paragraphIndex:p,...numbered.numbering});
     for (const match of raw.matchAll(/<w:r(?=[\s>])[^>]*>([\s\S]*?)<\/w:r>/g)) {
       const body = match[1];
       if (/<w:drawing\b/.test(body) && !/<w:t(?=[\s>])/.test(body)) continue;
