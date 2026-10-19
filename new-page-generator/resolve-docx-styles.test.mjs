@@ -371,7 +371,8 @@ test("treats a Word font hint without family values as selection metadata",()=>{
 test("allows complete explicit script fonts to override unresolved inherited theme fonts",()=>{
  const xml='<w:styles><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:asciiTheme="minorHAnsi"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>';
  const direct='<w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:eastAsia="Yu Gothic" w:cs="Arial"/>';
- const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml:paragraph(),runXml:run("",direct)});
+ const paragraphXml='<w:p><w:pPr><w:rPr>'+direct+'</w:rPr></w:pPr></w:p>';
+ const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml,runXml:run("",direct)});
  assert.equal(result.ok,true,result.errors.join("; "));
  assert.deepEqual(result.formatting.fontFamily,{ascii:"Arial",hAnsi:"Arial",eastAsia:"Yu Gothic",cs:"Arial"});
 });
@@ -388,7 +389,7 @@ test("keeps unresolved inherited theme fonts blocking when a direct override is 
 test("returns paragraph-mark metadata even when visible text inherits an unresolved theme font",()=>{
  const xml='<w:styles><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:asciiTheme="minorHAnsi"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>';
  const paragraphXml='<w:p><w:pPr><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:eastAsia="Yu Gothic" w:cs="Arial"/></w:rPr></w:pPr></w:p>';
- const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml,runXml:"<w:r/>"});
+ const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml,runXml:"<w:r><w:t>Text</w:t></w:r>"});
  assert.equal(result.ok,false);
  assert.deepEqual(result.paragraphMarkFormatting.fontFamily,{ascii:"Arial",hAnsi:"Arial",eastAsia:"Yu Gothic",cs:"Arial"});
 });
