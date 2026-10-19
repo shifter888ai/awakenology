@@ -30,3 +30,16 @@ test("blocks floating layouts whose wrapping or anchor coordinates are not repre
 test("leaves inline images to the ordinary inline renderer",()=>{
  assert.deepEqual(resolveDocxFloatingLayout({kind:"inline"}),{ok:true,css:null,style:null});
 });
+
+
+test("maps Word top-and-bottom wrapping to a responsive block image",()=>{
+ const result=resolveDocxFloatingLayout(placement({
+  wrap:'<wp:wrapTopAndBottom/>',
+  extent:'<wp:extent cx="7550150" cy="9906000"/>'
+ }),{left:840});
+ assert.equal(result.ok,true,result.error);
+ assert.deepEqual(result.style,{
+  display:"block",clear:"both",width:"594.5pt","margin-left":"-42pt","margin-top":"0pt","margin-bottom":"0pt",
+  "max-width":"100%",height:"auto","margin-right":"auto"
+ });
+});
