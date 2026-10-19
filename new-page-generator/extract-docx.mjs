@@ -22,6 +22,7 @@ const FEATURES = [
   ["paragraph or line spacing (requires lossless mapping)", /<w:pPr\b(?:(?!<\/w:pPr>)[\s\S])*?<w:spacing(?:\s|\/?>)/],
   ["paragraph or run style inheritance", /<w:(?:pStyle|rStyle)(?:\s|\/?>)/],
   ["paragraph numbering or list semantics", /<w:numPr(?:\s|\/?>)/],
+  ["Word table structure (requires cell/order/merge fidelity mapping)", /<w:tbl(?:\s|\/?>)/],
   ["paragraph indentation or alignment", /<w:(?:ind|jc)(?:\s|\/?>)/],
   ["highlight or shading (requires lossless mapping)", /<w:(?:highlight|shd)(?:\s|>)/],
   ["tracked insertion", /<w:ins(?:\s|>)/],
@@ -86,7 +87,7 @@ export async function extractDocx(buffer) {
     if (!inspected.ok) errors.push(...inspected.errors.map(error => `DOCX image adapter: ${error}`));
     else assets = inspected.assets;
   }
-  if (/<w:tbl(?:\s|>)/.test(xml) && /<w:(?:gridSpan|vMerge)(?:\s|>)/.test(xml)) errors.push("Merged table cells require explicit review.");
+
   if (errors.length) return blocked(errors, buffer);
   const sourceMap = await inspectDocxSourceMap(buffer);
   if (!sourceMap.ok) return blocked(sourceMap.errors.map(error => `DOCX source map: ${error}`), buffer);
