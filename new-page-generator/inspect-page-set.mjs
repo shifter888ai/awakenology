@@ -5,6 +5,7 @@ import { LANGUAGES, validatePageSet } from "./validate-page-set.mjs";
 import { inspectPastedHtml } from "./inspect-paste.mjs";
 import { validateInventory, compareInventories } from "./content-inventory.mjs";
 import { normalizeHtmlInventory } from "./normalize-html-inventory.mjs";
+import { markdownToHtml } from "./markdown-to-html.mjs";
 
 /**
  * Connects the existing validators without inventing a DOCX converter.
@@ -28,6 +29,11 @@ export async function inspectPageSet(pageSet, inputs = {}) {
     let sourceRichInventory = null;
     if (meta.mode === "paste") {
       inspected = inspectPastedHtml(input.html, input.parser);
+    } else if (meta.mode === "markdown") {
+      const converted = markdownToHtml(input.markdown);
+      inspected = converted.ok
+        ? inspectPastedHtml(converted.html, input.parser)
+        : { ok: false, errors: converted.errors, inventory: [] };
     } else {
       const rich = await inspectDocxRichContent(input.buffer);
       if (!rich.ok) {
@@ -46,8 +52,8 @@ export async function inspectPageSet(pageSet, inputs = {}) {
       if (!pageErrors.length) {
         const normalized = normalizeHtmlInventory(inspected.inventory, {
           language: lang,
-          sourceMode: meta.mode === "docx" ? "docx" : "html-paste",
-          sourcePart: meta.mode === "docx" ? "converted-html" : "pasted-html"
+          sourceMode: meta.mode === "docx" ? "docx" : meta.mode === "markdown" ? "markdown" : "html-paste",
+          sourcePart: meta.mode === "docx" ? "converted-html" : meta.mode === "markdown" ? "markdown-source" : "pasted-html"
         });
         pageErrors.push(...normalized.errors);
         if (normalized.ok) normalizedBlocks = normalized.blocks;
