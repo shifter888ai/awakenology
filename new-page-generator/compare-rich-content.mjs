@@ -71,7 +71,9 @@ export function compareRichContent(source, output) {
     for (let i = 0; i < Math.min(source[key].length, output[key].length); i++) {
       const fields = key === 'runs' ? ['paragraphIndex', 'text', 'bold', 'italic', 'underline', 'color', 'fontSizePt', 'href'] : ['assetPath', 'paragraphIndex', 'order', 'alt', 'textOffset', 'markerOrder', 'placement'];
       for (const field of fields) {
-        if (typeof source[key][i][field] !== typeof output[key][i][field] || source[key][i][field] !== output[key][i][field]) {
+        const expected = source[key][i][field], actual = output[key][i][field];
+        const equal = field === 'placement' ? JSON.stringify(expected) === JSON.stringify(actual) : (typeof expected === typeof actual && expected === actual);
+        if (!equal) {
           issues.push({kind: key + '-mismatch', index: i, field, expected: source[key][i][field], actual: output[key][i][field]});
         }
       }
