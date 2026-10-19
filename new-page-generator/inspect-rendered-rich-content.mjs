@@ -107,6 +107,7 @@ export function inspectRenderedRichContent(html, parser) {
     if(['S','STRIKE','DEL'].includes(tag)) errors.push('Unsupported rendered deletion/strike formatting: '+tag);
     const next={...state};
     const size=fontSizePt(node); if(size!==null) {next.fontSizePt=size;next.fontSizeCsPt=size;}
+    const csSizeAttr=node.getAttribute?.('data-word-font-size-cs'); if(csSizeAttr!==null && csSizeAttr!==undefined) {const parsed=Number(csSizeAttr);if(Number.isFinite(parsed)&&parsed>0) next.fontSizeCsPt=parsed;else errors.push('Unsupported rendered complex-script font size: '+csSizeAttr);}
     const fontFamilies={};
     for(const [attr,key] of [['data-word-font-ascii','ascii'],['data-word-font-hansi','hAnsi'],['data-word-font-east-asia','eastAsia'],['data-word-font-cs','cs']]) {const value=node.getAttribute?.(attr);if(value)fontFamilies[key]=value;}
     if(node.getAttribute?.('data-word-font-hint')) next.fontHint=node.getAttribute('data-word-font-hint');
