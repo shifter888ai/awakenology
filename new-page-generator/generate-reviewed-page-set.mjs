@@ -90,7 +90,7 @@ export async function generateReviewedPageSet({ pageSet, inputs, outputs }) {
   }
   const assetMap = new Map();
   for (const lang of LANGUAGES) for (const asset of inspection.pages[lang].assetFiles ?? []) {
-    const path = asset.outputPath.replace(/^\\/+/, "");
+    const path = asset.outputPath.replace(/^\/+/, "");
     const prior = assetMap.get(path);
     if (prior && prior.sha256 !== asset.sha256) {
       return { ok: false, stage: "assets", errors: ["Content-addressed asset path collision: " + path], pages: {} };
