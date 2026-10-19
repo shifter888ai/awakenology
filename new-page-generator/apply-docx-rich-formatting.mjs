@@ -159,7 +159,7 @@ export function applyDocxRichFormatting(html, sourceInventory) {
       }
       const placeholder=createEmptyParagraph(sourceImgs,sourceBrs);
       if(!appendAfterLastBlock(fragment,blocks,placeholder)) { errors.push("Cannot restore omitted empty source paragraph "+(sourceIndex+1)+"."); break; }
-      blocks.push(placeholder); previousMatchedBlock=placeholder; sourceIndex++; continue;
+      blocks.push(placeholder); previousMatchedBlock=placeholder; sourceIndex++; blockIndex++; continue;
     }
     const block=blocks[blockIndex], actual=nodeText(block);
     const renderedImage=hasDescendant(block,'img'), renderedBreak=hasDescendant(block,'br');
@@ -174,7 +174,7 @@ export function applyDocxRichFormatting(html, sourceInventory) {
         errors.push("Cannot safely restore omitted empty source paragraph "+(sourceIndex+1)+" near a list boundary.");
         break;
       }
-      blocks.splice(blockIndex,0,placeholder); previousMatchedBlock=placeholder; sourceIndex++; continue;
+      blocks.splice(blockIndex,0,placeholder); previousMatchedBlock=placeholder; sourceIndex++; blockIndex++; continue;
     }
     if(expected==="" && actual==="" && !sourceImgs.length && !sourceBrs.length && !renderedImage && !renderedBreak) {
       let sourceEmptyRun=0;
