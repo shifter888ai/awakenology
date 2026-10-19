@@ -14,10 +14,10 @@ export function compareRichContent(source, output) {
     if (!Array.isArray(value.runs) || !Array.isArray(value.images) || !Number.isInteger(value.paragraphCount) || value.paragraphCount < 0) throw new Error('Invalid inventory: ' + side);
     value.runs.forEach((r, i) => {
       const where = side + '.runs[' + i + ']';
-      required(r, ['paragraphIndex', 'text', 'bold', 'italic', 'underline', 'color', 'href'], where);
+      required(r, ['paragraphIndex', 'text', 'bold', 'italic', 'underline', 'color', 'fontSizePt', 'href'], where);
       if (!Number.isInteger(r.paragraphIndex) || r.paragraphIndex < 0 || typeof r.text !== 'string' || typeof r.bold !== 'boolean' ||
           typeof r.italic !== 'boolean' || typeof r.underline !== 'boolean' ||
-          !(r.color === null || typeof r.color === 'string') ||
+          !(r.color === null || typeof r.color === 'string') || !(r.fontSizePt === null || (typeof r.fontSizePt === 'number' && Number.isFinite(r.fontSizePt) && r.fontSizePt > 0)) ||
           !(r.href === null || typeof r.href === 'string')) {
         throw new Error('Invalid run field types at ' + where);
       }
