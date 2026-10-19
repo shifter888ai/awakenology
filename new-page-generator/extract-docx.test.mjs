@@ -124,7 +124,8 @@ test("preserves inherited font and language metadata when document runs are plai
  zip.file("word/styles.xml", '<w:styles><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial"/><w:lang w:val="en-US"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>');
  const result=await extractDocx(await zip.generateAsync({type:"nodebuffer"}));
  assert.equal(result.ok,true,result.errors.join("; "));
- assert.match(result.html,/font-family:&quot;Arial&quot;/);\n assert.match(result.html,/data-word-lang-val="en-US"/);
+ assert.match(result.html,/font-family:&quot;Arial&quot;/);
+ assert.match(result.html,/data-word-lang-val="en-US"/);
  
  
 });
