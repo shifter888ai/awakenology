@@ -32,8 +32,8 @@ test('reordered text runs block even when the same text is present',()=>{
 });
 
 test('extra output text run blocks',()=>{
- const source={runs:[],images:[]};
- const output={runs:[{paragraphIndex:0,text:'invented',bold:false,italic:false,underline:false,color:null,href:null}],images:[]};
+ const source={runs:[],images:[],lineBreaks:[]};
+ const output={runs:[{paragraphIndex:0,text:'invented',bold:false,italic:false,underline:false,color:null,href:null}],images:[],lineBreaks:[]};
  assert.equal(compareRichContent(source,output).ok,false);
 });
 
@@ -69,8 +69,8 @@ test('compares source and rendered line-break offsets independently of text',()=
 });
 test('blocks when one side omits line-break provenance',()=>{
  const a={runs:[],images:[],lineBreaks:[]};
- const b={runs:[],images:[],lineBreaks:[]};
- assert.equal(compareRichContent(a,b).ok,false);
+ const b={runs:[],images:[]};
+ assert.throws(()=>compareRichContent(a,b),/Incomplete rich-content inventory/);
 });
 
 
@@ -78,10 +78,10 @@ test('blocks identical text and styling moved to a different paragraph',()=>{
  const source={runs:[
   {paragraphIndex:0,text:'First',bold:false,italic:false,underline:false,color:null,href:null},
   {paragraphIndex:1,text:'Second',bold:false,italic:false,underline:false,color:null,href:null}
- ],images:[]};
+ ],images:[],lineBreaks:[]};
  const output={runs:[
   {paragraphIndex:0,text:'FirstSecond',bold:false,italic:false,underline:false,color:null,href:null}
- ],images:[]};
+ ],images:[],lineBreaks:[]};
  const result=compareRichContent(source,output);
  assert.equal(result.ok,false);
  assert.ok(result.issues.some(x=>x.kind==='runs-mismatch'));
