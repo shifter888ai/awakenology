@@ -1,5 +1,5 @@
 const LANGUAGES = new Set(["en", "ja", "zh-Hant"]);
-const SOURCE_MODES = new Set(["docx", "html-paste", "markdown"]);
+const SOURCE_MODES = new Set(["docx", "html", "html-paste", "markdown"]);
 const BLOCK_TYPES = new Set(["document", "section", "paragraph", "heading", "list", "list-item", "table", "table-row", "table-cell", "text", "link", "asset", "line-break", "unknown"]);
 const SEVERITIES = new Set(["info", "warning", "error", "blocking"]);
 const isRecord = value => value !== null && typeof value === "object" && !Array.isArray(value);
