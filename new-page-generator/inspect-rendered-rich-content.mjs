@@ -94,7 +94,7 @@ export function inspectRenderedRichContent(html, parser) {
     if(tag==='IMG') {
       const assetPath=node.getAttribute('src'), alt=node.getAttribute('alt');
       if(!assetPath || alt===null) errors.push('Image lacks src or alt.');
-      images.push({assetPath,paragraphIndex,order:order++,alt,textOffset:paragraphOffsets.get(paragraphIndex) ?? 0,markerOrder:nextMarkerOrder(Math.max(0,paragraphIndex))});
+      images.push({assetPath,paragraphIndex,order:order++,alt,textOffset:paragraphOffsets.get(paragraphIndex) ?? 0,markerOrder:nextMarkerOrder(Math.max(0,paragraphIndex)),placement:{kind:'inline'}});
     }
     for(const child of node.childNodes ?? []) visit(child,next);
   }
