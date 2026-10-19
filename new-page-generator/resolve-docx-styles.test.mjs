@@ -337,3 +337,12 @@ test('uses the document default paragraph style when a paragraph has no explicit
  assert.deepEqual(result.formatting.fontFamily,{ascii:'Arial',hAnsi:'Arial',eastAsia:'Yu Gothic'});
  assert.equal(result.formatting.fontSizePt,12);
 });
+
+
+test('merges font-family and language attributes instead of erasing inherited scripts',()=>{
+ const xml='<w:styles xmlns:w="x"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial" w:eastAsia="Yu Gothic"/><w:lang w:val="en-US" w:eastAsia="ja-JP"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>';
+ const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml:'<w:p/>',runXml:'<w:r><w:rPr><w:rFonts w:ascii="Inter"/><w:lang w:val="fr-FR"/></w:rPr><w:t>Text</w:t></w:r>'});
+ assert.equal(result.ok,true,result.errors.join('; '));
+ assert.deepEqual(result.formatting.fontFamily,{ascii:'Inter',eastAsia:'Yu Gothic'});
+ assert.deepEqual(result.formatting.language,{val:'fr-FR',eastAsia:'ja-JP'});
+});
