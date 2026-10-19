@@ -145,7 +145,8 @@ try {
     await writeFile(visualReviewPath, '<!doctype html><meta charset="utf-8"><title>Pilot visual review blocked</title><h1>Visual review artifact blocked</h1><pre>' + esc(JSON.stringify({source:sourceForReview.errors,assets:assetsForReview.errors,placements:placementsForReview.errors},null,2)) + '</pre>');
   } else {
     const assetById = new Map(assetsForReview.assets.map(asset => [asset.relationshipId, asset]));
-    const paragraphIndexHtml = sourceForReview.paragraphs.map(p => '<p class="source-paragraph"><strong>Paragraph ' + (p.index+1) + ':</strong> ' + esc(p.text) + (p.breaks.length ? ' <em>[explicit line break: ' + p.breaks.length + ']</em>' : '') + '</p>').join('\\n');\n    const sections = placementsForReview.images.map((item,index) => {
+    const paragraphIndexHtml = sourceForReview.paragraphs.map(p => '<p class="source-paragraph"><strong>Paragraph ' + (p.index+1) + ':</strong> ' + esc(p.text) + (p.breaks.length ? ' <em>[explicit line break: ' + p.breaks.length + ']</em>' : '') + '</p>').join(' ');
+    const sections = placementsForReview.images.map((item,index) => {
       const asset = assetById.get(item.relationshipId);
       const paragraphIndex = item.paragraphIndex;
       const paragraphs = sourceForReview.paragraphs;
