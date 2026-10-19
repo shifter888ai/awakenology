@@ -14,6 +14,30 @@ test("reject non-ZIP input", async () => assert.match((await extractDocx(Buffer.
 test("reject tracked deletion", async () => assert.match((await extractDocx(await fixture("<w:del><w:r><w:delText>lost</w:delText></w:r></w:del>"))).errors.join(" "), /tracked deletion/));
 test("reject explicit Word colors rather than drop them", async () => assert.match((await extractDocx(await fixture('<w:rPr><w:color w:val="FF0000"/></w:rPr><w:t>Red</w:t>'))).errors.join(" "), /text color/));
 test("reject malformed drawings instead of silently dropping them", async () => assert.match((await extractDocx(await fixture("<w:drawing/>"))).errors.join(" "), /DOCX image adapter/));
+
+test("reject font-family and font-size metadata until rendered mapping is lossless", async () => {
+  const fonts = await extractDocx(await fixture('<w:rPr><w:rFonts w:ascii="Arial" w:eastAsia="Yu Gothic"/><w:sz w:val="24"/></w:rPr><w:t>Styled</w:t>'));
+  assert.equal(fonts.ok, false);
+  assert.match(fonts.errors.join(" "), /font family/);
+  assert.match(fonts.errors.join(" "), /font size/);
+  assert.equal(fonts.html, null);
+});
+test("reject complex-script and language metadata until rendered mapping is lossless", async () => {
+  const result = await extractDocx(await fixture('<w:rPr><w:lang w:eastAsia="ja-JP"/><w:bCs/><w:iCs/><w:caps/></w:rPr><w:t>文字</w:t>'));
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join(" "), /language metadata/);
+  assert.match(result.errors.join(" "), /complex-script bold or italic/);
+  assert.match(result.errors.join(" "), /capitalization or character spacing/);
+});
+test("reject style and paragraph layout metadata rather than flattening it", async () => {
+  const result = await extractDocx(await fixture('<w:pPr><w:pStyle w:val="Heading1"/><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr><w:ind w:left="720"/><w:jc w:val="center"/></w:pPr><w:t>Heading</w:t>'));
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join(" "), /style inheritance/);
+  assert.match(result.errors.join(" "), /numbering or list semantics/);
+  assert.match(result.errors.join(" "), /indentation or alignment/);
+  assert.equal(result.html, null);
+});
+
 test("extract simple text from valid package", async () => {
   const result = await extractDocx(await fixture("<w:t>English 日本語 繁體中文</w:t>"));
   assert.equal(result.ok, true, result.errors.join("; "));
