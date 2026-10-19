@@ -92,3 +92,10 @@ Validation: **115 automated tests passed**. The real pilot is still blocked, as 
 The source-to-converted-HTML comparison now checks explicit Word text-wrapping breaks in addition to exact text. It compares the count and UTF-16 character offsets of each source break against each rendered `<br>`, so a break that is missing, added, or moved fails the comparison even when the concatenated text remains identical.
 
 Regression coverage verifies correct placement, missing breaks, relocated breaks, and extra HTML breaks. Validation: **117 automated tests passed**. The real pilot did not produce a line-break mismatch in this run; conversion remains blocked by the separately identified typography/style/list properties and floating image.
+
+
+## Rich-content line-break provenance (CI run 39202723213)
+
+The DOCX rich-content inspector now supports a Word run containing multiple text segments separated by explicit text-wrapping breaks. It emits those text segments in order and separately records each break's paragraph index and UTF-16 text offset. The rendered-HTML inspector independently records `<br>` positions, and `compareRichContent` now compares the line-break inventories rather than assuming text equality proves break fidelity.
+
+Validation: **121 automated tests passed**. The real pilot's prior generic “ambiguous run/text mapping” error at paragraph 125 is gone; the inspector now extracts 256 text runs and records all 3 images. Rich-content approval remains blocked by the still-unresolved font family/size, language, complex-script properties, capitalization/character spacing, and paragraph style inheritance.
