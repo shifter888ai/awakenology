@@ -106,3 +106,28 @@ test("source layout overrides conflicting pre-existing inline layout declaration
  assert.match(result.html,/style="text-align:center"/);
  assert.doesNotMatch(result.html,/text-align:right/);
 });
+
+
+test("renders standard Word bullet markers with explicit native list styling",()=>{
+ const source={
+  paragraphCount:1,
+  paragraphLayouts:[{paragraphIndex:0,alignment:"left",indentation:{},spacing:{beforePt:0,afterPt:0,lineHeightPt:null}}],
+  paragraphNumbering:[{paragraphIndex:0,numId:8,abstractNumId:3,level:0,format:"bullet",text:"•",start:1,indentation:{}}],
+  runs:[{paragraphIndex:0,text:"Bullet",bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null}]
+ };
+ const result=applyDocxRichFormatting("<ul><li>Bullet</li></ul>",source);
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.match(result.html,/<ul style="list-style-type:disc">/);
+});
+
+test("blocks custom Word bullet glyphs not representable by the native list adapter",()=>{
+ const source={
+  paragraphCount:1,
+  paragraphLayouts:[{paragraphIndex:0,alignment:"left",indentation:{},spacing:{}}],
+  paragraphNumbering:[{paragraphIndex:0,numId:8,abstractNumId:3,level:0,format:"bullet",text:"◆",start:1,indentation:{}}],
+  runs:[{paragraphIndex:0,text:"Bullet"}]
+ };
+ const result=applyDocxRichFormatting("<ul><li>Bullet</li></ul>",source);
+ assert.equal(result.ok,false);
+ assert.ok(result.errors.some(error=>error.includes("cannot be represented faithfully")));
+});
