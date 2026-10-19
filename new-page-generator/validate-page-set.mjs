@@ -3,7 +3,7 @@
  * Reject missing languages, duplicate routes, unsupported input modes and unsafe routes.
  */
 export const LANGUAGES = Object.freeze(["en", "ja", "zh-Hant"]);
-const MODES = new Set(["docx", "paste"]);
+const MODES = new Set(["docx", "paste", "markdown"]);
 const hasOwn = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
 
 export function validatePageSet(pageSet) {
@@ -26,7 +26,7 @@ export function validatePageSet(pageSet) {
       continue;
     }
     if (typeof p.title !== "string" || !p.title.trim()) errors.push(`${lang}: title is required.`);
-    if (!MODES.has(p.mode)) errors.push(`${lang}: mode must be docx or paste.`);
+    if (!MODES.has(p.mode)) errors.push(`${lang}: mode must be docx, paste, or markdown.`);
     if (typeof p.source !== "string" || !p.source.trim()) errors.push(`${lang}: source reference is required.`);
     if (typeof p.route !== "string" || !/^\/[\p{L}\p{N}_().%\-\/]+\/$/u.test(p.route) || p.route.includes("//") || p.route.includes("..") || /%(?:2f|5c|2e|00)/i.test(p.route)) {
       errors.push(`${lang}: route must be a safe absolute trailing-slash path.`);
