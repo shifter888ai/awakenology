@@ -110,9 +110,17 @@ export function applyDocxRichFormatting(html, sourceInventory) {
       if (!numbering) {
         errors.push("Rendered list item at paragraph "+(p+1)+" has no corresponding source numbering definition.");
       } else {
-        const listTag = block.parentNode?.nodeName;
-        const expectedTag = numbering.format === "bullet" ? "ul" : numbering.format === "none" ? null : "ol";
-        if (expectedTag && listTag !== expectedTag) errors.push("Rendered list type at paragraph "+(p+1)+" does not match Word numbering format "+numbering.format+".");
+        const list = block.parentNode;
+        const listTag = list?.nodeName;
+        const expectedTag = numbering.format === "bullet" ? "ul" : "ol";
+        if (listTag !== expectedTag && numbering.format !== "none") errors.push("Rendered list type at paragraph "+(p+1)+" does not match Word numbering format "+numbering.format+".");
+        const markerFormats = {decimal:null,upperRoman:"I",lowerRoman:"i",upperLetter:"A",lowerLetter:"a"};
+        if (numbering.format in markerFormats && numbering.format !== "decimal") setAttr(list,"type",markerFormats[numbering.format]);
+        if (numbering.format === "decimal" && numbering.text !== "%1.") errors.push("Word decimal marker pattern at paragraph "+(p+1)+" cannot be represented faithfully by a native HTML list.");
+        if (["upperRoman","lowerRoman","upperLetter","lowerLetter"].includes(numbering.format) && numbering.text !== "%1.") errors.push("Word list marker pattern at paragraph "+(p+1)+" cannot be represented faithfully by a native HTML list.");
+        if (numbering.format === "none") setAttr(list,"style",[attr(list,"style"),"list-style-type:none"].filter(Boolean).join(";"));
+        const firstListItem = list?.childNodes?.find(child => child.nodeName === "li");
+        if (firstListItem === block && Number(numbering.start) > 1 && listTag === "ol") setAttr(list,"start",String(numbering.start));
         for (const [key,name] of [["numId","data-word-num-id"],["abstractNumId","data-word-abstract-num-id"],["level","data-word-level"],["format","data-word-num-format"],["text","data-word-num-text"],["start","data-word-num-start"]]) {
           if (numbering[key] !== undefined && numbering[key] !== null) setAttr(block,name,String(numbering[key]));
         }
