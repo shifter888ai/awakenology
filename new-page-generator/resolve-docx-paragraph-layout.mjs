@@ -52,11 +52,18 @@ const layoutProps = xml => {
       }
     }
     if (a['w:start'] !== undefined || a['w:end'] !== undefined) parsed.unsupported={unsupported:true};
+    const unsupportedCharacterKeys=[];
     for (const key of ['leftChars','rightChars','firstLineChars','hangingChars']) {
       const raw=a['w:'+key];
-      // Explicit zero character indentation has no layout effect; nonzero values need font-metric resolution.
-      if (raw !== undefined && (!/^-?\d+$/.test(raw) || Number(raw)!==0)) parsed.unsupported={unsupported:true};
+      if (raw === undefined) continue;
+      if (!/^-?\d+$/.test(raw)) { parsed.unsupported={unsupported:true}; unsupportedCharacterKeys.push(key); }
+      else {
+        parsed[key]=Number(raw);
+        // Zero is a safe no-op. Nonzero character units need font-metric resolution unless a direct paragraph value overrides them.
+        if (Number(raw)!==0) { parsed.unsupported={unsupported:true}; unsupportedCharacterKeys.push(key); }
+      }
     }
+    if(unsupportedCharacterKeys.length) parsed.unsupportedCharacterKeys=unsupportedCharacterKeys;
     if (parsed.firstLine !== undefined && parsed.hanging !== undefined) parsed.unsupported={unsupported:true};
     result.indentation=parsed;
   }
@@ -75,7 +82,20 @@ export function resolveDocxParagraphLayout({stylesXml,paragraphXml}) {
   const defaultParagraphStyles=[...map.entries()].filter(([,style])=>style.type==='paragraph'&&style.isDefault);
   if(defaultParagraphStyles.length>1) errors.push('Multiple default Word paragraph styles are defined.');
   const defaultParagraphId=defaultParagraphStyles[0]?.[0]??null;
-  const merge=(target,source)=>{for(const [k,v] of Object.entries(source)){if(k==='indentation' && v && typeof v==='object' && !v.unsupported){target.indentation={...(target.indentation??{}),...v};}else if(k==='spacing' && v && typeof v==='object' && !v.unsupported){target.spacing={...(target.spacing??{}),...v};}else target[k]=v;}};
+  const merge=(target,source)=>{
+  for(const [k,v] of Object.entries(source)) {
+    if(k==='indentation' && v && typeof v==='object' && !v.unsupported) {
+      const next={...(target.indentation??{}),...v};
+      if(Array.isArray(next.unsupportedCharacterKeys)) {
+        next.unsupportedCharacterKeys=next.unsupportedCharacterKeys.filter(key=>!(v[key]===0));
+        if(!next.unsupportedCharacterKeys.length) { delete next.unsupportedCharacterKeys; delete next.unsupported; }
+        else next.unsupported={unsupported:true};
+      }
+      target.indentation=next;
+    } else if(k==='spacing' && v && typeof v==='object' && !v.unsupported) target.spacing={...(target.spacing??{}),...v};
+    else target[k]=v;
+  }
+};
   const result={alignment:'left',indentation:{left:0,right:0},spacing:{beforePt:0,afterPt:0,lineHeightPt:null}};
   const defaults=bodyOf(bodyOf(stylesXml,'docDefaults'),'pPrDefault');
   const defaultsP=bodyOf(defaults,'pPr');
