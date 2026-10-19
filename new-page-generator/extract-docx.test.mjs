@@ -15,6 +15,18 @@ test("reject tracked deletion", async () => assert.match((await extractDocx(awai
 test("reject explicit Word colors rather than drop them", async () => assert.match((await extractDocx(await fixture('<w:rPr><w:color w:val="FF0000"/></w:rPr><w:t>Red</w:t>'))).errors.join(" "), /text color/));
 test("reject malformed drawings instead of silently dropping them", async () => assert.match((await extractDocx(await fixture("<w:drawing/>"))).errors.join(" "), /DOCX image adapter/));
 
+test("rejects superscript, baseline shifts, and hidden text until formatting is mapped", async () => {
+  const result = await extractDocx(await fixture('<w:rPr><w:vertAlign w:val="superscript"/><w:position w:val="4"/><w:vanish/></w:rPr><w:t>Styled</w:t>'));
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join(" "), /run effects or hidden text/);
+  assert.equal(result.html, null);
+});
+test("rejects section and pagination layout until page flow is mapped", async () => {
+  const result = await extractDocx(await fixture('<w:pPr><w:keepNext/><w:pageBreakBefore/></w:pPr><w:t>Page flow</w:t>'));
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join(" "), /pagination, direction, or section layout/);
+  assert.equal(result.html, null);
+});
 test("rejects even simple Word tables until cell and paragraph structure is mapped", async () => {
   const result = await extractDocx(await fixture('<w:tbl><w:tr><w:tc><w:p><w:r><w:t>Cell</w:t></w:r></w:p></w:tc></w:tr></w:tbl>'));
   assert.equal(result.ok, false);
