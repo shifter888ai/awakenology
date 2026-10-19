@@ -17,7 +17,7 @@ const conversionCandidate = await extractDocx(buffer);
 const sha256 = createHash('sha256').update(buffer).digest('hex');
 const stages = {};
 const diagnostic = {unsupportedTextConstructs:[], drawingKinds:{}, explicitColors:[], lineBreaks:[], floatingDrawings:[], missingAltAssets:[], runPropertyInventory:{counts:{},samples:{}}, paragraphPropertyInventory:{counts:{},samples:{}},fontFamilyVariants:[],fontResolutionSamples:[],paragraphSpacingVariants:[],paragraphIndentationVariants:[],numberingInventory:null,styleResolutionInventory:{references:[],definitions:[],docDefaults:{}}};
-diagnostic.missingAltAssets=(conversionCandidate.assetFiles??[]).filter(asset=>!asset.alt?.trim()).map(asset=>({outputPath:asset.outputPath,sha256:asset.sha256,contentType:asset.contentType,byteLength:asset.byteLength}));
+diagnostic.missingAltAssets=(conversionCandidate.assetFiles??[]).filter(asset=>!asset.altText?.trim()).map(asset=>({outputPath:asset.outputPath,sha256:asset.sha256,contentType:asset.contentType,byteLength:asset.byteLength}));
 try {
   const zip = await JSZip.loadAsync(buffer,{checkCRC32:true});
   const xml = await zip.file('word/document.xml').async('string');
