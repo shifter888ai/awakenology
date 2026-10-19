@@ -24,7 +24,7 @@ export async function inspectDocxRichContent(buffer) {
   const advancedTags = new Map();
   const placement = await inspectDocxImagePlacement(buffer);
   if (!placement.ok) errors.push(...placement.errors);
-  for (const match of xml.matchAll(/<w:(pStyle|rStyle|basedOn|hyperlink|object|pict|fldChar|highlight|shd|numPr|keepNext|keepLines|pageBreakBefore|widowControl|outlineLvl|contextualSpacing|bidi|textDirection|mirrorIndents|snapToGrid|adjustRightInd|autoSpaceDE|autoSpaceDN|sectPr|tbl|vertAlign|position|vanish|specVanish|smallCaps|emboss|imprint|shadow|outline|effect|fitText|rtl|cs)\b/g)) {
+  for (const match of xml.matchAll(/<w:(hyperlink|object|pict|fldChar|highlight|shd|numPr|keepNext|keepLines|pageBreakBefore|widowControl|outlineLvl|contextualSpacing|bidi|textDirection|mirrorIndents|snapToGrid|adjustRightInd|autoSpaceDE|autoSpaceDN|sectPr|tbl|vertAlign|position|vanish|specVanish|smallCaps|emboss|imprint|shadow|outline|effect|fitText|rtl|cs)\b/g)) {
     const name = match[1];
     advancedTags.set(name, (advancedTags.get(name) ?? 0) + 1);
   }
@@ -41,7 +41,7 @@ export async function inspectDocxRichContent(buffer) {
       const body = match[1];
       if (/<w:drawing\b/.test(body) && !/<w:t(?=[\s>])/.test(body)) continue;
       const properties = /<w:rPr(?=[\s>])[^>]*>([\s\S]*?)<\/w:rPr>/.exec(body)?.[1] ?? '';
-      const unknown = properties.replace(/<w:(?:b|i|u|color|sz)(?:\s[^>]*?)?\s*\/\s*>/g, '').trim();
+      const unknown = properties.replace(/<w:(?:b|i|u|color|sz|rStyle)(?:\s[^>]*?)?\s*\/\s*>/g, '').trim();
       if (unknown) {
         for (const property of unknown.matchAll(/<w:([A-Za-z][A-Za-z0-9]*)\b/g)) {
           const name = property[1];
