@@ -14,8 +14,8 @@ export function compareRichContent(source, output) {
     if (!Array.isArray(value.runs) || !Array.isArray(value.images)) throw new Error('Invalid inventory: ' + side);
     value.runs.forEach((r, i) => {
       const where = side + '.runs[' + i + ']';
-      required(r, ['text', 'bold', 'italic', 'underline', 'color', 'href'], where);
-      if (typeof r.text !== 'string' || typeof r.bold !== 'boolean' ||
+      required(r, ['paragraphIndex', 'text', 'bold', 'italic', 'underline', 'color', 'href'], where);
+      if (!Number.isInteger(r.paragraphIndex) || r.paragraphIndex < 0 || typeof r.text !== 'string' || typeof r.bold !== 'boolean' ||
           typeof r.italic !== 'boolean' || typeof r.underline !== 'boolean' ||
           !(r.color === null || typeof r.color === 'string') ||
           !(r.href === null || typeof r.href === 'string')) {
@@ -56,7 +56,7 @@ export function compareRichContent(source, output) {
   for (const key of ['runs', 'images']) {
     if (source[key].length !== output[key].length) issues.push({kind: key + '-count', expected: source[key].length, actual: output[key].length});
     for (let i = 0; i < Math.min(source[key].length, output[key].length); i++) {
-      const fields = key === 'runs' ? ['text', 'bold', 'italic', 'underline', 'color', 'href'] : ['assetPath', 'paragraphIndex', 'order', 'alt'];
+      const fields = key === 'runs' ? ['paragraphIndex', 'text', 'bold', 'italic', 'underline', 'color', 'href'] : ['assetPath', 'paragraphIndex', 'order', 'alt'];
       for (const field of fields) {
         if (typeof source[key][i][field] !== typeof output[key][i][field] || source[key][i][field] !== output[key][i][field]) {
           issues.push({kind: key + '-mismatch', index: i, field, expected: source[key][i][field], actual: output[key][i][field]});
