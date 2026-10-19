@@ -243,7 +243,7 @@ try {
   const warning = '<aside class="preview-note" role="note"><strong>CONVERSION REVIEW ONLY — NOT APPROVED FOR PUBLICATION</strong><p>This candidate applies mapped source typography and paragraph layout. The original floating image is displayed inline here; its Word wrapping and position have not been certified. Do not publish this preview.</p></aside>';
   const body = conversionCandidate.previewHtml
     ? warning + candidate
-    : '<aside class="preview-note"><strong>CONVERSION PREVIEW UNAVAILABLE</strong><p>The source rich-content gate has not passed, so no converted HTML candidate was emitted.</p><pre>' + conversionCandidate.errors.map(error=>String(error).replace(/[&<>]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[char]))).join('\n') + '</pre></aside>';
+    : '<aside class="preview-note"><strong>CONVERSION PREVIEW UNAVAILABLE — NOT APPROVED FOR PUBLICATION</strong><p>The source rich-content gate has not passed, so no converted HTML candidate was emitted.</p><pre>' + conversionCandidate.errors.map(error=>String(error).replace(/[&<>]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[char]))).join('\n') + '</pre></aside>';
   const preview = renderStaticShell({
     language:'zh-Hant',
     title:'DOCX Conversion Review — Not Approved',
