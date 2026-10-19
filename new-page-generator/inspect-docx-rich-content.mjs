@@ -18,8 +18,12 @@ export async function inspectDocxRichContent(buffer) {
   const advancedTags = new Map();
   const placement = await inspectDocxImagePlacement(buffer);
   if (!placement.ok) errors.push(...placement.errors);
-  if (/<w:(?:pStyle|rStyle|basedOn|hyperlink|object|pict|fldChar|highlight|shd)\b/.test(xml)) {
-    errors.push('Inherited styles, hyperlinks, or advanced formatting require independent resolution.');
+  for (const match of xml.matchAll(/<w:(pStyle|rStyle|basedOn|hyperlink|object|pict|fldChar|highlight|shd)\b/g)) {
+    const name = match[1];
+    advancedTags.set(name, (advancedTags.get(name) ?? 0) + 1);
+  }
+  for (const [name, count] of advancedTags) {
+    errors.push('Unresolved OOXML feature w:' + name + ' (' + count + ' occurrence' + (count === 1 ? '' : 's') + ').');
   }
   const paragraphs = [...xml.matchAll(/<w:p(?=[\s>])[^>]*>([\s\S]*?)<\/w:p>/g)];
   for (let p = 0; p < paragraphs.length; p++) {
@@ -29,7 +33,13 @@ export async function inspectDocxRichContent(buffer) {
       if (/<w:drawing\b/.test(body) && !/<w:t(?=[\s>])/.test(body)) continue;
       const properties = /<w:rPr(?=[\s>])[^>]*>([\s\S]*?)<\/w:rPr>/.exec(body)?.[1] ?? '';
       const unknown = properties.replace(/<w:(?:b|i|u|color)(?:\s[^>]*?)?\s*\/\s*>/g, '').trim();
-      if (unknown) errors.push('Unresolved run property in paragraph ' + (p + 1) + '.');
+      if (unknown) {
+        for (const property of unknown.matchAll(/<w:([A-Za-z][A-Za-z0-9]*)\b/g)) {
+          const name = property[1];
+          if (!unknownRunProperties.has(name)) unknownRunProperties.set(name, new Set());
+          unknownRunProperties.get(name).add(p + 1);
+        }
+      }
       const flag = key => {
         const tag = new RegExp('<w:' + key + '(?:\\s[^>]*?)?\\s*/>').exec(properties)?.[0];
         if (!tag) return false;
@@ -55,6 +65,11 @@ export async function inspectDocxRichContent(buffer) {
       });
       runs.push({ text: decode(texts[0][1]), bold: flag('b'), italic: flag('i'), underline: flag('u'), color: color ? '#' + color.toLowerCase() : null, href: null });
     }
+  }
+  for (const [name, paragraphSet] of unknownRunProperties) {
+    const locations = [...paragraphSet].sort((a,b) => a-b);
+    const preview = locations.slice(0, 12).join(', ') + (locations.length > 12 ? ', …' : '');
+    errors.push('Unresolved run property w:' + name + ' in ' + locations.length + ' paragraph(s): ' + preview + '.');
   }
   for (const [name, paragraphSet] of unknownRunProperties) {
     const locations = [...paragraphSet].sort((a,b) => a-b);
