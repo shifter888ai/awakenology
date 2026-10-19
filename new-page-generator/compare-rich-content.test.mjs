@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {compareRichContent} from './compare-rich-content.mjs';
 const sample = () => ({
   runs: [{paragraphIndex:0,text:'什麽',bold:true,italic:false,underline:false,color:'#ff0000',href:'https://example.org'}],
-  images: [{assetPath:'assets/one.png',paragraphIndex:2,order:0,alt:'diagram'}],
+  images: [{assetPath:'assets/one.png',paragraphIndex:2,order:0,alt:'diagram',textOffset:12}],
   lineBreaks: []
 });
 test('identical inventory passes', () => assert.equal(compareRichContent(sample(), sample()).ok, true));
@@ -13,7 +13,7 @@ for (const field of ['paragraphIndex','text','bold','italic','underline','color'
     assert.equal(compareRichContent(a,b).ok,false);
   });
 }
-for (const field of ['assetPath','paragraphIndex','order','alt']) {
+for (const field of ['assetPath','paragraphIndex','order','alt','textOffset']) {
   test('changed image ' + field + ' blocks', () => {
     const a=sample(), b=sample(); b.images[0][field] = typeof b.images[0][field] === 'number' ? 99 : 'changed';
     assert.equal(compareRichContent(a,b).ok,false);
@@ -91,4 +91,13 @@ test('blocks identical text and styling moved to a different paragraph',()=>{
 test('blocks when both inventories omit line-break provenance',()=>{
  const source={runs:[],images:[]};
  assert.throws(()=>compareRichContent(source,{runs:[],images:[]}),/Incomplete rich-content inventory/);
+});
+
+
+test('blocks an image moved before or after paragraph text',()=>{
+ const source=sample(), output=sample();
+ output.images[0].textOffset=0;
+ const result=compareRichContent(source,output);
+ assert.equal(result.ok,false);
+ assert.ok(result.issues.some(x=>x.kind==='images-mismatch' && x.field==='textOffset'));
 });
