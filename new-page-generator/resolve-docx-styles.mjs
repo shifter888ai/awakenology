@@ -1,9 +1,9 @@
 // Minimal, fail-closed resolver for the subset of Word run formatting represented
 // by the rich-content inventory. This does not resolve fonts, sizes, language,
 // paragraph layout, numbering, theme colors, or other OOXML properties.
-const attrs = tag => Object.fromEntries([...tag.matchAll(/([\\w:.-]+)=[\"']([^\"']*)[\"']/g)].map(m => [m[1], m[2]]));
-const inner = (xml, tag) => new RegExp('<w:' + tag + '(?:\\\\s[^>]*)?>([\\\\s\\\\S]*?)<\\\\/w:' + tag + '>').exec(xml)?.[1] ?? '';
-const directTag = (xml, tag) => new RegExp('<w:' + tag + '\\\\b[^>]*\\\\/?\\\\s*>').exec(xml)?.[0] ?? null;
+const attrs = tag => Object.fromEntries([...tag.matchAll(/([\w:.-]+)=[\"']([^\"']*)[\"']/g)].map(m => [m[1], m[2]]));
+const inner = (xml, tag) => new RegExp('<w:' + tag + '(?:\\s[^>]*)?>([\\s\\S]*?)<\\/w:' + tag + '>').exec(xml)?.[1] ?? '';
+const directTag = (xml, tag) => new RegExp('<w:' + tag + '\\b[^>]*\\/?\\s*>').exec(xml)?.[0] ?? null;
 const propertyValue = (xml, tag) => {
   const found = directTag(xml, tag);
   if (!found) return undefined;
@@ -34,10 +34,10 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
     return {ok:false,errors:['Styles XML, paragraph XML, and run XML are required.'],formatting:null};
   }
   const styleMap=new Map();
-  for (const match of stylesXml.matchAll(/<w:style\\b([^>]*)>([\\s\\S]*?)<\\/w:style>/g)) {
+  for (const match of stylesXml.matchAll(/<w:style\b([^>]*)>([\s\S]*?)<\/w:style>/g)) {
     const a=attrs(match[1]), body=match[2], id=a['w:styleId'];
     if (!id || styleMap.has(id)) { errors.push('Missing or duplicate Word style ID.'); continue; }
-    styleMap.set(id,{id,basedOn:/<w:basedOn\\b[^>]*\\bw:val=[\"']([^\"']+)[\"']/.exec(body)?.[1] ?? null,run:runProps(inner(body,'rPr'))});
+    styleMap.set(id,{id,basedOn:/<w:basedOn\b[^>]*\bw:val=[\"']([^\"']+)[\"']/.exec(body)?.[1] ?? null,run:runProps(inner(body,'rPr'))});
   }
   const chain=(id,label)=>{
     const found=[], seen=new Set();
@@ -55,11 +55,11 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
   const effective={b:false,i:false,u:false,color:null};
   const defaults=inner(inner(stylesXml,'docDefaults'),'rPrDefault');
   merge(effective,runProps(defaults));
-  const pStyle=/<w:pStyle\\b[^>]*\\bw:val=[\"']([^\"']+)[\"']/.exec(paragraphXml)?.[1] ?? null;
+  const pStyle=/<w:pStyle\b[^>]*\bw:val=[\"']([^\"']+)[\"']/.exec(paragraphXml)?.[1] ?? null;
   if(pStyle) for(const props of chain(pStyle,'paragraph style')) merge(effective,props);
   const pRun=inner(inner(paragraphXml,'pPr'),'rPr');
   merge(effective,runProps(pRun));
-  const rStyle=/<w:rStyle\\b[^>]*\\bw:val=[\"']([^\"']+)[\"']/.exec(runXml)?.[1] ?? null;
+  const rStyle=/<w:rStyle\b[^>]*\bw:val=[\"']([^\"']+)[\"']/.exec(runXml)?.[1] ?? null;
   if(rStyle) for(const props of chain(rStyle,'character style')) merge(effective,props);
   merge(effective,runProps(inner(runXml,'rPr')));
   for(const [key,value] of Object.entries(effective)) if(value?.unsupported) errors.push('Unsupported inherited Word formatting: '+key+'.');
