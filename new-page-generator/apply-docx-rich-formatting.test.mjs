@@ -90,6 +90,6 @@ test("applies source paragraph formatting to rendered heading elements",()=>{
  const result=applyDocxRichFormatting("<h2>Heading</h2>",source);
  assert.equal(result.ok,true,result.errors.join("; "));
  assert.match(result.html,/<h2 style="text-align:center">/);
- assert.match(result.html,/<strong><span/);
- assert.match(result.html,/>Heading<\/span><\/strong>/);
+ assert.match(result.html,/<span style="[^"]*font-weight:bold/);
+ assert.match(result.html,/>Heading<\/span>/);
 });
