@@ -35,3 +35,9 @@ test("Markdown is an accepted explicit source mode",()=>{
  const input=valid(); input.pages.en.mode="markdown"; input.pages.en.source="english.md";
  assert.equal(validatePageSet(input).ok,true);
 });
+
+
+test("HTML file is an accepted explicit source mode",()=>{
+ const input=valid(); input.pages.en.mode="html"; input.pages.en.source="english.html";
+ assert.equal(validatePageSet(input).ok,true);
+});
