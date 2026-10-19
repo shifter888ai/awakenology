@@ -12,7 +12,7 @@ const outputPath = 'pilot-artifacts/pilot-audit.json';
 const buffer = await readFile(sourcePath);
 const sha256 = createHash('sha256').update(buffer).digest('hex');
 const stages = {};
-const diagnostic = {unsupportedTextConstructs:[], drawingKinds:{}, explicitColors:[], lineBreaks:[], floatingDrawings:[], runPropertyInventory:{counts:{},samples:{}}, paragraphPropertyInventory:{counts:{},samples:{}}};
+const diagnostic = {unsupportedTextConstructs:[], drawingKinds:{}, explicitColors:[], lineBreaks:[], floatingDrawings:[], runPropertyInventory:{counts:{},samples:{}}, paragraphPropertyInventory:{counts:{},samples:{}},styleResolutionInventory:{references:[],definitions:[],docDefaults:{}}};
 try {
   const zip = await JSZip.loadAsync(buffer,{checkCRC32:true});
   const xml = await zip.file('word/document.xml').async('string');
@@ -30,6 +30,45 @@ try {
     colors.set(value,(colors.get(value) ?? 0)+1);
   }
   diagnostic.explicitColors = [...colors].map(([value,count])=>({value,count}));
+  const stylesPart = zip.file('word/styles.xml');
+  if (stylesPart) {
+    const stylesXml = await stylesPart.async('string');
+    const refs = new Map();
+    for (const match of xml.matchAll(/<w:(pStyle|rStyle)\b[^>]*\bw:val=["']([^"']+)["'][^>]*\/?\s*>/g)) {
+      const key = match[1] + ':' + match[2];
+      refs.set(key, (refs.get(key) ?? 0) + 1);
+    }
+    diagnostic.styleResolutionInventory.references = [...refs].map(([key,count]) => {
+      const [kind,id] = key.split(':');
+      return {kind,id,count};
+    });
+    const styleTags = [...stylesXml.matchAll(/<w:style\b([^>]*)>([\s\S]*?)<\/w:style>/g)];
+    const attributes = tag => Object.fromEntries([...tag.matchAll(/([\w:.-]+)=["']([^"']*)["']/g)].map(m=>[m[1],m[2]]));
+    const propNames = (body, tag) => {
+      const content = new RegExp('<w:' + tag + '\\b[^>]*>([\\s\\S]*?)<\\/w:' + tag + '>').exec(body)?.[1] ?? '';
+      return [...content.matchAll(/<w:([A-Za-z][A-Za-z0-9]*)\b[^>]*\/?\s*>/g)].map(x=>x[1]);
+    };
+    for (const ref of diagnostic.styleResolutionInventory.references.slice(0,30)) {
+      const found = styleTags.find(m => attributes(m[1])['w:styleId'] === ref.id);
+      if (!found) {
+        diagnostic.styleResolutionInventory.definitions.push({id:ref.id,kind:ref.kind,missing:true});
+        continue;
+      }
+      const attrs = attributes(found[1]);
+      const body = found[2];
+      const name = /<w:name\b[^>]*\bw:val=["']([^"']+)["']/.exec(body)?.[1] ?? null;
+      const basedOn = /<w:basedOn\b[^>]*\bw:val=["']([^"']+)["']/.exec(body)?.[1] ?? null;
+      diagnostic.styleResolutionInventory.definitions.push({
+        id:attrs['w:styleId'],type:attrs['w:type'],name,basedOn,
+        runProperties:propNames(body,'rPr'),paragraphProperties:propNames(body,'pPr')
+      });
+    }
+    const defaults = /<w:docDefaults\b[^>]*>([\s\S]*?)<\/w:docDefaults>/.exec(stylesXml)?.[1] ?? '';
+    diagnostic.styleResolutionInventory.docDefaults = {
+      runProperties:propNames(defaults,'rPrDefault'),
+      paragraphProperties:propNames(defaults,'pPrDefault')
+    };
+  }
   const paragraphs = [...xml.matchAll(/<w:p(?=[\s>])[^>]*>[\s\S]*?<\/w:p>/g)];
   const recordProperties = (inventory, tag, paragraphIndex, sample) => {
     inventory.counts[tag] = (inventory.counts[tag] ?? 0) + 1;
