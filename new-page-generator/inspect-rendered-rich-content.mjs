@@ -109,6 +109,7 @@ export function inspectRenderedRichContent(html, parser) {
     const size=fontSizePt(node); if(size!==null) {next.fontSizePt=size;next.fontSizeCsPt=size;}
     const fontFamilies={};
     for(const [attr,key] of [['data-word-font-ascii','ascii'],['data-word-font-hansi','hAnsi'],['data-word-font-east-asia','eastAsia'],['data-word-font-cs','cs']]) {const value=node.getAttribute?.(attr);if(value)fontFamilies[key]=value;}
+    if(node.getAttribute?.('data-word-font-hint')) next.fontHint=node.getAttribute('data-word-font-hint');
     if(Object.keys(fontFamilies).length) next.fontFamily=fontFamilies;
     else if(family!==null) next.fontFamily=family.replace(/^['"]|['"]$/g,'');
     const language={};
@@ -138,7 +139,7 @@ export function inspectRenderedRichContent(html, parser) {
     }
     for(const child of node.childNodes ?? []) visit(child,next);
   }
-  const initial={bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null,fontKerning:null};
+  const initial={bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null,fontKerning:null,fontHint:null};
   for(const child of doc.body?.childNodes ?? []) visit(child,initial);
   if(!runs.length) errors.push('No rendered text runs.');
   return {ok:errors.length===0,errors,runs,images,lineBreaks,paragraphLayouts,paragraphCount:paragraphIndex+1};
