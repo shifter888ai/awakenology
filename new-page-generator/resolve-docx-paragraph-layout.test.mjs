@@ -61,12 +61,11 @@ test("blocks atLeast line spacing rather than treating it as a paragraph min-hei
   assert.equal(result.ok, false);
 });
 
-test('numbering wrapper is classified once while active numbering stays blocked',()=>{
+test('paragraph layout leaves active numbering to the independent numbering resolver',()=>{
  const disabled=resolveDocxParagraphLayout({stylesXml:styles(''),paragraphXml:p('', '<w:numPr><w:ilvl w:val="0"/><w:numId w:val="0"/></w:numPr>')});
  assert.equal(disabled.ok,true,disabled.errors.join('; '));
  const active=resolveDocxParagraphLayout({stylesXml:styles(''),paragraphXml:p('', '<w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr>')});
- assert.equal(active.ok,false);
- assert.ok(active.errors.some(x=>x.includes('independent list mapping')));
+ assert.equal(active.ok,true,active.errors.join('; '));
  assert.ok(!active.errors.some(x=>x.includes('property w:ilvl')||x.includes('property w:numId')));
 });
 
