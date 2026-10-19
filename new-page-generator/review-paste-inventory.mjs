@@ -18,7 +18,7 @@ const attrs = {
   A: ["href", "title", "style", "lang"],
   IMG: ["src", "alt", "title", "style"],
   TH: ["colspan", "rowspan", "style"], TD: ["colspan", "rowspan", "style"],
-  SPAN: ["style", ...WORD_RUN_ATTRS],
+  SPAN: ["style", "lang", ...WORD_RUN_ATTRS],
   P: ["style", ...WORD_PARAGRAPH_ATTRS],
   LI: ["style", ...WORD_PARAGRAPH_ATTRS],
   OL: ["start", "type", "style"], UL: ["style"],
