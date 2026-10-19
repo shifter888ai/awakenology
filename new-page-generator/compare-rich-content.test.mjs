@@ -207,3 +207,14 @@ test('blocks source paragraph-mark metadata missing from rendered inspection',()
  assert.equal(result.ok,false);
  assert.ok(result.issues.some(issue=>issue.kind==='paragraph-mark-formatting-rendered-inventory-missing'));
 });
+
+
+test("blocks unitless line-height ratio mismatches",()=>{
+ const source={...sample(),paragraphLayouts:[{paragraphIndex:0,alignment:"left",indentation:{left:0,right:0},spacing:{beforePt:0,afterPt:0,lineHeightPt:null,lineHeight:1.2}}]};
+ const output=structuredClone(source);
+ assert.equal(compareRichContent(source,output).ok,true);
+ output.paragraphLayouts[0].spacing.lineHeight=1.5;
+ const result=compareRichContent(source,output);
+ assert.equal(result.ok,false);
+ assert.ok(result.issues.some(issue=>issue.kind==="paragraph-spacing-mismatch"&&issue.field==="lineHeight"));
+});
