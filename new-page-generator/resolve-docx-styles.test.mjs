@@ -358,3 +358,11 @@ test("merges paragraph-mark fonts and languages across defaults, style, and dire
  assert.deepEqual(result.paragraphMarkFormatting.fontFamily,{ascii:"Arial",eastAsia:"Yu Gothic",cs:"Arial CS"});
  assert.deepEqual(result.paragraphMarkFormatting.language,{val:"en-US",eastAsia:"ja-JP",bidi:"ar-SA"});
 });
+
+
+test("treats a Word font hint without family values as selection metadata",()=>{
+ const result=resolveDocxRunFormatting({stylesXml:styles(),paragraphXml:paragraph(),runXml:run("",'<w:rFonts w:hint="default"/>')});
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.equal(result.formatting.fontFamily,undefined);
+ assert.equal(result.formatting.fontHint,"default");
+});
