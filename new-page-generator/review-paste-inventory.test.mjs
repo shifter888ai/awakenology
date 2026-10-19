@@ -25,3 +25,9 @@ test("allows verified Word list provenance and paragraph/run typography",()=>{
 test("still rejects unsupported CSS and unapproved provenance attributes",()=>{
  assert.equal(reviewPasteInventory(el("LI",[["style","position:fixed"],["data-word-unknown","x"]])).ok,false);
 });
+
+
+test("allows explicitly supported pixel-based inline layout",()=>{
+ const result=reviewPasteInventory(el("P",[["style","font-size:16px;margin-left:12px;line-height:20px"]]));
+ assert.equal(result.ok,true,result.errors.join("; "));
+});
