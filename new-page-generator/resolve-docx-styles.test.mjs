@@ -102,3 +102,12 @@ test('blocks malformed or zero Word font sizes',()=>{
  assert.equal(result.ok,false);
  assert.ok(result.errors.some(x=>x.includes('Unsupported inherited Word formatting: fontSizePt')));
 });
+
+
+test('direct unsupported run formatting cannot be silently dropped',()=>{
+ for(const property of ['<w:rFonts w:ascii="Arial"/>','<w:lang w:val="en-US"/>','<w:spacing w:val="20"/>','<w:szCs w:val="24"/>']) {
+  const result=resolveDocxRunFormatting({stylesXml:styles(),paragraphXml:paragraph(),runXml:run('',property)});
+  assert.equal(result.ok,false,property);
+  assert.ok(result.errors.some(x=>x.includes('Unsupported direct run property')),result.errors.join('; '));
+ }
+});
