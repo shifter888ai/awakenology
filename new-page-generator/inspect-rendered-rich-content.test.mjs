@@ -62,3 +62,27 @@ test('blocks text outside recognized paragraph containers',()=>{
  assert.equal(d.ok,false);
  assert.ok(d.errors.some(x=>x.includes('outside a recognized paragraph block')));
 });
+
+
+test('blocks inherited CSS and semantic layout tags until their effects are mapped',()=>{
+ const cssParser={parseFromString:()=>({
+  head:{childNodes:[node('STYLE',{},[text('p { font-size: 20px }')])]},
+  body:{childNodes:[node('P',{},[text('Text')])]}
+ })};
+ const css=inspectRenderedRichContent('<style>p { font-size: 20px }</style><p>Text</p>',cssParser);
+ assert.equal(css.ok,false);
+ assert.ok(css.errors.some(x=>x.includes('Embedded CSS rules')));
+ const headingParser={parseFromString:()=>({body:{childNodes:[node('H1',{},[text('Heading')])]}})};
+ const heading=inspectRenderedRichContent('<h1>Heading</h1>',headingParser);
+ assert.equal(heading.ok,false);
+ assert.ok(heading.errors.some(x=>x.includes('semantic formatting tag: H1')));
+});
+test('blocks external stylesheets before assuming inline style inventory is complete',()=>{
+ const stylesheetParser={parseFromString:()=>({
+  head:{childNodes:[node('LINK',{rel:'stylesheet',href:'/site.css'})]},
+  body:{childNodes:[node('P',{},[text('Text')])]}
+ })};
+ const result=inspectRenderedRichContent('<link rel="stylesheet" href="/site.css"><p>Text</p>',stylesheetParser);
+ assert.equal(result.ok,false);
+ assert.ok(result.errors.some(x=>x.includes('External stylesheets')));
+});
