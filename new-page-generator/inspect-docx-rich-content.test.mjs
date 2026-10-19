@@ -43,8 +43,17 @@ test('blocks unrecognized Word formatting values rather than flattening them',as
 test('blocks paragraph and run styles until inherited formatting is resolved',async()=>{
  const paragraph=await inspectDocxRichContent(await fixture('<w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:t>Heading</w:t></w:r></w:p>'));
  assert.equal(paragraph.ok,false);
- assert.ok(paragraph.errors.some(x=>x.includes('Inherited styles')));
+ assert.ok(paragraph.errors.some(x=>x.includes('Unresolved OOXML feature w:pStyle')));
  const run=await inspectDocxRichContent(await fixture('<w:p><w:r><w:rPr><w:rStyle w:val="Emphasis"/></w:rPr><w:t>Emphasized</w:t></w:r></w:p>'));
  assert.equal(run.ok,false);
- assert.ok(run.errors.some(x=>x.includes('Inherited styles')));
+ assert.ok(run.errors.some(x=>x.includes('Unresolved OOXML feature w:rStyle')));
+});
+
+
+test('reports exact unsupported run property names and paragraph locations',async()=>{
+ const r=await inspectDocxRichContent(await fixture('<w:p><w:r><w:rPr><w:rFonts w:ascii="Arial"/><w:sz w:val="24"/></w:rPr><w:t>Styled</w:t></w:r></w:p><w:p><w:r><w:rPr><w:rFonts w:ascii="Arial"/></w:rPr><w:t>Again</w:t></w:r></w:p>'));
+ assert.equal(r.ok,false);
+ assert.ok(r.errors.some(x=>x.includes('Unresolved run property w:rFonts in 2 paragraph(s): 1, 2')));
+ assert.ok(r.errors.some(x=>x.includes('Unresolved run property w:sz in 1 paragraph(s): 1')));
+ assert.ok(!r.errors.some(x=>x==='Unresolved run property in paragraph 1.'));
 });
