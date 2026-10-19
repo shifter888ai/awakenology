@@ -377,8 +377,9 @@ test("allows complete explicit script fonts to override unresolved inherited the
 });
 
 test("keeps unresolved inherited theme fonts blocking when a direct override is partial",()=>{
- const xml='<w:styles><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:asciiTheme="minorHAnsi"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>';
- const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml:paragraph(),runXml:run("",'<w:rFonts w:ascii="Arial"/>')});
+ const xml='<w:styles><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:asciiTheme="minorHAnsi" w:eastAsiaTheme="minorEastAsia"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>';
+ const japaneseRun='<w:r><w:rPr><w:rFonts w:ascii="Arial"/></w:rPr><w:t>日本語</w:t></w:r>';
+ const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml:paragraph(),runXml:japaneseRun});
  assert.equal(result.ok,false);
  assert.ok(result.errors.some(error=>error.includes("Unsupported inherited Word formatting: fontFamily")));
 });
