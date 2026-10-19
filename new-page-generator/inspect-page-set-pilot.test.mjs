@@ -46,7 +46,7 @@ test("real DOCX pilot exposes a non-publishable floating-image preview for visua
  assert.ok(result.pages.en.previewHtml.includes("<img"));
  assert.match(result.pages.en.sourceSha256,/^[a-f0-9]{64}$/);
  assert.equal(result.pages.en.imageAltIssues.length,1);
- assert.match(result.pages.en.imageAltIssues[0].src,/^\\/assets\\/docx-/);
+ assert.match(result.pages.en.imageAltIssues[0].src,/^\/assets\/docx-/);
  assert.ok(result.errors.some(error=>error.includes("image needs src and alt review")));
  assert.ok(result.errors.includes("en: "+FLOATING_DRAWING_REVIEW_ERROR));
 
