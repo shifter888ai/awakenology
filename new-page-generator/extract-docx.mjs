@@ -31,6 +31,17 @@ const FEATURES = [
 ];
 const xmlText = bytes => new TextDecoder("utf-8", { fatal: true }).decode(bytes);
 const digest = buffer => createHash("sha256").update(buffer).digest("hex");
+export function isResolvedListParagraphWarning(message, stylesXml, documentXml) {
+  const match=/^Unrecognised paragraph style: 'List Paragraph' \\(Style ID: ([^)]+)\\)$/.exec(message??'');
+  if(!match || typeof stylesXml!=='string' || typeof documentXml!=='string') return false;
+  const styleId=match[1];
+  const style=[...stylesXml.matchAll(/<w:style\\b([^>]*)>([\\s\\S]*?)<\\/w:style>/g)].find(item=>{
+    const id=/\\bw:styleId=["']([^"']+)["']/.exec(item[1])?.[1];
+    return id===styleId && /<w:name\\b[^>]*\\bw:val=["']List Paragraph["']/.test(item[2]);
+  });
+  const referenced=[...documentXml.matchAll(/<w:pStyle\\b[^>]*\\bw:val=["']([^"']+)["'][^>]*\\/?\\s*>/g)].some(item=>item[1]===styleId);
+  return Boolean(style&&referenced);
+}
 const blocked = (errors, buffer) => ({
   ok: false, errors, html: null,
   ...(Buffer.isBuffer(buffer) ? { sha256: digest(buffer) } : {})
@@ -128,7 +139,7 @@ export async function extractDocx(buffer) {
         return { src: asset.outputPath, alt: asset.altText };
       })
     });
-    errors.push(...converted.messages.map(m => `DOCX parser ${m.type}: ${m.message}`));
+    errors.push(...converted.messages.filter(m=>!(m.type==='warning'&&isResolvedListParagraphWarning(m.message,stylesXml,xml))).map(m => `DOCX parser ${m.type}: ${m.message}`));
     if (!converted.value?.trim()) errors.push("DOCX converted to empty HTML.");
     let formattedHtml = converted.value;
     if (converted.value?.trim()) {
