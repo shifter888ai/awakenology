@@ -7,6 +7,7 @@ import {inspectDocxImagePlacement} from './inspect-docx-image-placement.mjs';
 import {inspectDocxRichContent} from './inspect-docx-rich-content.mjs';
 import {extractDocx} from './extract-docx.mjs';
 import {countXmlTag} from './pilot-xml-diagnostics.mjs';
+import {resolveDocxNumbering} from './resolve-docx-numbering.mjs';
 import {renderStaticShell} from './static-shell.mjs';
 
 const sourcePath = 'temp/多重時空是什麽 - 繁體 - Copy.docx';
@@ -115,7 +116,8 @@ try {
       const ilvl = /<w:ilvl\b[^>]*\bw:val=["']([^"']+)["']/.exec(numPr)?.[1] ?? '0';
       const abstractNumId = nums.get(numId) ?? null;
       const level = (abstract.get(abstractNumId) ?? []).find(item => item.ilvl === ilvl) ?? null;
-      refs.push({paragraphIndex:index,numId,ilvl,abstractNumId,level});
+      const resolved = resolveDocxNumbering({numberingXml,paragraphXml:match[0]});
+      refs.push({paragraphIndex:index,numId,ilvl,abstractNumId,level,resolved:resolved.numbering,resolutionErrors:resolved.errors});
     });
     diagnostic.numberingInventory = {definedNumIds:[...nums.entries()].map(([numId,abstractNumId])=>({numId,abstractNumId,levels:abstract.get(abstractNumId)??[]})),paragraphReferences:refs};
   } else {
