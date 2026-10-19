@@ -8,13 +8,15 @@ const direct = (xml, tag) => new RegExp(String.raw`<w:${tag}\b[^>]*\/?\s*>`).exe
 const children = xml => [...xml.matchAll(/<w:([A-Za-z][A-Za-z0-9]*)\b[^>]*\/?\s*>/g)].map(m=>m[1]);
 const layoutProps = xml => {
   const result = {};
-  const jc = direct(xml,'jc');
+  // Run properties nested under pPr (paragraph-mark formatting) are not paragraph layout.
+  const paragraphOnly=xml.replace(/<w:rPr\\b[^>]*>[\\s\\S]*?<\\/w:rPr>/g,'').replace(/<w:rPr\\b[^>]*\\/>/g,'');
+  const jc = direct(paragraphOnly,'jc');
   if (jc) {
     const value=attrs(jc)['w:val'];
     if (invalidAttrs(jc,['w:val']) || !['left','right','center','both','start','end','distribute'].includes(value)) result.alignment={unsupported:true};
     else result.alignment=value;
   }
-  const spacing = direct(xml,'spacing');
+  const spacing = direct(paragraphOnly,'spacing');
   if (spacing) {
     const a = attrs(spacing), parsed = {};
     if (invalidAttrs(spacing,['w:before','w:after','w:line','w:lineRule','w:beforeAutospacing','w:afterAutospacing','w:beforeLines','w:afterLines'])) parsed.unsupported={unsupported:true};
@@ -38,7 +40,7 @@ const layoutProps = xml => {
     if (a['w:lineRule'] !== undefined && !['exact','auto','atLeast'].includes(a['w:lineRule'])) parsed.unsupported = {unsupported:true};
     result.spacing = parsed;
   }
-  const ind = direct(xml,'ind');
+  const ind = direct(paragraphOnly,'ind');
   if (ind) {
     const a=attrs(ind), parsed={};
     if (invalidAttrs(ind,['w:left','w:right','w:firstLine','w:hanging','w:start','w:end','w:leftChars','w:rightChars','w:firstLineChars','w:hangingChars'])) parsed.unsupported={unsupported:true};
