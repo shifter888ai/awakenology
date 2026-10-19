@@ -92,10 +92,21 @@ export function applyDocxRichFormatting(html, sourceInventory) {
     const layout=sourceInventory.paragraphLayouts.find(item=>item.paragraphIndex===p);
     if(!layout) {errors.push("Missing source paragraph layout for paragraph "+(p+1)+".");continue;}
     const existingStyle=attr(block,"style");
-    const mappedStyle=paragraphStyle(layout);
+    const numberingForBlock = block.nodeName === "li" ? sourceInventory.paragraphNumbering?.find(item => item.paragraphIndex === p) : null;
+    const numberIndent = numberingForBlock?.indentation ?? {};
+    const directIndent = layout.indentation ?? {};
+    const effectiveLayout = block.nodeName === "li" && numberingForBlock ? {
+      ...layout,
+      indentation: Object.fromEntries(["left","right","firstLine","hanging"].flatMap(key => {
+        const direct = directIndent[key];
+        const resolved = direct !== undefined && Number(direct) !== 0 ? direct : numberIndent[key];
+        return resolved === undefined || resolved === null || Number(resolved) === 0 ? [] : [[key,resolved]];
+      }))
+    } : layout;
+    const mappedStyle=paragraphStyle(effectiveLayout);
     if(existingStyle || mappedStyle) setAttr(block,"style",[existingStyle,mappedStyle].filter(Boolean).join(";"));
     if (block.nodeName === "li") {
-      const numbering = sourceInventory.paragraphNumbering?.find(item => item.paragraphIndex === p);
+      const numbering = numberingForBlock;
       if (!numbering) {
         errors.push("Rendered list item at paragraph "+(p+1)+" has no corresponding source numbering definition.");
       } else {
