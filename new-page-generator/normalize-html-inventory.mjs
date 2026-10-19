@@ -3,7 +3,9 @@ import { validateNormalizedBlocks } from "./normalized-source-model.mjs";
 const TAG_TYPE = new Map([
   ["H1","heading"],["H2","heading"],["H3","heading"],["H4","heading"],["H5","heading"],["H6","heading"],
   ["UL","list"],["OL","list"],["LI","list-item"],["TABLE","table"],["TR","table-row"],
-  ["TD","table-cell"],["TH","table-cell"],["BR","line-break"],["IMG","asset"],["A","link"]
+  ["TD","table-cell"],["TH","table-cell"],["BR","line-break"],["IMG","asset"],["A","link"],
+  ["STRONG","text"],["B","text"],["EM","text"],["I","text"],["U","text"],["S","text"],
+  ["SPAN","text"],["CODE","text"],["SUP","text"],["SUB","text"]
 ]);
 const isRecord = value => value !== null && typeof value === "object" && !Array.isArray(value);
 
