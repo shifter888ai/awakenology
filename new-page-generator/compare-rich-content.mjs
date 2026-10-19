@@ -2,7 +2,7 @@
 // Expected runs: [{paragraphIndex, text, bold, italic, underline, color, href}] in document order.
 // Expected images: [{assetPath, paragraphIndex, order, alt, textOffset, markerOrder}] in document order.
 const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
-const stable = value => Array.isArray(value) ? "["+value.map(stable).join(",")+"]" : value && typeof value==="object" ? "{"+Object.keys(value).sort().map(key=>JSON.stringify(key)+":"+stable(value[key])).join(",")+"}" : JSON.stringify(value);
+const stable = value => Array.isArray(value) ? "["+value.map(stable).join(",")+"]" : value && typeof value==="object" ? "{"+Object.keys(value).filter(key=>value[key]!==undefined).sort().map(key=>JSON.stringify(key)+":"+stable(value[key])).join(",")+"}" : JSON.stringify(value);
 const required = (o, keys, where) => {
   if (!o || typeof o !== 'object' || keys.some(k => !own(o, k))) {
     throw new Error('Incomplete rich-content inventory at ' + where);
