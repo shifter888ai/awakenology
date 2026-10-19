@@ -19,7 +19,7 @@ function inline(source, errors, line) {
     const url=(isImage?imageUrl:linkUrl).trim().replace(/^<|>$/g,"");
     if(!safeUrl(url,isImage)){errors.push(`Line ${line}: unsafe or unsupported Markdown ${isImage?"image":"link"} URL.`);return escapeHtml(match);}
     const escapedUrl=escapeHtml(url);
-    return tokenise(isImage ? `<img src="${escapedUrl}" alt="${escapeHtml(alt)}">` : `<a href="${escapedUrl}">${escapeHtml(label)}</a>`);
+    return tokenise(isImage ? `<img src="${escapedUrl}" alt="${escapeHtml(alt)}">` : `<a href="${escapedUrl}">${inline(label,errors,line)}</a>`);
   });
   let text=escapeHtml(protectedSource);
   text=text.replace(/\*\*([^*\n]+)\*\*/g,"<strong>$1</strong>").replace(/__([^_\n]+)__/g,"<strong>$1</strong>")
