@@ -3,25 +3,28 @@ import { inspectDocxSourceMap } from './inspect-docx-source-map.mjs';
 import { inspectDocxImagePlacement } from './inspect-docx-image-placement.mjs';
 import { resolveDocxRunFormatting } from './resolve-docx-styles.mjs';
 import { resolveDocxParagraphLayout } from './resolve-docx-paragraph-layout.mjs';
+import { resolveDocxNumbering } from './resolve-docx-numbering.mjs';
 import { splitWordScriptSegments } from './word-script-segments.mjs';
 
 // Conservative OOXML extractor. Anything not mapped with certainty blocks approval.
 export async function inspectDocxRichContent(buffer) {
-  const fail = errors => ({ ok: false, errors, runs: [], images: [], lineBreaks: [], paragraphLayouts: [], paragraphCount: 0 });
+  const fail = errors => ({ ok: false, errors, runs: [], images: [], lineBreaks: [], paragraphLayouts: [], paragraphNumbering: [], paragraphCount: 0 });
   const source = await inspectDocxSourceMap(buffer);
   if (!source.ok) return fail(source.errors);
-  let xml, stylesXml, hasSectionBreak = false;
+  let xml, stylesXml, numberingXml, hasSectionBreak = false;
   try {
     const zip = await JSZip.loadAsync(buffer, { checkCRC32: true });
     const documentPart = zip.file('word/document.xml');
     const stylesPart = zip.file('word/styles.xml');
+    const numberingPart = zip.file('word/numbering.xml');
     if (!documentPart) return fail(['Original document OOXML part is missing.']);
     xml = await documentPart.async('string');
     hasSectionBreak = [...xml.matchAll(/<w:p\b[^>]*>[\s\S]*?<\/w:p>/g)].some(paragraph => /<w:pPr\b[^>]*>[\s\S]*?<w:sectPr\b/.test(paragraph[0]));
     stylesXml = stylesPart ? await stylesPart.async('string') : '<w:styles></w:styles>';
+    numberingXml = numberingPart ? await numberingPart.async('string') : '<w:numbering></w:numbering>';
   } catch { return fail(['Cannot read original OOXML.']); }
 
-  const errors = [], runs = [], paragraphLayouts = [];
+  const errors = [], runs = [], paragraphLayouts = [], paragraphNumbering = [];
   if (hasSectionBreak) errors.push('Section breaks inside document content require manual resolution.');
   const unknownRunProperties = new Map();
   const advancedTags = new Map();
@@ -44,6 +47,9 @@ export async function inspectDocxRichContent(buffer) {
     const layout = resolveDocxParagraphLayout({stylesXml, paragraphXml: paragraphs[p][0]});
     if (!layout.ok) errors.push(...layout.errors.map(error => 'Paragraph ' + (p + 1) + ' layout: ' + error));
     paragraphLayouts.push({paragraphIndex:p, ...(layout.layout ?? {unsupported:true})});
+    const numbered = resolveDocxNumbering({numberingXml,paragraphXml:paragraphs[p][0]});
+    if (!numbered.ok) errors.push(...numbered.errors.map(error => 'Paragraph '+(p+1)+' numbering: '+error));
+    if (numbered.numbering) { paragraphNumbering.push({paragraphIndex:p,...numbered.numbering}); errors.push('Resolved Word list numbering at paragraph '+(p+1)+' still requires verified HTML list rendering.'); }
     for (const match of raw.matchAll(/<w:r(?=[\s>])[^>]*>([\s\S]*?)<\/w:r>/g)) {
       const body = match[1];
       if (/<w:drawing\b/.test(body) && !/<w:t(?=[\s>])/.test(body)) continue;
@@ -117,5 +123,5 @@ export async function inspectDocxRichContent(buffer) {
     if (!position) errors.push('No ordered content position for image relationship ' + relationshipId + '.');
     return {assetPath, paragraphIndex, order, alt, textOffset:position?.textOffset ?? 0, markerOrder:position?.markerOrder ?? -1, placement:imagePlacement};
   }) : [];
-  return errors.length ? {...fail([...new Set(errors)]), runs, images, lineBreaks, paragraphLayouts, paragraphCount:source.paragraphs.length} : {ok:true, errors:[], runs, images, lineBreaks, paragraphLayouts, paragraphCount:source.paragraphs.length};
+  return errors.length ? {...fail([...new Set(errors)]), runs, images, lineBreaks, paragraphLayouts, paragraphNumbering, paragraphCount:source.paragraphs.length} : {ok:true, errors:[], runs, images, lineBreaks, paragraphLayouts, paragraphCount:source.paragraphs.length};
 }
