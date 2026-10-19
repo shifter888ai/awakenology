@@ -10,7 +10,7 @@ import { compareRichContent } from "./compare-rich-content.mjs";
 import { inspectRenderedRichContent } from "./inspect-rendered-rich-content.mjs";
 
 /**
- * Offline review coordinator. Returns static HTML only when source inspection,
+ * Offline review coordinator. Returns static HTML and verified asset payloads only when source inspection,
  * parsed rendered content, and language routes all pass. Output inventories are
  * derived from the actual reviewedArticleHtml, never trusted from caller input.
  * This remains a review gate, not a security boundary or a full HTML sanitizer.
