@@ -40,17 +40,17 @@ jobs:
       - name: Verify source-image and paragraph review artifact
         run: |
           test -s pilot-artifacts/pilot-visual-review.html
-          grep -q 'All source paragraphs (184)' pilot-artifacts/pilot-visual-review.html
-          grep -q 'Linear source sequence (text and images)' pilot-artifacts/pilot-visual-review.html
-          grep -q 'Source image 1' pilot-artifacts/pilot-visual-review.html
-          grep -q 'Paragraph 184:' pilot-artifacts/pilot-visual-review.html
-          grep -q 'manual visual review required' pilot-artifacts/pilot-visual-review.html
+          grep -q 'All source paragraphs (184)' pilot-artifacts/pilot-visual-review.html || { echo "::error::Missing expected review marker: All source paragraphs (184) in pilot-artifacts/pilot-visual-review.html"; exit 1; }
+          grep -q 'Linear source sequence (text and images)' pilot-artifacts/pilot-visual-review.html || { echo "::error::Missing expected review marker: Linear source sequence (text and images) in pilot-artifacts/pilot-visual-review.html"; exit 1; }
+          grep -q 'Source image 1' pilot-artifacts/pilot-visual-review.html || { echo "::error::Missing expected review marker: Source image 1 in pilot-artifacts/pilot-visual-review.html"; exit 1; }
+          grep -q 'Paragraph 184:' pilot-artifacts/pilot-visual-review.html || { echo "::error::Missing expected review marker: Paragraph 184: in pilot-artifacts/pilot-visual-review.html"; exit 1; }
+          grep -q 'manual visual review required' pilot-artifacts/pilot-visual-review.html || { echo "::error::Missing expected review marker: manual visual review required in pilot-artifacts/pilot-visual-review.html"; exit 1; }
           test -s pilot-artifacts/shell-layout-preview.html
           test -s pilot-artifacts/pilot-converted-preview.html
-          grep -q 'NOT APPROVED FOR PUBLICATION' pilot-artifacts/pilot-converted-preview.html
-          grep -q 'LAYOUT PREVIEW ONLY' pilot-artifacts/shell-layout-preview.html
-          grep -q 'class="theme-toggle"' pilot-artifacts/shell-layout-preview.html
-          grep -q 'class="return-top"' pilot-artifacts/shell-layout-preview.html
+          grep -q 'NOT APPROVED FOR PUBLICATION' pilot-artifacts/pilot-converted-preview.html || { echo "::error::Missing expected review marker: NOT APPROVED FOR PUBLICATION in pilot-artifacts/pilot-converted-preview.html"; exit 1; }
+          grep -q 'LAYOUT PREVIEW ONLY' pilot-artifacts/shell-layout-preview.html || { echo "::error::Missing expected review marker: LAYOUT PREVIEW ONLY in pilot-artifacts/shell-layout-preview.html"; exit 1; }
+          grep -q 'class="theme-toggle"' pilot-artifacts/shell-layout-preview.html || { echo "::error::Missing expected review marker: class="theme-toggle" in pilot-artifacts/shell-layout-preview.html"; exit 1; }
+          grep -q 'class="return-top"' pilot-artifacts/shell-layout-preview.html || { echo "::error::Missing expected review marker: class="return-top" in pilot-artifacts/shell-layout-preview.html"; exit 1; }
       - name: Upload pilot diagnostic report
         if: always()
         uses: actions/upload-artifact@v4
