@@ -178,7 +178,7 @@ test("restores source markers inside an omitted empty paragraph",()=>{
  };
  const result=applyDocxRichFormatting("<p>First</p><p>Second</p>",source);
  assert.equal(result.ok,true,result.errors.join("; "));
- assert.match(result.html,/<p><br><img src="\/assets\/empty\.png" alt="Empty paragraph image"><\/p>/);
+ assert.match(result.html,/<p><br><img src="\\/assets\\/empty\\.png" alt="Empty paragraph image" data-word-image-placement-json=/);
 });
 
 
