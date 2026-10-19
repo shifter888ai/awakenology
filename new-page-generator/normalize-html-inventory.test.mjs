@@ -34,3 +34,17 @@ test("does not pretend generated HTML paths are original DOCX XML offsets", () =
   assert.deepEqual(result.blocks[0].sourceLocation, { part: "converted-html", path: "/0" });
   assert.equal("start" in result.blocks[0].sourceLocation, false);
 });
+
+
+test("retains ordered-list starts and Word numbering provenance in normalized blocks",()=>{
+ const inventory=[
+  {type:"element",path:"/0",tag:"OL",attributes:[["start","3"],["type","I"]]},
+  {type:"element",path:"/0/0",tag:"LI",attributes:[["data-word-num-id","7"],["data-word-level","0"]]},
+  {type:"text",path:"/0/0/0",value:"Third item"}
+ ];
+ const result=normalizeHtmlInventory(inventory,{language:"en",sourceMode:"docx",sourcePart:"converted-html"});
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.ok(result.blocks[0].formatting.some(item=>item.kind==="list-start"&&item.value==="3"));
+ assert.ok(result.blocks[0].formatting.some(item=>item.kind==="list-marker-type"&&item.value==="I"));
+ assert.ok(result.blocks[1].formatting.some(item=>item.kind==="word-metadata"&&item.property==="data-word-num-id"&&item.value==="7"));
+});
