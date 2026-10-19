@@ -41,3 +41,7 @@ The coordinator has a tested positive path for a minimal, supported synthetic DO
 ## HTML-paste URL guard (2026-10-19)
 
 The paste inspector now rejects URL schemes outside the explicit link/image allowlists and strips ASCII control/whitespace characters before scheme detection, preventing obfuscated `javascript:` links from bypassing the first inspection layer. Tests cover unsafe and obfuscated link schemes, protocol-relative URLs, safe relative links, and image source schemes. CI passed: [run 39238916402](https://github.com/shifter888ai/awakenology/actions/runs/39238916402). The later review-inventory gate still requires image sources to be reviewed local asset paths. This is defense-in-depth, not a full HTML sanitizer or approval of production publishing.
+
+## Supported style-reference resolution (2026-10-19)
+
+The extractor no longer rejects paragraph/character style references solely because a reference exists. The rich-content resolver applies document defaults, paragraph-style inheritance, character-style inheritance, and direct run overrides in the supported formatting subset, and rejects missing/cyclic/wrong-type references or unsupported properties. The extractor still blocks unsupported font metadata, language, complex-script typography, spacing, list semantics, and floating image fidelity. CI passed: [run 39240300513](https://github.com/shifter888ai/awakenology/actions/runs/39240300513). This removes an over-broad gate; it does not make the real pilot ready.
