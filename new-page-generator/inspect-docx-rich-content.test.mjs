@@ -53,7 +53,7 @@ test('blocks missing paragraph and run style definitions',async()=>{
 test('resolves consistent font families and font sizes in source inventory',async()=>{
  const r=await inspectDocxRichContent(await fixture('<w:p><w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="24"/></w:rPr><w:t>Styled</w:t></w:r></w:p><w:p><w:r><w:rPr><w:rFonts w:ascii="Arial"/></w:rPr><w:t>Again</w:t></w:r></w:p>'));
  assert.equal(r.ok,true,r.errors.join('; '));
- assert.equal(r.runs[0].fontFamily,'Arial');
+ assert.deepEqual(r.runs[0].fontFamily,{ascii:'Arial',hAnsi:'Arial'});
  assert.equal(r.runs[0].fontSizePt,12);
  assert.equal(r.runs[1].fontFamily,'Arial');
 });
@@ -103,7 +103,7 @@ test('resolves shared inherited font metadata once for all paragraphs',async()=>
  const styles='<w:styles xmlns:w="x"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>';
  const r=await inspectDocxRichContent(await fixture('<w:p><w:r><w:t>One</w:t></w:r></w:p><w:p><w:r><w:t>Two</w:t></w:r></w:p>',styles));
  assert.equal(r.ok,true,r.errors.join('; '));
- assert.deepEqual(r.runs.map(x=>x.fontFamily),['Arial','Arial']);
+ assert.deepEqual(r.runs.map(x=>x.fontFamily),[{ascii:'Arial'},{ascii:'Arial'}]);
 });
 
 
@@ -135,11 +135,11 @@ test('rejects cyclic paragraph-style inheritance without generic style-reference
  assert.ok(r.errors.some(x=>x.includes('Cyclic Word style inheritance')));
  assert.ok(!r.errors.some(x=>x.includes('Unresolved OOXML feature w:pStyle')));
 });
-test('rejects conflicting inherited font families after style-reference resolution',async()=>{
+test('preserves script-specific inherited font families after style-reference resolution',async()=>{
  const styles='<w:styles xmlns:w="x"><w:docDefaults><w:rPrDefault><w:rPr/></w:rPrDefault></w:docDefaults><w:style w:type="paragraph" w:styleId="Styled"><w:rPr><w:rFonts w:ascii="Arial" w:eastAsia="Yu Gothic"/></w:rPr></w:style></w:styles>';
  const r=await inspectDocxRichContent(await fixture('<w:p><w:pPr><w:pStyle w:val="Styled"/></w:pPr><w:r><w:t>Font</w:t></w:r></w:p>',styles));
- assert.equal(r.ok,false);
- assert.ok(r.errors.some(x=>x.includes('Unsupported inherited Word formatting: fontFamily')));
+ assert.equal(r.ok,true,r.errors.join('; '));
+ assert.deepEqual(r.runs[0].fontFamily,{ascii:'Arial',eastAsia:'Yu Gothic'});
  assert.ok(!r.errors.some(x=>x.includes('Unresolved OOXML feature w:pStyle')));
  assert.equal(r.runs[0].fontSizePt,null);
 });
