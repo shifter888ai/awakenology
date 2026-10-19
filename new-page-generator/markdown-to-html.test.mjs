@@ -59,3 +59,10 @@ test("preserves inline emphasis inside Markdown link labels",()=>{
  assert.equal(result.ok,true,result.errors.join("; "));
  assert.match(result.html,/<a href="https:\/\/example\.org"><strong>bold link<\/strong><\/a>/);
 });
+
+
+test("blocks nested code/link constructs it cannot preserve faithfully",()=>{
+ const result=markdownToHtml("[`code`](https://example.org)");
+ assert.equal(result.ok,false);
+ assert.match(result.errors.join(" "),/nested inline code/);
+});
