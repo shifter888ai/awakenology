@@ -119,22 +119,22 @@ test("integrate an inline image and expose its verified asset record", async () 
   assert.equal(result.sourceMap.imageReferences[0].relationshipId, result.assets[0].relationshipId);
 });
 
-test("rejects inherited font and language metadata even when document runs are plain", async () => {
+test("preserves inherited font and language metadata when document runs are plain", async () => {
  const zip=await JSZip.loadAsync(await fixture("<w:t>Plain-looking text</w:t>"));
  zip.file("word/styles.xml", '<w:styles><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial"/><w:lang w:val="en-US"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>');
  const result=await extractDocx(await zip.generateAsync({type:"nodebuffer"}));
- assert.equal(result.ok,false);
- assert.equal(result.html,null);
- assert.match(result.errors.join(" "),/inherited Word feature: explicit font family/);
- assert.match(result.errors.join(" "),/inherited Word feature: explicit language metadata/);
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.match(result.html,/font-family:&quot;Arial&quot;/);\n assert.match(result.html,/data-word-lang-val="en-US"/);
+ 
+ 
 });
-test("rejects inherited paragraph spacing even without direct paragraph spacing", async () => {
- const zip=await JSZip.loadAsync(await fixture("<w:t>Plain-looking text</w:t>"));
- zip.file("word/styles.xml", '<w:styles><w:style w:type="paragraph" w:styleId="Normal"><w:pPr><w:spacing w:after="120"/></w:pPr></w:style></w:styles>');
+test("preserves inherited paragraph spacing through the default paragraph style", async () => {
+ const zip=await JSZip.loadAsync(await fixture("<w:pPr><w:pStyle w:val=\"Normal\"/></w:pPr><w:t>Plain-looking text</w:t>"));
+ zip.file("word/styles.xml", '<w:styles><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:pPr><w:spacing w:after="120"/></w:pPr></w:style></w:styles>');
  const result=await extractDocx(await zip.generateAsync({type:"nodebuffer"}));
- assert.equal(result.ok,false);
- assert.equal(result.html,null);
- assert.match(result.errors.join(" "),/inherited Word feature: paragraph or line spacing/);
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.match(result.html,/margin-bottom:6pt/);
+
 });
 
 test("rejects oversized decompressed styles XML before conversion", async () => {
@@ -154,12 +154,12 @@ test("rejects malformed UTF-8 in inherited styles rather than treating it as abs
  assert.match(result.errors.join(" "),/styles part is unreadable/);
 });
 
-test("rejects inherited explicit color and complex-script styling before HTML conversion", async () => {
+test("preserves inherited color and matching complex-script formatting", async () => {
  const zip=await JSZip.loadAsync(await fixture("<w:t>Plain-looking text</w:t>"));
- zip.file("word/styles.xml", '<w:styles><w:docDefaults><w:rPrDefault><w:rPr><w:color w:val="FF0000"/><w:bCs/><w:iCs/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>');
+ zip.file("word/styles.xml", '<w:styles><w:docDefaults><w:rPrDefault><w:rPr><w:color w:val="FF0000"/><w:b/><w:bCs/><w:i/><w:iCs/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>');
  const result=await extractDocx(await zip.generateAsync({type:"nodebuffer"}));
- assert.equal(result.ok,false);
- assert.equal(result.html,null);
- assert.match(result.errors.join(" "),/inherited Word feature: explicit Word text color/);
- assert.match(result.errors.join(" "),/inherited Word feature: complex-script bold or italic/);
+ assert.equal(result.ok,true,result.errors.join("; "));
+ assert.match(result.html,/color:#ff0000/);
+
+
 });
