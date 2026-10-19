@@ -43,10 +43,16 @@ test("blocks external and internal hyperlinks until targets are mapped", async (
   assert.match(internal.errors.join(" "), /unsupported or ambiguous/);
 });
 
-test("blocks tabs and line breaks rather than silently flattening layout", async () => {
-  for (const construct of ['<w:tab/>', '<w:br/>', '<w:cr/>']) {
+test("maps explicit text-wrapping breaks in source order", async () => {
+  const result = await inspectDocxSourceMap(await fixture('<w:p><w:r><w:t>Before</w:t><w:br w:type="textWrapping"/><w:t>After</w:t></w:r></w:p>'));
+  assert.equal(result.ok, true, result.errors.join("; "));
+  assert.deepEqual(result.paragraphs[0].content.map(x => x.type), ["text", "lineBreak", "text"]);
+  assert.equal(result.paragraphs[0].content[1].breakType, "textWrapping");
+  assert.equal(result.paragraphs[0].text, "BeforeAfter");
+});
+test("blocks tabs, carriage returns, and non-text-wrapping breaks", async () => {
+  for (const construct of ['<w:tab/>', '<w:cr/>', '<w:br w:type="page"/>']) {
     const result = await inspectDocxSourceMap(await fixture('<w:p><w:r><w:t>Before</w:t>'+construct+'<w:t>After</w:t></w:r></w:p>'));
     assert.equal(result.ok, false, construct);
-    assert.match(result.errors.join(" "), /unsupported or ambiguous/);
   }
 });
