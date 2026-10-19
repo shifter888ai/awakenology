@@ -131,7 +131,7 @@ test("resolves consistent Word font families, language metadata, complex-script 
  assert.equal(result.formatting.caps,true);
  assert.equal(result.formatting.letterSpacingPt,1);
 });
-test("preserves script-specific font families and blocks script-style divergence", () => {
+test("preserves script-specific font families and complex-script emphasis", () => {
  const fonts=resolveDocxRunFormatting({stylesXml:styles(),paragraphXml:paragraph(),runXml:run('', '<w:rFonts w:ascii="Arial" w:eastAsia="Yu Gothic"/>')});
  assert.equal(fonts.ok,true,fonts.errors.join('; '));
  assert.deepEqual(fonts.formatting.fontFamily,{ascii:'Arial',eastAsia:'Yu Gothic'});
@@ -264,8 +264,9 @@ test("preserves script-specific font families and blocks script-style divergence
  assert.equal(fonts.ok,true,fonts.errors.join('; '));
  assert.deepEqual(fonts.formatting.fontFamily,{ascii:'Arial',eastAsia:'Yu Gothic'});
  const script=resolveDocxRunFormatting({stylesXml:styles(),paragraphXml:paragraph(),runXml:run('', '<w:bCs/>')});
- assert.equal(script.ok,false);
- assert.ok(script.errors.some(x=>x.includes('Complex-script bold differs')));
+ assert.equal(script.ok,true,script.errors.join('; '));
+ assert.equal(script.formatting.b,false);
+ assert.equal(script.formatting.bCs,true);
 });
 
 test("maps Word kerning threshold to CSS when effective font size is known", () => {
