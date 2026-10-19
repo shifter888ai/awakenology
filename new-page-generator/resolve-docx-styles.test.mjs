@@ -293,3 +293,12 @@ test("rejects duplicate Word font and language attributes",()=>{
   assert.equal(result.formatting,null);
  }
 });
+
+
+test("rejects unknown and duplicate attributes on color and boolean run properties",()=>{
+ for(const property of ['<w:color w:val="FF0000" w:unknown="x"/>','<w:color w:val="FF0000" w:val="00FF00"/>','<w:b w:val="1" w:unknown="x"/>','<w:i w:val="1" w:val="0"/>']) {
+  const result=resolveDocxRunFormatting({stylesXml:styles(),paragraphXml:paragraph(),runXml:run('',property)});
+  assert.equal(result.ok,false,property);
+  assert.equal(result.formatting,null);
+ }
+});
