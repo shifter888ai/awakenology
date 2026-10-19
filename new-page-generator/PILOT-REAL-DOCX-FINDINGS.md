@@ -161,3 +161,10 @@ Validation: **136 tests passed, 0 failed** in [CI run 39203905399](https://githu
 The DOCX and rendered-HTML rich inventories now expose their total recognized paragraph count, and the comparator requires and compares it. This catches missing empty paragraphs—including trailing or otherwise textless paragraphs—that run indices alone cannot reliably detect. Missing paragraph-count metadata now blocks comparison.
 
 Regression coverage verifies that dropping an empty paragraph fails even when all text runs are identical. Validation: **138 tests passed, 0 failed** in [CI run 39204047613](https://github.com/shifter888ai/awakenology/actions/runs/39204047613). The rendered inspector counts only recognized paragraph-like blocks; unsupported semantic structures and CSS remain blocked rather than counted as equivalent.
+
+
+## Run effects and paragraph-flow safeguards (CI run 39204159713)
+
+The conversion adapter now also blocks unhandled run effects and hidden-text controls (including superscript/subscript baseline shifts, vertical positioning, and vanish flags), plus paragraph pagination/direction/section-layout properties (including keep-next, page-break-before, widow control and section properties). The independent rich-content inspector reports these properties too, along with indentation, alignment and table structure; the two gates no longer disagree by allowing the rich inventory to appear clean when unsupported layout is present.
+
+Regression tests cover run effects, paragraph page-flow properties, paragraph layout and tables. Validation: **141 tests passed, 0 failed** in [CI run 39204159713](https://github.com/shifter888ai/awakenology/actions/runs/39204159713). These properties remain intentionally unsupported; the gate reports them rather than flattening them.
