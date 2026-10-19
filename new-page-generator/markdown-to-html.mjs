@@ -42,7 +42,7 @@ export function markdownToHtml(markdown) {
   const lines=markdown.replace(/\r\n?/g,"\n").split("\n");
   const output=[];
   let paragraph=[], listType=null, listItems=[], listStart=null, quote=[];
-  const flushParagraph=()=>{if(paragraph.length){output.push("<p>"+inline(paragraph.join("\n"),errors,paragraph[0].line).replace(/\n/g,"\n")+"</p>");paragraph=[];}};
+  const flushParagraph=()=>{if(paragraph.length){output.push("<p>"+paragraph.map(item=>inline(item.text,errors,item.line)).join("\n")+"</p>");paragraph=[];}};
   const flushList=()=>{if(listItems.length){const startAttr=listType==="ol" && listStart!==null && listStart!==1 ? ` start="${listStart}"` : "";output.push("<"+listType+startAttr+">"+listItems.map(item=>"<li>"+inline(item.text,errors,item.line)+"</li>").join("")+"</"+listType+">");listType=null;listItems=[];listStart=null;}};
   const flushQuote=()=>{if(quote.length){output.push("<blockquote>"+quote.map(item=>"<p>"+inline(item.text,errors,item.line)+"</p>").join("")+"</blockquote>");quote=[];}};
   for(let i=0;i<lines.length;i++){
