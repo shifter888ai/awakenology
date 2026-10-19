@@ -85,6 +85,21 @@ export function applyDocxRichFormatting(html, sourceInventory) {
     const existingStyle=attr(block,"style");
     const mappedStyle=paragraphStyle(layout);
     if(existingStyle || mappedStyle) setAttr(block,"style",[existingStyle,mappedStyle].filter(Boolean).join(";"));
+    // Paragraph-mark properties are not run properties: preserve them as
+    // explicit metadata instead of incorrectly applying them to every text run.
+    const mark=sourceInventory.paragraphMarkFormatting?.find(item=>item.paragraphIndex===p);
+    if(mark) {
+      if(mark.fontFamily && typeof mark.fontFamily==="object") {
+        for(const [key,name] of [["ascii","data-word-mark-font-ascii"],["hAnsi","data-word-mark-font-hansi"],["eastAsia","data-word-mark-font-east-asia"],["cs","data-word-mark-font-cs"]]) {
+          if(mark.fontFamily[key]) setAttr(block,name,mark.fontFamily[key]);
+        }
+      }
+      if(mark.language && typeof mark.language==="object") {
+        for(const [key,name] of [["val","data-word-mark-lang-val"],["eastAsia","data-word-mark-lang-east-asia"],["bidi","data-word-mark-lang-bidi"]]) {
+          if(mark.language[key]) setAttr(block,name,mark.language[key]);
+        }
+      }
+    }
     const sourceRuns=runsByParagraph[p];
     const spans=[];
     let offset=0;
