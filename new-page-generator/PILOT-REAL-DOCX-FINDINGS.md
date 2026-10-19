@@ -175,3 +175,10 @@ Regression tests cover run effects, paragraph page-flow properties, paragraph la
 The HTML-paste inspector now checks the raw input's tag vocabulary before relying on DOMParser's repaired body tree. This prevents unsupported tags hidden in a full-document head—or document wrappers discarded/moved by parser repair—from being overlooked while the original HTML string is later inserted into the page shell. It also rejects CSS and external stylesheets found in the head. Regression coverage includes a script inside a head that the test parser omits from its body result.
 
 Validation: **143 tests passed, 0 failed** in [CI run 39204366041](https://github.com/shifter888ai/awakenology/actions/runs/39204366041). This remains a conservative inspector, not a complete HTML sanitizer; production output is not authorized by these tests alone.
+
+
+## Word run-style inheritance resolver (CI run 39205462857)
+
+Added a conservative style resolver for the rich-content source inventory. It resolves supported bold, italic, underline and explicit six-digit colors through document run defaults, paragraph-style inheritance, character styles, and direct run formatting in precedence order. It rejects missing/cyclic references, mismatched paragraph/character style types, theme-based colors, unsupported underline values, unmodeled inherited run properties (such as fonts and sizes), unmodeled paragraph-layout properties, and paragraph-mark formatting that must not be applied to all text runs.
+
+The DOCX rich-content inspector now uses resolved formatting values for its run inventory. Style references and unsupported properties are still blocking, so this is not a claim that the real pilot now passes. Regression coverage includes inheritance order, explicit-off overrides, unsupported inherited properties, paragraph-mark separation and style type checks. Validation: **153 tests passed, 0 failed** in [CI run 39205462857](https://github.com/shifter888ai/awakenology/actions/runs/39205462857). The pilot remains blocked on unsupported inherited font/size/language, numbering and paragraph layout, floating-image rendering, and other unresolved content.
