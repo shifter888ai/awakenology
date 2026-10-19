@@ -147,12 +147,12 @@ try {
         if (!tag[0].startsWith('</')) recordProperties(diagnostic.runPropertyInventory,tag[1],i,tag[0]);
       }
     }
-    const paragraphStyleId=/<w:pStyle\\b[^>]*\\bw:val=["']([^"']+)["']/.exec(raw)?.[1]??null;
-    const markFont=/<w:pPr\\b[^>]*>[\\s\\S]*?<w:rPr\\b[^>]*>[\\s\\S]*?<w:rFonts\\b[^>]*\\/?\\s*>[\\s\\S]*?<\\/w:rPr>[\\s\\S]*?<\\/w:pPr>/.exec(raw)?.[0]?.match(/<w:rFonts\\b[^>]*\\/?\\s*>/)?.[0]??null;
-    const runFontDetails=[...raw.matchAll(/<w:r(?=[\\s>])[^>]*>([\\s\\S]*?)<\\/w:r>/g)].map(run=>{
-      const body=run[1], rPr=/<w:rPr(?=[\\s>])[^>]*>([\\s\\S]*?)<\\/w:rPr>/.exec(body)?.[1]??'';
-      const texts=[...body.matchAll(/<w:t(?=[\\s>])[^>]*>([\\s\\S]*?)<\\/w:t>/g)].map(x=>x[1]).join('');
-      return {text:texts.slice(0,100),fontTag:/<w:rFonts\\b[^>]*\\/?\\s*>/.exec(rPr)?.[0]??null,style:/<w:rStyle\\b[^>]*\\bw:val=["']([^"']+)["']/.exec(rPr)?.[1]??null};
+    const paragraphStyleId=/<w:pStyle\b[^>]*\bw:val=["']([^"']+)["']/.exec(raw)?.[1]??null;
+    const markFont=/<w:pPr\b[^>]*>[\s\S]*?<w:rPr\b[^>]*>[\s\S]*?<w:rFonts\b[^>]*\/?\s*>[\s\S]*?<\/w:rPr>[\s\S]*?<\/w:pPr>/.exec(raw)?.[0]?.match(/<w:rFonts\b[^>]*\/?\s*>/)?.[0]??null;
+    const runFontDetails=[...raw.matchAll(/<w:r(?=[\s>])[^>]*>([\s\S]*?)<\/w:r>/g)].map(run=>{
+      const body=run[1], rPr=/<w:rPr(?=[\s>])[^>]*>([\s\S]*?)<\/w:rPr>/.exec(body)?.[1]??'';
+      const texts=[...body.matchAll(/<w:t(?=[\s>])[^>]*>([\s\S]*?)<\/w:t>/g)].map(x=>x[1]).join('');
+      return {text:texts.slice(0,100),fontTag:/<w:rFonts\b[^>]*\/?\s*>/.exec(rPr)?.[0]??null,style:/<w:rStyle\b[^>]*\bw:val=["']([^"']+)["']/.exec(rPr)?.[1]??null};
     }).filter(run=>run.text.trim());
     if(runFontDetails.some(run=>!run.fontTag||!/(?:w:ascii|w:hAnsi|w:eastAsia|w:cs)=/.test(run.fontTag))) diagnostic.fontResolutionSamples.push({paragraphIndex:i,paragraphStyleId,paragraphMarkFont:markFont,runs:runFontDetails});
     const breaks = [...raw.matchAll(/<w:br(?=[\s/>])[^>]*\/?\s*>/g)];
