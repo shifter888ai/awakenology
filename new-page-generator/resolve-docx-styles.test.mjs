@@ -266,3 +266,10 @@ test("preserves script-specific font families and blocks script-style divergence
  assert.equal(script.ok,false);
  assert.ok(script.errors.some(x=>x.includes('Complex-script bold differs')));
 });
+
+test("maps Word kerning threshold to CSS when effective font size is known", () => {
+ const result=resolveDocxRunFormatting({stylesXml:styles('<w:style w:type="paragraph" w:styleId="P"><w:rPr><w:sz w:val="22"/><w:kern w:val="2"/></w:rPr></w:style>'),paragraphXml:paragraph('P'),runXml:run()});
+ assert.equal(result.ok,true,result.errors.join('; '));
+ assert.equal(result.formatting.fontKerningThresholdPt,1);
+ assert.equal(result.formatting.fontKerning,'normal');
+});
