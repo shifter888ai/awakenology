@@ -25,7 +25,7 @@ test('incomplete source inventory throws', () => {const a=sample(); delete a.run
 
 
 test('reordered text runs block even when the same text is present',()=>{
- const source={runs:[{paragraphIndex:0,text:'A',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null},{paragraphIndex:0,text:'B',bold:false,italic:false,underline:false,color:null,href:null}],images:[],lineBreaks:[],paragraphCount:1};
+ const source={runs:[{paragraphIndex:0,text:'A',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null},{paragraphIndex:0,text:'B',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null}],images:[],lineBreaks:[],paragraphCount:1};
  const output={runs:[source.runs[1],source.runs[0]],images:[],lineBreaks:[],paragraphCount:1};
  const result=compareRichContent(source,output);
  assert.equal(result.ok,false);
@@ -34,7 +34,7 @@ test('reordered text runs block even when the same text is present',()=>{
 
 test('extra output text run blocks',()=>{
  const source={runs:[],images:[],lineBreaks:[],paragraphCount:0};
- const output={runs:[{paragraphIndex:0,text:'invented',bold:false,italic:false,underline:false,color:null,href:null}],images:[],lineBreaks:[],paragraphCount:1};
+ const output={runs:[{paragraphIndex:0,text:'invented',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null}],images:[],lineBreaks:[],paragraphCount:1};
  assert.equal(compareRichContent(source,output).ok,false);
 });
 
@@ -60,7 +60,7 @@ test('rejects invalid image positions and missing asset paths',()=>{
 
 
 test('compares source and rendered line-break offsets independently of text',()=>{
- const a={runs:[{paragraphIndex:0,text:'A',bold:false,italic:false,underline:false,color:null,href:null},{paragraphIndex:0,text:'B',bold:false,italic:false,underline:false,color:null,href:null}],images:[],lineBreaks:[{paragraphIndex:0,textOffset:1,breakType:'textWrapping',markerOrder:0}],paragraphCount:1};
+ const a={runs:[{paragraphIndex:0,text:'A',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null},{paragraphIndex:0,text:'B',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null}],images:[],lineBreaks:[{paragraphIndex:0,textOffset:1,breakType:'textWrapping',markerOrder:0}],paragraphCount:1};
  const b=structuredClone(a);
  assert.equal(compareRichContent(a,b).ok,true);
  b.lineBreaks[0].textOffset=0;
@@ -77,11 +77,11 @@ test('blocks when one side omits line-break provenance',()=>{
 
 test('blocks identical text and styling moved to a different paragraph',()=>{
  const source={runs:[
-  {paragraphIndex:0,text:'First',bold:false,italic:false,underline:false,color:null,href:null},
-  {paragraphIndex:1,text:'Second',bold:false,italic:false,underline:false,color:null,href:null}
+  {paragraphIndex:0,text:'First',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null},
+  {paragraphIndex:1,text:'Second',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null}
  ],images:[],lineBreaks:[],paragraphCount:2};
  const output={runs:[
-  {paragraphIndex:0,text:'FirstSecond',bold:false,italic:false,underline:false,color:null,href:null}
+  {paragraphIndex:0,text:'FirstSecond',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null}
  ],images:[],lineBreaks:[],paragraphCount:1};
  const result=compareRichContent(source,output);
  assert.equal(result.ok,false);
@@ -106,7 +106,7 @@ test('blocks an image moved before or after paragraph text',()=>{
 
 test('detects image and line-break swaps when both share the same text offset',()=>{
  const source={
-  runs:[{paragraphIndex:0,text:'A',bold:false,italic:false,underline:false,color:null,href:null}],
+  runs:[{paragraphIndex:0,text:'A',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null}],
   images:[{assetPath:'asset.png',paragraphIndex:0,order:0,alt:'diagram',textOffset:1,markerOrder:0}],
   lineBreaks:[{paragraphIndex:0,textOffset:1,breakType:'textWrapping',markerOrder:1}],
   paragraphCount:1
@@ -121,8 +121,8 @@ test('detects image and line-break swaps when both share the same text offset',(
 
 
 test('detects lost empty paragraphs even when text runs are unchanged',()=>{
- const source={runs:[{paragraphIndex:0,text:'Start',bold:false,italic:false,underline:false,color:null,href:null}],images:[],lineBreaks:[],paragraphCount:2};
- const output={runs:[{paragraphIndex:0,text:'Start',bold:false,italic:false,underline:false,color:null,href:null}],images:[],lineBreaks:[],paragraphCount:1};
+ const source={runs:[{paragraphIndex:0,text:'Start',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null}],images:[],lineBreaks:[],paragraphCount:2};
+ const output={runs:[{paragraphIndex:0,text:'Start',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null}],images:[],lineBreaks:[],paragraphCount:1};
  const result=compareRichContent(source,output);
  assert.equal(result.ok,false);
  assert.ok(result.issues.some(x=>x.kind==='paragraph-count'));
