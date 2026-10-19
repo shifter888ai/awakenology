@@ -70,10 +70,9 @@ export async function extractDocx(buffer) {
   for (const [name, pattern] of FEATURES) {
     if (pattern.test(xml)) errors.push(`Unsupported or ambiguous Word feature: ${name}.`);
   }
-  for (const match of xml.matchAll(/<w:numPr\b[^>]*>([\s\S]*?)<\/w:numPr>/g)) {
-    const numId=/<w:numId\b[^>]*\bw:val=["']([^"']+)["']/.exec(match[1])?.[1]??null;
-    if (numId !== '0') errors.push('Unsupported or ambiguous Word feature: active or unresolved paragraph numbering.');
-  }
+  // Numbering references are validated by inspectDocxRichContent, which resolves
+  // concrete numbering definitions and levels before the conversion gate blocks
+  // unverified HTML list rendering.
   // Document defaults and named styles can affect runs without any direct formatting
   // in document.xml. Until inherited typography is rendered and compared end-to-end,
   // never let an otherwise plain-looking document bypass the conversion gate.
