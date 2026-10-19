@@ -37,6 +37,21 @@ try {
   const stylesPart = zip.file('word/styles.xml');
   if (stylesPart) {
     const stylesXml = await stylesPart.async('string');
+    const defaultsRunXml=/<w:rPrDefault\\b[^>]*>([\\s\\S]*?)<\\/w:rPrDefault>/.exec(stylesXml)?.[1]??'';
+    diagnostic.styleResolutionInventory.fontTags={
+      docDefaults:[...defaultsRunXml.matchAll(/<w:rFonts\\b[^>]*\\/?\\s*>/g)].map(x=>x[0]),
+      styles:[...stylesXml.matchAll(/<w:style\\b([^>]*)>([\\s\\S]*?)<\\/w:style>/g)].map(m=>{
+        const id=/w:styleId=["']([^"']+)["']/.exec(m[1])?.[1]??null;
+        const body=m[2], runBody=body.replace(/<w:pPr\\b[^>]*>[\\s\\S]*?<\\/w:pPr>/g,'');
+        return {id,run:[...runBody.matchAll(/<w:rFonts\\b[^>]*\\/?\\s*>/g)].map(x=>x[0]),paragraphMark:[...body.matchAll(/<w:pPr\\b[^>]*>[\\s\\S]*?<w:rFonts\\b[^>]*\\/?\\s*>/g)].map(x=>x[0].match(/<w:rFonts\\b[^>]*\\/?\\s*>/)?.[0]??null).filter(Boolean)};
+      })
+    };
+    const themePart=zip.file('word/theme/theme1.xml');
+    if(themePart){
+      const themeXml=await themePart.async('string');
+      const scheme=(name)=>{const section=new RegExp('<a:'+name+'Font\\\\b[^>]*>([\\\\s\\\\S]*?)<\\\\/a:'+name+'Font>').exec(themeXml)?.[1]??'';return {latin:/<a:latin\\b[^>]*\\btypeface=["']([^"']*)["']/.exec(section)?.[1]??null,eastAsia:/<a:ea\\b[^>]*\\btypeface=["']([^"']*)["']/.exec(section)?.[1]??null,complexScript:/<a:cs\\b[^>]*\\btypeface=["']([^"']*)["']/.exec(section)?.[1]??null,scripts:[...section.matchAll(/<a:font\\b[^>]*\\bscript=["']([^"']+)["'][^>]*\\btypeface=["']([^"']*)["'][^>]*\\/?\\s*>/g)].map(x=>({script:x[1],typeface:x[2]}))};};
+      diagnostic.themeFontScheme={major:scheme('major'),minor:scheme('minor')};
+    }
     const refs = new Map();
     for (const match of xml.matchAll(/<w:(pStyle|rStyle)\b[^>]*\bw:val=["']([^"']+)["'][^>]*\/?\s*>/g)) {
       const key = match[1] + ':' + match[2];
