@@ -19,7 +19,7 @@ export function normalizeHtmlInventory(inventory, { language, sourceMode, source
   if (!["en","ja","zh-Hant"].includes(language)) {
     return { ok: false, errors: ["A supported language is required."], blocks: [] };
   }
-  if (!["docx","html-paste","markdown"].includes(sourceMode)) {
+  if (!["docx","html","html-paste","markdown"].includes(sourceMode)) {
     return { ok: false, errors: ["sourceMode must be docx or html-paste."], blocks: [] };
   }
   if (typeof sourcePart !== "string" || !sourcePart.trim()) {
