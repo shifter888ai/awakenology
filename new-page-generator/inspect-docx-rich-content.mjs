@@ -4,7 +4,7 @@ import { inspectDocxImagePlacement } from './inspect-docx-image-placement.mjs';
 
 // Conservative OOXML extractor. Anything not mapped with certainty blocks approval.
 export async function inspectDocxRichContent(buffer) {
-  const fail = errors => ({ ok: false, errors, runs: [], images: [] });
+  const fail = errors => ({ ok: false, errors, runs: [], images: [], lineBreaks: [] });
   const source = await inspectDocxSourceMap(buffer);
   if (!source.ok) return fail(source.errors);
   let xml;
@@ -56,14 +56,17 @@ export async function inspectDocxRichContent(buffer) {
       if (color && !/^[0-9a-fA-F]{6}$/.test(color)) errors.push('Unresolved Word color in paragraph ' + (p + 1) + '.');
       if (/<w:color\b[^>]*\bw:theme(?:Color|Tint|Shade)=/.test(properties)) errors.push('Theme-based Word color requires independent resolution in paragraph ' + (p + 1) + '.');
       const texts = [...body.matchAll(/<w:t(?=[\s>])[^>]*>([\s\S]*?)<\/w:t>/g)];
-      if (texts.length !== 1) { errors.push('Ambiguous run/text mapping in paragraph ' + (p + 1) + '.'); continue; }
+      const breakCount = [...body.matchAll(/<w:br(?=[\s/>])[^>]*\/?\s*>/g)].length;
+      if (texts.length !== 1 && (!breakCount || breakCount < texts.length - 1)) {
+        errors.push('Ambiguous run/text mapping in paragraph ' + (p + 1) + '.'); continue;
+      }
       const decode = s => s.replace(/&(?:amp|lt|gt|quot|apos);|&#(?:x[0-9a-fA-F]+|[0-9]+);/g, entity => {
         const named = {'&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"','&apos;':"'"}; 
         if (entity in named) return named[entity];
         const code = entity.startsWith('&#x') ? parseInt(entity.slice(3, -1), 16) : parseInt(entity.slice(2, -1), 10);
         return Number.isInteger(code) && code >= 0 && code <= 0x10ffff && !(code >= 0xd800 && code <= 0xdfff) ? String.fromCodePoint(code) : entity;
       });
-      runs.push({ text: decode(texts[0][1]), bold: flag('b'), italic: flag('i'), underline: flag('u'), color: color ? '#' + color.toLowerCase() : null, href: null });
+      for (const text of texts) runs.push({ text: decode(text[1]), bold: flag('b'), italic: flag('i'), underline: flag('u'), color: color ? '#' + color.toLowerCase() : null, href: null });
     }
   }
   for (const [name, paragraphSet] of unknownRunProperties) {
@@ -71,8 +74,16 @@ export async function inspectDocxRichContent(buffer) {
     const preview = locations.slice(0, 12).join(', ') + (locations.length > 12 ? ', …' : '');
     errors.push('Unresolved run property w:' + name + ' in ' + locations.length + ' paragraph(s): ' + preview + '.');
   }
+  const lineBreaks = [];
+  for (const paragraph of source.paragraphs) {
+    let textOffset = 0;
+    for (const item of paragraph.content ?? []) {
+      if (item.type === 'lineBreak') lineBreaks.push({paragraphIndex:paragraph.index,textOffset,breakType:item.breakType});
+      else if (item.type === 'text') textOffset += item.text.length;
+    }
+  }
   if (runs.map(r => r.text).join('') !== source.paragraphs.map(p => p.text).join('')) errors.push('Rich runs do not reproduce exact source-map text.');
   if (!runs.length) errors.push('No rich text runs extracted.');
   const images = placement.ok ? placement.images.map(({assetPath, paragraphIndex, order, alt}) => ({assetPath, paragraphIndex, order, alt})) : [];
-  return errors.length ? fail([...new Set(errors)]) : {ok:true, errors:[], runs, images};
+  return errors.length ? {...fail([...new Set(errors)]), runs, images, lineBreaks} : {ok:true, errors:[], runs, images, lineBreaks};
 }
