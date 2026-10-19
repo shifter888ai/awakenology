@@ -24,3 +24,10 @@ test("leaves unrelated HTML unchanged", () => {
   const html = '<p style="color:#eeeeee">Already bright</p><p>ordinary paragraph</p>';
   assert.equal(correctPilotPreview(html), html);
 });
+
+test("does not alter background-color while correcting text colour", () => {
+  const html = '<p style="background-color:#111111;color:#111111">English</p>';
+  const out = correctPilotPreview(html);
+  assert.match(out, /background-color:#111111/);
+  assert.match(out, /color:var\\(--fg\\)/);
+});
