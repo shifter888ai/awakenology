@@ -27,7 +27,13 @@ test("reject complex-script and language metadata until rendered mapping is loss
   assert.equal(result.ok, false);
   assert.match(result.errors.join(" "), /language metadata/);
   assert.match(result.errors.join(" "), /complex-script bold or italic/);
-  assert.match(result.errors.join(" "), /capitalization or character spacing/);
+  assert.match(result.errors.join(" "), /capitalization/);
+});
+test("distinguishes unsupported paragraph spacing from run character spacing", async () => {
+  const result = await extractDocx(await fixture('<w:pPr><w:spacing w:before="120" w:after="120"/></w:pPr><w:rPr><w:spacing w:val="20"/></w:rPr><w:t>Spaced</w:t>'));
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join(" "), /character spacing/);
+  assert.match(result.errors.join(" "), /paragraph or line spacing/);
 });
 test("reject style and paragraph layout metadata rather than flattening it", async () => {
   const result = await extractDocx(await fixture('<w:pPr><w:pStyle w:val="Heading1"/><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr><w:ind w:left="720"/><w:jc w:val="center"/></w:pPr><w:t>Heading</w:t>'));
