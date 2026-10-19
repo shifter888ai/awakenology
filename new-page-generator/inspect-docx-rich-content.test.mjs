@@ -122,10 +122,12 @@ test('fails closed on numbering references until numbering.xml semantics are res
 });
 
 
-test('fails closed on section properties until page geometry and section breaks are mapped',async()=>{
+test('ignores document-wide print setup but blocks section breaks inside article content',async()=>{
  const section=await inspectDocxRichContent(await fixture('<w:p><w:r><w:t>Section</w:t></w:r></w:p><w:sectPr><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/></w:sectPr>'));
- assert.equal(section.ok,false);
- assert.ok(section.errors.length>0,'Section geometry must not be approved without page-layout mapping.');
+ assert.equal(section.ok,true,section.errors.join('; '));
+ const sectionBreak=await inspectDocxRichContent(await fixture('<w:p><w:pPr><w:sectPr><w:pgSz w:w="12240" w:h="15840"/></w:sectPr></w:pPr><w:r><w:t>Section break</w:t></w:r></w:p>'));
+ assert.equal(sectionBreak.ok,false);
+ assert.ok(sectionBreak.errors.some(x=>x.includes('Section breaks inside document content')));
 });
 
 test('rejects cyclic paragraph-style inheritance without generic style-reference noise',async()=>{
