@@ -21,7 +21,7 @@ const propertyValue = (xml, tag) => {
 };
 const childProperties = xml => [...xml.matchAll(/<w:([A-Za-z][A-Za-z0-9]*)\b[^>]*\/?\s*>/g)].map(match => match[1]);
 const unsupportedRunProps = xml => childProperties(xml).filter(name => !['b','i','u','color','sz','rFonts','lang','szCs','bCs','iCs','caps','spacing','rStyle'].includes(name));
-const unsupportedParagraphProps = xml => childProperties(xml.replace(/<w:rPr\b[^>]*>[\s\S]*?<\/w:rPr>/g,'')).filter(name => name !== 'rPr');
+const unsupportedParagraphProps = xml => childProperties(xml.replace(/<w:rPr\b[^>]*>[\s\S]*?<\/w:rPr>/g,'')).filter(name => !['rPr','spacing','ind','jc'].includes(name));
 function runProps(xml) {
   const result={};
   for (const key of ['b','i','u','color']) {
