@@ -28,7 +28,7 @@ test("rejects superscript, baseline shifts, and hidden text until formatting is 
 test("rejects section and pagination layout until page flow is mapped", async () => {
   const result = await extractDocx(await fixture('<w:pPr><w:keepNext/><w:pageBreakBefore/></w:pPr><w:t>Page flow</w:t>'));
   assert.equal(result.ok, false);
-  assert.match(result.errors.join(" "), /pagination, direction, or section layout/);
+  assert.match(result.errors.join(" "), /paragraph pagination or direction/);
   assert.equal(result.html, null);
 });
 test("rejects even simple Word tables until cell and paragraph structure is mapped", async () => {
