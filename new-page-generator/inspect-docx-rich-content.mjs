@@ -90,6 +90,7 @@ export async function inspectDocxRichContent(buffer) {
       if (/<w:color\b[^>]*\bw:theme(?:Color|Tint|Shade)=/.test(properties)) errors.push('Theme-based Word color requires independent resolution in paragraph ' + (p + 1) + '.');
       const texts = [...body.matchAll(/<w:t(?=[\s>])[^>]*>([\s\S]*?)<\/w:t>/g)];
       const breakCount = [...body.matchAll(/<w:br(?=[\s/>])[^>]*\/?\s*>/g)].length;
+      if (texts.length === 0 && breakCount === 0) continue;
       if (texts.length !== 1 && (!breakCount || breakCount < texts.length - 1)) {
         errors.push('Ambiguous run/text mapping in paragraph ' + (p + 1) + '.'); continue;
       }
