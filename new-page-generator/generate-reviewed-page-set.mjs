@@ -17,7 +17,10 @@ import { inspectRenderedRichContent } from "./inspect-rendered-rich-content.mjs"
  */
 export async function generateReviewedPageSet({ pageSet, inputs, outputs }) {
   const inspection = await inspectPageSet(pageSet, inputs);
-  if (!inspection.ok) return { ok: false, stage: inspection.stage ?? "source-inspection", errors: inspection.errors, pages: inspection.reviewRequired ? inspection.pages : {}, reviewRequired: inspection.reviewRequired === true };
+  if (!inspection.ok) {
+    const hasReviewablePages=Object.values(inspection.pages??{}).some(page=>Boolean(page.previewHtml)||(page.imageAltIssues??[]).length>0);
+    return { ok:false,stage:inspection.stage??"source-inspection",errors:inspection.errors,pages:inspection.reviewRequired||hasReviewablePages?inspection.pages:{},reviewRequired:inspection.reviewRequired===true,reviewablePagesAvailable:hasReviewablePages };
+  }
 
   const routeManifest = buildLanguageRouteManifest(pageSet);
   if (!routeManifest.ok) return { ok: false, stage: "routes", errors: routeManifest.errors, pages: {} };
