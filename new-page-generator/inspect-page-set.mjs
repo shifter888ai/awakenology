@@ -27,7 +27,7 @@ export async function inspectPageSet(pageSet, inputs = {}) {
     }
     let inspected;
     let sourceRichInventory = null;
-    if (meta.mode === "paste") {
+    if (meta.mode === "paste" || meta.mode === "html") {
       inspected = inspectPastedHtml(input.html, input.parser);
     } else if (meta.mode === "markdown") {
       const converted = markdownToHtml(input.markdown);
@@ -53,7 +53,7 @@ export async function inspectPageSet(pageSet, inputs = {}) {
         const normalized = normalizeHtmlInventory(inspected.inventory, {
           language: lang,
           sourceMode: meta.mode === "docx" ? "docx" : meta.mode === "markdown" ? "markdown" : "html-paste",
-          sourcePart: meta.mode === "docx" ? "converted-html" : meta.mode === "markdown" ? "markdown-source" : "pasted-html"
+          sourcePart: meta.mode === "docx" ? "converted-html" : meta.mode === "markdown" ? "markdown-source" : meta.mode === "html" ? "html-file" : "pasted-html"
         });
         pageErrors.push(...normalized.errors);
         if (normalized.ok) normalizedBlocks = normalized.blocks;
