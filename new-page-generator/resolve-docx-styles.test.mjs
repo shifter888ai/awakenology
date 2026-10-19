@@ -48,14 +48,13 @@ test('requires all source components',()=>{
 });
 
 
-test('blocks conflicting inherited font families in run resolver',()=>{
+test('preserves script-specific inherited font families',()=>{
  const fonts=resolveDocxRunFormatting({
-  stylesXml:styles('<w:style w:type="paragraph" w:styleId="P"><w:rPr><w:rFonts w:ascii="Arial" w:eastAsia="Yu Gothic"/><w:sz w:val="24"/></w:rPr></w:style>'),
+  stylesXml:styles('<w:style w:type="paragraph" w:styleId="P"><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:eastAsia="Yu Gothic" w:cs="Arial"/><w:sz w:val="24"/></w:rPr></w:style>'),
   paragraphXml:paragraph('P'),runXml:run()
  });
- assert.equal(fonts.ok,false);
- assert.ok(fonts.errors.some(x=>x.includes('Unsupported inherited Word formatting: fontFamily')));
- assert.equal(fonts.formatting,null);
+ assert.equal(fonts.ok,true,fonts.errors.join('; '));
+ assert.deepEqual(fonts.formatting.fontFamily,{ascii:'Arial',hAnsi:'Arial',eastAsia:'Yu Gothic',cs:'Arial'});
 });
 
 
@@ -98,7 +97,7 @@ test('blocks malformed or zero Word font sizes',()=>{
 
 
 test('direct unsupported run formatting cannot be silently dropped',()=>{
- for(const property of ['<w:rFonts w:ascii="Arial" w:eastAsia="Yu Gothic"/>','<w:lang/>','<w:spacing/>','<w:szCs w:val="0"/>']) {
+ for(const property of ['<w:rFonts w:asciiTheme="minorHAnsi"/>','<w:lang/>','<w:spacing/>','<w:szCs w:val="0"/>']) {
   const result=resolveDocxRunFormatting({stylesXml:styles(),paragraphXml:paragraph(),runXml:run('',property)});
   assert.equal(result.ok,false,property);
   assert.ok(result.errors.some(x=>x.includes('Unsupported direct run property') || x.includes('Unsupported inherited Word formatting')),result.errors.join('; '));
@@ -106,7 +105,7 @@ test('direct unsupported run formatting cannot be silently dropped',()=>{
 });
 
 test('rejects unsupported formatting in an inherited base even when a derived style overrides it',()=>{
- const xml=styles('<w:style w:type="paragraph" w:styleId="Base"><w:rPr><w:rFonts w:ascii="Arial" w:eastAsia="Yu Gothic"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="Derived"><w:basedOn w:val="Base"/><w:rPr><w:b/></w:rPr></w:style>');
+ const xml=styles('<w:style w:type="paragraph" w:styleId="Base"><w:rPr><w:rFonts w:asciiTheme="minorHAnsi"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="Derived"><w:basedOn w:val="Base"/><w:rPr><w:b/></w:rPr></w:style>');
  const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml:paragraph('Derived'),runXml:run()});
  assert.equal(result.ok,false);
  assert.equal(result.formatting,null);
@@ -123,7 +122,7 @@ test("resolves consistent Word font families, language metadata, complex-script 
  const xml=styles('<w:style w:type="paragraph" w:styleId="P"><w:rPr><w:rFonts w:ascii="Microsoft YaHei" w:hAnsi="Microsoft YaHei" w:eastAsia="Microsoft YaHei" w:cs="Microsoft YaHei"/><w:lang w:val="en-US" w:eastAsia="zh-CN"/><w:sz w:val="22"/><w:szCs w:val="22"/><w:b/><w:bCs/><w:i w:val="0"/><w:iCs w:val="0"/><w:caps/><w:spacing w:val="20"/></w:rPr></w:style>');
  const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml:paragraph('P'),runXml:run()});
  assert.equal(result.ok,true,result.errors.join('; '));
- assert.equal(result.formatting.fontFamily,'Microsoft YaHei');
+ assert.deepEqual(result.formatting.fontFamily,{ascii:'Microsoft YaHei',hAnsi:'Microsoft YaHei',eastAsia:'Microsoft YaHei',cs:'Microsoft YaHei'});
  assert.deepEqual(result.formatting.language,{val:'en-US',eastAsia:'zh-CN'});
  assert.equal(result.formatting.fontSizePt,11);
  assert.equal(result.formatting.fontSizeCsPt,11);
