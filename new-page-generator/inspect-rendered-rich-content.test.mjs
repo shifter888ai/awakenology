@@ -36,3 +36,17 @@ test('maps rendered br position within paragraph text',()=>{
  assert.equal(r.ok,true,r.errors.join('; '));
  assert.deepEqual(r.lineBreaks,[{paragraphIndex:0,textOffset:1,breakType:'textWrapping'}]);
 });
+
+
+test('records separate paragraph indices even when adjacent text has no styling boundary',()=>{
+ const multi={parseFromString:()=>({body:{childNodes:[
+  node('P',{},[text('First')]),
+  node('P',{},[text('Second')])
+ ]}})};
+ const r=inspectRenderedRichContent('<p>First</p><p>Second</p>',multi);
+ assert.equal(r.ok,true,r.errors.join('; '));
+ assert.deepEqual(r.runs.map(x=>({paragraphIndex:x.paragraphIndex,text:x.text})),[
+  {paragraphIndex:0,text:'First'},
+  {paragraphIndex:1,text:'Second'}
+ ]);
+});
