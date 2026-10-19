@@ -117,3 +117,11 @@ All Word tables now block DOCX conversion until row/cell order, nested paragraph
 ## Rendered CSS and semantic layout guard (2026-10-19)
 
 The rendered rich-content inspector now blocks embedded CSS, external stylesheets and unverified structural/semantic tags whose browser-default styling is not yet compared. It also rejects text outside recognized paragraph containers. CI [39203529462](https://github.com/shifter888ai/awakenology/actions/runs/39203529462) passed **131/131 tests**. Support for these structures must be implemented and compared explicitly before the gate can permit them.
+
+
+## Image/text interleaving fidelity (2026-10-19)
+
+- Original DOCX paragraph content now includes image anchors in source XML order alongside text and line breaks.
+- Source and rendered image inventories record a character offset within the paragraph; the comparator checks it, preventing an image from moving relative to surrounding text while the separate text/image counts still pass.
+- CI [39203712577](https://github.com/shifter888ai/awakenology/actions/runs/39203712577) passed **134/134 tests**.
+- Floating drawing conversion remains blocked because exact page-relative coordinates and wrapping are not represented by the rendered comparison.
