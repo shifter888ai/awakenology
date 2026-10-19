@@ -89,10 +89,7 @@ export function resolveDocxParagraphLayout({stylesXml,paragraphXml}) {
     for(const style of chain) merge(result,layoutProps(style.pPr));
   }
   const pPr=bodyOf(paragraphXml,'pPr');
-  for (const match of pPr.matchAll(/<w:numPr\b[^>]*>([\s\S]*?)<\/w:numPr>/g)) {
-    const numId=/<w:numId\b[^>]*\bw:val=["']([^"']+)["']/.exec(match[1])?.[1] ?? null;
-    if(numId !== '0') errors.push('Active or unresolved Word numbering requires independent list mapping.');
-  }
+  // Numbering semantics are resolved independently by resolve-docx-numbering.mjs.
   for(const name of unsupported(pPr)) errors.push('Unsupported direct paragraph property w:'+name+'.');
   merge(result,layoutProps(pPr));
   for(const [key,value] of Object.entries(result)) {
