@@ -145,7 +145,7 @@ export async function extractDocx(buffer) {
     return {
       ok: resultErrors.length === 0, errors: resultErrors, html: resultErrors.length ? null : formattedHtml,
       ...(hasFloatingDrawing && errors.length === 0 ? {previewHtml:formattedHtml} : {}),
-      sha256: digest(buffer), sourceMap: errors.length ? null : sourceMap, assets: errors.length ? [] : assets.map(({ bytes, ...asset }) => asset)
+      sha256: digest(buffer), sourceMap: errors.length ? null : sourceMap, assets: errors.length ? [] : assets.map(({ bytes, ...asset }) => asset), assetFiles: errors.length ? [] : assets
     };
   } catch (error) {
     return blocked([`DOCX conversion failed: ${error.message}`], buffer);
