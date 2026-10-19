@@ -21,7 +21,7 @@ The implementation is an isolated proof of pipeline boundaries, not a working pa
 
 ## Remaining blockers before a Draft PR can be considered review-ready
 1. Keep the clean CI suite green as implementation changes continue; do not report passing tests without evidence.
-2. Harden DOCX fidelity: inherited styles, numbering/list structure, hyperlink relationships, Word tables, image extraction, and source XML-to-HTML loss accounting. Current parser deliberately blocks several complex features and explicit colors.
+2. Harden DOCX fidelity: inherited run styles and numbering/list structure, hyperlink relationships, Word tables, image extraction, and source XML-to-HTML loss accounting. A paragraph-layout resolver now inventories supported alignment and twip indentation through paragraph-style inheritance, and the rendered inspector/comparator check corresponding inline CSS values. Numbering and section-layout regression tests assert fail-closed behavior; numbering definitions/markers and section page geometry are not yet implemented. Current parser deliberately blocks several complex features and explicit colors.
 3. Harden HTML paste: sanitizer and output construction, CSS value validation, URL policy, parser-repair detection, attribute restrictions per tag, and image asset handling. The inspector is **not** an HTML sanitizer.
 4. Normalize both adapters into one common source model with source locations and issue severity.
 5. Extract and approve exact header/footer, CSS, circled-A logo and theme controls for *new pages only*; current static shell accepts components but does not supply or verify them.
