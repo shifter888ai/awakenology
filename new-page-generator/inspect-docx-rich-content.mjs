@@ -21,6 +21,7 @@ export async function inspectDocxRichContent(buffer) {
   } catch { return fail(['Cannot read original OOXML.']); }
 
   const errors = [], runs = [], paragraphLayouts = [];
+  if (hasSectionBreak) errors.push('Section breaks inside document content require manual resolution.');
   const unknownRunProperties = new Map();
   const advancedTags = new Map();
   const placement = await inspectDocxImagePlacement(buffer);
