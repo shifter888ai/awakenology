@@ -30,6 +30,7 @@ const formattingStyle = (run, fontFamily = null) => {
   if(run.fontSizePt !== null && run.fontSizePt !== undefined) declarations.push("font-size:"+run.fontSizePt+"pt");
   if(fontFamily || typeof run.fontFamily === "string") declarations.push("font-family:"+CSS_QUOTE(fontFamily || run.fontFamily));
   if(run.letterSpacingPt !== null && run.letterSpacingPt !== undefined) declarations.push("letter-spacing:"+run.letterSpacingPt+"pt");
+  if(run.fontKerning) declarations.push("font-kerning:"+run.fontKerning);
   return declarations.join(";");
 };
 function paragraphStyle(layout) {
@@ -51,7 +52,7 @@ function paragraphStyle(layout) {
 }
 const needsSpan = run => Boolean(run.bold || run.italic || run.underline || run.color || run.fontFamily ||
   run.language || run.allCaps || run.fontSizePt !== null && run.fontSizePt !== undefined ||
-  run.letterSpacingPt !== null && run.letterSpacingPt !== undefined);
+  run.letterSpacingPt !== null && run.letterSpacingPt !== undefined || run.fontKerning);
 const eastAsianScript = /[\u3000-\u303f\u3040-\u30ff\u3100-\u312f\u3130-\u318f\u31a0-\u31bf\u31f0-\u31ff\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7af\uf900-\ufaff\uff00-\uffef]/u;
 const complexScript = /[\p{Script=Arabic}\p{Script=Hebrew}\p{Script=Syriac}\p{Script=Thaana}\p{Script=Nko}\p{Script=Devanagari}\p{Script=Bengali}\p{Script=Gurmukhi}\p{Script=Gujarati}\p{Script=Oriya}\p{Script=Tamil}\p{Script=Telugu}\p{Script=Kannada}\p{Script=Malayalam}\p{Script=Sinhala}\p{Script=Thai}\p{Script=Lao}\p{Script=Tibetan}\p{Script=Myanmar}\p{Script=Khmer}\p{Script=Ethiopic}]/u;
 function familyForChar(families, character) {
