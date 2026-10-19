@@ -382,3 +382,12 @@ test("keeps unresolved inherited theme fonts blocking when a direct override is 
  assert.equal(result.ok,false);
  assert.ok(result.errors.some(error=>error.includes("Unsupported inherited Word formatting: fontFamily")));
 });
+
+
+test("returns paragraph-mark metadata even when visible text inherits an unresolved theme font",()=>{
+ const xml='<w:styles><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:asciiTheme="minorHAnsi"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>';
+ const paragraphXml='<w:p><w:pPr><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:eastAsia="Yu Gothic" w:cs="Arial"/></w:rPr></w:pPr></w:p>';
+ const result=resolveDocxRunFormatting({stylesXml:xml,paragraphXml,runXml:"<w:r/>"});
+ assert.equal(result.ok,false);
+ assert.deepEqual(result.paragraphMarkFormatting.fontFamily,{ascii:"Arial",hAnsi:"Arial",eastAsia:"Yu Gothic",cs:"Arial"});
+});
