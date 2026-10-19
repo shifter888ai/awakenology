@@ -145,3 +145,12 @@ Regression coverage verifies embedded CSS, external stylesheets and heading sema
 The source-map content stream now includes image anchors interleaved with text and line breaks in original XML order. Both the DOCX and rendered-HTML rich-content inventories record each image's character offset within its paragraph, and the comparator checks that offset along with image order, paragraph index, asset path and alt text. This closes a gap where text and image inventories could each pass independently even if the image had moved before or after the surrounding text.
 
 Regression tests verify source sequence `text → image → text`, the extracted image offset, rendered image offset, and rejection of a relocated image. Validation: **134 tests passed, 0 failed** in [CI run 39203712577](https://github.com/shifter888ai/awakenology/actions/runs/39203712577). Floating-image conversion is still blocked; this comparison does not claim to preserve its actual page-relative coordinates or wrapping.
+
+
+## Shared marker order and repeated-image occurrences (CI run 39203905399)
+
+The rich-content inventory now records a shared per-paragraph marker order for images and explicit line breaks, in addition to each marker's text offset. This distinguishes cases where an image and a line break occur at the same character offset but swap order. The source map retains image anchors in the same ordered content stream as text and breaks.
+
+Image asset mapping also pairs source image references with asset records by occurrence order, not merely relationship ID. This preserves per-occurrence alt text when the same media relationship is reused more than once. Regression tests cover swapping an image and break at a shared offset and reusing one image relationship with different alt text.
+
+Validation: **136 tests passed, 0 failed** in [CI run 39203905399](https://github.com/shifter888ai/awakenology/actions/runs/39203905399). Floating image page-relative placement/wrapping and the pilot's inherited formatting remain blocked.
