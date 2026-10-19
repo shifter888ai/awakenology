@@ -42,9 +42,6 @@ function runProps(xml) {
     const families = {};
     for (const key of ['ascii','hAnsi','eastAsia','cs']) if (a['w:'+key]) families[key] = a['w:'+key];
     result.fontFamily = unsupportedTheme || !Object.keys(families).length ? {unsupported:true} : families;
-    if (result.fontFamily?.unsupported) result.fontFamilyReason = unsupportedTheme
-      ? 'Theme-dependent Word font family requires theme resolution (' + Object.keys(a).filter(key=>/Theme$/i.test(key) && key.startsWith('w:')).join(', ') + ').'
-      : 'Word font family has no explicit supported script-family attribute (' + Object.keys(a).join(', ') + ').';
     if (a['w:hint'] !== undefined) result.fontHint = ['default','eastAsia','cs'].includes(a['w:hint']) ? a['w:hint'] : {unsupported:true};
   }
   const lang = directTag(xml,'lang');
@@ -127,6 +124,6 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
     if (effective.fontSizePt === null || effective.fontKerningThresholdPt?.unsupported) errors.push('Word font kerning threshold requires an explicit supported font size.');
     else effective.fontKerning = effective.fontSizePt >= effective.fontKerningThresholdPt ? 'normal' : 'none';
   }
-  for(const [key,value] of Object.entries(effective)) if(value?.unsupported) errors.push('Unsupported inherited Word formatting: '+key+'.'+(key==='fontFamily' && effective.fontFamilyReason ? ' '+effective.fontFamilyReason : ''));
+  for(const [key,value] of Object.entries(effective)) if(value?.unsupported) errors.push('Unsupported inherited Word formatting: '+key+'.');
   return {ok:errors.length===0,errors,formatting:errors.length?null:effective};
 }
