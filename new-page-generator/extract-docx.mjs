@@ -94,7 +94,7 @@ export async function extractDocx(buffer) {
   if (zip.file("word/comments.xml")) errors.push("Word comments require manual resolution.");
   if (zip.file("word/footnotes.xml")) errors.push("Footnotes require manual resolution.");
   if (zip.file("word/endnotes.xml")) errors.push("Endnotes require manual resolution.");
-  if (/<w:pPr\b[^>]*>[\s\S]*?<w:sectPr\b/.test(xml)) errors.push("Section breaks within document content require manual resolution.");
+  if ([...xml.matchAll(/<w:p\b[^>]*>[\s\S]*?<\/w:p>/g)].some(paragraph => /<w:pPr\b[^>]*>[\s\S]*?<w:sectPr\b/.test(paragraph[0]))) errors.push("Section breaks within document content require manual resolution.");
   if (/<w:altChunk(?:\s|>)/.test(xml)) errors.push("Alternative content chunks require manual resolution.");
   const hasDrawings = /<w:drawing(?:\s|\/?>)/.test(xml) || /<w:pict(?:\s|\/?>)/.test(xml);
   let assets = [];
