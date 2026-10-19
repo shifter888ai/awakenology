@@ -107,3 +107,8 @@ The historical sections above record the sequence of earlier implementation stag
 - CI diagnostic resolves the pilot’s referenced style chain: style `7` (“List Paragraph”) inherits from style `1` (“Normal”). The chain includes paragraph indentation, font family, kerning, font sizes (including complex-script size), language, widow control and alignment. Document defaults also contribute font metadata.
 - CI run [39203373115](https://github.com/shifter888ai/awakenology/actions/runs/39203373115) passed **128/128 tests**.
 - This evidence clarifies the next implementation slice: implement an explicit OOXML style/default resolver and compare its effective formatting to rendered HTML, or continue to block. Do not simply ignore inherited properties. The real pilot remains unapproved.
+
+
+## Word table fail-closed gate (2026-10-19)
+
+All Word tables now block DOCX conversion until row/cell order, nested paragraphs, empty cells, and merge semantics are represented and compared. This replaces the narrower merged-cell-only guard. Regression CI [39203460322](https://github.com/shifter888ai/awakenology/actions/runs/39203460322) passed **129/129 tests**. No unsupported table is flattened into HTML.
