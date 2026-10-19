@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import JSZip from "jszip";
-import { extractDocx } from "./extract-docx.mjs";
+import { extractDocx, isResolvedListParagraphWarning } from "./extract-docx.mjs";
 
 async function fixture(body) {
   const zip = new JSZip();
@@ -167,4 +167,14 @@ test("preserves inherited color and matching complex-script formatting", async (
  assert.match(result.html,/color:#ff0000/);
 
 
+});
+
+
+test("recognizes only the warning for a referenced and defined List Paragraph style",()=>{
+ const warning="Unrecognised paragraph style: 'List Paragraph' (Style ID: 7)";
+ const stylesXml='<w:styles><w:style w:type="paragraph" w:styleId="7"><w:name w:val="List Paragraph"/></w:style></w:styles>';
+ const documentXml='<w:document><w:body><w:p><w:pPr><w:pStyle w:val="7"/></w:pPr></w:p></w:body></w:document>';
+ assert.equal(isResolvedListParagraphWarning(warning,stylesXml,documentXml),true);
+ assert.equal(isResolvedListParagraphWarning(warning,stylesXml,documentXml.replace('w:val="7"','w:val="Other")),false);
+ assert.equal(isResolvedListParagraphWarning("Unrecognised paragraph style: 'Unknown' (Style ID: 7)",stylesXml,documentXml),false);
 });
