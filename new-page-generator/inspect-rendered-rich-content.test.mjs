@@ -130,13 +130,14 @@ test("extracts rendered before/after and exact line spacing in point units", () 
 
 test("inspects rendered font family, word-language provenance, all-caps and letter spacing", () => {
  const styled={parseFromString:()=>({body:{childNodes:[node('P',{},[
-  node('SPAN',{'style':'font-family: "Microsoft YaHei"; font-size: 11pt; text-transform: uppercase; letter-spacing: 1pt','data-word-lang-val':'en-US','data-word-lang-east-asia':'zh-CN'},[text('Mixed')])
+  node('SPAN',{'style':'font-family: "Microsoft YaHei"; font-size: 11pt; text-transform: uppercase; letter-spacing: 1pt; font-kerning: normal','data-word-lang-val':'en-US','data-word-lang-east-asia':'zh-CN'},[text('Mixed')])
  ])]}})};
- const result=inspectRenderedRichContent('<p><span style="font-family: &quot;Microsoft YaHei&quot;;font-size:11pt;text-transform:uppercase;letter-spacing:1pt" data-word-lang-val="en-US" data-word-lang-east-asia="zh-CN">Mixed</span></p>',styled);
+ const result=inspectRenderedRichContent('<p><span style="font-family: &quot;Microsoft YaHei&quot;;font-size:11pt;text-transform:uppercase;letter-spacing:1pt;font-kerning:normal" data-word-lang-val="en-US" data-word-lang-east-asia="zh-CN">Mixed</span></p>',styled);
  assert.equal(result.ok,true,result.errors.join('; '));
  assert.equal(result.runs[0].fontFamily,'Microsoft YaHei');
  assert.deepEqual(result.runs[0].language,{val:'en-US',eastAsia:'zh-CN'});
  assert.equal(result.runs[0].fontSizeCsPt,11);
  assert.equal(result.runs[0].allCaps,true);
  assert.equal(result.runs[0].letterSpacingPt,1);
+ assert.equal(result.runs[0].fontKerning,'normal');
 });
