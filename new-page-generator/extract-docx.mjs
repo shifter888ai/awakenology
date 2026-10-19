@@ -16,7 +16,7 @@ const MAX_DOCUMENT_XML_BYTES = 20 * 1024 * 1024;
 const MAX_STYLES_XML_BYTES = 5 * 1024 * 1024;
 const FEATURES = [
   ["unsupported run effects or hidden text", /<w:(?:vertAlign|position|vanish|specVanish|smallCaps|emboss|imprint|shadow|outline|effect|fitText|rtl|cs)(?:\s|\/?>)/],
-  ["paragraph pagination, direction, or section layout", /<w:(?:sectPr|pageBreakBefore|keepNext|keepLines|widowControl|outlineLvl|contextualSpacing|bidi|textDirection|mirrorIndents|snapToGrid|adjustRightInd|autoSpaceDE|autoSpaceDN)(?:\s|\/?>)/],
+  ["paragraph pagination or direction", /<w:(?:pageBreakBefore|keepNext|keepLines|outlineLvl|contextualSpacing|bidi|textDirection|mirrorIndents|snapToGrid|adjustRightInd|autoSpaceDE|autoSpaceDN)(?:\s|\/?>)/],
   ["paragraph numbering or list semantics", /<w:numPr(?:\s|\/?>)/],
   ["Word table structure (requires cell/order/merge fidelity mapping)", /<w:tbl(?:\s|\/?>)/],
   ["highlight or shading (requires lossless mapping)", /<w:(?:highlight|shd)(?:\s|>)/],
