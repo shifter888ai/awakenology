@@ -125,8 +125,10 @@ export function inspectRenderedRichContent(html, parser) {
       else next.letterSpacingPt=Number(match[1])*(match[2]==='px'?0.75:1);
     }
     if(weight!==null) next.bold=['bold','700'].includes(weight.toLowerCase());
+    const boldCsAttr=node.getAttribute?.('data-word-bold-cs'); if(boldCsAttr!==null && boldCsAttr!==undefined) next.boldCs=boldCsAttr==='true';
     else if(['B','STRONG'].includes(tag)) next.bold=true;
     if(fontStyle!==null) next.italic=fontStyle.toLowerCase()==='italic';
+    const italicCsAttr=node.getAttribute?.('data-word-italic-cs'); if(italicCsAttr!==null && italicCsAttr!==undefined) next.italicCs=italicCsAttr==='true';
     else if(['I','EM'].includes(tag)) next.italic=true;
     if(decoration!==null) next.underline=decoration.toLowerCase()==='underline';
     else if(tag==='U') next.underline=true;
