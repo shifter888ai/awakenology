@@ -19,6 +19,9 @@ const propertyValue = (xml, tag) => {
   }
   return undefined;
 };
+const childProperties = xml => [...xml.matchAll(/<w:([A-Za-z][A-Za-z0-9]*)\b[^>]*\/?\s*>/g)].map(match => match[1]);
+const unsupportedRunProps = xml => childProperties(xml).filter(name => !['b','i','u','color'].includes(name));
+const unsupportedParagraphProps = xml => childProperties(xml).filter(name => name !== 'rPr');
 function runProps(xml) {
   const result={};
   for (const key of ['b','i','u','color']) {
@@ -34,10 +37,13 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
     return {ok:false,errors:['Styles XML, paragraph XML, and run XML are required.'],formatting:null};
   }
   const styleMap=new Map();
+  // Defaults are parsed once above; use the effective run-properties element.
+  const defaultsRun=inner(defaults,'rPr');
+  for(const name of unsupportedRunProps(defaultsRun)) errors.push('Unsupported document-default run property w:'+name+'.');
   for (const match of stylesXml.matchAll(/<w:style\b([^>]*)>([\s\S]*?)<\/w:style>/g)) {
     const a=attrs(match[1]), body=match[2], id=a['w:styleId'];
     if (!id || styleMap.has(id)) { errors.push('Missing or duplicate Word style ID.'); continue; }
-    styleMap.set(id,{id,basedOn:/<w:basedOn\b[^>]*\bw:val=[\"']([^\"']+)[\"']/.exec(body)?.[1] ?? null,run:runProps(inner(body,'rPr'))});
+    styleMap.set(id,{id,basedOn:/<w:basedOn\b[^>]*\bw:val=["']([^"']+)["']/.exec(body)?.[1] ?? null,run:runProps(inner(body,'rPr')),unsupportedRun:unsupportedRunProps(inner(body,'rPr')),unsupportedParagraph:unsupportedParagraphProps(inner(body,'pPr'))});
   }
   const chain=(id,label)=>{
     const found=[], seen=new Set();
@@ -46,6 +52,8 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
       seen.add(id);
       const style=styleMap.get(id);
       if(!style){errors.push('Missing Word style '+id+' referenced by '+label+'.');break;}
+      for(const name of style.unsupportedRun) errors.push('Unsupported run property w:'+name+' in Word style '+style.id+'.');
+      for(const name of style.unsupportedParagraph) errors.push('Unsupported paragraph property w:'+name+' in Word style '+style.id+'.');
       found.unshift(style.run);
       id=style.basedOn;
     }
@@ -53,8 +61,8 @@ export function resolveDocxRunFormatting({stylesXml, paragraphXml, runXml}) {
   };
   const merge=(target,source)=>{for(const [key,value] of Object.entries(source)) target[key]=value;};
   const effective={b:false,i:false,u:false,color:null};
-  const defaults=inner(inner(stylesXml,'docDefaults'),'rPrDefault');
-  merge(effective,runProps(defaults));
+  // Defaults are parsed once above; use the effective run-properties element.
+  merge(effective,runProps(defaultsRun));
   const pStyle=/<w:pStyle\b[^>]*\bw:val=[\"']([^\"']+)[\"']/.exec(paragraphXml)?.[1] ?? null;
   if(pStyle) for(const props of chain(pStyle,'paragraph style')) merge(effective,props);
   const pRun=inner(inner(paragraphXml,'pPr'),'rPr');
