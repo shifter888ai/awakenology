@@ -31,3 +31,21 @@ test("allows ordinary relative, HTTPS, mailto and telephone links", () => {
     assert.equal(result.ok, true, href + ": " + result.errors.join("; "));
   }
 });
+
+test("image sources allow HTTP(S) only and still require alt text", () => {
+  const makeParser = (src, alt = "Illustration") => ({ parseFromString() {
+    const text = { nodeType: 3, textContent: "Caption" };
+    return { head: { childNodes: [] }, body: { childNodes: [
+      element("p", {}, [text]), element("img", { src, alt }, [])
+    ] } };
+  }});
+  for (const src of ["javascript:alert(1)", "data:image/png;base64,AA==", "blob:https://example.com/id", "//example.com/image.png"]) {
+    const html = '<p>Caption</p><img src="' + src + '" alt="Illustration">';
+    const result = inspectPastedHtml(html, makeParser(src));
+    assert.equal(result.ok, false, src);
+    assert.ok(result.errors.some(error => error.includes("unsafe URL")), result.errors.join("; "));
+  }
+  const safeHtml = '<p>Caption</p><img src="https://example.com/image.png" alt="Illustration">';
+  const safe = inspectPastedHtml(safeHtml, makeParser("https://example.com/image.png"));
+  assert.equal(safe.ok, true, safe.errors.join("; "));
+});
