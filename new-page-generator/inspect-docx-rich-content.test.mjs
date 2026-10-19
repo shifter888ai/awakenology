@@ -136,10 +136,10 @@ test('rejects cyclic paragraph-style inheritance without generic style-reference
  assert.ok(!r.errors.some(x=>x.includes('Unresolved OOXML feature w:pStyle')));
 });
 test('rejects conflicting inherited font families after style-reference resolution',async()=>{
- const styles='<w:styles xmlns:w="x"><w:docDefaults><w:rPrDefault><w:rPr/></w:rPrDefault></w:docDefaults><w:style w:type="paragraph" w:styleId="Styled"><w:rPr><w:rFonts w:ascii="Arial"/></w:rPr></w:style></w:styles>';
+ const styles='<w:styles xmlns:w="x"><w:docDefaults><w:rPrDefault><w:rPr/></w:rPrDefault></w:docDefaults><w:style w:type="paragraph" w:styleId="Styled"><w:rPr><w:rFonts w:ascii="Arial" w:eastAsia="Yu Gothic"/></w:rPr></w:style></w:styles>';
  const r=await inspectDocxRichContent(await fixture('<w:p><w:pPr><w:pStyle w:val="Styled"/></w:pPr><w:r><w:t>Font</w:t></w:r></w:p>',styles));
  assert.equal(r.ok,false);
- assert.ok(r.errors.some(x=>x.includes('Unsupported run property w:rFonts in Word style Styled')));
+ assert.ok(r.errors.some(x=>x.includes('Unsupported inherited Word formatting: fontFamily')));
  assert.ok(!r.errors.some(x=>x.includes('Unresolved OOXML feature w:pStyle')));
  assert.equal(r.runs[0].fontSizePt,null);
 });
