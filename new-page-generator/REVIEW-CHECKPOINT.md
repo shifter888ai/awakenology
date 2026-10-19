@@ -125,3 +125,11 @@ The rendered rich-content inspector now blocks embedded CSS, external stylesheet
 - Source and rendered image inventories record a character offset within the paragraph; the comparator checks it, preventing an image from moving relative to surrounding text while the separate text/image counts still pass.
 - CI [39203712577](https://github.com/shifter888ai/awakenology/actions/runs/39203712577) passed **134/134 tests**.
 - Floating drawing conversion remains blocked because exact page-relative coordinates and wrapping are not represented by the rendered comparison.
+
+
+## Shared image/line-break marker order (2026-10-19)
+
+- Image and line-break records now share a per-paragraph marker-order index as well as text offsets, so swapping two markers at the same offset fails comparison.
+- Image occurrences are paired with asset records by source order, preserving different alt text when one relationship is reused.
+- CI [39203905399](https://github.com/shifter888ai/awakenology/actions/runs/39203905399) passed **136/136 tests**.
+- Floating-image coordinate/wrapping conversion and inherited formatting remain unsupported; the pilot is not approved.
