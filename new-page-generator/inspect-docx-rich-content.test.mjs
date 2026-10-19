@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import JSZip from 'jszip';
 import {inspectDocxRichContent} from './inspect-docx-rich-content.mjs';
-async function fixture(body,stylesXml='<w:styles xmlns:w="x"><w:docDefaults><w:rPrDefault><w:rPr/></w:rPrDefault></w:docDefaults></w:styles>'){const z=new JSZip();z.file('word/document.xml','<w:document xmlns:w="x"><w:body>'+body+'</w:body></w:document>');z.file('word/_rels/document.xml.rels','<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>');z.file('word/styles.xml',stylesXml);z.file('[Content_Types].xml','<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="xml" ContentType="application/xml"/></Types>');return z.generateAsync({type:'nodebuffer'});}
+async function fixture(body,stylesXml='<w:styles xmlns:w="x"><w:docDefaults><w:rPrDefault><w:rPr/></w:rPrDefault></w:docDefaults></w:styles>',numberingXml='<w:numbering xmlns:w="x"></w:numbering>'){const z=new JSZip();z.file('word/document.xml','<w:document xmlns:w="x"><w:body>'+body+'</w:body></w:document>');z.file('word/_rels/document.xml.rels','<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>');z.file('word/styles.xml',stylesXml);z.file('word/numbering.xml',numberingXml);z.file('[Content_Types].xml','<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="xml" ContentType="application/xml"/></Types>');return z.generateAsync({type:'nodebuffer'});}
 test('reads exact Traditional Chinese and explicit run formatting',async()=>{
  const r=await inspectDocxRichContent(await fixture('<w:p><w:r><w:rPr><w:b/><w:color w:val="FF0000"/></w:rPr><w:t>什麽</w:t></w:r></w:p>'));
  assert.equal(r.ok,true,r.errors.join('; '));assert.deepEqual(r.runs,[{paragraphIndex:0,text:'什麽',bold:true,italic:false,underline:false,color:'#ff0000',fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null,fontKerning:null,fontHint:null}]);
@@ -115,10 +115,12 @@ test('records resolved Word font size in the source rich inventory',async()=>{
 });
 
 
-test('fails closed on numbering references until numbering.xml semantics are resolved',async()=>{
- const numbered=await inspectDocxRichContent(await fixture('<w:p><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="7"/></w:numPr></w:pPr><w:r><w:t>List item</w:t></w:r></w:p>'));
- assert.equal(numbered.ok,false);
- assert.ok(numbered.errors.length>0,'Numbering must not be approved without mapping its definition and rendered marker.');
+test('resolves Word list numbering into source rich inventory with indentation',async()=>{
+ const numbering='<w:numbering xmlns:w="x"><w:abstractNum w:abstractNumId="2"><w:lvl w:ilvl="0"><w:start w:val="3"/><w:numFmt w:val="decimal"/><w:lvlText w:val="%1."/><w:pPr><w:ind w:left="720" w:hanging="360"/></w:pPr></w:lvl></w:abstractNum><w:num w:numId="7"><w:abstractNumId w:val="2"/></w:num></w:numbering>';
+ const numbered=await inspectDocxRichContent(await fixture('<w:p><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="7"/></w:numPr></w:pPr><w:r><w:t>List item</w:t></w:r></w:p>','<w:styles xmlns:w="x"><w:docDefaults><w:rPrDefault><w:rPr/></w:rPrDefault></w:docDefaults></w:styles>',numbering));
+ assert.equal(numbered.ok,true,numbered.errors.join('; '));
+ assert.deepEqual(numbered.paragraphNumbering,[{paragraphIndex:0,numId:7,abstractNumId:2,level:0,format:'decimal',text:'%1.',start:3,indentation:{left:720,hanging:360}}]);
+ assert.deepEqual(numbered.paragraphLayouts[0].indentation,{left:720,hanging:360});
 });
 
 
