@@ -5,7 +5,7 @@ import {inspectDocxRichContent} from './inspect-docx-rich-content.mjs';
 async function fixture(body,stylesXml='<w:styles xmlns:w="x"><w:docDefaults><w:rPrDefault><w:rPr/></w:rPrDefault></w:docDefaults></w:styles>',numberingXml='<w:numbering xmlns:w="x"></w:numbering>'){const z=new JSZip();z.file('word/document.xml','<w:document xmlns:w="x"><w:body>'+body+'</w:body></w:document>');z.file('word/_rels/document.xml.rels','<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>');z.file('word/styles.xml',stylesXml);z.file('word/numbering.xml',numberingXml);z.file('[Content_Types].xml','<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="xml" ContentType="application/xml"/></Types>');return z.generateAsync({type:'nodebuffer'});}
 test('reads exact Traditional Chinese and explicit run formatting',async()=>{
  const r=await inspectDocxRichContent(await fixture('<w:p><w:r><w:rPr><w:b/><w:color w:val="FF0000"/></w:rPr><w:t>什麽</w:t></w:r></w:p>'));
- assert.equal(r.ok,true,r.errors.join('; '));assert.deepEqual(r.runs,[{paragraphIndex:0,text:'什麽',bold:true,italic:false,underline:false,color:'#ff0000',fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null,fontKerning:null,fontHint:null}]);
+ assert.equal(r.ok,true,r.errors.join('; '));assert.deepEqual(r.runs,[{paragraphIndex:0,text:'什麽',bold:true,italic:false,underline:false,color:'#ff0000',fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null,fontKerning:null,fontHint:null}]);assert.deepEqual(r.paragraphMarkFormatting,[]);
 });
 test('does not guess hyperlink inheritance',async()=>assert.equal((await inspectDocxRichContent(await fixture('<w:p><w:hyperlink r:id="rId1"><w:r><w:t>link</w:t></w:r></w:hyperlink></w:p>'))).ok,false));
 test('does not certify embedded drawings without asset mapping',async()=>assert.equal((await inspectDocxRichContent(await fixture('<w:p><w:r><w:drawing><a:blip r:embed="rId2"/></w:drawing></w:r></w:p>'))).ok,false));
@@ -154,4 +154,13 @@ test('includes paragraph-mark formatting in successful rich-content inventories'
  const r=await inspectDocxRichContent(await fixture('<w:p><w:r><w:t>Text</w:t></w:r></w:p>',styles));
  assert.equal(r.ok,true,r.errors.join('; '));
  assert.deepEqual(r.paragraphMarkFormatting,[{paragraphIndex:0,fontFamily:{ascii:'Arial',eastAsia:'Yu Gothic'},language:{val:'en-US',eastAsia:'ja-JP'}}]);
+});
+
+
+test("captures paragraph-mark formatting even on an empty paragraph",async()=>{
+ const body='<w:p><w:r><w:t>Text</w:t></w:r></w:p><w:p><w:pPr><w:rPr><w:rFonts w:ascii="Arial"/></w:rPr></w:pPr></w:p>';
+ const r=await inspectDocxRichContent(await fixture(body));
+ assert.equal(r.ok,true,r.errors.join("; "));
+ assert.deepEqual(r.paragraphMarkFormatting,[{paragraphIndex:1,fontFamily:{ascii:"Arial"}}]);
+ assert.equal(r.paragraphCount,2);
 });
