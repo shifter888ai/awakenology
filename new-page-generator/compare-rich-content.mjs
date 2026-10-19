@@ -44,7 +44,7 @@ export function compareRichContent(source, output) {
       if (typeof r.assetPath !== 'string' || !r.assetPath ||
           !Number.isInteger(r.paragraphIndex) || r.paragraphIndex < 0 ||
           !Number.isInteger(r.order) || r.order < 0 || !Number.isInteger(r.textOffset) || r.textOffset < 0 || !Number.isInteger(r.markerOrder) || r.markerOrder < 0 ||
-          !(r.alt === null || typeof r.alt === 'string')) {
+          !(r.alt === null || typeof r.alt === 'string') || !r.placement || typeof r.placement !== 'object' || typeof r.placement.kind !== 'string') {
         throw new Error('Invalid image field types at ' + where);
       }
     });
