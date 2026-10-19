@@ -1,11 +1,17 @@
 import { reviewPasteInventory } from "./review-paste-inventory.mjs";
-import { extractDocx } from "./extract-docx.mjs";
+import { extractDocx, FLOATING_DRAWING_REVIEW_ERROR } from "./extract-docx.mjs";
 import { inspectDocxRichContent } from "./inspect-docx-rich-content.mjs";
 import { LANGUAGES, validatePageSet } from "./validate-page-set.mjs";
 import { inspectPastedHtml } from "./inspect-paste.mjs";
 import { validateInventory, compareInventories } from "./content-inventory.mjs";
 import { normalizeHtmlInventory } from "./normalize-html-inventory.mjs";
 import { markdownToHtml } from "./markdown-to-html.mjs";
+
+export function isFloatingDrawingReviewOnly(extracted) {
+  return Boolean(extracted && extracted.ok===false && typeof extracted.previewHtml==="string" &&
+    Array.isArray(extracted.errors) && extracted.errors.length===1 &&
+    extracted.errors[0]===FLOATING_DRAWING_REVIEW_ERROR && typeof extracted.sha256==="string");
+}
 
 /**
  * Connects the existing validators without inventing a DOCX converter.
@@ -28,6 +34,10 @@ export async function inspectPageSet(pageSet, inputs = {}) {
     let inspected;
     let sourceRichInventory = null;
     let assetFiles = [];
+    let previewHtml = null;
+    let visualReviewRequired = false;
+    let visualReviewApproved = false;
+    let reviewWarnings = [];
     if (meta.mode === "paste" || meta.mode === "html") {
       inspected = inspectPastedHtml(input.html, input.parser, { allowDocumentShell: meta.mode === "html" });
     } else if (meta.mode === "markdown") {
@@ -41,10 +51,19 @@ export async function inspectPageSet(pageSet, inputs = {}) {
         errors.push(...rich.errors.map(e => `${lang}: original DOCX rich content: ${e}`));
       } else sourceRichInventory = rich;
       const extracted = await extractDocx(input.buffer);
-      if (extracted.ok) assetFiles = extracted.assetFiles ?? [];
-      inspected = extracted.ok
-        ? inspectPastedHtml(extracted.html, input.parser)
-        : { ok: false, errors: extracted.errors, inventory: [] };
+      const floatingReviewOnly=isFloatingDrawingReviewOnly(extracted);
+      if (extracted.ok || floatingReviewOnly) assetFiles = extracted.assetFiles ?? [];
+      if (extracted.ok) {
+        inspected=inspectPastedHtml(extracted.html,input.parser);
+      } else if (floatingReviewOnly) {
+        previewHtml=extracted.previewHtml;
+        inspected=inspectPastedHtml(previewHtml,input.parser);
+        visualReviewApproved=input.floatingImageReviewApprovedSha256===extracted.sha256;
+        visualReviewRequired=!visualReviewApproved;
+        if(visualReviewRequired) reviewWarnings=[...extracted.errors];
+      } else {
+        inspected={ok:false,errors:extracted.errors,inventory:[]};
+      }
     }
     const pageErrors = [...inspected.errors];
     let normalizedBlocks = [];
@@ -61,10 +80,14 @@ export async function inspectPageSet(pageSet, inputs = {}) {
         if (normalized.ok) normalizedBlocks = normalized.blocks;
       }
     }
-    pages[lang] = { mode: meta.mode, inventory: inspected.inventory, normalizedBlocks, sourceRichInventory, assetFiles, errors: pageErrors };
+    pages[lang] = { mode: meta.mode, inventory: inspected.inventory, normalizedBlocks, sourceRichInventory, assetFiles, errors: pageErrors, ...(previewHtml ? {previewHtml,sourceSha256:input.floatingImageReviewApprovedSha256??null,visualReviewRequired,visualReviewApproved,reviewWarnings} : {}) };
     errors.push(...pageErrors.map(e => `${lang}: ${e}`));
   }
-  return { ok: errors.length === 0, errors, pages };
+  for(const [lang,page] of Object.entries(pages)) for(const warning of page.reviewWarnings??[]) errors.push(lang+': '+warning);
+  const reviewRequired=Object.values(pages).some(page=>page.visualReviewRequired===true);
+  const nonReviewErrors=errors.filter(error=>!error.includes(FLOATING_DRAWING_REVIEW_ERROR));
+  const stage=reviewRequired ? (nonReviewErrors.length ? 'source-inspection-and-visual-review' : 'visual-review-required') : errors.length ? 'source-inspection' : 'review-ready';
+  return { ok: errors.length === 0 && !reviewRequired, stage, reviewRequired, errors, pages };
 }
 
 /** Gate a reviewed output inventory against an inspected input page. */
