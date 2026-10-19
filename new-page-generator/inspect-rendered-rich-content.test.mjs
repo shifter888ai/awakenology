@@ -86,3 +86,19 @@ test('blocks external stylesheets before assuming inline style inventory is comp
  assert.equal(result.ok,false);
  assert.ok(result.errors.some(x=>x.includes('External stylesheets')));
 });
+
+
+test('records explicit rendered font sizes in points',()=>{
+ const sized={parseFromString:()=>({body:{childNodes:[node('P',{},[node('SPAN',{style:'font-size: 12pt'},[text('Twelve')]),node('SPAN',{style:'font-size: 16px'},[text('Sixteen')])])]}})};
+ const r=inspectRenderedRichContent('<p><span style="font-size:12pt">Twelve</span><span style="font-size:16px">Sixteen</span></p>',sized);
+ assert.equal(r.ok,true,r.errors.join('; '));
+ assert.equal(r.runs[0].fontSizePt,12);
+ assert.equal(r.runs[1].fontSizePt,12);
+});
+
+test('blocks relative or malformed rendered font sizes',()=>{
+ const sized={parseFromString:()=>({body:{childNodes:[node('P',{},[node('SPAN',{style:'font-size: 1.2em'},[text('Relative')])]})]})};
+ const r=inspectRenderedRichContent('<p><span style="font-size:1.2em">Relative</span></p>',sized);
+ assert.equal(r.ok,false);
+ assert.ok(r.errors.some(x=>x.includes('Unsupported rendered font-size')));
+});
