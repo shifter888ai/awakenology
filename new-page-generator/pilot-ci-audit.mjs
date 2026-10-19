@@ -146,6 +146,20 @@ try {
   } else {
     const assetById = new Map(assetsForReview.assets.map(asset => [asset.relationshipId, asset]));
     const paragraphIndexHtml = sourceForReview.paragraphs.map(p => '<p class="source-paragraph"><strong>Paragraph ' + (p.index+1) + ':</strong> ' + esc(p.text) + (p.breaks.length ? ' <em>[explicit line break: ' + p.breaks.length + ']</em>' : '') + '</p>').join(' ');
+    const imagesByParagraph = new Map();
+    placementsForReview.images.forEach((item,index) => {
+      const group = imagesByParagraph.get(item.paragraphIndex) ?? [];
+      group.push({item,index});
+      imagesByParagraph.set(item.paragraphIndex,group);
+    });
+    const sourceSequenceHtml = sourceForReview.paragraphs.map(p => {
+      const images = (imagesByParagraph.get(p.index) ?? []).map(({item,index}) => {
+        const asset = assetById.get(item.relationshipId);
+        if (!asset) return '<p class="warning">Source image ' + (index+1) + ' unavailable</p>';
+        return '<figure><img alt="' + esc(asset.altText || ('Source image ' + (index+1))) + '" src="data:' + esc(asset.contentType) + ';base64,' + asset.bytes.toString('base64') + '"><figcaption>Source image ' + (index+1) + ' · ' + esc(item.placement.kind) + ' placement · paragraph ' + (p.index+1) + '</figcaption></figure>';
+      }).join('');
+      return '<section class="source-block"><small>Source paragraph ' + (p.index+1) + '</small><p>' + esc(p.text) + (p.breaks.length ? '<span class="warning"> [explicit line break × ' + p.breaks.length + ']</span>' : '') + '</p>' + images + '</section>';
+    }).join('');
     const sections = placementsForReview.images.map((item,index) => {
       const asset = assetById.get(item.relationshipId);
       const paragraphIndex = item.paragraphIndex;
@@ -154,7 +168,7 @@ try {
       const image = asset ? '<img alt="' + esc(asset.altText || ('Source image ' + (index+1))) + '" src="data:' + esc(asset.contentType) + ';base64,' + asset.bytes.toString('base64') + '">' : '<p>Embedded source image unavailable.</p>';
       return '<section><h2>Image ' + (index+1) + ' — paragraph ' + (paragraphIndex+1) + '</h2><p><strong>Placement:</strong> ' + esc(item.placement.kind) + (item.placement.requiresVisualReview ? ' — manual visual review required' : '') + '</p><p><strong>Relationship:</strong> ' + esc(item.relationshipId) + ' · <strong>SHA-256:</strong> ' + esc(item.sha256) + '</p>' + image + '<h3>Source paragraph context</h3>' + context.map((p,i)=>'<p class="context"><strong>' + (p.index===paragraphIndex?'Image paragraph':p.index<paragraphIndex?'Previous paragraph':'Next paragraph') + ':</strong> ' + esc(p.text) + '</p>').join('') + '<details><summary>Raw placement metadata</summary><pre>' + esc(JSON.stringify(item.placement,null,2)) + '</pre></details></section>';
     }).join('\n');
-    await writeFile(visualReviewPath, '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DOCX pilot source image review</title><style>body{font:16px/1.55 system-ui,sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem;color:#222}section{border-top:1px solid #aaa;padding:1.5rem 0}img{display:block;max-width:100%;max-height:600px;object-fit:contain;margin:1rem auto}pre{white-space:pre-wrap;overflow-wrap:anywhere}.context{padding:.6rem;border-left:3px solid #bbb}.warning{padding:1rem;background:#fff2cc}</style><h1>DOCX pilot — source image review</h1><p class="warning">This is a source inspection aid, not a converted page preview. Floating image metadata cannot prove visual fidelity. Compare the floating image against its original position and wrapping in Word before approving the page generator.</p>' + sections + '<details><summary>All source paragraphs (' + sourceForReview.paragraphs.length + ')</summary>' + paragraphIndexHtml + '</details></html>');
+    await writeFile(visualReviewPath, '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DOCX pilot source image review</title><style>body{font:16px/1.55 system-ui,sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem;color:#222}section{border-top:1px solid #aaa;padding:1.5rem 0}img{display:block;max-width:100%;max-height:600px;object-fit:contain;margin:1rem auto}pre{white-space:pre-wrap;overflow-wrap:anywhere}.context{padding:.6rem;border-left:3px solid #bbb}.warning{padding:1rem;background:#fff2cc}</style><h1>DOCX pilot — source image review</h1><p class="warning">This is a source inspection aid, not a converted page preview. Floating image metadata cannot prove visual fidelity. Compare the floating image against its original position and wrapping in Word before approving the page generator.</p>' + '<h2>Linear source sequence (text and images)</h2><p>This sequence preserves source paragraph order and text but does not reproduce Word typography, page layout, or floating-image wrapping. Do not treat it as approved output.</p>' + sourceSequenceHtml + '<h2>Image details</h2>' + sections + '<details><summary>All source paragraphs (' + sourceForReview.paragraphs.length + ')</summary>' + paragraphIndexHtml + '</details></html>');
   }
 } catch(error) {
   await writeFile(visualReviewPath, '<!doctype html><meta charset="utf-8"><title>Pilot visual review unavailable</title><h1>Visual review unavailable</h1><pre>' + String(error?.message ?? error).replace(/[&<>]/g,'') + '</pre>');
