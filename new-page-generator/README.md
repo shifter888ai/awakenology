@@ -13,6 +13,14 @@ Status: work in progress. This directory is **not a publishing endpoint**. Nothi
 - Generate a review report and full-page previews; only an explicitly reviewed Draft PR may enter the existing CI and approval process.
 - Never write to `main`, merge, deploy, or edit existing article files as a side effect of generation.
 
+## Choosing a source format
+
+- Prefer `.md` for text-first articles with ordinary headings, emphasis, simple lists, links, and images. It has the smallest conversion surface, but this adapter is not full CommonMark and does not support custom colours or arbitrary CSS.
+- Prefer `.html` when the source already contains the needed markup and supported inline styles. A full document wrapper is accepted; embedded CSS stylesheets and unreviewed structures are still blocked rather than silently dropped.
+- Prefer `.docx` when the original Word document is the source of truth or uses Word-specific formatting. It is the most complex path because numbering, inherited typography, image placement, and paragraph layout must be independently verified.
+
+These formats are alternative input routes into the same strict content-integrity gate, not alternative levels of permission to publish.
+
 ## Delivery slices
 
 1. Establish the isolated generator specification and source inventory (this commit).
