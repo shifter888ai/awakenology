@@ -18,7 +18,7 @@ export async function inspectDocxRichContent(buffer) {
   const advancedTags = new Map();
   const placement = await inspectDocxImagePlacement(buffer);
   if (!placement.ok) errors.push(...placement.errors);
-  for (const match of xml.matchAll(/<w:(pStyle|rStyle|basedOn|hyperlink|object|pict|fldChar|highlight|shd)\b/g)) {
+  for (const match of xml.matchAll(/<w:(pStyle|rStyle|basedOn|hyperlink|object|pict|fldChar|highlight|shd|ind|jc|numPr|keepNext|keepLines|pageBreakBefore|widowControl|outlineLvl|contextualSpacing|bidi|textDirection|mirrorIndents|snapToGrid|adjustRightInd|autoSpaceDE|autoSpaceDN|sectPr|tbl|vertAlign|position|vanish|specVanish|smallCaps|emboss|imprint|shadow|outline|effect|fitText|rtl|cs)\b/g)) {
     const name = match[1];
     advancedTags.set(name, (advancedTags.get(name) ?? 0) + 1);
   }
