@@ -145,3 +145,11 @@ test('preserves script-specific inherited font families after style-reference re
  assert.ok(!r.errors.some(x=>x.includes('Unresolved OOXML feature w:pStyle')));
  assert.equal(r.runs[0].fontSizePt,null);
 });
+
+
+test('includes paragraph-mark formatting in successful rich-content inventories',async()=>{
+ const styles='<w:styles xmlns:w="x"><w:docDefaults><w:rPrDefault><w:rPr/></w:rPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:pPr><w:rPr><w:rFonts w:ascii="Arial" w:eastAsia="Yu Gothic"/><w:lang w:val="en-US" w:eastAsia="ja-JP"/></w:rPr></w:pPr></w:style></w:styles>';
+ const r=await inspectDocxRichContent(await fixture('<w:p><w:r><w:t>Text</w:t></w:r></w:p>',styles));
+ assert.equal(r.ok,true,r.errors.join('; '));
+ assert.deepEqual(r.paragraphMarkFormatting,[{paragraphIndex:0,fontFamily:{ascii:'Arial',eastAsia:'Yu Gothic'},language:{val:'en-US',eastAsia:'ja-JP'}}]);
+});
