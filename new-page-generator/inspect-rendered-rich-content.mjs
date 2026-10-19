@@ -118,9 +118,12 @@ export function inspectRenderedRichContent(html, parser) {
       else if(!match) errors.push('Unsupported rendered letter-spacing: '+letterSpacing);
       else next.letterSpacingPt=Number(match[1])*(match[2]==='px'?0.75:1);
     }
-    if(['B','STRONG'].includes(tag) || ['bold','700'].includes((weight ?? '').toLowerCase())) next.bold=true;
-    if(['I','EM'].includes(tag) || (fontStyle ?? '').toLowerCase()==='italic') next.italic=true;
-    if(tag==='U' || (decoration ?? '').toLowerCase()==='underline') next.underline=true;
+    if(weight!==null) next.bold=['bold','700'].includes(weight.toLowerCase());
+    else if(['B','STRONG'].includes(tag)) next.bold=true;
+    if(fontStyle!==null) next.italic=fontStyle.toLowerCase()==='italic';
+    else if(['I','EM'].includes(tag)) next.italic=true;
+    if(decoration!==null) next.underline=decoration.toLowerCase()==='underline';
+    else if(tag==='U') next.underline=true;
     const color=formatting(node,'color'); if(color!==null) next.color=color;
     if(tag==='A') {const href=node.getAttribute('href'); if(!href) errors.push('Link without href.'); next.href=href;}
     if(tag==='IMG') {
