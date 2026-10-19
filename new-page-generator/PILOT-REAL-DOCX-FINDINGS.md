@@ -115,3 +115,12 @@ The source and rendered rich-text inventories now attach a paragraph index to ev
 Regression coverage includes paragraph boundary movement, per-run paragraph indices, and omitted line-break metadata. The first strict-gate test run correctly failed because older test fixtures did not include the newly mandatory inventory; the fixtures were updated rather than weakening the gate. Validation: **127 tests passed, 0 failed** in [CI run 39203209912](https://github.com/shifter888ai/awakenology/actions/runs/39203209912).
 
 This improves the comparator's ability to catch structure loss; it does not resolve inherited Word styles or approve the pilot. Those remain blocked.
+
+
+## Paragraph structure, rendered-text fail-closed guard, and style-chain evidence (CI run 39203373115)
+
+The rendered-HTML inspector now blocks text that appears outside a recognized paragraph container. This prevents unwrapped text or generic <div> text from being assigned a fabricated paragraph index and accidentally passing structural comparison. Regression coverage verifies both cases.
+
+The pilot CI diagnostic now follows the actual referenced Word style chain rather than reporting only the direct style reference. The two `w:pStyle` references point to style ID `7` (“List Paragraph”), which inherits from style ID `1` (“Normal”). The List Paragraph style defines paragraph indentation; Normal defines run font, kerning, font size, complex-script font size, and language, plus paragraph widow control and alignment. Document defaults also define run font metadata. This confirms the blocker is genuine inherited formatting, not merely a vague parser warning.
+
+Validation: **128 automated tests passed, 0 failed** in [CI run 39203373115](https://github.com/shifter888ai/awakenology/actions/runs/39203373115). The source map (184 paragraphs), asset extraction (3 images), and image-placement inspection (3 images) still pass; rich-content and conversion remain blocked. No pilot HTML has been approved or generated.
