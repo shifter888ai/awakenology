@@ -45,7 +45,8 @@ const formattingStyle = (run, fontFamily = null) => {
 };
 function paragraphStyle(layout) {
   const css = [];
-  const alignment = {left:"left",right:"right",center:"center",both:"justify",start:"start",end:"end",distribute:"justify"};
+  const alignment = {left:"left",right:"right",center:"center",both:"justify",start:"start",end:"end"};
+  if (layout.alignment === "distribute") throw new Error("Word distributed paragraph alignment cannot be represented faithfully by supported CSS.");
   if (!alignment[layout.alignment]) throw new Error("Unsupported resolved paragraph alignment.");
   if(layout.alignment!=="left") css.push("text-align:"+alignment[layout.alignment]);
   const indent=layout.indentation ?? {};
