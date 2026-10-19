@@ -55,7 +55,7 @@ export function reviewPasteInventory(inventory) {
     for (const [name, raw] of item.attributes || []) {
       const key = name.toLowerCase(), value = raw.trim();
       if (!allowed.includes(key)) { errors.push(`${item.path}: ${key} not approved on ${item.tag}.`); continue; }
-      if (key === "href" && !(/^(?:https?:\/\/[^\s/]+|mailto:[^\s@]+@[^\s@]+|\/(?!\/)[^\s]*|#[A-Za-z][\w-]*)$/i.test(value)) ) errors.push(`${item.path}: unapproved link URL.`);
+      if (key === "href" && !(/^(?:https?:\/\/[^\s\/@?#]+(?:[\/?#][^\s]*)?|mailto:[^\s@]+@[^\s@]+|tel:\+?[0-9().-]+|\/(?!\/)[^\s]*|#[A-Za-z][\w-]*)$/i.test(value)) ) errors.push(`${item.path}: unapproved link URL.`);
       if (key === "start" && !/^[1-9][0-9]*$/.test(value)) errors.push(`${item.path}: invalid ordered-list start.`);
       if (key === "type" && !/^(?:1|a|A|i|I)$/.test(value)) errors.push(`${item.path}: invalid ordered-list marker type.`);
       if (key === "src" && (!/^\/(?!\/)[^\s?#]+(?:\?[^\s#]*)?$/.test(value) || value.includes(".."))) errors.push(`${item.path}: image must use a reviewed local asset path.`);
