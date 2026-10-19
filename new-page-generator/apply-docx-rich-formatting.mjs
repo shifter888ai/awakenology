@@ -52,20 +52,22 @@ function paragraphStyle(layout) {
 }
 const needsSpan = run => Boolean(run.bold || run.italic || run.underline || run.color || run.fontFamily ||
   run.language || run.allCaps || run.fontSizePt !== null && run.fontSizePt !== undefined ||
-  run.letterSpacingPt !== null && run.letterSpacingPt !== undefined || run.fontKerning);
+  run.letterSpacingPt !== null && run.letterSpacingPt !== undefined || run.fontKerning || run.fontHint);
 const eastAsianScript = /[\u3000-\u303f\u3040-\u30ff\u3100-\u312f\u3130-\u318f\u31a0-\u31bf\u31f0-\u31ff\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7af\uf900-\ufaff\uff00-\uffef]/u;
 const complexScript = /[\p{Script=Arabic}\p{Script=Hebrew}\p{Script=Syriac}\p{Script=Thaana}\p{Script=Nko}\p{Script=Devanagari}\p{Script=Bengali}\p{Script=Gurmukhi}\p{Script=Gujarati}\p{Script=Oriya}\p{Script=Tamil}\p{Script=Telugu}\p{Script=Kannada}\p{Script=Malayalam}\p{Script=Sinhala}\p{Script=Thai}\p{Script=Lao}\p{Script=Tibetan}\p{Script=Myanmar}\p{Script=Khmer}\p{Script=Ethiopic}]/u;
-function familyForChar(families, character) {
+function familyForChar(families, character, hint = null) {
   if (!families || typeof families !== "object" || Array.isArray(families)) return typeof families === "string" ? families : null;
+  if (/\\p{Script=Common}/u.test(character) && !/\\s/u.test(character) && hint === 'eastAsia') return families.eastAsia ?? families.hAnsi ?? families.ascii ?? families.cs ?? null;
+  if (/\\p{Script=Common}/u.test(character) && !/\\s/u.test(character) && hint === 'cs') return families.cs ?? families.hAnsi ?? families.ascii ?? families.eastAsia ?? null;
   const order = eastAsianScript.test(character) ? ["eastAsia","hAnsi","ascii","cs"] :
     complexScript.test(character) ? ["cs","hAnsi","ascii","eastAsia"] : ["ascii","hAnsi","cs","eastAsia"];
   return order.map(key=>families[key]).find(Boolean) ?? null;
 }
-function scriptSegments(text, families) {
+function scriptSegments(text, families, hint = null) {
   if (!families || typeof families !== "object" || Array.isArray(families)) return [{text,fontFamily:typeof families==="string"?families:null}];
   const result=[];
   for(const character of text) {
-    const fontFamily=familyForChar(families,character);
+    const fontFamily=familyForChar(families,character,hint);
     const last=result[result.length-1];
     if(last && last.fontFamily===fontFamily) last.text+=character;
     else result.push({text:character,fontFamily});
@@ -119,7 +121,7 @@ export function applyDocxRichFormatting(html, sourceInventory) {
         if(!runSpan) {errors.push("No source formatting run covers paragraph "+(p+1)+" text offset "+at+".");break;}
         const stop=Math.min(end,runSpan.end);
         const content=value.slice(at-start,stop-start);
-        for(const scriptPart of scriptSegments(content,runSpan.run.fontFamily)) {
+        for(const scriptPart of scriptSegments(content,runSpan.run.fontFamily,runSpan.run.fontHint)) {
           if(!needsSpan(runSpan.run)) {
             pieces.push({nodeName:"#text",value:scriptPart.text,parentNode:null});
           } else {
@@ -128,6 +130,7 @@ export function applyDocxRichFormatting(html, sourceInventory) {
               for(const [key,name] of [["val","data-word-lang-val"],["eastAsia","data-word-lang-east-asia"],["bidi","data-word-lang-bidi"]]) if(runSpan.run.language[key]) span.attrs.push({name,value:runSpan.run.language[key]});
               if(runSpan.run.language.val) span.attrs.push({name:"lang",value:runSpan.run.language.val});
             }
+            if(runSpan.run.fontHint) span.attrs.push({name:"data-word-font-hint",value:runSpan.run.fontHint});
             if(runSpan.run.fontFamily && typeof runSpan.run.fontFamily==="object") {
               for(const [key,name] of [["ascii","data-word-font-ascii"],["hAnsi","data-word-font-hansi"],["eastAsia","data-word-font-east-asia"],["cs","data-word-font-cs"]]) if(runSpan.run.fontFamily[key]) span.attrs.push({name,value:runSpan.run.fontFamily[key]});
             }
