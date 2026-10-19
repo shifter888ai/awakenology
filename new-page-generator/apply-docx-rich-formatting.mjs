@@ -52,7 +52,7 @@ function paragraphStyle(layout) {
   return css.join(";");
 }
 const needsSpan = run => Boolean(run.bold || run.italic || run.underline || run.color || run.fontFamily ||
-  run.language || run.allCaps || run.fontSizePt !== null && run.fontSizePt !== undefined ||
+  run.language || run.allCaps || run.fontSizePt !== null && run.fontSizePt !== undefined || run.fontSizeCsPt !== null && run.fontSizeCsPt !== undefined ||
   run.letterSpacingPt !== null && run.letterSpacingPt !== undefined || run.fontKerning || run.fontHint || run.boldCs !== undefined || run.italicCs !== undefined);
 
 export function applyDocxRichFormatting(html, sourceInventory) {
@@ -112,6 +112,7 @@ export function applyDocxRichFormatting(html, sourceInventory) {
               if(runSpan.run.language.val) span.attrs.push({name:"lang",value:runSpan.run.language.val});
             }
             if(runSpan.run.fontHint) span.attrs.push({name:"data-word-font-hint",value:runSpan.run.fontHint});
+            if(runSpan.run.fontSizeCsPt !== null && runSpan.run.fontSizeCsPt !== undefined && runSpan.run.fontSizeCsPt !== runSpan.run.fontSizePt) span.attrs.push({name:"data-word-font-size-cs",value:String(runSpan.run.fontSizeCsPt)});
             if(runSpan.run.boldCs !== undefined) span.attrs.push({name:"data-word-bold-cs",value:String(runSpan.run.boldCs)});
             if(runSpan.run.italicCs !== undefined) span.attrs.push({name:"data-word-italic-cs",value:String(runSpan.run.italicCs)});
             if(runSpan.run.fontFamily && typeof runSpan.run.fontFamily==="object") {
