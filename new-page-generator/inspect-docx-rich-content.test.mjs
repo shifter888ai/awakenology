@@ -127,3 +127,19 @@ test('fails closed on section properties until page geometry and section breaks 
  assert.equal(section.ok,false);
  assert.ok(section.errors.length>0,'Section geometry must not be approved without page-layout mapping.');
 });
+
+test('rejects cyclic paragraph-style inheritance without generic style-reference noise',async()=>{
+ const styles='<w:styles xmlns:w="x"><w:docDefaults><w:rPrDefault><w:rPr/></w:rPrDefault></w:docDefaults><w:style w:type="paragraph" w:styleId="A"><w:basedOn w:val="B"/></w:style><w:style w:type="paragraph" w:styleId="B"><w:basedOn w:val="A"/></w:style></w:styles>';
+ const r=await inspectDocxRichContent(await fixture('<w:p><w:pPr><w:pStyle w:val="A"/></w:pPr><w:r><w:t>Cycle</w:t></w:r></w:p>',styles));
+ assert.equal(r.ok,false);
+ assert.ok(r.errors.some(x=>x.includes('Cyclic Word style inheritance')));
+ assert.ok(!r.errors.some(x=>x.includes('Unresolved OOXML feature w:pStyle')));
+});
+test('rejects unsupported inherited font families after style-reference resolution',async()=>{
+ const styles='<w:styles xmlns:w="x"><w:docDefaults><w:rPrDefault><w:rPr/></w:rPrDefault></w:docDefaults><w:style w:type="paragraph" w:styleId="Styled"><w:rPr><w:rFonts w:ascii="Arial"/></w:rPr></w:style></w:styles>';
+ const r=await inspectDocxRichContent(await fixture('<w:p><w:pPr><w:pStyle w:val="Styled"/></w:pPr><w:r><w:t>Font</w:t></w:r></w:p>',styles));
+ assert.equal(r.ok,false);
+ assert.ok(r.errors.some(x=>x.includes('Unsupported run property w:rFonts in Word style Styled')));
+ assert.ok(!r.errors.some(x=>x.includes('Unresolved OOXML feature w:pStyle')));
+ assert.equal(r.runs[0].fontSizePt,null);
+});
