@@ -284,3 +284,12 @@ test("rejects unmodeled Word font and language attributes rather than silently d
   assert.equal(result.formatting,null);
  }
 });
+
+
+test("rejects duplicate Word font and language attributes",()=>{
+ for(const property of ['<w:rFonts w:ascii="Arial" w:ascii="Times New Roman"/>','<w:lang w:val="en-US" w:val="ja-JP"/>']) {
+  const result=resolveDocxRunFormatting({stylesXml:styles(),paragraphXml:paragraph(),runXml:run('',property)});
+  assert.equal(result.ok,false,property);
+  assert.equal(result.formatting,null);
+ }
+});
