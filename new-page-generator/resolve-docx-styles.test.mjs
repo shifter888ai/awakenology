@@ -46,3 +46,20 @@ test('requires all source components',()=>{
  assert.equal(result.ok,false);
  assert.equal(result.formatting,null);
 });
+
+
+test('blocks unmodeled inherited font and paragraph-layout properties',()=>{
+ const fonts=resolveDocxRunFormatting({
+  stylesXml:styles('<w:style w:type="paragraph" w:styleId="P"><w:rPr><w:rFonts w:ascii="Arial"/><w:sz w:val="24"/></w:rPr></w:style>'),
+  paragraphXml:paragraph('P'),runXml:run()
+ });
+ assert.equal(fonts.ok,false);
+ assert.ok(fonts.errors.some(x=>x.includes('Unsupported run property w:rFonts')));
+ assert.ok(fonts.errors.some(x=>x.includes('Unsupported run property w:sz')));
+ const layout=resolveDocxRunFormatting({
+  stylesXml:styles('<w:style w:type="paragraph" w:styleId="P"><w:pPr><w:ind w:left="720"/></w:pPr></w:style>'),
+  paragraphXml:paragraph('P'),runXml:run()
+ });
+ assert.equal(layout.ok,false);
+ assert.ok(layout.errors.some(x=>x.includes('Unsupported paragraph property w:ind')));
+});
