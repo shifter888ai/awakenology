@@ -58,7 +58,7 @@ export async function inspectDocxRichContent(buffer) {
       }));
     }
     const markResolved=resolveDocxRunFormatting({stylesXml,paragraphXml:paragraphs[p][0],runXml:'<w:r/>'});
-    if(!markResolved.ok) errors.push(...markResolved.errors.map(error => error.startsWith('Unsupported inherited Word formatting:') ? 'Paragraph '+(p+1)+': '+error : error));
+    if(!markResolved.ok) errors.push(...markResolved.errors.filter(error => error.startsWith('Unsupported paragraph-mark')));
     const markFormatting=markResolved.paragraphMarkFormatting;
     if(markFormatting && (Object.keys(markFormatting.fontFamily??{}).length || Object.keys(markFormatting.language??{}).length)) paragraphMarkFormatting.push({paragraphIndex:p,...markFormatting});
     for (const match of raw.matchAll(/<w:r(?=[\s>])[^>]*>([\s\S]*?)<\/w:r>/g)) {
