@@ -49,3 +49,33 @@ test('preserves paragraph-mark font and language metadata on the paragraph eleme
  assert.match(result.html,/data-word-mark-lang-val="en-US"/);
  assert.match(result.html,/data-word-mark-lang-east-asia="ja-JP"/);
 });
+
+
+test('maps source numbering to rendered list items without changing list text',()=>{
+ const source={
+  paragraphCount:1,
+  paragraphLayouts:[{paragraphIndex:0,alignment:'left',indentation:{left:720,right:0,hanging:360},spacing:{beforePt:0,afterPt:0,lineHeightPt:null}}],
+  paragraphNumbering:[{paragraphIndex:0,numId:7,abstractNumId:2,level:0,format:'decimal',text:'%1.',start:3,indentation:{left:720,hanging:360}}],
+  runs:[{paragraphIndex:0,text:'List item',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null}]
+ };
+ const result=applyDocxRichFormatting('<ol start="3"><li>List item</li></ol>',source);
+ assert.equal(result.ok,true,result.errors.join('; '));
+ assert.match(result.html,/<ol start="3"><li[^>]*data-word-num-id="7"/);
+ assert.match(result.html,/data-word-abstract-num-id="2"/);
+ assert.match(result.html,/data-word-num-text="%1\."/);
+ assert.match(result.html,/margin-left:36pt/);
+ assert.match(result.html,/text-indent:-18pt/);
+ assert.match(result.html,/>List item<\/li>/);
+});
+
+test('blocks a numbered source paragraph rendered as an ordinary paragraph',()=>{
+ const source={
+  paragraphCount:1,
+  paragraphLayouts:[{paragraphIndex:0,alignment:'left',indentation:{},spacing:{}}],
+  paragraphNumbering:[{paragraphIndex:0,numId:7,abstractNumId:2,level:0,format:'decimal',text:'%1.',start:1,indentation:{}}],
+  runs:[{paragraphIndex:0,text:'List item'}]
+ };
+ const result=applyDocxRichFormatting('<p>List item</p>',source);
+ assert.equal(result.ok,false);
+ assert.ok(result.errors.some(error=>error.includes('does not use a list item')));
+});
