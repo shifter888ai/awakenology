@@ -16,7 +16,7 @@ const buffer = await readFile(sourcePath);
 const conversionCandidate = await extractDocx(buffer);
 const sha256 = createHash('sha256').update(buffer).digest('hex');
 const stages = {};
-const diagnostic = {unsupportedTextConstructs:[], drawingKinds:{}, explicitColors:[], lineBreaks:[], floatingDrawings:[], runPropertyInventory:{counts:{},samples:{}}, paragraphPropertyInventory:{counts:{},samples:{}},fontFamilyVariants:[],fontResolutionSamples:[],numberingInventory:null,styleResolutionInventory:{references:[],definitions:[],docDefaults:{}}};
+const diagnostic = {unsupportedTextConstructs:[], drawingKinds:{}, explicitColors:[], lineBreaks:[], floatingDrawings:[], runPropertyInventory:{counts:{},samples:{}}, paragraphPropertyInventory:{counts:{},samples:{}},fontFamilyVariants:[],fontResolutionSamples:[],paragraphSpacingVariants:[],paragraphIndentationVariants:[],numberingInventory:null,styleResolutionInventory:{references:[],definitions:[],docDefaults:{}}};
 try {
   const zip = await JSZip.loadAsync(buffer,{checkCRC32:true});
   const xml = await zip.file('word/document.xml').async('string');
@@ -134,6 +134,7 @@ try {
     if (!inventory.samples[tag]) inventory.samples[tag] = [];
     if (inventory.samples[tag].length < 4) inventory.samples[tag].push({paragraphIndex, sample:sample.slice(0,180)});
   };
+  const paragraphSpacingVariants=new Map(), paragraphIndentationVariants=new Map();
   for (let i=0;i<paragraphs.length;i++) {
     const raw = paragraphs[i][0];
     for (const pPr of raw.matchAll(/<w:pPr(?=[\s>])[^>]*>([\s\S]*?)<\/w:pPr>/g)) {
@@ -155,6 +156,14 @@ try {
       return {text:texts.slice(0,100),fontTag:/<w:rFonts\b[^>]*\/?\s*>/.exec(rPr)?.[0]??null,style:/<w:rStyle\b[^>]*\bw:val=["']([^"']+)["']/.exec(rPr)?.[1]??null};
     }).filter(run=>run.text.trim());
     if(runFontDetails.some(run=>!run.fontTag||!/(?:w:ascii|w:hAnsi|w:eastAsia|w:cs)=/.test(run.fontTag))) diagnostic.fontResolutionSamples.push({paragraphIndex:i,paragraphStyleId,paragraphMarkFont:markFont,runs:runFontDetails});
+    for(const match of raw.matchAll(/<w:spacing\\b[^>]*\\/?\\s*>/g)){
+      const tag=match[0], entry=paragraphSpacingVariants.get(tag)??{tag,count:0,paragraphs:[]};
+      entry.count++; if(entry.paragraphs.length<10) entry.paragraphs.push(i); paragraphSpacingVariants.set(tag,entry);
+    }
+    for(const match of raw.matchAll(/<w:ind\\b[^>]*\\/?\\s*>/g)){
+      const tag=match[0], entry=paragraphIndentationVariants.get(tag)??{tag,count:0,paragraphs:[]};
+      entry.count++; if(entry.paragraphs.length<10) entry.paragraphs.push(i); paragraphIndentationVariants.set(tag,entry);
+    }
     const breaks = [...raw.matchAll(/<w:br(?=[\s/>])[^>]*\/?\s*>/g)];
     for (const br of breaks) diagnostic.lineBreaks.push({paragraphIndex:i, tag:br[0], textBefore:raw.slice(0,br.index).replace(/<[^>]*>/g,'').slice(-60), textAfter:raw.slice(br.index+br[0].length).replace(/<[^>]*>/g,'').slice(0,60)});
     for (const anchor of raw.matchAll(/<wp:anchor(?=[\s>])[^>]*>[\s\S]*?<\/wp:anchor>/g)) {
@@ -165,6 +174,8 @@ try {
       diagnostic.floatingDrawings.push({paragraphIndex:i, anchorAttributes:firstTag, position, relationshipIds:embeds, docPr, hasWrap:/<wp:wrap\w+\b/.test(body)});
     }
   }
+  diagnostic.paragraphSpacingVariants=[...paragraphSpacingVariants.values()];
+  diagnostic.paragraphIndentationVariants=[...paragraphIndentationVariants.values()];
 
 } catch(error) {diagnostic.error = 'Cannot inspect pilot XML: ' + error.message;}
 
