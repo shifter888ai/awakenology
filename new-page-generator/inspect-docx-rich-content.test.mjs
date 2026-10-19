@@ -22,7 +22,7 @@ test('decodes decimal and hexadecimal XML character references exactly',async()=
 test('honors explicitly disabled bold, italic, and underline flags',async()=>{
  const r=await inspectDocxRichContent(await fixture('<w:p><w:r><w:rPr><w:b w:val="0"/><w:i w:val="false"/><w:u w:val="none"/></w:rPr><w:t>Plain</w:t></w:r></w:p>'));
  assert.equal(r.ok,true,r.errors.join('; '));
- assert.deepEqual(r.runs,[{paragraphIndex:0,text:'Plain',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null}]);
+ assert.deepEqual(r.runs,[{paragraphIndex:0,text:'Plain',bold:false,italic:false,underline:false,color:null,fontSizePt:null,href:null,fontFamily:null,language:null,fontSizeCsPt:null,allCaps:false,letterSpacingPt:null,fontKerning:null}]);
 });
 
 
