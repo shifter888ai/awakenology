@@ -39,3 +39,23 @@ test("blocks missing reviewed shell component", () => {
   const input = fixture(); input.approvedFooter = "";
   assert.throws(() => renderStaticShell(input), /Approved shell components/);
 });
+
+test("generated shell defaults to dark mode and includes one accessible theme toggle", () => {
+  const html = renderStaticShell(fixture());
+  assert.match(html, /--bg:#0D0F12/);
+  assert.match(html, /data-aw-theme="dark"/);
+  assert.match(html, /class="theme-toggle"/);
+  assert.match(html, /aria-label="Switch to light theme"/);
+  assert.equal((html.match(/class="theme-toggle"/g) ?? []).length, 1);
+});
+test("generated shell includes responsive article styling and return-to-top control", () => {
+  const html = renderStaticShell(fixture());
+  assert.match(html, /@media\(max-width:640px\)/);
+  assert.match(html, /\.article img\{max-width:100%;height:auto\}/);
+  assert.match(html, /class="return-top"/);
+  assert.match(html, /window\.scrollTo\(\{top:0,behavior:"smooth"\}\)/);
+});
+test("generated shell requires a real header so the theme toggle cannot disappear silently", () => {
+  const input = fixture(); input.approvedHeader = "<div>not a header</div>";
+  assert.throws(() => renderStaticShell(input), /header element/);
+});
