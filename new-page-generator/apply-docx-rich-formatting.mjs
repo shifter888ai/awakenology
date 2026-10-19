@@ -1,6 +1,6 @@
 import { parseFragment, serialize } from "parse5";
 import { splitWordScriptSegments } from "./word-script-segments.mjs";
-import { resolveDocxFloatingLayout } from "./resolve-docx-floating-layout.mjs";
+import { resolveDocxFloatingLayout, normalizeDocxImagePlacement } from "./resolve-docx-floating-layout.mjs";
 
 const ESCAPE = value => String(value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const CSS_QUOTE = value => '"' + String(value).replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/[\r\n]/g," ") + '"';
@@ -240,7 +240,7 @@ export function applyDocxRichFormatting(html, sourceInventory) {
     if(sourceImagesForParagraph.length!==renderedImages.length) errors.push("Rendered image count at paragraph "+(p+1)+" differs from the source image inventory.");
     for(let imageIndex=0;imageIndex<Math.min(sourceImagesForParagraph.length,renderedImages.length);imageIndex++) {
       const sourceImage=sourceImagesForParagraph[imageIndex], renderedImage=renderedImages[imageIndex];
-      const placement=sourceImage.placement??{kind:"inline",requiresVisualReview:false};
+      const placement=normalizeDocxImagePlacement(sourceImage.placement??{kind:"inline",requiresVisualReview:false});
       setAttr(renderedImage,"data-word-image-placement-json",JSON.stringify(placement));
       if(placement.kind==="floating") {
         const plan=resolveDocxFloatingLayout(placement,effectiveLayout.indentation??{});
