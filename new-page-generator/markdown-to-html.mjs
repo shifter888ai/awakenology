@@ -9,33 +9,26 @@ function safeUrl(value, image=false) {
   return scheme ? (image ? ["https"].includes(scheme) : ["http","https","mailto","tel"].includes(scheme)) : !url.startsWith("\\");
 }
 function inline(source, errors, line) {
-  // Raw HTML is rejected before escaping so it cannot be mistaken for Markdown.
   if(/<\/?[A-Za-z][^>]*>/.test(source)) errors.push(`Line ${line}: raw HTML is unsupported in Markdown input.`);
-  let text=escapeHtml(source);
-  const code=[];
-  text=text.replace(/`([^`\n]+)`/g,(_,body)=>{const token="@@CODE"+code.length+"@@";code.push("<code>"+body+"</code>");return token;});
-  // Links and images are parsed from original source, not escaped markup.
   const tokens=[];
-  const tokenise=(html)=>{const key="@@TOKEN"+tokens.length+"@@";tokens.push(html);return key;};
-  const raw=source.replace(/!\[([^\]]*)\]\(([^)]+)\)|\[([^\]]+)\]\(([^)]+)\)/g,(match,alt,imageUrl,label,linkUrl)=>{
+  const tokenise=html=>{const key="@@TOKEN"+tokens.length+"@@";tokens.push(html);return key;};
+  // Protect code spans before parsing emphasis or links.
+  let protectedSource=source.replace(/`([^`\n]+)`/g,(_,body)=>tokenise("<code>"+escapeHtml(body)+"</code>"));
+  protectedSource=protectedSource.replace(/!\[([^\]]*)\]\(([^)]+)\)|\[([^\]]+)\]\(([^)]+)\)/g,(match,alt,imageUrl,label,linkUrl)=>{
     const isImage=match.startsWith("!");
     const url=(isImage?imageUrl:linkUrl).trim().replace(/^<|>$/g,"");
     if(!safeUrl(url,isImage)){errors.push(`Line ${line}: unsafe or unsupported Markdown ${isImage?"image":"link"} URL.`);return escapeHtml(match);}
-    const titleMatch=/^(.*?)(?:\s+["']([^"']*)["'])?$/.exec(url);
-    const cleanUrl=titleMatch?.[1]??url, title=titleMatch?.[2];
-    const escapedUrl=escapeHtml(cleanUrl);
-    return tokenise(isImage ? `<img src="${escapedUrl}" alt="${escapeHtml(alt)}">` : `<a href="${escapedUrl}"${title? ` title="${escapeHtml(title)}"`:""}>${escapeHtml(label)}</a>`);
+    const escapedUrl=escapeHtml(url);
+    return tokenise(isImage ? `<img src="${escapedUrl}" alt="${escapeHtml(alt)}">` : `<a href="${escapedUrl}">${escapeHtml(label)}</a>`);
   });
-  text=escapeHtml(raw);
+  let text=escapeHtml(protectedSource);
   text=text.replace(/\*\*([^*\n]+)\*\*/g,"<strong>$1</strong>").replace(/__([^_\n]+)__/g,"<strong>$1</strong>")
     .replace(/\*([^*\n]+)\*/g,"<em>$1</em>").replace(/_([^_\n]+)_/g,"<em>$1</em>").replace(/~~([^~\n]+)~~/g,"<s>$1</s>");
-  text=text.replace(/@@CODE(\d+)@@/g,(_,i)=>code[Number(i)]??"");
   text=text.replace(/@@TOKEN(\d+)@@/g,(_,i)=>tokens[Number(i)]??"");
-  // The simple inline grammar intentionally rejects reference-style syntax and
-  // unresolved Markdown control characters instead of silently changing meaning.
   if(/(^|\s)\[[^\]]+\]\[[^\]]*\]/.test(source) || /^ {0,3}\[[^\]]+\]:/.test(source)) errors.push(`Line ${line}: reference-style Markdown links are unsupported.`);
   return text;
 }
+
 export function markdownToHtml(markdown) {
   const errors=[];
   if(typeof markdown!=="string" || !markdown.trim()) return {ok:false,errors:["Empty Markdown source."],html:""};
