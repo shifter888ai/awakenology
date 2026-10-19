@@ -25,7 +25,7 @@ export async function inspectDocxImagePlacement(buffer) {
       sha256:asset.sha256,
       byteLength:asset.byteLength,
       contentType:asset.contentType,
-      placement:ref.placement
+      placement:asset.placement
     });
   }
   if(images.length!==assets.assets.length) errors.push('Embedded asset count does not match mapped source image references.');
