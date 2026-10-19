@@ -51,7 +51,6 @@ export async function extractDocx(buffer) {
   }
 
   const errors = [];
-  const hasFloatingDrawing = /<wp:anchor(?:\\s|>)/.test(xml);
   const required = ["[Content_Types].xml", "word/document.xml", "word/_rels/document.xml.rels"];
   for (const path of required) if (!zip.file(path)) errors.push(`Missing required DOCX part: ${path}.`);
   if (errors.length) return blocked(errors, buffer);
@@ -67,6 +66,7 @@ export async function extractDocx(buffer) {
     return blocked(["word/document.xml is unreadable or is not valid UTF-8."], buffer);
   }
 
+  const hasFloatingDrawing = /<wp:anchor(?:\s|>)/.test(xml);
   for (const [name, pattern] of FEATURES) {
     if (pattern.test(xml)) errors.push(`Unsupported or ambiguous Word feature: ${name}.`);
   }
