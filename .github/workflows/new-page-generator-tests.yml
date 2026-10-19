@@ -35,6 +35,8 @@ jobs:
         run: npm test
       - name: Audit uploaded pilot DOCX without approving generation
         run: node pilot-ci-audit.mjs
+      - name: Generate isolated shell layout preview
+        run: node shell-layout-preview.mjs
       - name: Verify source-image and paragraph review artifact
         run: |
           test -s pilot-artifacts/pilot-visual-review.html
@@ -43,6 +45,10 @@ jobs:
           grep -q 'Source image 1' pilot-artifacts/pilot-visual-review.html
           grep -q 'Paragraph 184:' pilot-artifacts/pilot-visual-review.html
           grep -q 'manual visual review required' pilot-artifacts/pilot-visual-review.html
+          test -s pilot-artifacts/shell-layout-preview.html
+          grep -q 'LAYOUT PREVIEW ONLY' pilot-artifacts/shell-layout-preview.html
+          grep -q 'class="theme-toggle"' pilot-artifacts/shell-layout-preview.html
+          grep -q 'class="return-top"' pilot-artifacts/shell-layout-preview.html
       - name: Upload pilot diagnostic report
         if: always()
         uses: actions/upload-artifact@v4
@@ -51,6 +57,7 @@ jobs:
           path: |
             new-page-generator/pilot-artifacts/pilot-audit.json
             new-page-generator/pilot-artifacts/pilot-visual-review.html
+            new-page-generator/pilot-artifacts/shell-layout-preview.html
           if-no-files-found: warn
       - name: Publish pilot findings in job summary
         if: always()
