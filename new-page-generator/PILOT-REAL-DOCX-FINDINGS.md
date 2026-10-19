@@ -208,3 +208,9 @@ The converter still blocks the source's font family, font size, language metadat
 The converter now inspects `word/styles.xml` in addition to `word/document.xml` before calling Mammoth. Unsupported formatting in document defaults and named styles cannot bypass the existing fail-closed feature inventory merely because a run lacks direct properties. The styles part is capped at 5 MiB after decompression and decoded with fatal UTF-8 validation; oversized or malformed data blocks conversion. Regression coverage checks inherited font/language metadata, inherited paragraph spacing, oversized style XML, and malformed UTF-8.
 
 Validation: [run 39238117016](https://github.com/shifter888ai/awakenology/actions/runs/39238117016) passed. This is defensive validation, not implementation of inherited typography in output. Current conservative scan can block on unsupported declarations anywhere in styles.xml; narrowing that behavior requires a correct used-style-chain/defaults resolver, not a broad whitelist. Pilot approval remains false.
+
+## Pilot tag-count diagnostic regression fix (2026-10-19)
+
+The pilot audit's dynamic XML-tag counting now uses a dedicated, tested helper with exact qualified-name boundaries. The tests cover self-closing and opening tags, whitespace boundaries, namespace-qualified names, similarly prefixed names, and invalid inputs. This prevents diagnostic tag counts from being skewed by incorrectly escaped whitespace in a dynamically constructed regular expression.
+
+Validation: [run 39238529558](https://github.com/shifter888ai/awakenology/actions/runs/39238529558) passed the helper tests; [run 39238519698](https://github.com/shifter888ai/awakenology/actions/runs/39238519698) passed the implementation. This corrects diagnostics only; it does not resolve the actual formatting blockers or approve the pilot.
