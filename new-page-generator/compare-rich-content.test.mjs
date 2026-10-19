@@ -153,3 +153,12 @@ test('matching floating image metadata still requires visual review',()=>{
  assert.equal(result.ok,false);
  assert.ok(result.issues.some(x=>x.kind==='floating-image-visual-review-required'));
 });
+
+test("paragraph spacing mismatch blocks even when text and other layout fields match", () => {
+ const source=sample(), output=sample();
+ source.paragraphLayouts[0].spacing={beforePt:0,afterPt:0,lineHeightPt:18};
+ output.paragraphLayouts[0].spacing={beforePt:0,afterPt:0,lineHeightPt:null};
+ const result=compareRichContent(source,output);
+ assert.equal(result.ok,false);
+ assert.ok(result.issues.some(x=>x.kind==="paragraph-spacing-mismatch" && x.field==="lineHeightPt"));
+});
