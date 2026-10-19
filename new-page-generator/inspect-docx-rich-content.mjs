@@ -8,7 +8,7 @@ import { splitWordScriptSegments } from './word-script-segments.mjs';
 
 // Conservative OOXML extractor. Anything not mapped with certainty blocks approval.
 export async function inspectDocxRichContent(buffer) {
-  const fail = errors => ({ ok: false, errors, runs: [], images: [], lineBreaks: [], paragraphLayouts: [], paragraphNumbering: [], paragraphCount: 0 });
+  const fail = errors => ({ ok: false, errors, runs: [], images: [], lineBreaks: [], paragraphLayouts: [], paragraphNumbering: [], paragraphMarkFormatting: [], paragraphCount: 0 });
   const source = await inspectDocxSourceMap(buffer);
   if (!source.ok) return fail(source.errors);
   let xml, stylesXml, numberingXml, hasSectionBreak = false;
@@ -24,7 +24,7 @@ export async function inspectDocxRichContent(buffer) {
     numberingXml = numberingPart ? await numberingPart.async('string') : '<w:numbering></w:numbering>';
   } catch { return fail(['Cannot read original OOXML.']); }
 
-  const errors = [], runs = [], paragraphLayouts = [], paragraphNumbering = [];
+  const errors = [], runs = [], paragraphLayouts = [], paragraphNumbering = [], paragraphMarkFormatting = [];
   if (hasSectionBreak) errors.push('Section breaks inside document content require manual resolution.');
   const unknownRunProperties = new Map();
   const advancedTags = new Map();
@@ -87,6 +87,7 @@ export async function inspectDocxRichContent(buffer) {
       const resolved = resolveDocxRunFormatting({stylesXml,paragraphXml:paragraphs[p][0],runXml:match[0]});
       if (!resolved.ok) errors.push(...resolved.errors.map(error => error.startsWith('Unsupported inherited Word formatting:') ? 'Paragraph ' + (p + 1) + ': ' + error : error));
       const formatting = resolved.formatting;
+      if (resolved.paragraphMarkFormatting && !paragraphMarkFormatting.some(item => item.paragraphIndex === p)) paragraphMarkFormatting.push({paragraphIndex:p, ...resolved.paragraphMarkFormatting});
       for (const text of texts) {
       const baseRun = { paragraphIndex:p, text:decode(text[1]), bold:formatting?.b ?? flag('b'), italic:formatting?.i ?? flag('i'), underline:formatting?.u ?? flag('u'), color:formatting?.color ?? (color ? '#'+color.toLowerCase() : null), fontSizePt:formatting?.fontSizePt ?? null, href:null, fontFamily:formatting?.fontFamily ?? null, language:formatting?.language ?? null, fontSizeCsPt:formatting?.fontSizeCsPt ?? formatting?.fontSizePt ?? null, allCaps:formatting?.caps ?? false, letterSpacingPt:formatting?.letterSpacingPt ?? null, fontKerning:formatting?.fontKerning ?? null, fontHint:formatting?.fontHint ?? null };
       if (formatting?.bCs !== undefined) baseRun.boldCs = formatting.bCs;
@@ -119,5 +120,5 @@ export async function inspectDocxRichContent(buffer) {
     if (!position) errors.push('No ordered content position for image relationship ' + relationshipId + '.');
     return {assetPath, paragraphIndex, order, alt, textOffset:position?.textOffset ?? 0, markerOrder:position?.markerOrder ?? -1, placement:imagePlacement};
   }) : [];
-  return errors.length ? {...fail([...new Set(errors)]), runs, images, lineBreaks, paragraphLayouts, paragraphNumbering, paragraphCount:source.paragraphs.length} : {ok:true, errors:[], runs, images, lineBreaks, paragraphLayouts, paragraphNumbering, paragraphCount:source.paragraphs.length};
+  return errors.length ? {...fail([...new Set(errors)]), runs, images, lineBreaks, paragraphLayouts, paragraphNumbering, paragraphMarkFormatting, paragraphCount:source.paragraphs.length} : {ok:true, errors:[], runs, images, lineBreaks, paragraphLayouts, paragraphNumbering, paragraphCount:source.paragraphs.length};
 }
