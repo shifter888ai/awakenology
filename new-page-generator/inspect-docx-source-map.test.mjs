@@ -67,3 +67,11 @@ test("records floating drawing anchor metadata without coercing it to inline", a
   assert.match(result.imageReferences[0].placement.horizontalPosition, /relativeFrom="column"/);
   assert.match(result.imageReferences[0].placement.wrap, /wp:wrapSquare/);
 });
+
+
+test("keeps image anchors in the same ordered content stream as text",async()=>{
+ const result=await inspectDocxSourceMap(await fixture('<w:p><w:r><w:t>Before</w:t></w:r><w:r><w:drawing><wp:inline><a:blip r:embed="rId7"/></wp:inline></w:drawing></w:r><w:r><w:t>After</w:t></w:r></w:p>'));
+ assert.equal(result.ok,true,result.errors.join('; '));
+ assert.deepEqual(result.paragraphs[0].content.map(x=>x.type),['text','image','text']);
+ assert.equal(result.paragraphs[0].content[1].relationshipId,'rId7');
+});
