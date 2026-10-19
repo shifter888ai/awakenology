@@ -28,7 +28,8 @@ export async function inspectDocxRichContent(buffer) {
   if (hasSectionBreak) errors.push('Section breaks inside document content require manual resolution.');
   const unknownRunProperties = new Map();
   const advancedTags = new Map();
-  // Per-paragraph numbering resolution below reports precise definitions and levels.\n  const placement = await inspectDocxImagePlacement(buffer);
+  // Per-paragraph numbering resolution below reports precise definitions and levels.
+  const placement = await inspectDocxImagePlacement(buffer);
   if (!placement.ok) errors.push(...placement.errors);
   for (const match of xml.matchAll(/<w:(hyperlink|object|pict|fldChar|highlight|shd|keepNext|keepLines|pageBreakBefore|outlineLvl|contextualSpacing|bidi|textDirection|mirrorIndents|snapToGrid|adjustRightInd|autoSpaceDE|autoSpaceDN|tbl|vertAlign|position|vanish|specVanish|smallCaps|emboss|imprint|shadow|outline|effect|fitText|rtl|cs)\b/g)) {
     const name = match[1];
