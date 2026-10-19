@@ -1,5 +1,5 @@
 // Compare source and output rich-content inventories without normalizing authorial details.
-// Expected runs: [{text, bold, italic, underline, color, href}] in document order.
+// Expected runs: [{paragraphIndex, text, bold, italic, underline, color, href}] in document order.
 // Expected images: [{assetPath, paragraphIndex, order, alt}] in document order.
 const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
 const required = (o, keys, where) => {
@@ -10,7 +10,7 @@ const required = (o, keys, where) => {
 export function compareRichContent(source, output) {
   const issues = [];
   for (const [side, value] of [['source', source], ['output', output]]) {
-    required(value, ['runs', 'images'], side);
+    required(value, ['runs', 'images', 'lineBreaks'], side);
     if (!Array.isArray(value.runs) || !Array.isArray(value.images)) throw new Error('Invalid inventory: ' + side);
     value.runs.forEach((r, i) => {
       const where = side + '.runs[' + i + ']';
@@ -22,7 +22,7 @@ export function compareRichContent(source, output) {
         throw new Error('Invalid run field types at ' + where);
       }
     });
-    if (own(value, 'lineBreaks')) {
+    {
       if (!Array.isArray(value.lineBreaks)) throw new Error('Invalid line-break inventory: ' + side);
       value.lineBreaks.forEach((item, i) => {
         const where = side + '.lineBreaks[' + i + ']';
@@ -43,9 +43,7 @@ export function compareRichContent(source, output) {
       }
     });
   }
-  if (own(source, 'lineBreaks') !== own(output, 'lineBreaks')) {
-    issues.push({kind:'line-break-inventory-missing', expected:own(source,'lineBreaks'), actual:own(output,'lineBreaks')});
-  } else if (own(source, 'lineBreaks')) {
+  {
     if (source.lineBreaks.length !== output.lineBreaks.length) issues.push({kind:'line-break-count',expected:source.lineBreaks.length,actual:output.lineBreaks.length});
     for (let i=0;i<Math.min(source.lineBreaks.length,output.lineBreaks.length);i++) {
       for (const field of ['paragraphIndex','textOffset','breakType']) {
