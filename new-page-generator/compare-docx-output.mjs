@@ -32,6 +32,23 @@ export function compareDocxSourceToHtml(sourceMap, html) {
     });
     errors.push(`Source/HTML text mismatch at UTF-16 offset ${offset}${sourceParagraph ? `; source paragraph ${sourceParagraph.index + 1}, XML offset ${sourceParagraph.sourceLocation.start}` : ""}. Exact characters, order and whitespace must match.`);
   }
+  // Text comparison alone cannot detect a dropped or relocated image.
+  // Compare each image's character offset in the concatenated text stream.
+  const expectedImageOffsets = [];
+  let imageSourceOffset = 0;
+  for (const paragraph of sourceMap.paragraphs) {
+    for (const item of paragraph.content ?? []) {
+      if (item.type === "image") expectedImageOffsets.push(imageSourceOffset + (item.textOffset ?? 0));
+    }
+    imageSourceOffset += paragraph.text.length;
+  }
+  const actualImageOffsets = [...html.matchAll(/<img\\b[^>]*\\/?\\s*>/gi)].map(match =>
+    decode(html.slice(0, match.index).replace(/<\\/?[a-z][\\w-]*\\b[^>]*>/gi, "")).length
+  );
+  if (expectedImageOffsets.length !== actualImageOffsets.length ||
+      expectedImageOffsets.some((offset, index) => offset !== actualImageOffsets[index])) {
+    errors.push("Source/HTML image-position mismatch: expected offsets [" + expectedImageOffsets.join(", ") + "], actual offsets [" + actualImageOffsets.join(", ") + "].");
+  }
   // Text comparison alone cannot detect a dropped or relocated Word line break.
   // Compare each break's character offset in the concatenated text stream.
   const expectedBreakOffsets = [];
