@@ -11,6 +11,13 @@ export function correctPilotPreview(html) {
       : attrs + ' style="' + correction + '"';
     return "<" + tag + next + ">" + inner + "</" + tag + ">";
   });
+  // Human-reviewed alt text for the source diagram. The DOCX has no alt metadata;
+  // use this explicit override only for the checksum-identified pilot image.
+  candidate = candidate.replace(/<img\\b([^>]*\\bsrc=["']\\/assets\\/docx-b7dba7e21c2441ad\\.png["'][^>]*)>/gi, (whole, attrs) => {
+    const alt = "多重空間的泡泡示意圖：從第3界到N界展示空間、時間線及各種可能性。";
+    if (/\\balt\\s*=/.test(attrs)) return whole.replace(/\\balt=(["']).*?\\1/i, 'alt="' + alt + '"');
+    return "<img" + attrs + ' alt="' + alt + '">';
+  });
   // Replace only dark neutral six-digit hex text colours. Keep chromatic emphasis.
   candidate = candidate.replace(/(^|[;{\s"'])color\s*:\s*#([0-9a-f]{6})\b/gi, (whole, prefix, hex) => {
     const rgb = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16));
