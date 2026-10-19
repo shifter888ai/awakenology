@@ -118,7 +118,7 @@ for (const [name, inspect] of [
     stages[name] = {ok: result.ok, errors: result.errors ?? [],
       ...(Array.isArray(result.paragraphs) ? {paragraphCount: result.paragraphs.length} : {}),
       ...(Array.isArray(result.assets) ? {assetCount: result.assets.length} : {}),
-      ...(Array.isArray(result.images) ? {imageCount: result.images.length} : {}),
+      ...(Array.isArray(result.images) ? {imageCount: result.images.length, floatingImageCount:result.images.filter(image=>image.placement?.kind==='floating').length, floatingVisualReviewCount:result.images.filter(image=>image.placement?.kind==='floating' && image.placement.requiresVisualReview===true).length} : {}),
       ...(Array.isArray(result.runs) ? {runCount: result.runs.length} : {})
     };
   } catch (error) {
