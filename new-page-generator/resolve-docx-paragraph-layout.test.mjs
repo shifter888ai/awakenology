@@ -45,11 +45,18 @@ test("resolves exact Word line spacing and before/after spacing into point units
   assert.equal(result.ok, true, result.errors.join("; "));
   assert.deepEqual(result.layout.spacing, {beforePt:6,afterPt:12,lineHeightPt:18});
 });
-test("blocks automatic Word line spacing until a lossless CSS mapping is available", () => {
+test("maps automatic Word line spacing to a unitless CSS line-height", () => {
   const result = resolveDocxParagraphLayout({
     stylesXml: styles(""),
     paragraphXml: p("", '<w:spacing w:line="276" w:lineRule="auto"/>')
   });
+  assert.equal(result.ok, true, result.errors.join("; "));
+  assert.equal(result.layout.spacing.lineHeight, 276 / 240);
+});
+test("blocks atLeast line spacing rather than treating it as a paragraph min-height", () => {
+  const result = resolveDocxParagraphLayout({
+    stylesXml: styles(""),
+    paragraphXml: p("", '<w:spacing w:line="276" w:lineRule="atLeast"/>')
+  });
   assert.equal(result.ok, false);
-  assert.ok(result.errors.some(x => x.includes("paragraph spacing")));
 });
