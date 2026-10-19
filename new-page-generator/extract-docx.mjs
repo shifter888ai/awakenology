@@ -14,6 +14,7 @@ import { applyDocxRichFormatting } from "./apply-docx-rich-formatting.mjs";
 const MAX_INPUT_BYTES = 25 * 1024 * 1024;
 const MAX_DOCUMENT_XML_BYTES = 20 * 1024 * 1024;
 const MAX_STYLES_XML_BYTES = 5 * 1024 * 1024;
+export const FLOATING_DRAWING_REVIEW_ERROR = "Floating drawing converted only to a review preview; original Word wrapping and position require visual verification.";
 const FEATURES = [
   ["unsupported run effects or hidden text", /<w:(?:vertAlign|position|vanish|specVanish|smallCaps|emboss|imprint|shadow|outline|effect|fitText|rtl|cs)(?:\s|\/?>)/],
   ["paragraph pagination or direction", /<w:(?:pageBreakBefore|keepNext|keepLines|outlineLvl|contextualSpacing|bidi|textDirection|mirrorIndents|snapToGrid|adjustRightInd|autoSpaceDE|autoSpaceDN)(?:\s|\/?>)/],
@@ -152,7 +153,7 @@ export async function extractDocx(buffer) {
       if (!converted.value.includes(asset.outputPath)) errors.push(`Inspected image was not preserved in converted HTML: ${asset.outputPath}.`);
     }
     const resultErrors = [...errors];
-    if (hasFloatingDrawing) resultErrors.push("Floating drawing converted only to a review preview; original Word wrapping and position require visual verification.");
+    if (hasFloatingDrawing) resultErrors.push(FLOATING_DRAWING_REVIEW_ERROR);
     return {
       ok: resultErrors.length === 0, errors: resultErrors, html: resultErrors.length ? null : formattedHtml,
       ...(hasFloatingDrawing && errors.length === 0 ? {previewHtml:formattedHtml} : {}),
