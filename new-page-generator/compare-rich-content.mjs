@@ -19,7 +19,7 @@ export function compareRichContent(source, output) {
           typeof r.italic !== 'boolean' || typeof r.underline !== 'boolean' ||
           !(r.color === null || typeof r.color === 'string') || !(r.fontSizePt === null || (typeof r.fontSizePt === 'number' && Number.isFinite(r.fontSizePt) && r.fontSizePt > 0)) ||
           !(r.href === null || typeof r.href === 'string') ||
-          (own(r,'fontFamily') && !(r.fontFamily === null || typeof r.fontFamily === 'string')) ||
+          (own(r,'fontFamily') && !(r.fontFamily === null || typeof r.fontFamily === 'string' || (r.fontFamily && typeof r.fontFamily === 'object' && !Array.isArray(r.fontFamily) && Object.values(r.fontFamily).every(v=>typeof v==='string')))) ||
           (own(r,'language') && !(r.language === null || (r.language && typeof r.language === 'object' && !Array.isArray(r.language) && Object.values(r.language).every(v=>typeof v==='string')))) ||
           (own(r,'fontSizeCsPt') && !(r.fontSizeCsPt === null || (typeof r.fontSizeCsPt === 'number' && Number.isFinite(r.fontSizeCsPt) && r.fontSizeCsPt > 0))) ||
           (own(r,'allCaps') && typeof r.allCaps !== 'boolean') ||
@@ -85,7 +85,7 @@ export function compareRichContent(source, output) {
       const fields = key === 'runs' ? ['paragraphIndex', 'text', 'bold', 'italic', 'underline', 'color', 'fontSizePt', 'href', ...(['fontFamily','language','fontSizeCsPt','allCaps','letterSpacingPt'].filter(field=>own(source[key][i],field)||own(output[key][i],field)))] : ['assetPath', 'paragraphIndex', 'order', 'alt', 'textOffset', 'markerOrder', 'placement'];
       for (const field of fields) {
         const expected = source[key][i][field], actual = output[key][i][field];
-        const equal = ['placement','language'].includes(field) ? JSON.stringify(expected) === JSON.stringify(actual) : (typeof expected === typeof actual && expected === actual);
+        const equal = ['placement','language','fontFamily'].includes(field) ? JSON.stringify(expected) === JSON.stringify(actual) : (typeof expected === typeof actual && expected === actual);
         if (!equal) {
           issues.push({kind: key + '-mismatch', index: i, field, expected: source[key][i][field], actual: output[key][i][field]});
         }
