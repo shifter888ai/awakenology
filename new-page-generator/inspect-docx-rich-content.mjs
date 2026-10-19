@@ -84,6 +84,14 @@ export async function inspectDocxRichContent(buffer) {
   }
   if (runs.map(r => r.text).join('') !== source.paragraphs.map(p => p.text).join('')) errors.push('Rich runs do not reproduce exact source-map text.');
   if (!runs.length) errors.push('No rich text runs extracted.');
-  const images = placement.ok ? placement.images.map(({assetPath, paragraphIndex, order, alt}) => ({assetPath, paragraphIndex, order, alt})) : [];
+  const images = placement.ok ? placement.images.map(({assetPath, paragraphIndex, order, alt, relationshipId}) => {
+    const paragraph = source.paragraphs[paragraphIndex];
+    let textOffset = 0;
+    for (const item of paragraph?.content ?? []) {
+      if (item.type === 'image' && item.relationshipId === relationshipId) break;
+      if (item.type === 'text') textOffset += item.text.length;
+    }
+    return {assetPath, paragraphIndex, order, alt, textOffset};
+  }) : [];
   return errors.length ? {...fail([...new Set(errors)]), runs, images, lineBreaks} : {ok:true, errors:[], runs, images, lineBreaks};
 }
