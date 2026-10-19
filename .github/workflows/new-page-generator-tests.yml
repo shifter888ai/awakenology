@@ -50,10 +50,30 @@ jobs:
             echo
             if [ -f pilot-artifacts/pilot-audit.json ]; then
               echo 'Diagnostic report (not approval for generation):'
-              echo '\`\`\`json'
+              echo '```json'
               cat pilot-artifacts/pilot-audit.json
-              echo '\`\`\`'
+              echo '```'
             else
               echo 'Diagnostic report was not generated; inspect preceding job steps.'
             fi
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Surface pilot blockers as GitHub annotations
+        if: always()
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync, existsSync} from 'node:fs';
+          const path = 'pilot-artifacts/pilot-audit.json';
+          if (!existsSync(path)) {
+            console.log('::warning file=new-page-generator/pilot-ci-audit.mjs::Pilot audit report missing');
+          } else {
+            const report = JSON.parse(readFileSync(path,'utf8'));
+            console.log('Pilot SHA-256: ' + report.sha256);
+            for (const [stage, result] of Object.entries(report.stages)) {
+              console.log(stage + ': ' + (result.ok ? 'PASS' : 'BLOCKED'));
+              for (const message of result.errors) {
+                const safe = String(message).replace(/[\r\n]/g,' ').replace(/%/g,'%25').replace(/:/g,'%3A');
+                console.log('::warning file=new-page-generator/pilot-ci-audit.mjs,title=' + stage + '::' + safe);
+              }
+            }
+          }
+          NODE
