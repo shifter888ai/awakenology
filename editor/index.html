@@ -87,7 +87,21 @@ document.querySelector('#cancelReview').addEventListener('click',()=>{panel.hidd
 save.addEventListener('click',()=>{if(!reviewedHtml){setStatus('Click Review full-page HTML first.');return;}const url=URL.createObjectURL(new Blob([reviewedHtml],{type:'text/html;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=filename.replace(/\.html?$/i,'')+'-reviewed.html';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);setStatus('Downloaded a reconstructed full-page HTML copy. Original file remains unchanged; inspect the downloaded page before using it.');});
 const createPRButton=document.querySelector('#createPR'), publishStatus=document.querySelector('#publishStatus');
 function publishMessage(s){publishStatus.textContent=s}
-function updatePublishAvailability(){createPRButton.disabled=!(reviewedHtml&&hasActualArticleChanges&&loadedRepoPath&&loadedRepoPath.length&&githubBaseline&&panel.hidden===false)}
+function updatePublishAvailability(){
+let differsFromGitHub=false;
+if(reviewedHtml&&githubBaseline){
+ try{
+ const reviewedDoc=new DOMParser().parseFromString(reviewedHtml,'text/html');
+ const baselineDoc=new DOMParser().parseFromString(githubBaseline,'text/html');
+ const reviewedArticle=reviewedDoc.querySelector('.article');
+ const baselineArticle=baselineDoc.querySelector('.article');
+ differsFromGitHub=!!(reviewedArticle&&baselineArticle&&reviewedArticle.outerHTML!==baselineArticle.outerHTML);
+ }catch{}
+}
+createPRButton.disabled=!(reviewedHtml&&differsFromGitHub&&loadedRepoPath&&loadedRepoPath.length&&githubBaseline&&panel.hidden===false);
+if(reviewedHtml&&githubBaseline&&panel.hidden===false&&!differsFromGitHub)publishMessage('The reviewed article is identical to the current GitHub article. Make a change before creating a pull request.');
+else if(reviewedHtml&&differsFromGitHub)publishMessage('Changes detected against GitHub. You can create a draft pull request.');
+}
 updatePublishAvailability();
 review.addEventListener('click',()=>{setTimeout(updatePublishAvailability,0)});
 document.querySelector('#cancelReview').addEventListener('click',()=>{updatePublishAvailability();publishMessage('')});
