@@ -97,6 +97,9 @@ jobs:
                !page.previewHtml.includes('href="/English/"') || !page.previewHtml.includes('href="/Japanese/"') ||
                !page.previewHtml.includes('href="/Chinese/"') || !page.previewHtml.includes('href="/ai-search/"') ||
                !page.previewHtml.includes('mailto:contact@awakenology.org') || !page.previewHtml.includes('href="/Disclaimer/"') ||
+               !page.previewHtml.includes('class="theme-toggle"') ||
+               page.previewHtml.includes('class="return-top"') || page.previewHtml.includes('awakenology-cn-toggle') ||
+               page.previewHtml.includes('window.scrollTo') || page.previewHtml.includes('ontouchstart=') ||
                !page.previewHtml.includes('.theme-toggle{position:fixed') ||
                !page.previewHtml.includes('class="reddit-icon reddit-one"') ||
                !page.previewHtml.includes('class="reddit-icon reddit-two"') ||
