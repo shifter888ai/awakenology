@@ -6,7 +6,7 @@ test("left-aligns only the two owner-identified headings", () => {
   const html = '<p style="margin-left:24pt;text-indent:12pt">1）界是什麼？</p><p style="margin-left:18pt">2）其他標題</p><p>3）界與界的關係？</p>';
   const out = correctPilotPreview(html);
   assert.match(out, /1）界是什麼？/);
-  assert.match(out, /margin-left:0;padding-left:0;text-indent:0;text-align:left/);
+  assert.match(out, /margin-left:0;text-indent:0;text-align:left/);
   assert.match(out, /2）其他標題/);
   assert.match(out, /margin-left:18pt/);
   assert.match(out, /3）界與界的關係？/);
