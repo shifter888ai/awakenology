@@ -272,7 +272,7 @@ try {
     readFile('pilot-human-review.json','utf8').catch(()=>null)
   ]);
   const review=reviewText?JSON.parse(reviewText):null;
-  const reviewMatchesSource=Boolean(review?.sourceSha256===sha256&&review?.visualReview?.approved===true&&review?.sourcePath===sourcePath);
+  const reviewMatchesSource=Boolean(review?.sourceSha256===sha256&&review?.visualReview?.approved===true&&(review?.sourcePath===sourcePath||review?.sourcePath===('new-page-generator/'+sourcePath)));
   const htmlSplit=typeof conversionCandidate.previewHtml==='string'
     ? segmentConvertedHtml(correctPilotPreview(conversionCandidate.previewHtml))
     : {ok:false,errors:['Converted HTML preview unavailable.'],segments:[]};
