@@ -1,4 +1,5 @@
 import importlib.util
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -8,6 +9,14 @@ AUDIT = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(AUDIT)
 
 class ConsolidateAuditReportsTests(unittest.TestCase):
+    def test_csv_reader_accepts_fields_larger_than_default_limit(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "large.csv"
+            large_value = "x" * 200_000
+            report.write_text("detail\n" + large_value + "\n", encoding="utf-8")
+            rows = AUDIT.read_rows(report)
+        self.assertEqual(rows[0]["detail"], large_value)
+
     def test_source_seo_warning_is_separated_from_live_failure(self):
         reports = {
             "seo-metadata-report.csv": [{"path":"A/index.html","flags":"missing-description;duplicate-title"}],

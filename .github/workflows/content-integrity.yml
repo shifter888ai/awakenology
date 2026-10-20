@@ -149,6 +149,11 @@ jobs:
           for path in changed:
               if not path.lower().endswith((".html", ".htm")):
                   continue
+              # New-Article is a generator test fixture, not a production article.
+              # Its placeholder is intentionally replaced during generator tests.
+              if path.replace("\\", "/").strip("/").lower() == "new-article/index.html":
+                  print(f"Skipping content-loss baseline comparison for test fixture: {path}")
+                  continue
               before = read_at(base, path)
               after = read_at(head, path)
               if before is None or after is None:
