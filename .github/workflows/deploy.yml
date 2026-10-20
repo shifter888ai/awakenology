@@ -35,9 +35,9 @@ jobs:
           # The production Worker injects the canonical circle-A into a.brand.
           # Remove page-authored SVG logos inside that link to avoid duplicates.
           def clean_brand(m):
-              return re.sub(r'<svg\\b[^>]*>.*?</svg\\s*>','',m.group(0),flags=re.I|re.S)
-          s=re.sub(r'<a\\b(?=[^>]*\\bclass=["\\'][^"\\']*\\bbrand\\b[^"\\']*["\\'])[^>]*>.*?</a\\s*>',clean_brand,s,flags=re.I|re.S)
-          s=re.sub(r'(<head\\b[^>]*>)',r'\\1<meta name="robots" content="noindex,nofollow,noarchive">',s,count=1,flags=re.I)
+              return re.sub(r'<svg\b[^>]*>.*?</svg\s*>','',m.group(0),flags=re.I|re.S)
+          s=re.sub(r'<a\b(?=[^>]*\bclass=["\'][^"\']*\bbrand\b[^"\']*["\'])[^>]*>.*?</a\s*>',clean_brand,s,flags=re.I|re.S)
+          s=re.sub(r'(<head\b[^>]*>)',r'\1<meta name="robots" content="noindex,nofollow,noarchive">',s,count=1,flags=re.I)
           p.write_text(s,encoding='utf-8')
           PY
           done
