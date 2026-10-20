@@ -30,7 +30,7 @@ export async function applySourceBoundHumanReview(pageSet, inputs) {
 }
 
 import { LANGUAGES, validatePageSet } from "./validate-page-set.mjs";
-import { inspectPageSet } from "./inspect-page-set.mjs";
+import { inspectPageSet, applyImageAltTextOverrides } from "./inspect-page-set.mjs";
 import { buildLanguageRouteManifest, verifyLanguageRouteManifest } from "./language-route-manifest.mjs";
 import { renderStaticShell } from "./static-shell.mjs";
 import { verifyRenderedInventory } from "./inspect-page-set.mjs";
@@ -83,17 +83,21 @@ export async function generateSegmentedDocxReviewBundle({sourceBuffer,sourcePath
   }
   const sourceSplit=segmentTrilingualDocxSource(sourceMap);
   if(!sourceSplit.ok) return blocked("language-source-segmentation",sourceSplit.errors);
-  const htmlSplit=segmentConvertedHtml(correctPilotPreview(extracted.previewHtml));
+  const altApplied=applyImageAltTextOverrides(extracted.previewHtml,review.imageAltTextBySrc??{});
+  if(altApplied.errors.length) return blocked("reviewed-alt-text",altApplied.errors);
+  const validationSplit=segmentConvertedHtml(altApplied.html);
+  if(!validationSplit.ok) return blocked("language-html-validation-segmentation",validationSplit.errors);
+  const htmlSplit=segmentConvertedHtml(correctPilotPreview(altApplied.html));
   if(!htmlSplit.ok) return blocked("language-html-segmentation",htmlSplit.errors);
-  if(sourceSplit.segments.length!==LANGUAGES.length||htmlSplit.segments.length!==LANGUAGES.length ||
+  if(sourceSplit.segments.length!==LANGUAGES.length||htmlSplit.segments.length!==LANGUAGES.length||validationSplit.segments.length!==LANGUAGES.length ||
      sourceSplit.segments.some(segment=>!LANGUAGES.includes(segment.language))) {
     return blocked("language-segmentation",["Expected exactly one source and converted segment for each required language."]);
   }
   const richResults=[];
-  const fragments={};
+  const fragments={},validationFragments={};
   for(let i=0;i<sourceSplit.segments.length;i++) {
-    const sourceSegment=sourceSplit.segments[i],htmlSegment=htmlSplit.segments[i],lang=sourceSegment.language;
-    if(htmlSegment.language!==lang) {
+    const sourceSegment=sourceSplit.segments[i],htmlSegment=htmlSplit.segments[i],validationSegment=validationSplit.segments[i],lang=sourceSegment.language;
+    if(htmlSegment.language!==lang||validationSegment.language!==lang) {
       return blocked("language-segmentation",["Source/HTML language order mismatch at "+lang+"."]);
     }
     const sourceInventory=segmentRichContentInventory(sourceRich,sourceSegment);
@@ -117,16 +121,17 @@ export async function generateSegmentedDocxReviewBundle({sourceBuffer,sourcePath
     richResults.push(result);
     if(!result.ok) return blocked("language-rich-content-integrity",["Source/rendered mismatch in "+lang+" ("+comparison.issues.length+" rich-content issue(s); paragraph text match="+paragraphTextMatches+")."],{languageRichComparison:richResults});
     fragments[lang]=htmlSegment;
+    validationFragments[lang]=validationSegment;
   }
   const htmlPageSet={pages:Object.fromEntries(LANGUAGES.map(lang=>[lang,{
     ...pageSet.pages[lang],mode:"html",source:sourcePath+"#"+lang
   }]))};
-  const inputs=Object.fromEntries(LANGUAGES.map(lang=>[lang,{html:fragments[lang].html,parser}]));
+  const inputs=Object.fromEntries(LANGUAGES.map(lang=>[lang,{html:validationFragments[lang].html,parser}]));
   const outputs=Object.fromEntries(LANGUAGES.map(lang=>[lang,{
     title:pageSet.pages[lang].title,description:"Non-publishable DOCX review fragment.",
     parser,approvedHeader:"<header>Review-only validation shell</header>",
     approvedFooter:"<footer>Review-only validation shell</footer>",
-    reviewedArticleHtml:fragments[lang].html
+    reviewedArticleHtml:validationFragments[lang].html
   }]));
   const integrity=await generateReviewedPageSet({pageSet:htmlPageSet,inputs,outputs});
   if(!integrity.ok) return blocked("html-page-set-integrity",integrity.errors,{languageRichComparison:richResults});
