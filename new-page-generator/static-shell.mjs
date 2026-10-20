@@ -15,7 +15,7 @@ export function renderStaticShell({ language, title, description, route, alterna
   if (!approvedHeader?.trim() || !approvedFooter?.trim() || !reviewedArticleHtml?.trim()) throw Error("Approved shell components and reviewed content are required.");
   if (!alternates || !["en","ja","zh-Hant"].every(lang => routeOK(alternates[lang]))) throw Error("Complete alternate-language routes required.");
   const canonical = absolute(route);
-  const headerMarkup = approvedHeader;
+  const headerMarkup = approvedHeader.includes('class="theme-toggle"') ? approvedHeader : approvedHeader.replace(/<\/header>/i, '<button class="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch theme"><span aria-hidden="true">☀</span></button></header>');
   if (!/<header\b/i.test(headerMarkup)) throw Error("Approved header must contain a header element.");
   if (/class="site-header"/.test(headerMarkup)) {
     if (!/<nav\b/i.test(headerMarkup) || !/class="brand"/.test(headerMarkup)) throw Error("Complete site header must include the brand and navigation.");
