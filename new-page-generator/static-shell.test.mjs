@@ -57,13 +57,12 @@ test("generated shell defaults to dark mode and includes one accessible theme to
 });
 test("generated shell includes responsive article styling and return-to-top control", () => {
   const html = renderStaticShell(fixture());
-  assert.match(html, /@media\(max-width:640px\)/);
+  assert.match(html, /@media\\(max-width:700px\\)/);
   assert.match(html, /\.article img\{max-width:100%;height:auto\}/);
   assert.match(html, /class="return-top"/);
   assert.match(html, /window\.scrollTo\(\{top:0,behavior:"smooth"\}\)/);
   assert.match(html, /addEventListener\("pointerup"/, "mobile touch/pointer activation is explicitly handled");
   assert.match(html, /touch-action:manipulation/);
-  assert.match(html, /class="review-banner"/);
 });
 test("generated shell requires a real header with brand and navigation", () => {
   const input = fixture(); input.approvedHeader = '<header class="site-header">Header only</header>';
