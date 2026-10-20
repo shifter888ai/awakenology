@@ -12,7 +12,7 @@
 <label>Page language<select id="lang"><option value="zh">Traditional Chinese</option><option value="ja">Japanese</option><option value="en">English</option></select></label>
 <label>Final page URL path<input id="path" value="New-Article/index.html" placeholder="Folder/index.html" autocomplete="off"></label>
 </div>
-<label>Word document (.docx)<input id="docx" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"></label>
+<label>Source document (Word .docx or HTML .html/.htm)<input id="docx" type="file" accept=".docx,.html,.htm,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/html"></label>
 <label>Page title<input id="title" placeholder="Article title"></label></section>
 <section class="panel"><h2 style="font-size:17px;margin:0 0 12px">2. Generate and review</h2><div class="actions"><button id="generate" disabled>Generate preview</button><button id="publish" disabled>Approve &amp; Publish</button></div>
 <div id="status" role="status" aria-live="polite">Choose one Word document. The generator preserves text, headings, lists, tables, links and basic emphasis. Publishing stays disabled until the target page is checked and a preview is generated.</div>
@@ -60,7 +60,7 @@ generate.addEventListener('click',async()=>{
   if(!result.value.trim())throw Error('No document content was found.');
   let html=await loadTemplate();const parsed=new DOMParser().parseFromString(html,'text/html');
   const article=parsed.querySelector('.article');if(!article)throw Error('Template has no article content area.');
-  article.innerHTML=result.value;
+  article.innerHTML=contentHtml;
   const heading=parsed.querySelector('main h1, h1');if(heading)heading.textContent=title.value.trim()||docxFile.name.replace(/\.docx$/i,'');
   parsed.title=(title.value.trim()||docxFile.name.replace(/\.docx$/i,''))+' | Awakenology';
   const canonical=parsed.querySelector('link[rel="canonical"]');
@@ -74,7 +74,7 @@ generate.addEventListener('click',async()=>{
   generatedHtml='<!doctype html>\n'+parsed.documentElement.outerHTML;
   preview.srcdoc=generatedHtml;
   edited=false;publish.disabled=!(targetLoaded&&validPath());
-  say('Preview ready. '+(result.messages.length?result.messages.length+' conversion note(s); check the page carefully. ':'')+'Review the page below, then click Approve & Publish.');
+  say('Preview ready. '+(conversionNotes.length?conversionNotes.length+' conversion note(s); check the page carefully. ':'')+'Review the page below, then click Approve & Publish.');
  }catch(e){generatedHtml='';say('Generation failed: '+e.message)}finally{controls();generate.disabled=!(docxFile&&validPath())}
 });
 publish.addEventListener('click',async()=>{
