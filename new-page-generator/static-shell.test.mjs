@@ -57,7 +57,7 @@ test("generated shell defaults to dark mode and includes one accessible theme to
 });
 test("generated shell includes responsive article styling and return-to-top control", () => {
   const html = renderStaticShell(fixture());
-  assert.match(html, /@media\\(max-width:700px\\)/);
+  assert.match(html, /@media\(max-width:700px\)/);
   assert.match(html, /\.article img\{max-width:100%;height:auto\}/);
   assert.match(html, /class="return-top"/);
   assert.match(html, /window\.scrollTo\(\{top:0,behavior:"smooth"\}\)/);
