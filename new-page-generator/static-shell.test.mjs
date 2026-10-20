@@ -8,7 +8,7 @@ const fixture = () => ({
   description: "Description <safe>",
   route: "/繁體中文/",
   alternates: { en: "/English-Article/", ja: "/日本語記事/", "zh-Hant": "/繁體中文/" },
-  approvedHeader: '<header class="site-header"><div class="header-inner"><a class="brand" href="/">Awakenology</a><nav class="nav"><a href="/English/">English</a><a href="/Japanese/">日本語</a><a href="/Chinese/">中文</a><a href="/ai-search/">Search / Ask</a></nav></div></header>',
+  approvedHeader: '<header class="site-header"><div class="header-inner"><a class="brand" href="/">Awakenology</a><nav class="nav"><a href="/English/">English</a><a href="/Japanese/">日本語</a><a href="/Chinese/">中文</a><a href="/ai-search/">Search / Ask</a></nav><button class="theme-toggle" type="button" aria-label="Switch to light theme">☀</button></div></header>',
   approvedFooter: '<footer class="site-footer"><div class="footer-links"><a href="mailto:contact@awakenology.org">Contact</a><a href="/Disclaimer/">Disclaimer</a></div><span>© 2017 Awakenology</span></footer>',
   reviewedArticleHtml: "<p>Preserved article</p>",
   integrityApproved: true
