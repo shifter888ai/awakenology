@@ -282,3 +282,16 @@ The integration path now exposes a non-publishable preview, flags the missing al
 
 **Remaining gate:** the segments are now isolated for language-specific review, but they are not yet independent generated pages. Next, compare each segment's rich-formatting and image inventory against the corresponding paragraph slice from the original DOCX, accounting only for explicitly reviewed corrections. Keep output generation fail-closed if any unexplained difference remains.
 
+## Per-language rich-content comparison (2026-10-20)
+
+- Added language-local slicing for source rich-content inventories. Run formatting, paragraph layout, explicit line breaks, and image metadata are rebased into each language's own paragraph range before comparison.
+- The converted HTML is independently inspected for each segment and compared against the corresponding source inventory. Only two source-reviewed preview adjustments are allowed: the approved `multi-planes` alt text and dark-neutral text colors changed to the theme foreground. Red/blue emphasis remains strict; the approval is bound to the exact source SHA-256.
+- The comparison now passes for all three languages with **zero unexplained rich-content issues**:
+  - Traditional Chinese: 58 paragraphs, 64 runs, 1 image, 0 explicit line breaks.
+  - English: 67 paragraphs, 159 runs, 1 image, 1 explicit line break.
+  - Japanese: 59 paragraphs, 57 runs, 1 image, 0 explicit line breaks.
+- For all three languages, concatenated text matches paragraph by paragraph, and source/rendered paragraph, image, and line-break counts match.
+- The CI workflow now fails if any language segment is missing, has a text mismatch, or reports an unexplained rich-content issue. Latest verified gate run: https://github.com/shifter888ai/awakenology/actions/runs/39345849474 — passed.
+
+**Important distinction:** this proves the current reviewed preview's source-to-rendered fidelity by language; it does not mean the actual page-set generator has emitted three final article pages. The conversion audit still deliberately labels the floating-image path as a non-publishable review preview. Next, wire these same segment-specific source inventories and reviewed HTML fragments into the generation coordinator, retain all route/content-integrity gates, and test that it produces a non-publishable three-language output bundle without duplicating or omitting language sections.
+
