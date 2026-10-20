@@ -272,3 +272,13 @@ The integration path now exposes a non-publishable preview, flags the missing al
 
 **Scope:** this is a validated paragraph-range inventory, not yet three generated article pages. The audit's conversion stage remains explicitly non-publishable because the floating-image renderer returns a review preview rather than ordinary final HTML. Next, the generator must split the converted article at these verified language boundaries and compare each language's own text, formatting, and image inventory independently before any page set can be marked review-ready. No PR, merge, or deployment is authorized.
 
+## Language-separated HTML review artifact (2026-10-20)
+
+- Added a title-marker HTML splitter that verifies the converted fragment's concatenated text is unchanged by splitting. It rejects missing/duplicate title blocks, out-of-order markers, and non-whitespace content before the first language title.
+- The real DOCX test confirms the converted preview splits into three segments with paragraph/image counts matching the source ranges: zh-Hant 58/1, en 67/1, ja 59/1.
+- CI now produces and uploads `pilot-language-segments.html`, visibly labels all three language sections, applies only the previously reviewed preview corrections, and prominently marks the artifact **REVIEW ONLY — NOT APPROVED FOR PUBLICATION**.
+- The workflow verifies the review-only label and the presence of all three language sections before uploading the artifact.
+- Latest verified run: https://github.com/shifter888ai/awakenology/actions/runs/39345146179 — passed. The artifact includes the language-separated review HTML and machine-readable `languageSegmentation` / `languageHtmlSegmentation` summaries.
+
+**Remaining gate:** the segments are now isolated for language-specific review, but they are not yet independent generated pages. Next, compare each segment's rich-formatting and image inventory against the corresponding paragraph slice from the original DOCX, accounting only for explicitly reviewed corrections. Keep output generation fail-closed if any unexplained difference remains.
+
