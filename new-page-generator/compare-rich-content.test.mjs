@@ -253,3 +253,10 @@ test("dark neutral contrast correction requires explicit reviewed approval",()=>
  source.runs[0].color="#ff0000";
  assert.equal(compareRichContent(source,output,{approvedNeutralTextColorOverride:true}).ok,false,"chromatic emphasis must not be normalized");
 });
+
+
+test("omitted zero indentation is equivalent to explicit CSS zero",()=>{
+ const source=sample(), output=sample();
+ delete source.paragraphLayouts[0].indentation.right;
+ assert.equal(compareRichContent(source,output).ok,true);
+});
