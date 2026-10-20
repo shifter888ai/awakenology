@@ -97,14 +97,14 @@ jobs:
                !page.previewHtml.includes('href="/English/"') || !page.previewHtml.includes('href="/Japanese/"') ||
                !page.previewHtml.includes('href="/Chinese/"') || !page.previewHtml.includes('href="/ai-search/"') ||
                !page.previewHtml.includes('mailto:contact@awakenology.org') || !page.previewHtml.includes('href="/Disclaimer/"') ||
-               !page.previewHtml.includes('class="theme-toggle"') ||
+               page.previewHtml.includes('class="theme-toggle"') ||
                page.previewHtml.includes('class="return-top"') || page.previewHtml.includes('awakenology-cn-toggle') ||
                page.previewHtml.includes('window.scrollTo') || page.previewHtml.includes('ontouchstart=') ||
-               !page.previewHtml.includes('.theme-toggle{position:fixed') ||
+               page.previewHtml.includes('.theme-toggle{') ||
                !page.previewHtml.includes('class="reddit-icon reddit-one"') ||
                !page.previewHtml.includes('class="reddit-icon reddit-two"') ||
                !page.previewHtml.includes('class="reddit-icon reddit-three"') ||
-               (page.previewHtml.match(/class="theme-toggle"/g) || []).length!==1 ||
+               (page.previewHtml.match(/class="theme-toggle"/g) || []).length!==0 ||
                page.previewHtml.includes('<main><h1>')) {
               console.error('Invalid complete review-only page preview:',lang);
               process.exit(1);
@@ -122,7 +122,7 @@ jobs:
           echo "Standalone visual review pages PASS: embedded images, local-file compatible, watermark present."
           (grep -q 'NOT APPROVED FOR PUBLICATION' pilot-artifacts/pilot-converted-preview.html || grep -q 'REVIEW PREVIEW — NOT FOR PUBLICATION' pilot-artifacts/pilot-converted-preview.html) || { echo "::error::Missing non-publishable review watermark in pilot-converted-preview.html"; exit 1; }
           grep -q 'LAYOUT PREVIEW ONLY' pilot-artifacts/shell-layout-preview.html || { echo "::error::Missing expected review marker: LAYOUT PREVIEW ONLY in pilot-artifacts/shell-layout-preview.html"; exit 1; }
-          grep -q 'class="theme-toggle"' pilot-artifacts/shell-layout-preview.html || { echo "::error::Missing expected review marker: class="theme-toggle" in pilot-artifacts/shell-layout-preview.html"; exit 1; }
+          if grep -q 'class="theme-toggle"' pilot-artifacts/shell-layout-preview.html; then echo "::error::Per-page theme button must be absent; global Worker owns theme switching"; exit 1; fi
       - name: Upload pilot diagnostic report
         if: always()
         uses: actions/upload-artifact@v4
