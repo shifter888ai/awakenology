@@ -15,9 +15,10 @@ export function renderStaticShell({ language, title, description, route, alterna
   if (!approvedHeader?.trim() || !approvedFooter?.trim() || !reviewedArticleHtml?.trim()) throw Error("Approved shell components and reviewed content are required.");
   if (!alternates || !["en","ja","zh-Hant"].every(lang => routeOK(alternates[lang]))) throw Error("Complete alternate-language routes required.");
   const canonical = absolute(route);
-  const headerMarkup = approvedHeader.includes('class="theme-toggle"') ? approvedHeader : approvedHeader.replace(/<\/header>/i, '</header>');
+  const headerMarkup = approvedHeader;
   if (!/<header\b/i.test(headerMarkup)) throw Error("Approved header must contain a header element.");
   if (!/<nav\b/i.test(headerMarkup) || !/class="brand"/.test(headerMarkup)) throw Error("Complete site header must include the brand and navigation.");
+  if (!/class="theme-toggle"/.test(headerMarkup) || (headerMarkup.match(/class="theme-toggle"/g) ?? []).length !== 1) throw Error("Complete site header must include exactly one theme toggle.");
   if (!/<footer\b/i.test(approvedFooter) || !/contact@awakenology\.org/.test(approvedFooter) || !/Disclaimer/.test(approvedFooter)) throw Error("Complete site footer must include Contact and Disclaimer links.");
   const hreflang = ["en","ja","zh-Hant"].map(lang => `<link rel="alternate" hreflang="${lang}" href="${escapeText(absolute(alternates[lang]))}">`).join("\n");
   return `<!doctype html>
