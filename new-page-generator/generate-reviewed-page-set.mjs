@@ -85,15 +85,16 @@ export async function generateSegmentedDocxReviewBundle({sourceBuffer,sourcePath
   if(!sourceSplit.ok) return blocked("language-source-segmentation",sourceSplit.errors);
   const htmlSplit=segmentConvertedHtml(correctPilotPreview(extracted.previewHtml));
   if(!htmlSplit.ok) return blocked("language-html-segmentation",htmlSplit.errors);
-  if(sourceSplit.segments.length!==LANGUAGES.length||htmlSplit.segments.length!==LANGUAGES.length) {
-    return blocked("language-segmentation",["Expected exactly three source and converted language segments."]);
+  if(sourceSplit.segments.length!==LANGUAGES.length||htmlSplit.segments.length!==LANGUAGES.length ||
+     sourceSplit.segments.some(segment=>!LANGUAGES.includes(segment.language))) {
+    return blocked("language-segmentation",["Expected exactly one source and converted segment for each required language."]);
   }
   const richResults=[];
   const fragments={};
-  for(let i=0;i<LANGUAGES.length;i++) {
-    const lang=LANGUAGES[i],sourceSegment=sourceSplit.segments[i],htmlSegment=htmlSplit.segments[i];
-    if(sourceSegment.language!==lang||htmlSegment.language!==lang) {
-      return blocked("language-segmentation",["Language order mismatch at "+lang+"."]);
+  for(let i=0;i<sourceSplit.segments.length;i++) {
+    const sourceSegment=sourceSplit.segments[i],htmlSegment=htmlSplit.segments[i],lang=sourceSegment.language;
+    if(htmlSegment.language!==lang) {
+      return blocked("language-segmentation",["Source/HTML language order mismatch at "+lang+"."]);
     }
     const sourceInventory=segmentRichContentInventory(sourceRich,sourceSegment);
     const rendered=inspectRenderedRichContent(htmlSegment.html,parser);
