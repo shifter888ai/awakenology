@@ -309,3 +309,13 @@ The integration path now exposes a non-publishable preview, flags the missing al
 
 **Current milestone:** a validated, non-publishable trilingual article-fragment bundle is produced by the coordinator. It is not yet a finished page-generator release: the shared production shell still needs explicit approval, and the generated fragments remain review artifacts only. No PR, merge, or deployment has been created.
 
+## Standalone trilingual page previews (2026-10-20)
+
+- The review-only coordinator now wraps each validated language fragment in a complete static HTML shell with a draft header/footer, dark-mode default, one accessible theme toggle, responsive article/image styling, return-to-top control, canonical metadata, and reciprocal `hreflang` links for EN/JA/zh-Hant.
+- Each page includes the explicit `REVIEW PREVIEW — NOT FOR PUBLICATION` watermark. The shell is a draft for owner review, not the approved production shell.
+- CI also exports self-contained HTML files under `pilot-artifacts/review-pages/`. The exact extracted source image bytes are embedded as data URLs, so the pages can be opened locally without a server or missing article images.
+- Verified files: `en.html` (318,173 bytes), `ja.html` (262,883 bytes), and `zh-Hant.html` (475,423 bytes). Each passed checks for doctype, watermark, embedded image, absence of unresolved root-relative article-image paths, and the non-publishable state.
+- CI run: https://github.com/shifter888ai/awakenology/actions/runs/39346911522 — passed.
+
+**Next human gate:** owner visual review of the generated EN/JA/Traditional Chinese page shells and the article placement inside each. Only after that review should the production header/footer be selected or approved. This does not authorize merging, deployment, or publishing.
+
