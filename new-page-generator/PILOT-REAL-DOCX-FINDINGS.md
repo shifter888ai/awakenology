@@ -349,3 +349,16 @@ Implemented and regression-tested:
 
 Validation: https://github.com/shifter888ai/awakenology/actions/runs/39350107297 — passed. This is still a review-only artifact; it does not authorize production changes, merge, or deployment.
 
+## Third owner feedback fixes: clickable floating controls and zh-Hant variant switch (2026-10-20)
+
+Owner reported that the floating buttons remained unclickable in EN/JA and the Traditional Chinese preview had no TC/SC switch.
+
+Implemented:
+- Every generated theme toggle now receives a direct inline native click handler, even when the supplied header already includes the button. It switches the root theme and updates icon/accessibility state.
+- Return-to-top now has a direct inline click handler calling `window.scrollTo(0,0)`; an event-listener fallback is retained for shell callers without inline handlers.
+- Both controls use fixed positioning, high stacking order, explicit pointer events, and touch-friendly targets.
+- The zh-Hant page now includes a visible fixed `简` / `繁` button. It loads OpenCC JS to convert text in the article and title, updates the page language, and saves the selected variant when local storage is available. The control remains absent from EN/JA.
+- Regression checks validate direct inline handlers and require the Chinese variant control only in the zh-Hant preview.
+
+Validation: CI run https://github.com/shifter888ai/awakenology/actions/runs/39351130574 — passed. Fresh standalone previews were extracted from that run's artifact and inspected for direct handlers and the zh-Hant switch. These remain review-only files; no production publishing, merge, or deployment is authorized.
+
