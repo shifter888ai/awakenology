@@ -61,8 +61,12 @@ test("generated shell includes responsive article styling and return-to-top cont
   assert.match(html, /\.article img\{max-width:100%;height:auto\}/);
   assert.match(html, /class="return-top"/);
   assert.match(html, /window\.scrollTo\(\{top:0,behavior:"smooth"\}\)/);
-  assert.match(html, /addEventListener\("pointerup"/, "mobile touch/pointer activation is explicitly handled");
+  assert.match(html, /addEventListener\("click"/, "native click activation supports touch and keyboard");
   assert.match(html, /touch-action:manipulation/);
+  assert.match(html, /\.theme-toggle\{position:fixed/);
+  assert.match(html, /\.return-top\{position:fixed/);
+  assert.match(html, /\.reddit-icon svg\{display:block;width:28px;height:28px/);
+  assert.match(html, /pointer-events:auto/);
 });
 test("generated shell requires a real header with brand and navigation", () => {
   const input = fixture(); input.approvedHeader = '<header class="site-header">Header only</header>';
