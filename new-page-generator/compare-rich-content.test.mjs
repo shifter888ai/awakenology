@@ -242,3 +242,14 @@ test("accepts explicit floating-image approval and reviewed alt text for a sourc
  });
  assert.equal(reviewed.ok,true,JSON.stringify(reviewed.issues));
 });
+
+
+test("dark neutral contrast correction requires explicit reviewed approval",()=>{
+ const source=sample(), output=sample();
+ source.runs[0].color="#333333";
+ output.runs[0].color="var(--fg)";
+ assert.equal(compareRichContent(source,output).ok,false);
+ assert.equal(compareRichContent(source,output,{approvedNeutralTextColorOverride:true}).ok,true);
+ source.runs[0].color="#ff0000";
+ assert.equal(compareRichContent(source,output,{approvedNeutralTextColorOverride:true}).ok,false,"chromatic emphasis must not be normalized");
+});
