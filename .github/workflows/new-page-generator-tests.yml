@@ -47,6 +47,11 @@ jobs:
           grep -q 'manual visual review required' pilot-artifacts/pilot-visual-review.html || { echo "::error::Missing expected review marker: manual visual review required in pilot-artifacts/pilot-visual-review.html"; exit 1; }
           test -s pilot-artifacts/shell-layout-preview.html
           test -s pilot-artifacts/pilot-converted-preview.html
+          test -s pilot-artifacts/pilot-language-segments.html
+          grep -q 'REVIEW ONLY — NOT APPROVED FOR PUBLICATION' pilot-artifacts/pilot-language-segments.html || { echo "::error::Missing non-publishable review label in language-segment preview"; exit 1; }
+          grep -q '繁體中文 (zh-Hant)' pilot-artifacts/pilot-language-segments.html || { echo "::error::Missing Traditional Chinese segment"; exit 1; }
+          grep -q 'English (en)' pilot-artifacts/pilot-language-segments.html || { echo "::error::Missing English segment"; exit 1; }
+          grep -q '日本語 (ja)' pilot-artifacts/pilot-language-segments.html || { echo "::error::Missing Japanese segment"; exit 1; }
           grep -q 'NOT APPROVED FOR PUBLICATION' pilot-artifacts/pilot-converted-preview.html || { echo "::error::Missing expected review marker: NOT APPROVED FOR PUBLICATION in pilot-artifacts/pilot-converted-preview.html"; exit 1; }
           grep -q 'LAYOUT PREVIEW ONLY' pilot-artifacts/shell-layout-preview.html || { echo "::error::Missing expected review marker: LAYOUT PREVIEW ONLY in pilot-artifacts/shell-layout-preview.html"; exit 1; }
           grep -q 'class="theme-toggle"' pilot-artifacts/shell-layout-preview.html || { echo "::error::Missing expected review marker: class="theme-toggle" in pilot-artifacts/shell-layout-preview.html"; exit 1; }
@@ -61,6 +66,7 @@ jobs:
             new-page-generator/pilot-artifacts/pilot-visual-review.html
             new-page-generator/pilot-artifacts/shell-layout-preview.html
             new-page-generator/pilot-artifacts/pilot-converted-preview.html
+            new-page-generator/pilot-artifacts/pilot-language-segments.html
           if-no-files-found: warn
       - name: Publish pilot findings in job summary
         if: always()
