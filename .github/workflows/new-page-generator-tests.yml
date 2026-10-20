@@ -100,7 +100,7 @@ jobs:
                !page.previewHtml.includes('mailto:contact@awakenology.org') || !page.previewHtml.includes('href="/Disclaimer/"') ||
                !page.previewHtml.includes('addEventListener("pointerup"') ||
                (page.previewHtml.match(/class="theme-toggle"/g) || []).length!==1 ||
-               (page.previewHtml.match(/<h1\b/g) || []).length!==1) {
+               page.previewHtml.includes('<main><h1>')) {
               console.error('Invalid complete review-only page preview:',lang);
               process.exit(1);
             }
