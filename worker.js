@@ -303,8 +303,9 @@ async function publishReviewedPage(request, env) {
     const payload = { message: "Publish reviewed page: " + path, content: toBase64(new TextEncoder().encode(html)), branch: "main" };
     if (current) payload.sha = current.sha;
     const saved = await githubApi("/repos/" + GITHUB_REPO + "/contents/" + encodedPath, token, { method: "PUT", body: JSON.stringify(payload) });
+    const isIndexPage = /index\.html?$/i.test(path);
     const finalPath = path.replace(/index\.html?$/i, "").split("/").filter(Boolean).map(encodeURIComponent).join("/");
-    return jsonResponse({ ok: true, path, commit: saved.commit && saved.commit.sha, url: "https://awakenology.space/" + finalPath + (finalPath ? "/" : "") });
+    return jsonResponse({ ok: true, path, commit: saved.commit && saved.commit.sha, url: "https://awakenology.space/" + finalPath + (isIndexPage && finalPath ? "/" : "") });
   } catch (error) {
     return jsonResponse({ error: error && error.message ? error.message : "Publishing failed." }, 502);
   }
