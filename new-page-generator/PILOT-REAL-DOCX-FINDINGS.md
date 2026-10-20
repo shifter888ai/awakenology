@@ -335,3 +335,17 @@ Validation: CI run https://github.com/shifter888ai/awakenology/actions/runs/3934
 
 These remain review previews, not production pages. No PR, merge, or deployment was created. Next gate is the owner's visual re-check of the updated three files, especially the header/footer and mobile controls.
 
+## Second owner feedback fixes: floating theme control, Reddit icons, mobile activation (2026-10-20)
+
+Owner reported that all three refreshed previews still lacked the three Reddit icons, the theme toggle was not floating, and theme/return-to-top controls did not work on mobile.
+
+Implemented and regression-tested:
+- Theme toggle is now fixed to the viewport's top-right corner, above page content, with a high stacking order and explicit pointer events; mobile tap target is 46px.
+- Return-to-top is fixed to the bottom-right corner with a 48px mobile tap target.
+- Replaced custom pointer-up activation with native click activation, which supports touch browsers and keyboard/assistive activation without double-trigger logic.
+- Added explicit SVG dimensions and visible overflow for the three embedded Reddit icons, preserving the individual icon color treatment.
+- CI's generated-preview checks now require all three Reddit icon classes, fixed positioning for both controls, click activation, and exactly one theme control.
+- Re-generated self-contained EN/JA/zh-Hant preview files from CI artifact.
+
+Validation: https://github.com/shifter888ai/awakenology/actions/runs/39350107297 — passed. This is still a review-only artifact; it does not authorize production changes, merge, or deployment.
+
