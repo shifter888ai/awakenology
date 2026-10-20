@@ -70,14 +70,14 @@ export function inspectRenderedRichContent(html, parser) {
       }
       const readTwips = (key) => {
         const value = formatting(node,key);
-        if (value === null) return 0;
+        if (value === null || value === '0') return 0;
         const match = /^(\d+(?:\.\d+)?)(pt|px)$/.exec(value.toLowerCase());
         if (!match) { errors.push('Unsupported rendered paragraph '+key+': '+value); return 0; }
         return Number(match[1]) * (match[2] === 'px' ? 15 : 20);
       };
       const indentation = {left:readTwips('margin-left'),right:readTwips('margin-right')};
       const firstLine = formatting(node,'text-indent');
-      if (firstLine !== null) {
+      if (firstLine !== null && firstLine !== '0') {
         const match = /^(-?\d+(?:\.\d+)?)(pt|px)$/.exec(firstLine.toLowerCase());
         if (!match) errors.push('Unsupported rendered paragraph text-indent: '+firstLine);
         else {
