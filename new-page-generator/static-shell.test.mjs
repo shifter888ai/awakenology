@@ -60,8 +60,10 @@ test("generated shell includes responsive article styling and return-to-top cont
   assert.match(html, /@media\(max-width:700px\)/);
   assert.match(html, /\.article img\{max-width:100%;height:auto\}/);
   assert.match(html, /class="return-top"/);
-  assert.match(html, /window\.scrollTo\(\{top:0,behavior:"smooth"\}\)/);
-  assert.match(html, /addEventListener\("click"/, "native click activation supports touch and keyboard");
+  assert.match(html, /onclick="window\.scrollTo\(0,0\)"/, "return-to-top uses a direct native click handler");
+  assert.match(html, /onclick="var r=document\.documentElement/, "theme control has a direct native click handler");
+  assert.match(html, /class="cn-variant-toggle"/, "Traditional Chinese preview exposes a variant toggle");
+  assert.match(html, /id="awakenology-cn-toggle"/);
   assert.match(html, /touch-action:manipulation/);
   assert.match(html, /\.theme-toggle\{position:fixed/);
   assert.match(html, /\.return-top\{position:fixed/);
