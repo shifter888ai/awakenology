@@ -62,7 +62,7 @@ main{max-width:900px;margin:0 auto;padding:24px 20px 48px}main h1{line-height:1.
 ${headerMarkup}
 <main><article class="article">${reviewedArticleHtml}</article></main>
 ${approvedFooter}
-${language === "zh-Hant" ? '<button class="cn-variant-toggle" id="awakenology-cn-toggle" type="button" aria-label="Convert to Simplified Chinese" title="繁體中文／简体中文" onclick="if(window.awakenologyConvertChinese){window.awakenologyConvertChinese()}else{this.setAttribute('aria-label','Chinese conversion is still loading; please try again shortly')}" ontouchstart="event.preventDefault();this.click()">繁／简</button>' : ''}
+${language === "zh-Hant" ? '<button class="cn-variant-toggle" id="awakenology-cn-toggle" type="button" aria-label="Convert to Simplified Chinese" title="繁體中文／简体中文" onclick="if(window.awakenologyConvertChinese)window.awakenologyConvertChinese()" ontouchstart="event.preventDefault();this.click()">繁／简</button>' : ''}
 <button class="return-top" type="button" aria-label="Return to top" title="Return to top" onclick="window.scrollTo({top:0,behavior:'smooth'})" ontouchstart="event.preventDefault();this.click()">↑</button>
 <script>
 (function(){
