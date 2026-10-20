@@ -5,7 +5,7 @@ export function correctPilotPreview(html) {
   candidate = candidate.replace(/<(p|h[1-6]|li|div)\b([^>]*)>([\s\S]*?)<\/\1>/gi, (whole, tag, attrs, inner) => {
     const plain = inner.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
     if (!["1）界是什麼？", "3）界與界的關係？"].includes(plain)) return whole;
-    const correction = "margin-left:0!important;padding-left:0!important;text-indent:0!important;text-align:left!important";
+    const correction = "margin-left:0;padding-left:0;text-indent:0;text-align:left";
     const next = /\bstyle=(["'])(.*?)\1/i.test(attrs)
       ? attrs.replace(/\bstyle=(["'])(.*?)\1/i, (_m, q, value) => "style=" + q + value + ";" + correction + q)
       : attrs + ' style="' + correction + '"';
