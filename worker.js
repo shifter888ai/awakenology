@@ -259,12 +259,64 @@ async function createReviewedDraftPR(request, env) {
   }
 }
 
+
+async function publishReviewedPage(request, env) {
+  if (request.method !== "POST") return jsonResponse({ error: "Method not allowed." }, 405);
+  if (!(request.headers.get("content-type") || "").toLowerCase().includes("application/json")) return jsonResponse({ error: "JSON content type required." }, 415);
+  const origin = request.headers.get("origin");
+  if (origin && origin !== "https://" + EDITOR_HOST) return jsonResponse({ error: "Cross-origin publishing is not allowed." }, 403);
+  let body;
+  try { body = await request.json(); } catch { return jsonResponse({ error: "Invalid request." }, 400); }
+  const path = body.path, html = body.html, baselineSha256 = body.baselineSha256;
+  if (typeof path !== "string" || path.length > 500 || path.startsWith("/") || path.includes("\\") ||
+      !/\.html?$/i.test(path) || path.split("/").some(part => !part || part === "." || part === ".." || part.startsWith("."))) {
+    return jsonResponse({ error: "Enter a valid repository-relative .html page path." }, 400);
+  }
+  if (typeof html !== "string" || html.length > 1500000 || !/<html[\s>]/i.test(html) ||
+      !/<article\b[^>]*class=["'][^"']*\barticle\b/i.test(html)) {
+    return jsonResponse({ error: "Generated page is invalid or exceeds the 1.5 MB limit." }, 400);
+  }
+  if (typeof baselineSha256 !== "string" || !(baselineSha256 === "NEW" || /^[a-f0-9]{64}$/i.test(baselineSha256))) {
+    return jsonResponse({ error: "Missing page version check." }, 400);
+  }
+  try {
+    const token = await createGitHubInstallationToken(env);
+    const encodedPath = path.split("/").map(encodeURIComponent).join("/");
+    const apiPath = "/repos/" + GITHUB_REPO + "/contents/" + encodedPath + "?ref=main";
+    const getResponse = await fetch("https://api.github.com" + apiPath, {
+      headers: { authorization: "Bearer " + token, accept: "application/vnd.github+json", "x-github-api-version": "2022-11-28", "user-agent": "Awakenology-Private-Editor" }
+    });
+    let current = null;
+    if (getResponse.ok) current = await getResponse.json();
+    else if (getResponse.status !== 404) {
+      const problem = await getResponse.json().catch(() => ({}));
+      return jsonResponse({ error: "Could not check the current page: " + (problem.message || getResponse.status) }, 502);
+    }
+    if (baselineSha256 === "NEW" && current) return jsonResponse({ error: "That URL already exists. Load it as an existing page before publishing." }, 409);
+    if (baselineSha256 !== "NEW" && !current) return jsonResponse({ error: "This page no longer exists. Reload and review it again." }, 409);
+    if (current) {
+      if (current.type !== "file" || current.encoding !== "base64" || !current.content) return jsonResponse({ error: "The target is not a supported text file." }, 409);
+      const currentHtml = decodeGitHubFile(current.content);
+      if (await sha256Hex(currentHtml) !== baselineSha256.toLowerCase()) return jsonResponse({ error: "The page changed on GitHub after it was loaded. Reload it and review again." }, 409);
+      if (html === currentHtml) return jsonResponse({ error: "There are no changes to publish." }, 409);
+    }
+    const payload = { message: "Publish reviewed page: " + path, content: toBase64(new TextEncoder().encode(html)), branch: "main" };
+    if (current) payload.sha = current.sha;
+    const saved = await githubApi("/repos/" + GITHUB_REPO + "/contents/" + encodedPath, token, { method: "PUT", body: JSON.stringify(payload) });
+    const finalPath = path.replace(/index\.html?$/i, "").split("/").filter(Boolean).map(encodeURIComponent).join("/");
+    return jsonResponse({ ok: true, path, commit: saved.commit && saved.commit.sha, url: "https://awakenology.space/" + finalPath + (finalPath ? "/" : "") });
+  } catch (error) {
+    return jsonResponse({ error: error && error.message ? error.message : "Publishing failed." }, 502);
+  }
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const isEditorHost = url.hostname === EDITOR_HOST;
     const isEditorPath = url.pathname === "/editor" || url.pathname.startsWith("/editor/");
     const isEditorApi = url.pathname === "/api/editor/create-draft-pr";
+    const isPublishApi = url.pathname === "/api/editor/publish-page";
     if (isEditorHost) {
       if (url.pathname === "/auth/github" && request.method === "GET") return startGitHubLogin(request, env);
       if (url.pathname === "/auth/github/callback" && request.method === "GET") return finishGitHubLogin(request, env);
@@ -275,19 +327,20 @@ export default {
           "cache-control": "no-store"
         }});
       }
-      if (isEditorPath || isEditorApi || url.pathname === "/") {
+      if (isEditorPath || isEditorApi || isPublishApi || url.pathname === "/") {
         const authenticated = await verifyEditorSession(request, env);
         if (!authenticated) {
-          if (isEditorApi) return jsonResponse({ error: "Sign in with the authorized GitHub account to continue." }, 401);
+          if (isEditorApi || isPublishApi) return jsonResponse({ error: "Sign in with the authorized GitHub account to continue." }, 401);
           return authRedirect("https://" + EDITOR_HOST + "/auth/github");
         }
         if (isEditorApi) return createReviewedDraftPR(request, env);
+        if (isPublishApi) return publishReviewedPage(request, env);
         if (url.pathname === "/") return authRedirect("https://" + EDITOR_HOST + "/editor/");
         return env.ASSETS.fetch(request);
       }
     }
     // Never expose the editor or publishing API on the public website or temporary preview hosts.
-    if (isEditorPath || isEditorApi) return new Response("Not found", { status: 404 });
+    if (isEditorPath || isEditorApi || isPublishApi) return new Response("Not found", { status: 404 });
     const response = await env.ASSETS.fetch(request);
     const contentType = response.headers.get("content-type") || "";
     const pathname = new URL(request.url).pathname;
