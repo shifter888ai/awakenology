@@ -253,3 +253,19 @@ test("validates CSS float geometry against serialized Word placement metadata",(
  assert.equal(bad.ok,false);
  assert.ok(bad.errors.some(error=>error.includes('CSS float differs')));
 });
+
+
+test('accepts only zero padding and zero text-indent used by the reviewed heading correction',()=>{
+ const reviewed={parseFromString:()=>({body:{childNodes:[
+  node('P',{style:'margin-left:0;padding-left:0;text-indent:0;text-align:left'},[text('Reviewed heading')])
+ ]}})};
+ const result=inspectRenderedRichContent('<p style="margin-left:0;padding-left:0;text-indent:0;text-align:left">Reviewed heading</p>',reviewed);
+ assert.equal(result.ok,true,result.errors.join('; '));
+ assert.deepEqual(result.paragraphLayouts[0].indentation,{left:0,right:0});
+ const unsafe={parseFromString:()=>({body:{childNodes:[
+  node('P',{style:'padding-left:12pt'},[text('Unreviewed indentation')])
+ ]}})};
+ const blocked=inspectRenderedRichContent('<p style="padding-left:12pt">Unreviewed indentation</p>',unsafe);
+ assert.equal(blocked.ok,false);
+ assert.ok(blocked.errors.some(error=>error.includes('Unsupported rendered style: padding-left:12pt')));
+});
