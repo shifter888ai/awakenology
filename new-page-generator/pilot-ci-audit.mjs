@@ -347,6 +347,27 @@ await mkdir('pilot-artifacts',{recursive:true});
 await writeFile(outputPath, JSON.stringify(report,null,2)+'\n');
 await writeFile('pilot-artifacts/pilot-language-bundle.json',JSON.stringify(generatedReviewBundle,null,2)+'\n');
 
+// Standalone visual-review files embed the exact extracted source image bytes so
+// reviewers can open each HTML file locally without a web server or missing assets.
+if(generatedReviewBundle.ok===true) {
+  const imageInventory=await inspectDocxAssets(buffer);
+  if(!imageInventory.ok) throw new Error('Cannot package standalone preview images: '+imageInventory.errors.join('; '));
+  const dataUrls=new Map(imageInventory.assets.map(asset=>[
+    asset.outputPath,'data:'+asset.contentType+';base64,'+asset.bytes.toString('base64')
+  ]));
+  const previewDir='pilot-artifacts/review-pages';
+  await mkdir(previewDir,{recursive:true});
+  for(const lang of ['en','ja','zh-Hant']) {
+    const page=generatedReviewBundle.pages[lang];
+    if(!page?.previewHtml||page.publishable!==false) throw new Error('Missing or publishable review page for '+lang);
+    let html=page.previewHtml;
+    for(const [src,dataUrl] of dataUrls) html=html.split('src="'+src+'"').join('src="'+dataUrl+'"');
+    if(/<img[^>]+src="\/(?:assets)\//i.test(html)) throw new Error('Unembedded local image path remains in '+lang+' preview.');
+    if(!html.includes('REVIEW PREVIEW — NOT FOR PUBLICATION')) throw new Error('Missing review watermark in '+lang+' preview.');
+    await writeFile(previewDir+'/'+lang+'.html',html);
+  }
+}
+
 // A language-separated visual aid for checking boundaries. This remains a
 // review artifact; it is not passed to the page-set generator or published.
 const languagePreviewPath='pilot-artifacts/pilot-language-segments.html';
