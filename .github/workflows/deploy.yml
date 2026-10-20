@@ -33,9 +33,11 @@ jobs:
           s=p.read_text(encoding='utf-8')
           assert '<head' in s.lower() and '</head>' in s.lower()
           # The production Worker injects the canonical circle-A into a.brand.
-          # Remove any page-authored copy first so the logo appears exactly once.
-          s,n=re.subn(r'<svg\b(?=[^>]*\bclass=["\'][^"\']*\bbrand-symbol\b[^"\']*["\'])[^>]*>.*?</svg\s*>','',s,count=0,flags=re.I|re.S)
-          s=re.sub(r'(<head\b[^>]*>)',r'\1<meta name="robots" content="noindex,nofollow,noarchive">',s,count=1,flags=re.I)
+          # Remove page-authored SVG logos inside that link to avoid duplicates.
+          def clean_brand(m):
+              return re.sub(r'<svg\\b[^>]*>.*?</svg\\s*>','',m.group(0),flags=re.I|re.S)
+          s=re.sub(r'<a\\b(?=[^>]*\\bclass=["\\'][^"\\']*\\bbrand\\b[^"\\']*["\\'])[^>]*>.*?</a\\s*>',clean_brand,s,flags=re.I|re.S)
+          s=re.sub(r'(<head\\b[^>]*>)',r'\\1<meta name="robots" content="noindex,nofollow,noarchive">',s,count=1,flags=re.I)
           p.write_text(s,encoding='utf-8')
           PY
           done
