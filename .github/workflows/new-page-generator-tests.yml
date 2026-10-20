@@ -99,7 +99,10 @@ jobs:
                !page.previewHtml.includes('href="/Chinese/"') || !page.previewHtml.includes('href="/ai-search/"') ||
                !page.previewHtml.includes('mailto:contact@awakenology.org') || !page.previewHtml.includes('href="/Disclaimer/"') ||
                !page.previewHtml.includes('onclick="var r=document.documentElement') ||
-               !page.previewHtml.includes('onclick="window.scrollTo(0,0)"') ||
+               !page.previewHtml.includes("onclick=\\"window.scrollTo({top:0,behavior:'smooth'})\\"") ||
+               !page.previewHtml.includes('ontouchstart="event.preventDefault();this.click()"') ||
+               !page.previewHtml.includes('visibility:visible!important') ||
+               !page.previewHtml.includes('繁體中文／简体中文') ||
                !page.previewHtml.includes('.theme-toggle{position:fixed') ||
                !page.previewHtml.includes('.return-top{position:fixed') ||
                !page.previewHtml.includes('class="reddit-icon reddit-one"') ||
