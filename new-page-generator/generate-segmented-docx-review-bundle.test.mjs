@@ -39,7 +39,9 @@ test("real trilingual DOCX produces a validated non-publishable language bundle"
   assert.match(html,/hreflang="ja"/);
   assert.match(html,/hreflang="zh-Hant"/);
   assert.match(html,/class="theme-toggle"/);
-  assert.doesNotMatch(html,/class="return-top"|id="awakenology-return-top"/);\n  assert.doesNotMatch(html,/awakenology-cn-toggle|cn-variant-toggle|awakenologyConvertChinese/);\n  assert.doesNotMatch(html,/window\\.scrollTo|ontouchstart=/);
+  assert.doesNotMatch(html,/class="return-top"|id="awakenology-return-top"/);
+  assert.doesNotMatch(html,/awakenology-cn-toggle|cn-variant-toggle|awakenologyConvertChinese/);
+  assert.doesNotMatch(html,/window\\.scrollTo|ontouchstart=/);
  }
 });
 
