@@ -115,7 +115,7 @@ jobs:
             if grep -q 'src="/assets/' "pilot-artifacts/review-pages/$lang.html"; then echo "::error::Unresolved local image path in $lang preview"; exit 1; fi
           done
           echo "Standalone visual review pages PASS: embedded images, local-file compatible, watermark present."
-          grep -q 'NOT APPROVED FOR PUBLICATION' pilot-artifacts/pilot-converted-preview.html || { echo "::error::Missing expected review marker: NOT APPROVED FOR PUBLICATION in pilot-artifacts/pilot-converted-preview.html"; exit 1; }
+          (grep -q 'NOT APPROVED FOR PUBLICATION' pilot-artifacts/pilot-converted-preview.html || grep -q 'REVIEW PREVIEW — NOT FOR PUBLICATION' pilot-artifacts/pilot-converted-preview.html) || { echo "::error::Missing non-publishable review watermark in pilot-converted-preview.html"; exit 1; }
           grep -q 'LAYOUT PREVIEW ONLY' pilot-artifacts/shell-layout-preview.html || { echo "::error::Missing expected review marker: LAYOUT PREVIEW ONLY in pilot-artifacts/shell-layout-preview.html"; exit 1; }
           grep -q 'class="theme-toggle"' pilot-artifacts/shell-layout-preview.html || { echo "::error::Missing expected review marker: class="theme-toggle" in pilot-artifacts/shell-layout-preview.html"; exit 1; }
           grep -q 'class="return-top"' pilot-artifacts/shell-layout-preview.html || { echo "::error::Missing expected review marker: class="return-top" in pilot-artifacts/shell-layout-preview.html"; exit 1; }
