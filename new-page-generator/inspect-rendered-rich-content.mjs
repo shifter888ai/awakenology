@@ -124,7 +124,10 @@ export function inspectRenderedRichContent(html, parser) {
     const allowed=new Set(['color','font-weight','font-style','text-decoration','list-style-type','font-size','text-align','margin-left','margin-right','text-indent','margin-top','margin-bottom','float','width','height','display','clear','max-width','line-height','font-family','text-transform','letter-spacing','font-kerning']);
     for(const decl of style.split(';').filter(x=>x.trim())) {
       const index=decl.indexOf(':');
-      if(index<0 || !allowed.has(decl.slice(0,index).trim().toLowerCase())) errors.push('Unsupported rendered style: '+decl);
+      const property=index<0?'':decl.slice(0,index).trim().toLowerCase();
+      const value=index<0?'':decl.slice(index+1).trim().toLowerCase();
+      const reviewedZeroPadding=property==='padding-left'&&value==='0';
+      if(index<0 || (!allowed.has(property)&&!reviewedZeroPadding)) errors.push('Unsupported rendered style: '+decl);
     }
     const weight=formatting(node,'font-weight'), fontStyle=formatting(node,'font-style'), decoration=formatting(node,'text-decoration');
     if(weight!==null && !['bold','normal','400','700'].includes(weight.toLowerCase())) errors.push('Unsupported rendered font-weight: '+weight);
