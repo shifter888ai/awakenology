@@ -135,16 +135,36 @@ export async function generateSegmentedDocxReviewBundle({sourceBuffer,sourcePath
   }]));
   const integrity=await generateReviewedPageSet({pageSet:htmlPageSet,inputs,outputs});
   if(!integrity.ok) return blocked("html-page-set-integrity",integrity.errors,{languageRichComparison:richResults});
-  const pages=Object.fromEntries(LANGUAGES.map(lang=>[lang,{
-    language:lang,route:pageSet.pages[lang].route,articleHtml:fragments[lang].html,
-    paragraphCount:fragments[lang].paragraphCount,imageCount:fragments[lang].imageCount,
-    textCharacterCount:fragments[lang].textCharacterCount,publishable:false
-  }]));
+  const previewRouteManifest=buildLanguageRouteManifest(htmlPageSet);
+  if(!previewRouteManifest.ok) return blocked("preview-routes",previewRouteManifest.errors,{languageRichComparison:{ok:true,segments:richResults}});
+  const draftHeader='<header class="site-header"><div class="header-inner"><a class="brand" href="/">Awakenology</a><strong>REVIEW PREVIEW — NOT FOR PUBLICATION</strong></div></header>';
+  const draftFooter='<footer class="footer"><div class="footer-inner"><span>© 2017 Awakenology</span><strong>REVIEW PREVIEW — NOT FOR PUBLICATION</strong></div></footer>';
+  const pages=Object.fromEntries(LANGUAGES.map(lang=>{
+    const meta=pageSet.pages[lang],fragment=fragments[lang];
+    let previewHtml;
+    try {
+      previewHtml=renderStaticShell({
+        language:lang,title:meta.title,
+        description:"Review-only preview generated from the visually reviewed source DOCX. Not approved for publication.",
+        route:meta.route,alternates:previewRouteManifest.pages[lang].alternates,
+        approvedHeader:draftHeader,approvedFooter:draftFooter,
+        reviewedArticleHtml:fragment.html,integrityApproved:true
+      });
+    } catch(error) {
+      throw new Error(lang+": review-only shell preview failed: "+String(error?.message??error));
+    }
+    return [lang,{
+      language:lang,route:meta.route,articleHtml:fragment.html,previewHtml,
+      paragraphCount:fragment.paragraphCount,imageCount:fragment.imageCount,
+      textCharacterCount:fragment.textCharacterCount,publishable:false
+    }];
+  }));
   return {
     ok:true,stage:"review-only-trilingual-bundle",publishable:false,sourcePath,sourceSha256:sha256,
     errors:[],pages,languageRichComparison:{ok:true,segments:richResults},
     htmlPageSetValidation:{ok:true,stage:integrity.stage},
-    note:"Article fragments only; no approved production shell, site files, sitemap, PR, merge, or deployment are produced."
+    previewShell:{kind:"draft-review-only",publishable:false,containsReviewWatermark:true},
+    note:"Each language includes a complete static-shell review preview with an explicit NOT FOR PUBLICATION watermark. The draft shell is not the approved production shell; no site files, sitemap, PR, merge, or deployment are produced."
   };
 }
 
