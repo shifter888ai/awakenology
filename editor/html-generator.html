@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Awakenology · HTML Page Generator</title><meta name="robots" content="noindex,nofollow">
+<style>
+:root{font:15px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:dark;background:#111;color:#f2f2f2;--panel:#191919;--line:#3c3c3c;--muted:#b5b5b5}
+*{box-sizing:border-box}body{margin:0}header{padding:16px max(16px,calc((100vw - 1100px)/2));border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#151515}h1{font-size:18px;margin:0 auto 0 0;font-weight:650}header a{color:inherit;border:1px solid #555;border-radius:7px;padding:8px 11px;text-decoration:none}header a[aria-current=page]{background:#eee;color:#111;border-color:#eee}main{max-width:1100px;margin:22px auto;padding:0 16px}label{display:block;font-size:13px;color:#ddd;margin:0 0 14px}input,select{display:block;width:100%;margin-top:5px;padding:9px;background:#222;color:#eee;border:1px solid #555;border-radius:7px;font:inherit}input[type=file]{padding:7px}button{border:1px solid #666;background:#292929;color:inherit;border-radius:7px;padding:9px 13px;cursor:pointer;font:inherit}button:hover:not(:disabled){border-color:#aaa}button:disabled{opacity:.38;cursor:not-allowed}.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}iframe{display:block;width:100%;height:68vh;border:1px solid #555;background:white;border-radius:8px}#status{color:#ddd;font-size:13px;margin:14px 0;padding:12px 14px;min-height:22px;background:#202020;border:1px solid var(--line);border-radius:8px}.hint{font-size:12px;color:#aaa}#publish{background:#eee;color:#111;border-color:#eee;font-weight:650}.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin:14px 0}.step{color:#aaa;font-size:12px;text-transform:uppercase;letter-spacing:.07em;margin:0 0 8px}p{margin:8px 0 14px}@media(max-width:650px){.fields{grid-template-columns:1fr}header{padding:12px}header h1{width:100%;margin:0}main{padding:0 12px}}
+</style></head><body>
+<header><h1>Awakenology · HTML Generator</h1><a href="/editor/generator.html">Word Generator</a><a href="/editor/html-generator.html" aria-current="page">HTML Generator</a><a href="/editor/">Git Editor</a></header>
+<main>
+<p class="step">One-page publishing workflow</p><p>Choose one HTML file, generate one page, inspect the preview, then publish explicitly.</p>
+<section class="panel"><h2 style="font-size:17px;margin:0 0 12px">1. Page settings</h2><div class="fields">
+<label>Page language<select id="lang"><option value="zh">Traditional Chinese</option><option value="ja">Japanese</option><option value="en">English</option></select></label>
+<label>Final page URL path<input id="path" value="New-Article/index.html" placeholder="Folder/index.html" autocomplete="off"></label>
+</div>
+<label>Source HTML file<input id="docx" type="file" accept=".html,.htm,.xhtml,text/html,application/xhtml+xml"></label>
+<label>Page title<input id="title" placeholder="Article title"></label></section>
+<section class="panel"><h2 style="font-size:17px;margin:0 0 12px">2. Generate and review</h2><div class="actions"><button id="generate" disabled>Generate preview</button><button id="publish" disabled>Approve &amp; Create Draft PR</button></div>
+<div id="status" role="status" aria-live="polite">Choose one HTML file. The generator transfers article content into the standard Awakenology page template. Publishing stays disabled until the target page is checked and a preview is generated.</div>
+<p class="hint">Approval creates a GitHub draft pull request. Nothing is deployed until you review and merge that PR.</p></section>
+<section class="panel"><h2 style="font-size:17px;margin:0 0 12px">3. Page preview</h2><iframe id="preview" title="Generated page preview" sandbox="allow-same-origin"></iframe></section>
+</main>
+<script>
+(()=>{'use strict';
+const $=s=>document.querySelector(s), lang=$('#lang'), path=$('#path'), file=$('#docx'), title=$('#title'), generate=$('#generate'), publish=$('#publish'), preview=$('#preview'), status=$('#status');
+let sourceFile=null, templateHtml='', generatedHtml='', baselineSha256='NEW', targetLoaded=false, edited=false;
+const templates={zh:'/與退化派對話8/index.html',ja:'/アインシュタイン協議百年催眠実験/index.html',en:'/Destruction-Occurs-in-an-Instant/index.html'};
+function say(s){status.textContent=s}
+function validPath(){const p=path.value.trim().replace(/^\/+|\/+$/g,'');return p&&/\.html?$/i.test(p)&&!p.split('/').some(x=>!x||x==='.'||x==='..'||x.startsWith('.'))?p:''}
+async function sha(text){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function controls(){generate.disabled=!(sourceFile&&validPath());publish.disabled=!(generatedHtml&&targetLoaded&&validPath())}
+async function loadTarget(){
+ targetLoaded=false;generatedHtml='';publish.disabled=true;baselineSha256='NEW';lang.disabled=false;templateHtml='';
+ const p=validPath();if(!p){say('Enter a valid final URL path ending in .html or index.html.');return}
+ say('Checking whether the final URL already exists…');
+ try{
+  const response=await fetch('https://raw.githubusercontent.com/shifter888ai/awakenology/main/'+p.split('/').map(encodeURIComponent).join('/'),{cache:'no-store'});
+  if(response.ok){const current=await response.text();if(!new DOMParser().parseFromString(current,'text/html').querySelector('.article'))throw Error('The existing target is not a standard article page.');baselineSha256=await sha(current);templateHtml=current;targetLoaded=true;const existingLang=new DOMParser().parseFromString(current,'text/html').documentElement.lang;if(existingLang==='ja'||existingLang==='en'||existingLang==='zh-Hant'||existingLang==='zh-CN'){lang.value=existingLang==='ja'?'ja':existingLang==='en'?'en':'zh';}lang.disabled=true;say('Existing page loaded. Publishing will replace this one page after a version check.')}
+  else if(response.status===404){baselineSha256='NEW';targetLoaded=true;templateHtml='';lang.disabled=false;say('New page path confirmed. A matching site template will be used.')}
+  else throw Error('GitHub returned HTTP '+response.status);
+ }catch(e){say('Could not check target: '+e.message);targetLoaded=false}
+ controls()
+}
+async function loadTemplate(){
+ if(templateHtml)return templateHtml;
+ const response=await fetch('https://raw.githubusercontent.com/shifter888ai/awakenology/main'+templates[lang.value],{cache:'no-store'});if(!response.ok)throw Error('Could not load the '+lang.options[lang.selectedIndex].text+' page template.');
+ return await response.text()
+}
+file.addEventListener('change',()=>{sourceFile=file.files&&file.files[0];generatedHtml='';publish.disabled=true;if(sourceFile&&!/\.(html?|xhtml)$/i.test(sourceFile.name)){sourceFile=null;say('Please choose an HTML .html, .htm, or .xhtml file.')}else say(sourceFile?'Ready to generate one page from '+sourceFile.name+'.':'Choose one HTML file.');controls()});
+path.addEventListener('change',loadTarget);path.addEventListener('blur',()=>{if(!targetLoaded)loadTarget()});
+lang.addEventListener('change',()=>{if(baselineSha256!=='NEW')return;templateHtml='';generatedHtml='';publish.disabled=true;controls()});
+title.addEventListener('input',()=>{if(generatedHtml)publish.disabled=true;});
+generate.addEventListener('click',async()=>{
+ if(!sourceFile||!validPath())return;
+ generate.disabled=true;publish.disabled=true;say('Converting the source document and building the page…');
+ try{
+  let contentHtml='', conversionNotes=[];
+  const sourceText=await sourceFile.text();
+  const sourceDoc=new DOMParser().parseFromString(sourceText,'text/html');
+  const sourceArticle=sourceDoc.querySelector('.article, article, main');
+  if(!sourceArticle)throw Error('The HTML file has no .article, article, or main content area. No conversion was made.');
+  if(sourceArticle.querySelector('script, iframe, object, embed'))throw Error('The HTML contains active embedded content (script, iframe, object, or embed). Remove it before converting.');
+  contentHtml=sourceArticle.innerHTML;
+  if(!contentHtml.trim())throw Error('The HTML content area is empty.');
+  const styleCount=sourceDoc.querySelectorAll('style').length;
+  if(styleCount)conversionNotes.push({message:styleCount+' source style block(s) are not copied into the standard template; inline formatting is preserved.'});
+  const media=[...sourceArticle.querySelectorAll('img[src],source[src],video[poster]')];
+  const relativeMedia=media.some(el=>{const attr=el.hasAttribute('poster')?'poster':'src';const v=el.getAttribute(attr)||'';return v&&!/^(?:[a-z]+:|\/\/|\/|data:|#)/i.test(v)});
+  if(relativeMedia)conversionNotes.push({message:'Relative media paths may need correction because the source HTML file location is not retained.'});
+  if(!contentHtml.trim())throw Error('No document content was found.');
+  let html=await loadTemplate();const parsed=new DOMParser().parseFromString(html,'text/html');
+  const article=parsed.querySelector('.article');if(!article)throw Error('Template has no article content area.');
+  article.innerHTML=contentHtml;
+  const heading=parsed.querySelector('main h1, h1');if(heading)heading.textContent=title.value.trim()||sourceFile.name.replace(/\.(?:html?|xhtml)$/i,'');
+  parsed.title=(title.value.trim()||sourceFile.name.replace(/\.(?:html?|xhtml)$/i,''))+' | Awakenology';
+  const canonical=parsed.querySelector('link[rel="canonical"]');
+  const rawFinalPath=validPath();
+  const finalPath=rawFinalPath.replace(/index\.html?$/i,'');
+  const canonicalUrl='https://awakenology.space/'+finalPath.split('/').filter(Boolean).map(encodeURIComponent).join('/')+(/index\.html?$/i.test(rawFinalPath)&&finalPath?'/':'');
+  if(canonical)canonical.href=canonicalUrl;
+  const og=parsed.querySelector('meta[property="og:url"]');if(og)og.content=canonicalUrl;
+  const desc=parsed.querySelector('meta[name="description"]');if(desc)desc.content=(title.value.trim()||sourceFile.name.replace(/\.(?:html?|xhtml)$/i,''))+'. Awakenology article.';
+  const ogTitle=parsed.querySelector('meta[property="og:title"]');if(ogTitle)ogTitle.content=parsed.title;
+  generatedHtml='<!doctype html>\n'+parsed.documentElement.outerHTML;
+  preview.srcdoc=generatedHtml;
+  edited=false;publish.disabled=!(targetLoaded&&validPath());
+  say('Preview ready. '+(conversionNotes.length?conversionNotes.length+' conversion note(s); check the page carefully. ':'')+'Review the page below, then click Approve & Publish.');
+ }catch(e){generatedHtml='';say('Generation failed: '+e.message)}finally{controls();generate.disabled=!(sourceFile&&validPath())}
+});
+publish.addEventListener('click',async()=>{
+ if(!generatedHtml||!targetLoaded)return;
+ if(!confirm('Create a GitHub draft pull request for this reviewed page? Nothing will be deployed until you review and merge the PR.'))return;
+ publish.disabled=true;generate.disabled=true;say('Creating the draft pull request…');
+ try{
+  const response=await fetch('/api/editor/create-draft-pr',{method:'POST',headers:{'content-type':'application/json','accept':'application/json'},body:JSON.stringify({path:validPath(),reviewedHtml:generatedHtml,baselineSha256})});
+  const data=await response.json().catch(()=>({}));if(!response.ok)throw Error(data.error||('Draft PR creation failed: HTTP '+response.status));
+  say('Draft PR #'+data.number+' created. Nothing has been deployed. ');
+  const a=document.createElement('a');a.href=data.pullRequestUrl;a.target='_blank';a.rel='noopener noreferrer';a.textContent='Open draft PR #'+data.number;a.style.color='inherit';status.append(a);
+  generatedHtml='';publish.disabled=true;
+ }catch(e){say('Could not create draft PR: '+e.message);controls()}finally{generate.disabled=!(sourceFile&&validPath())}
+});
+loadTarget();
+})();
+</script></body></html>
