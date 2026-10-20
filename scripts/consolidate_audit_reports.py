@@ -7,8 +7,13 @@ findings merely because the Worker may repair them at runtime.
 import argparse
 import csv
 import hashlib
+import sys
 from collections import Counter
 from pathlib import Path
+
+# Audit CSVs may contain serialized DOM/accessibility details larger than csv's
+# conservative default 128 KiB field limit.
+csv.field_size_limit(sys.maxsize)
 
 ROOT = Path(__file__).resolve().parents[1]
 INPUTS = {
