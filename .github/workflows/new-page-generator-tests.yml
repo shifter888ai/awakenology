@@ -94,7 +94,13 @@ jobs:
                !page.previewHtml.includes('REVIEW PREVIEW — NOT FOR PUBLICATION') ||
                !page.previewHtml.includes('class="theme-toggle"') || !page.previewHtml.includes('class="return-top"') ||
                !page.previewHtml.includes('hreflang="en"') || !page.previewHtml.includes('hreflang="ja"') ||
-               !page.previewHtml.includes('hreflang="zh-Hant"')) {
+               !page.previewHtml.includes('hreflang="zh-Hant"') ||
+               !page.previewHtml.includes('href="/English/"') || !page.previewHtml.includes('href="/Japanese/"') ||
+               !page.previewHtml.includes('href="/Chinese/"') || !page.previewHtml.includes('href="/ai-search/"') ||
+               !page.previewHtml.includes('mailto:contact@awakenology.org') || !page.previewHtml.includes('href="/Disclaimer/"') ||
+               !page.previewHtml.includes('addEventListener("pointerup"') ||
+               (page.previewHtml.match(/class="theme-toggle"/g) || []).length!==1 ||
+               (page.previewHtml.match(/<h1\b/g) || []).length!==1) {
               console.error('Invalid complete review-only page preview:',lang);
               process.exit(1);
             }
