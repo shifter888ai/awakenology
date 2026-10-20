@@ -62,8 +62,11 @@ test("generated shell includes responsive article styling and return-to-top cont
   assert.match(html, /class="return-top"/);
   assert.match(html, /onclick="window\.scrollTo\(0,0\)"/, "return-to-top uses a direct native click handler");
   assert.match(html, /onclick="var r=document\.documentElement/, "theme control has a direct native click handler");
+  assert.match(html, /ontouchstart="event\.preventDefault\(\);this\.click\(\)"/, "floating controls explicitly forward touch input to click activation");
   assert.match(html, /class="cn-variant-toggle"/, "Traditional Chinese preview exposes a variant toggle");
   assert.match(html, /id="awakenology-cn-toggle"/);
+  assert.match(html, /繁體中文／简体中文/);
+  assert.match(html, /visibility:visible!important/);
   assert.match(html, /touch-action:manipulation/);
   assert.match(html, /\.theme-toggle\{position:fixed/);
   assert.match(html, /\.return-top\{position:fixed/);
