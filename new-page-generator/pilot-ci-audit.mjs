@@ -4,6 +4,10 @@ import JSZip from 'jszip';
 import {inspectDocxSourceMap} from './inspect-docx-source-map.mjs';
 import {segmentTrilingualDocxSource} from './segment-docx-languages.mjs';
 import {segmentConvertedHtml} from './segment-converted-html.mjs';
+import {segmentRichContentInventory} from './segment-rich-content.mjs';
+import {inspectRenderedRichContent} from './inspect-rendered-rich-content.mjs';
+import {compareRichContent} from './compare-rich-content.mjs';
+import {parse5DomParser} from './parse5-dom-parser.mjs';
 import {inspectDocxAssets} from './inspect-docx-assets.mjs';
 import {inspectDocxImagePlacement} from './inspect-docx-image-placement.mjs';
 import {inspectDocxRichContent} from './inspect-docx-rich-content.mjs';
@@ -261,10 +265,57 @@ if(typeof conversionCandidate.previewHtml==='string') {
     languageHtmlSegmentation={ok:false,errors:['Converted HTML segmentation exception: '+error.message],segments:[]};
   }
 }
-const report = {sourcePath, byteLength:buffer.length, sha256, diagnostic, stages, languageSegmentation, languageHtmlSegmentation,
+let languageRichComparison={ok:false,errors:['Language-local rich-content comparison was not run.'],segments:[]};
+try {
+  const [sourceRich,reviewText]=await Promise.all([
+    inspectDocxRichContent(buffer),
+    readFile('pilot-human-review.json','utf8').catch(()=>null)
+  ]);
+  const review=reviewText?JSON.parse(reviewText):null;
+  const reviewMatchesSource=Boolean(review?.sourceSha256===sha256&&review?.visualReview?.approved===true&&review?.sourcePath===sourcePath);
+  const htmlSplit=typeof conversionCandidate.previewHtml==='string'
+    ? segmentConvertedHtml(correctPilotPreview(conversionCandidate.previewHtml))
+    : {ok:false,errors:['Converted HTML preview unavailable.'],segments:[]};
+  if(!sourceRich.ok) languageRichComparison.errors=sourceRich.errors;
+  else if(!languageSegmentation.ok) languageRichComparison.errors=languageSegmentation.errors;
+  else if(!htmlSplit.ok) languageRichComparison.errors=htmlSplit.errors;
+  else {
+    const segments=[];
+    for(let i=0;i<languageSegmentation.segments.length;i++) {
+      const sourceRange=languageSegmentation.segments[i];
+      const htmlRange=htmlSplit.segments[i];
+      if(sourceRange.language!==htmlRange.language) {
+        segments.push({language:sourceRange.language,ok:false,errors:['Source/HTML language segment order mismatch.'],issues:[]});
+        continue;
+      }
+      const sourceSegment=segmentRichContentInventory(sourceRich,sourceRange);
+      const rendered=inspectRenderedRichContent(htmlRange.html,parse5DomParser);
+      const comparison=sourceSegment.ok&&rendered.ok
+        ? compareRichContent(sourceSegment,rendered,{floatingImageReviewApproved:reviewMatchesSource,imageAltTextBySrc:reviewMatchesSource?(review.imageAltTextBySrc??{}):{}})
+        : {ok:false,issues:[]};
+      const sourceParagraphTexts=Array.from({length:sourceSegment.paragraphCount??0},(_,index)=>sourceSegment.runs.filter(run=>run.paragraphIndex===index).map(run=>run.text).join(''));
+      const renderedParagraphTexts=Array.from({length:rendered.paragraphCount??0},(_,index)=>rendered.runs.filter(run=>run.paragraphIndex===index).map(run=>run.text).join(''));
+      const paragraphTextMatches=JSON.stringify(sourceParagraphTexts)===JSON.stringify(renderedParagraphTexts);
+      segments.push({
+        language:sourceRange.language,
+        ok:sourceSegment.ok&&rendered.ok&&comparison.ok&&paragraphTextMatches,
+        paragraphTextMatches,
+        source:{paragraphCount:sourceSegment.paragraphCount,runCount:sourceSegment.runs.length,imageCount:sourceSegment.images.length,lineBreakCount:sourceSegment.lineBreaks.length},
+        rendered:{paragraphCount:rendered.paragraphCount,runCount:rendered.runs.length,imageCount:rendered.images.length,lineBreakCount:rendered.lineBreaks.length},
+        errors:rendered.errors,
+        issueCount:comparison.issues.length,
+        issues:comparison.issues.slice(0,30)
+      });
+    }
+    languageRichComparison={ok:segments.every(segment=>segment.ok),errors:[],segments};
+  }
+} catch(error) {
+  languageRichComparison={ok:false,errors:['Language-local rich-content comparison exception: '+error.message],segments:[]};
+}
+const report = {sourcePath, byteLength:buffer.length, sha256, diagnostic, stages, languageSegmentation, languageHtmlSegmentation, languageRichComparison,
   conversionPreview:{publishable:false,previewAvailable:typeof conversionCandidate.previewHtml==='string',errors:conversionCandidate.errors},
   pilotApproved:false,
-  note:'Diagnostic only. Language ranges and converted preview fragments are inventoried for review; trilingual output remains unapproved and non-publishable.'};
+  note:'Diagnostic only. Language ranges, converted preview fragments, and per-language rich-content comparisons are review evidence; trilingual output remains unapproved and non-publishable.'};
 await mkdir('pilot-artifacts',{recursive:true});
 await writeFile(outputPath, JSON.stringify(report,null,2)+'\n');
 
