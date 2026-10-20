@@ -13,7 +13,7 @@ class ConsolidateAuditReportsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             report = Path(directory) / "large.csv"
             large_value = "x" * 200_000
-            report.write_text("detail\\n" + large_value + "\\n", encoding="utf-8")
+            report.write_text("detail\n" + large_value + "\n", encoding="utf-8")
             rows = AUDIT.read_rows(report)
         self.assertEqual(rows[0]["detail"], large_value)
 
