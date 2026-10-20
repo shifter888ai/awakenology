@@ -38,7 +38,29 @@ original=text;filename=name;loadedRepoPath=sourcePath;githubBaseline=null;baseli
 frame.onload=()=>{const a=article();if(!a){setStatus('Could not load article.');return}a.contentEditable='true';a.spellcheck=false;loaded=true;review.disabled=false;controls.forEach(x=>x.disabled=false);setStatus(fullPageReady?'Editing '+filename+'. Full-page header/footer detected; review will preserve the surrounding page.':'Local HTML loaded. Content area detected automatically; review the full-page preview before downloading.')};
 frame.srcdoc=text;return true;
 }
-file.addEventListener('change',async()=>{const f=file.files?.[0];if(!f)return;const targetPath=document.querySelector('#githubPath').value.trim().replace(/^\/+|\/+$/g,'');const validPath=targetPath&&/\.html?$/i.test(targetPath)&&!targetPath.split('/').some(part=>!part||part==='.'||part==='..');loadHtmlText(await f.text(),f.name,validPath?targetPath:'',true);if(!validPath)setStatus('Local HTML loaded. Enter its exact repository-relative GitHub path above, then review the page. The PR flow will verify that the original file matches main before creating a draft.');});
+file.addEventListener('change',async()=>{
+const f=file.files?.[0];if(!f)return;
+const pathInput=document.querySelector('#githubPath');
+let targetPath=pathInput.value.trim();
+try{if(/^https?:\/\//i.test(targetPath)){const u=new URL(targetPath);if(u.hostname==='awakenology.space'||u.hostname==='www.awakenology.space')targetPath=decodeURIComponent(u.pathname).replace(/^\/+|\/+$/g,'');}}catch{}
+targetPath=targetPath.replace(/^\/+|\/+$/g,'');
+if(targetPath&&!/\.html?$/i.test(targetPath))targetPath+='/index.html';
+const validPath=targetPath&&/\.html?$/i.test(targetPath)&&!targetPath.split('/').some(part=>!part||part==='.'||part==='..');
+if(validPath)pathInput.value=targetPath;
+loadHtmlText(await f.text(),f.name,validPath?targetPath:'',true);
+if(!validPath){githubBaseline=null;setStatus('Local HTML loaded. Enter the target repository path (for example New-Article/index.html), then change the field to load its GitHub baseline before reviewing.');return;}
+const request=++baselineRequest;githubBaseline=null;updatePublishAvailability();setStatus('Local HTML loaded. Checking GitHub baseline for '+targetPath+'…');
+try{
+const url='https://raw.githubusercontent.com/shifter888ai/awakenology/main/'+targetPath.split('/').map(encodeURIComponent).join('/');
+const response=await fetch(url,{cache:'no-store'});
+if(!response.ok)throw new Error('GitHub returned HTTP '+response.status);
+const baseline=await response.text();
+if(request!==baselineRequest)return;
+if(!new DOMParser().parseFromString(baseline,'text/html').querySelector('.article'))throw new Error('The GitHub target is not an article HTML page.');
+githubBaseline=baseline;setStatus('Local HTML loaded and GitHub baseline verified for '+targetPath+'. Click Review, then Create draft PR.');
+updatePublishAvailability();
+}catch(err){if(request===baselineRequest){githubBaseline=null;updatePublishAvailability();setStatus('Local HTML loaded, but publishing baseline could not be verified for '+targetPath+': '+(err?.message||String(err))+'. Check the exact existing repository path.');}}
+});
 document.querySelector('#githubPath').addEventListener('change',async()=>{if(!loaded)return;const p=document.querySelector('#githubPath').value.trim().replace(/^\/+|\/+$/g,'');if(!p||! /\.html?$/i.test(p)||p.split('/').some(part=>!part||part==='.'||part==='..')){loadedRepoPath='';githubBaseline=null;updatePublishAvailability();return}loadedRepoPath=p;const request=++baselineRequest;githubBaseline=null;updatePublishAvailability();setStatus('Checking the current GitHub baseline for '+p+'…');try{const url='https://raw.githubusercontent.com/shifter888ai/awakenology/main/'+p.split('/').map(encodeURIComponent).join('/');const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw new Error('GitHub returned HTTP '+response.status);const baseline=await response.text();if(request!==baselineRequest)return;if(!new DOMParser().parseFromString(baseline,'text/html').querySelector('.article'))throw new Error('The GitHub target is not an article HTML page.');githubBaseline=baseline;setStatus('GitHub baseline loaded for '+p+'. Review the local HTML; the PR action will verify that main has not changed since this check.');updatePublishAvailability()}catch(err){if(request!==baselineRequest)return;loadedRepoPath='';githubBaseline=null;setStatus('Could not establish a safe GitHub baseline: '+(err?.message||String(err)));updatePublishAvailability()}});
 document.querySelector('#loadGitHub').addEventListener('click',async()=>{
 const rawPath=document.querySelector('#githubPath').value.trim().replace(/^\/+|\/+$/g,'');
