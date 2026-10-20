@@ -47,20 +47,17 @@ test("blocks missing reviewed shell component", () => {
   assert.throws(() => renderStaticShell(input), /Approved shell components/);
 });
 
-test("generated shell defaults to dark mode and includes one accessible theme toggle", () => {
+test("generated shell defaults to dark mode and removes the nonfunctional per-page theme toggle", () => {
   const html = renderStaticShell(fixture());
   assert.match(html, /--bg:#0D0F12/);
   assert.match(html, /data-aw-theme="dark"/);
-  assert.match(html, /class="theme-toggle"/);
-  assert.match(html, /aria-label="Switch to light theme"/);
-  assert.equal((html.match(/class="theme-toggle"/g) ?? []).length, 1);
+  assert.doesNotMatch(html, /class="theme-toggle"|awakenology-theme-toggle|Switch to light theme/);
 });
 test("generated shell leaves global floating controls to the shared template and Worker", () => {
   const html = renderStaticShell(fixture());
   assert.ok(html.includes("@media(max-width:700px)"));
   assert.ok(html.includes(".article img{max-width:100%;height:auto}"));
-  assert.ok(html.includes('class="theme-toggle"'), "shared header retains its single theme control");
-  assert.equal((html.match(/class="theme-toggle"/g) ?? []).length, 1);
+  assert.doesNotMatch(html, /class="theme-toggle"|awakenology-theme-toggle/, "global Worker exclusively owns the theme control");
   assert.ok(!html.includes('class="return-top"') && !html.includes('id="awakenology-return-top"'), "page shell must not duplicate global return-to-top");
   assert.ok(!html.includes("cn-variant-toggle") && !html.includes("awakenology-cn-toggle") && !html.includes("awakenologyConvertChinese"), "page shell must not duplicate global Chinese variant control");
   assert.ok(!html.includes("window.scrollTo") && !html.includes("ontouchstart=") && !html.includes("visibility:visible!important"), "page shell must not ship per-page floating-control handlers or overrides");
