@@ -14,9 +14,9 @@
 </div>
 <label>Word document (.docx)<input id="docx" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"></label>
 <label>Page title<input id="title" placeholder="Article title"></label></section>
-<section class="panel"><h2 style="font-size:17px;margin:0 0 12px">2. Generate and review</h2><div class="actions"><button id="generate" disabled>Generate preview</button><button id="publish" disabled>Approve &amp; Publish</button></div>
+<section class="panel"><h2 style="font-size:17px;margin:0 0 12px">2. Generate and review</h2><div class="actions"><button id="generate" disabled>Generate preview</button><button id="publish" disabled>Approve &amp; Create Draft PR</button></div>
 <div id="status" role="status" aria-live="polite">Choose one Word document. The generator preserves text, headings, lists, tables, links and basic emphasis. Publishing stays disabled until the target page is checked and a preview is generated.</div>
-<p class="hint">Publishing writes only the selected page to the live site. Existing pages are protected by a version check. This is direct publishing, not a pull request.</p></section>
+<p class="hint">Approval creates a GitHub draft pull request. Nothing is deployed until you review and merge that PR. This is direct publishing, not a pull request.</p></section>
 <section class="panel"><h2 style="font-size:17px;margin:0 0 12px">3. Page preview</h2><iframe id="preview" title="Generated page preview" sandbox="allow-same-origin"></iframe></section>
 </main>
 <script src="https://unpkg.com/mammoth@1.9.0/mammoth.browser.min.js"></script>
@@ -79,15 +79,15 @@ generate.addEventListener('click',async()=>{
 });
 publish.addEventListener('click',async()=>{
  if(!generatedHtml||!targetLoaded)return;
- if(!confirm('Publish this single page to the live Awakenology website?'))return;
- publish.disabled=true;generate.disabled=true;say('Publishing the reviewed page…');
+ if(!confirm('Create a GitHub draft pull request for this reviewed page? Nothing will be deployed until you review and merge the PR.'))return;
+ publish.disabled=true;generate.disabled=true;say('Creating the draft pull request…');
  try{
-  const response=await fetch('/api/editor/publish-page',{method:'POST',headers:{'content-type':'application/json','accept':'application/json'},body:JSON.stringify({path:validPath(),html:generatedHtml,baselineSha256})});
-  const data=await response.json().catch(()=>({}));if(!response.ok)throw Error(data.error||('Publish failed: HTTP '+response.status));
-  say('Published successfully. Commit: '+(data.commit||'created')+'. Live page: '+data.url+' (deployment may take a minute).');
-  const a=document.createElement('a');a.href=data.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent='Open published page';a.style.color='inherit';status.append(' ');status.append(a);
-  baselineSha256=await sha(generatedHtml);targetLoaded=true;generatedHtml='';publish.disabled=true;
- }catch(e){say('Could not publish: '+e.message);controls()}finally{generate.disabled=!(docxFile&&validPath())}
+  const response=await fetch('/api/editor/create-draft-pr',{method:'POST',headers:{'content-type':'application/json','accept':'application/json'},body:JSON.stringify({path:validPath(),reviewedHtml:generatedHtml,baselineSha256})});
+  const data=await response.json().catch(()=>({}));if(!response.ok)throw Error(data.error||('Draft PR creation failed: HTTP '+response.status));
+  say('Draft PR #'+data.number+' created. Nothing has been deployed. ');
+  const a=document.createElement('a');a.href=data.pullRequestUrl;a.target='_blank';a.rel='noopener noreferrer';a.textContent='Open draft PR #'+data.number;a.style.color='inherit';status.append(a);
+  generatedHtml='';publish.disabled=true;
+ }catch(e){say('Could not create draft PR: '+e.message);controls()}finally{generate.disabled=!(docxFile&&validPath())}
 });
 loadTarget();
 })();
