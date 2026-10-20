@@ -42,7 +42,7 @@ async function loadTarget(){
 }
 async function loadTemplate(){
  if(templateHtml)return templateHtml;
- const response=await fetch(templates[lang.value],{cache:'no-store'});if(!response.ok)throw Error('Could not load the '+lang.options[lang.selectedIndex].text+' page template.');
+ const response=await fetch('https://raw.githubusercontent.com/shifter888ai/awakenology/main'+templates[lang.value],{cache:'no-store'});if(!response.ok)throw Error('Could not load the '+lang.options[lang.selectedIndex].text+' page template.');
  return await response.text()
 }
 file.addEventListener('change',()=>{docxFile=file.files&&file.files[0];generatedHtml='';publish.disabled=true;if(docxFile&&!/\.docx$/i.test(docxFile.name)){docxFile=null;say('Please choose a .docx Word document.')}else say(docxFile?'Ready to generate one page from '+docxFile.name+'.':'Choose one Word document.');controls()});
