@@ -28,11 +28,15 @@ jobs:
             mkdir -p "three-page-test/$lang"
             cp "/tmp/pilot/review-pages/$lang.html" "three-page-test/$lang/index.html"
             python3 - "$lang" <<'PY'
-          import pathlib,sys
+          import pathlib,sys,re
           p=pathlib.Path('three-page-test')/sys.argv[1]/'index.html'
           s=p.read_text(encoding='utf-8')
           assert '<head' in s.lower() and '</head>' in s.lower()
-          import re
+          # The production Worker injects the canonical circle-A into a.brand.
+          # Remove page-authored SVG logos inside that link to avoid duplicates.
+          def clean_brand(m):
+              return re.sub(r'<svg\b[^>]*>.*?</svg\s*>','',m.group(0),flags=re.I|re.S)
+          s=re.sub(r'<a\b(?=[^>]*\bclass=["\'][^"\']*\bbrand\b[^"\']*["\'])[^>]*>.*?</a\s*>',clean_brand,s,flags=re.I|re.S)
           s=re.sub(r'(<head\b[^>]*>)',r'\1<meta name="robots" content="noindex,nofollow,noarchive">',s,count=1,flags=re.I)
           p.write_text(s,encoding='utf-8')
           PY
