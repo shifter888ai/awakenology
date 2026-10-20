@@ -99,7 +99,7 @@ jobs:
                !page.previewHtml.includes('href="/Chinese/"') || !page.previewHtml.includes('href="/ai-search/"') ||
                !page.previewHtml.includes('mailto:contact@awakenology.org') || !page.previewHtml.includes('href="/Disclaimer/"') ||
                !page.previewHtml.includes('onclick="var r=document.documentElement') ||
-               !page.previewHtml.includes("onclick=\\"window.scrollTo({top:0,behavior:'smooth'})\\"") ||
+               !page.previewHtml.includes('onclick="window.scrollTo({top:0,behavior:\\'smooth\\'})"') ||
                !page.previewHtml.includes('ontouchstart="event.preventDefault();this.click()"') ||
                !page.previewHtml.includes('visibility:visible!important') ||
                (lang==='zh-Hant' && !page.previewHtml.includes('繁體中文／简体中文')) ||
