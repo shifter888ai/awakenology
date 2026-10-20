@@ -55,23 +55,16 @@ test("generated shell defaults to dark mode and includes one accessible theme to
   assert.match(html, /aria-label="Switch to light theme"/);
   assert.equal((html.match(/class="theme-toggle"/g) ?? []).length, 1);
 });
-test("generated shell includes responsive article styling and return-to-top control", () => {
+test("generated shell leaves global floating controls to the shared template and Worker", () => {
   const html = renderStaticShell(fixture());
-  assert.match(html, /@media\(max-width:700px\)/);
-  assert.match(html, /\.article img\{max-width:100%;height:auto\}/);
-  assert.match(html, /class="return-top"/);
-  assert.match(html, /onclick="window\.scrollTo\(\{top:0,behavior:'smooth'\}\)"/, "return-to-top uses a direct native click handler");
-  assert.match(html, /onclick="var r=document\.documentElement/, "theme control has a direct native click handler");
-  assert.match(html, /ontouchstart="event\.preventDefault\(\);this\.click\(\)"/, "floating controls explicitly forward touch input to click activation");
-  assert.match(html, /class="cn-variant-toggle"/, "Traditional Chinese preview exposes a variant toggle");
-  assert.match(html, /id="awakenology-cn-toggle"/);
-  assert.match(html, /繁體中文／简体中文/);
-  assert.match(html, /visibility:visible!important/);
-  assert.match(html, /touch-action:manipulation/);
-  assert.match(html, /\.theme-toggle\{position:fixed/);
-  assert.match(html, /\.return-top\{position:fixed/);
-  assert.match(html, /\.reddit-icon svg\{display:block;width:28px;height:28px/);
-  assert.match(html, /pointer-events:auto/);
+  assert.match(html, /@media\\(max-width:700px\\)/);
+  assert.match(html, /\\.article img\\{max-width:100%;height:auto\\}/);
+  assert.match(html, /class="theme-toggle"/, "shared header retains its single theme control");
+  assert.equal((html.match(/class="theme-toggle"/g) ?? []).length, 1);
+  assert.doesNotMatch(html, /class="return-top"|id="awakenology-return-top"/, "page shell must not duplicate global return-to-top");
+  assert.doesNotMatch(html, /cn-variant-toggle|awakenology-cn-toggle|awakenologyConvertChinese/, "page shell must not duplicate global Chinese variant control");
+  assert.doesNotMatch(html, /window\\.scrollTo|ontouchstart=|visibility:visible!important/, "page shell must not ship per-page floating-control handlers or overrides");
+  assert.match(html, /\\.reddit-icon svg\\{display:block;width:28px;height:28px/);
 });
 test("generated shell requires a real header with brand and navigation", () => {
   const input = fixture(); input.approvedHeader = '<header class="site-header">Header only</header>';
