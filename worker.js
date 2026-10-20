@@ -220,37 +220,47 @@ async function createReviewedDraftPR(request, env) {
       !/\.html?$/i.test(path) || path.split("/").some(part => !part || part === "." || part === ".." || part.startsWith("."))) {
     return jsonResponse({ error: "Invalid repository-relative article path." }, 400);
   }
-  if (typeof reviewedHtml !== "string" || reviewedHtml.length > 60000 || !/<html[\s>]/i.test(reviewedHtml) || !/class\s*=\s*["'][^"']*\barticle\b/i.test(reviewedHtml)) {
-    return jsonResponse({ error: "Reviewed HTML is missing the full document or .article element, or exceeds the size limit." }, 400);
+  if (typeof reviewedHtml !== "string" || reviewedHtml.length > 1500000 || !/<html[\s>]/i.test(reviewedHtml) || !/class\s*=\s*["'][^"']*\barticle\b/i.test(reviewedHtml)) {
+    return jsonResponse({ error: "Reviewed HTML is missing the full document or .article element, or exceeds the 1.5 MB limit." }, 400);
   }
-  if (typeof baselineSha256 !== "string" || !/^[a-f0-9]{64}$/i.test(baselineSha256)) return jsonResponse({ error: "Missing valid baseline fingerprint." }, 400);
+  if (typeof baselineSha256 !== "string" || !(baselineSha256 === "NEW" || /^[a-f0-9]{64}$/i.test(baselineSha256))) return jsonResponse({ error: "Missing valid baseline fingerprint." }, 400);
   try {
     const token = await createGitHubInstallationToken(env);
     const encodedPath = path.split("/").map(encodeURIComponent).join("/");
-    const current = await githubApi("/repos/" + GITHUB_REPO + "/contents/" + encodedPath + "?ref=main", token);
-    if (current.type !== "file" || !current.content || current.encoding !== "base64") return jsonResponse({ error: "GitHub did not return a supported HTML file." }, 409);
-    const currentHtml = decodeGitHubFile(current.content);
-    if (reviewedHtml === currentHtml) return jsonResponse({ error: "The reviewed HTML is identical to the current GitHub file. No pull request was created because there are no file changes." }, 409);
-    if (await sha256Hex(currentHtml) !== baselineSha256.toLowerCase()) {
-      return jsonResponse({ error: "The article on main has changed since it was loaded. Reload the latest version, reapply your edits, and review again." }, 409);
+    const apiPath = "/repos/" + GITHUB_REPO + "/contents/" + encodedPath + "?ref=main";
+    const getResponse = await fetch("https://api.github.com" + apiPath, {
+      headers: { authorization: "Bearer " + token, accept: "application/vnd.github+json", "x-github-api-version": "2022-11-28", "user-agent": "Awakenology-Private-Editor" }
+    });
+    let current = null;
+    if (getResponse.ok) current = await getResponse.json();
+    else if (getResponse.status !== 404) {
+      const problem = await getResponse.json().catch(() => ({}));
+      return jsonResponse({ error: "Could not check the target page: " + (problem.message || getResponse.status) }, 502);
+    }
+    if (baselineSha256 === "NEW" && current) return jsonResponse({ error: "The target page now exists on main. Reload it and review the replacement before creating a draft PR." }, 409);
+    if (baselineSha256 !== "NEW" && !current) return jsonResponse({ error: "The target page no longer exists on main. Reload and review it before creating a draft PR." }, 409);
+    if (current) {
+      if (current.type !== "file" || current.encoding !== "base64" || !current.content) return jsonResponse({ error: "The target is not a supported text file." }, 409);
+      const currentHtml = decodeGitHubFile(current.content);
+      if (reviewedHtml === currentHtml) return jsonResponse({ error: "There are no file changes to submit." }, 409);
+      if (await sha256Hex(currentHtml) !== baselineSha256.toLowerCase()) return jsonResponse({ error: "The target page changed on main after it was loaded. Reload it and review again." }, 409);
     }
     const mainRef = await githubApi("/repos/" + GITHUB_REPO + "/git/ref/heads/main", token);
     const slug = path.replace(/\.html?$/i, "").split("/").map(part => part.replace(/[^A-Za-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "")).filter(Boolean).join("-").slice(-45) || "article";
-    const branch = "visual-editor/" + new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14) + "-" + crypto.randomUUID().slice(0, 8) + "-" + slug;
+    const branch = "page-generator/" + new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14) + "-" + crypto.randomUUID().slice(0, 8) + "-" + slug;
     await githubApi("/repos/" + GITHUB_REPO + "/git/refs", token, { method: "POST", body: JSON.stringify({ ref: "refs/heads/" + branch, sha: mainRef.object.sha }) });
-    await githubApi("/repos/" + GITHUB_REPO + "/contents/" + encodedPath, token, {
-      method: "PUT",
-      body: JSON.stringify({ message: "Edit article via private visual editor: " + path, content: toBase64(new TextEncoder().encode(reviewedHtml)), sha: current.sha, branch })
-    });
+    const payload = { message: (current ? "Update generated page: " : "Add generated page: ") + path, content: toBase64(new TextEncoder().encode(reviewedHtml)), branch };
+    if (current) payload.sha = current.sha;
+    await githubApi("/repos/" + GITHUB_REPO + "/contents/" + encodedPath, token, { method: "PUT", body: JSON.stringify(payload) });
     const pr = await githubApi("/repos/" + GITHUB_REPO + "/pulls", token, {
       method: "POST",
       body: JSON.stringify({
-        title: "Edit article: " + path,
+        title: (current ? "Update page: " : "Add page: ") + path,
         head: branch,
         base: "main",
         draft: true,
         maintainer_can_modify: true,
-        body: "## Summary\nReviewed article edit created with the Awakenology private visual editor.\n\n- Article: " + path + "\n- Full-page review and text-difference checks completed in the editor\n- Draft only: inspect the rendered page and diff before merging\n\nThis change does not deploy until the PR is merged."
+        body: "## Summary\nGenerated page submitted through the Awakenology page generator.\n\n- Page: " + path + "\n- Preview reviewed before submission\n- Draft only: inspect the rendered page and diff before merging\n\nThis change does not deploy until the PR is merged."
       })
     });
     return jsonResponse({ ok: true, number: pr.number, pullRequestUrl: pr.html_url, branch });
@@ -258,7 +268,6 @@ async function createReviewedDraftPR(request, env) {
     return jsonResponse({ error: error && error.message ? error.message : "Could not create the draft pull request." }, 502);
   }
 }
-
 
 async function publishReviewedPage(request, env) {
   if (request.method !== "POST") return jsonResponse({ error: "Method not allowed." }, 405);
