@@ -57,14 +57,14 @@ test("generated shell defaults to dark mode and includes one accessible theme to
 });
 test("generated shell leaves global floating controls to the shared template and Worker", () => {
   const html = renderStaticShell(fixture());
-  assert.match(html, /@media\\(max-width:700px\\)/);
-  assert.match(html, /\\.article img\\{max-width:100%;height:auto\\}/);
-  assert.match(html, /class="theme-toggle"/, "shared header retains its single theme control");
+  assert.ok(html.includes("@media(max-width:700px)"));
+  assert.ok(html.includes(".article img{max-width:100%;height:auto}"));
+  assert.ok(html.includes('class="theme-toggle"'), "shared header retains its single theme control");
   assert.equal((html.match(/class="theme-toggle"/g) ?? []).length, 1);
-  assert.doesNotMatch(html, /class="return-top"|id="awakenology-return-top"/, "page shell must not duplicate global return-to-top");
-  assert.doesNotMatch(html, /cn-variant-toggle|awakenology-cn-toggle|awakenologyConvertChinese/, "page shell must not duplicate global Chinese variant control");
-  assert.doesNotMatch(html, /window\\.scrollTo|ontouchstart=|visibility:visible!important/, "page shell must not ship per-page floating-control handlers or overrides");
-  assert.match(html, /\\.reddit-icon svg\\{display:block;width:28px;height:28px/);
+  assert.ok(!html.includes('class="return-top"') && !html.includes('id="awakenology-return-top"'), "page shell must not duplicate global return-to-top");
+  assert.ok(!html.includes("cn-variant-toggle") && !html.includes("awakenology-cn-toggle") && !html.includes("awakenologyConvertChinese"), "page shell must not duplicate global Chinese variant control");
+  assert.ok(!html.includes("window.scrollTo") && !html.includes("ontouchstart=") && !html.includes("visibility:visible!important"), "page shell must not ship per-page floating-control handlers or overrides");
+  assert.ok(html.includes(".reddit-icon svg{display:block;width:28px;height:28px"));
 });
 test("generated shell requires a real header with brand and navigation", () => {
   const input = fixture(); input.approvedHeader = '<header class="site-header">Header only</header>';
