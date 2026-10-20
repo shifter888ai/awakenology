@@ -1,0 +1,45 @@
+name: Three-page isolated preview
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Download tested three-page artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download 39357870597 --repo shifter888ai/awakenology --name trilingual-docx-pilot-audit --dir /tmp/pilot
+          mkdir -p /tmp/awakenology-three-page-preview/en /tmp/awakenology-three-page-preview/ja /tmp/awakenology-three-page-preview/zh-Hant
+          cp /tmp/pilot/review-pages/en.html /tmp/awakenology-three-page-preview/en/index.html
+          cp /tmp/pilot/review-pages/ja.html /tmp/awakenology-three-page-preview/ja/index.html
+          cp /tmp/pilot/review-pages/zh-Hant.html /tmp/awakenology-three-page-preview/zh-Hant/index.html
+          cp worker.js /tmp/awakenology-three-page-preview/worker.js
+          cat > /tmp/awakenology-three-page-preview/wrangler.jsonc <<'EOF'
+          {
+            "name": "awakenology-three-page-preview",
+            "compatibility_date": "2026-09-30",
+            "main": "./worker.js",
+            "assets": {
+              "directory": ".",
+              "binding": "ASSETS",
+              "run_worker_first": true
+            }
+          }
+          EOF
+      - name: Deploy isolated preview Worker
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: /tmp/awakenology-three-page-preview
+          command: deploy
+          wranglerVersion: "4.147.0"
