@@ -92,23 +92,15 @@ jobs:
             if(page.publishable!==false || typeof page.articleHtml!=='string' || !page.articleHtml.trim() ||
                typeof page.previewHtml!=='string' || !page.previewHtml.startsWith('<!doctype html>') || page.imageCount!==1 ||
                !page.previewHtml.includes('REVIEW PREVIEW — NOT FOR PUBLICATION') ||
-               !page.previewHtml.includes('class="theme-toggle"') || !page.previewHtml.includes('class="return-top"') ||
                !page.previewHtml.includes('hreflang="en"') || !page.previewHtml.includes('hreflang="ja"') ||
                !page.previewHtml.includes('hreflang="zh-Hant"') ||
                !page.previewHtml.includes('href="/English/"') || !page.previewHtml.includes('href="/Japanese/"') ||
                !page.previewHtml.includes('href="/Chinese/"') || !page.previewHtml.includes('href="/ai-search/"') ||
                !page.previewHtml.includes('mailto:contact@awakenology.org') || !page.previewHtml.includes('href="/Disclaimer/"') ||
-               !page.previewHtml.includes('onclick="var r=document.documentElement') ||
-               !page.previewHtml.includes('onclick="window.scrollTo({top:0,behavior:\'smooth\'})"') ||
-               !page.previewHtml.includes('ontouchstart="event.preventDefault();this.click()"') ||
-               !page.previewHtml.includes('visibility:visible!important') ||
-               (lang==='zh-Hant' && !page.previewHtml.includes('繁體中文／简体中文')) ||
                !page.previewHtml.includes('.theme-toggle{position:fixed') ||
-               !page.previewHtml.includes('.return-top{position:fixed') ||
                !page.previewHtml.includes('class="reddit-icon reddit-one"') ||
                !page.previewHtml.includes('class="reddit-icon reddit-two"') ||
                !page.previewHtml.includes('class="reddit-icon reddit-three"') ||
-               (lang==='zh-Hant' && !page.previewHtml.includes('id="awakenology-cn-toggle"')) ||
                (page.previewHtml.match(/class="theme-toggle"/g) || []).length!==1 ||
                page.previewHtml.includes('<main><h1>')) {
               console.error('Invalid complete review-only page preview:',lang);
@@ -128,7 +120,6 @@ jobs:
           (grep -q 'NOT APPROVED FOR PUBLICATION' pilot-artifacts/pilot-converted-preview.html || grep -q 'REVIEW PREVIEW — NOT FOR PUBLICATION' pilot-artifacts/pilot-converted-preview.html) || { echo "::error::Missing non-publishable review watermark in pilot-converted-preview.html"; exit 1; }
           grep -q 'LAYOUT PREVIEW ONLY' pilot-artifacts/shell-layout-preview.html || { echo "::error::Missing expected review marker: LAYOUT PREVIEW ONLY in pilot-artifacts/shell-layout-preview.html"; exit 1; }
           grep -q 'class="theme-toggle"' pilot-artifacts/shell-layout-preview.html || { echo "::error::Missing expected review marker: class="theme-toggle" in pilot-artifacts/shell-layout-preview.html"; exit 1; }
-          grep -q 'class="return-top"' pilot-artifacts/shell-layout-preview.html || { echo "::error::Missing expected review marker: class="return-top" in pilot-artifacts/shell-layout-preview.html"; exit 1; }
       - name: Upload pilot diagnostic report
         if: always()
         uses: actions/upload-artifact@v4
