@@ -42,6 +42,8 @@ file.addEventListener('change',async()=>{
 const f=file.files?.[0];if(!f)return;
 const pathInput=document.querySelector('#githubPath');
 let targetPath=pathInput.value.trim();
+// Convenient test default; users can enter another repository path before loading a different target.
+if(!targetPath)targetPath='New-Article/index.html';
 try{if(/^https?:\/\//i.test(targetPath)){const u=new URL(targetPath);if(u.hostname==='awakenology.space'||u.hostname==='www.awakenology.space')targetPath=decodeURIComponent(u.pathname).replace(/^\/+|\/+$/g,'');}}catch{}
 targetPath=targetPath.replace(/^\/+|\/+$/g,'');
 if(targetPath&&!/\.html?$/i.test(targetPath))targetPath+='/index.html';
