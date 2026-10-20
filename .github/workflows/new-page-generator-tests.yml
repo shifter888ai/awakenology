@@ -89,12 +89,17 @@ jobs:
           }
           for(const lang of expected) {
             const page=bundle.pages[lang];
-            if(page.publishable!==false || typeof page.articleHtml!=='string' || !page.articleHtml.trim() || page.imageCount!==1) {
-              console.error('Invalid review-only page fragment:',lang);
+            if(page.publishable!==false || typeof page.articleHtml!=='string' || !page.articleHtml.trim() ||
+               typeof page.previewHtml!=='string' || !page.previewHtml.startsWith('<!doctype html>') || page.imageCount!==1 ||
+               !page.previewHtml.includes('REVIEW PREVIEW — NOT FOR PUBLICATION') ||
+               !page.previewHtml.includes('class="theme-toggle"') || !page.previewHtml.includes('class="return-top"') ||
+               !page.previewHtml.includes('hreflang="en"') || !page.previewHtml.includes('hreflang="ja"') ||
+               !page.previewHtml.includes('hreflang="zh-Hant"')) {
+              console.error('Invalid complete review-only page preview:',lang);
               process.exit(1);
             }
           }
-          console.log('Review-only trilingual bundle PASS: three language fragments, one source image each, no production shell.');
+          console.log('Review-only trilingual bundle PASS: three complete watermarked static page previews, reciprocal language metadata, one source image each; no production shell approval.');
           NODE
           grep -q 'NOT APPROVED FOR PUBLICATION' pilot-artifacts/pilot-converted-preview.html || { echo "::error::Missing expected review marker: NOT APPROVED FOR PUBLICATION in pilot-artifacts/pilot-converted-preview.html"; exit 1; }
           grep -q 'LAYOUT PREVIEW ONLY' pilot-artifacts/shell-layout-preview.html || { echo "::error::Missing expected review marker: LAYOUT PREVIEW ONLY in pilot-artifacts/shell-layout-preview.html"; exit 1; }
