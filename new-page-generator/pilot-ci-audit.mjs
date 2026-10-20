@@ -245,7 +245,7 @@ try {
 let languageHtmlSegmentation={ok:false,errors:['Converted HTML preview was unavailable.'],segments:[]};
 if(typeof conversionCandidate.previewHtml==='string') {
   try {
-    const split=segmentConvertedHtml(conversionCandidate.previewHtml);
+    const split=segmentConvertedHtml(correctPilotPreview(conversionCandidate.previewHtml));
     languageHtmlSegmentation={
       ok:split.ok,
       errors:split.errors,
@@ -267,6 +267,25 @@ const report = {sourcePath, byteLength:buffer.length, sha256, diagnostic, stages
   note:'Diagnostic only. Language ranges and converted preview fragments are inventoried for review; trilingual output remains unapproved and non-publishable.'};
 await mkdir('pilot-artifacts',{recursive:true});
 await writeFile(outputPath, JSON.stringify(report,null,2)+'\n');
+
+// A language-separated visual aid for checking boundaries. This remains a
+// review artifact; it is not passed to the page-set generator or published.
+const languagePreviewPath='pilot-artifacts/pilot-language-segments.html';
+try {
+  const split=typeof conversionCandidate.previewHtml==='string'
+    ? segmentConvertedHtml(correctPilotPreview(conversionCandidate.previewHtml))
+    : {ok:false,errors:['Converted HTML preview unavailable.'],segments:[]};
+  const esc=value=>String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  const labels={ 'zh-Hant':'繁體中文 (zh-Hant)', en:'English (en)', ja:'日本語 (ja)' };
+  const content=split.ok ? split.segments.map(segment=>
+    '<section class="language"><h2>'+esc(labels[segment.language]??segment.language)+'</h2>'+
+    '<p class="meta">Source-derived segment · '+segment.paragraphCount+' paragraphs · '+segment.imageCount+' images · '+segment.textCharacterCount+' text characters</p>'+
+    '<article class="article">'+segment.html+'</article></section>'
+  ).join('') : '<pre>'+esc(JSON.stringify(split.errors,null,2))+'</pre>';
+  await writeFile(languagePreviewPath,'<!doctype html><html lang="en" data-aw-theme="dark"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Trilingual DOCX Segments — Review Only</title><style>:root{color-scheme:dark;--bg:#0D0F12;--fg:#fff;--muted:#b8b8c3;--line:#34343b;--soft:#171920}html[data-aw-theme="light"]{color-scheme:light;--bg:#fff;--fg:#0D0F12;--muted:#626270;--line:#e5e5e5;--soft:#f7f7fa}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 Arial,sans-serif}main{max-width:1000px;margin:auto;padding:24px}.warning{border:1px solid #d97706;padding:12px;border-radius:8px;margin-bottom:24px}.language{border-top:2px solid var(--line);padding:24px 0}.meta{color:var(--muted);font-size:13px}.article{max-width:780px;margin:auto;overflow-wrap:anywhere}.article img{max-width:100%;height:auto}.article p{margin:1em 0}button{background:var(--soft);color:var(--fg);border:1px solid var(--line);border-radius:999px;padding:8px 12px}</style><main><h1>Trilingual DOCX language segments</h1><div class="warning"><strong>REVIEW ONLY — NOT APPROVED FOR PUBLICATION.</strong><br>Segments are split at the three source title markers. This preview does not replace source-to-output fidelity checks or authorize page generation.</div><button onclick="document.documentElement.dataset.awTheme=document.documentElement.dataset.awTheme===\'dark\'?\'light\':\'dark\'">Toggle light/dark</button>'+content+'</main></html>');
+} catch(error) {
+  await writeFile(languagePreviewPath,'<!doctype html><meta charset="utf-8"><title>Language segmentation blocked</title><h1>Language segmentation blocked</h1><pre>'+String(error?.message??error)+'</pre>');
+}
 
 // Produce a review aid for source-image inspection, never a generated article.
 // Inline image bytes are embedded only in this CI artifact so reviewers can see
