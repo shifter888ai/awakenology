@@ -69,7 +69,7 @@ generate.addEventListener('click',async()=>{
    contentHtml=sourceArticle.innerHTML;
    if(!contentHtml.trim())throw Error('The HTML content area is empty.');
    const styleCount=sourceDoc.querySelectorAll('style').length;
-   if(styleCount)conversionNotes.push({message:styleCount+' source style block(s) are not copied into the standard template; inline formatting is preserved.'});
+   if(styleCount)conversionNotes.push({message:styleCount+' source style block(s) are not copied into the standard template; inline formatting is preserved.'});\n   if(sourceArticle.querySelector('img[src],source[src],video[poster]')){const relativeMedia=[...sourceArticle.querySelectorAll('img[src],source[src],video[poster]')].some(el=>{const attr=el.hasAttribute('poster')?'poster':'src';const v=el.getAttribute(attr)||'';return v&&!/^(?:[a-z]+:|\/\/|\/|data:|#)/i.test(v)});if(relativeMedia)conversionNotes.push({message:'Relative media paths may need correction because the original HTML file location is unknown.'});}
   }
   if(!contentHtml.trim())throw Error('No document content was found.');
   let html=await loadTemplate();const parsed=new DOMParser().parseFromString(html,'text/html');
