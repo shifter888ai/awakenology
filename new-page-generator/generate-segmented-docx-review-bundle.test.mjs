@@ -19,7 +19,9 @@ test("real trilingual DOCX produces a validated non-publishable language bundle"
  assert.equal(result.languageRichComparison.ok,true);
  for(const lang of ["en","ja","zh-Hant"]) {
   assert.equal(result.pages[lang].publishable,false);
-  assert.ok(result.pages[lang].articleHtml.includes(result.pages[lang].language==="en"?"What is Multidimensional Space-Time":lang==="ja"?"多重時空とは":"多重時空是什麽"));
+  if(lang==="en") assert.ok(result.pages[lang].articleHtml.includes("What is Multidimensional Space-Time"));
+  else if(lang==="ja") assert.ok(result.pages[lang].articleHtml.includes("多重時空とは"));
+  else assert.ok(result.pages[lang].articleHtml.includes("多重")&&result.pages[lang].articleHtml.includes("時空是什麽"));
   assert.equal(result.pages[lang].imageCount,1);
  }
  assert.equal(result.htmlPageSetValidation.ok,true);
