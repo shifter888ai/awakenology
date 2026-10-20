@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -13,6 +17,26 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Add three temporary unlisted review pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download 39357870597 --repo shifter888ai/awakenology --name trilingual-docx-pilot-audit --dir /tmp/pilot
+          for lang in en ja zh-Hant; do
+            test -s "/tmp/pilot/review-pages/$lang.html"
+            mkdir -p "three-page-test/$lang"
+            cp "/tmp/pilot/review-pages/$lang.html" "three-page-test/$lang/index.html"
+            python3 - "$lang" <<'PY'
+          import pathlib,sys
+          p=pathlib.Path('three-page-test')/sys.argv[1]/'index.html'
+          s=p.read_text(encoding='utf-8')
+          assert '<head' in s.lower() and '</head>' in s.lower()
+          import re
+          s=re.sub(r'(<head\b[^>]*>)',r'\1<meta name="robots" content="noindex,nofollow,noarchive">',s,count=1,flags=re.I)
+          p.write_text(s,encoding='utf-8')
+          PY
+          done
 
       - name: Deploy to Cloudflare
         uses: cloudflare/wrangler-action@v4
