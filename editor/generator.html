@@ -46,18 +46,32 @@ async function loadTemplate(){
  const response=await fetch('https://raw.githubusercontent.com/shifter888ai/awakenology/main'+templates[lang.value],{cache:'no-store'});if(!response.ok)throw Error('Could not load the '+lang.options[lang.selectedIndex].text+' page template.');
  return await response.text()
 }
-file.addEventListener('change',()=>{docxFile=file.files&&file.files[0];generatedHtml='';publish.disabled=true;if(docxFile&&!/\.docx$/i.test(docxFile.name)){docxFile=null;say('Please choose a .docx Word document.')}else say(docxFile?'Ready to generate one page from '+docxFile.name+'.':'Choose one Word document.');controls()});
+file.addEventListener('change',()=>{docxFile=file.files&&file.files[0];generatedHtml='';publish.disabled=true;if(docxFile&&!/\.(docx|html?|xhtml)$/i.test(docxFile.name)){docxFile=null;say('Please choose a Word .docx or HTML .html/.htm file.')}else say(docxFile?'Ready to generate one page from '+docxFile.name+'.':'Choose one Word or HTML file.');controls()});
 path.addEventListener('change',loadTarget);path.addEventListener('blur',()=>{if(!targetLoaded)loadTarget()});
 lang.addEventListener('change',()=>{if(baselineSha256!=='NEW')return;templateHtml='';generatedHtml='';publish.disabled=true;controls()});
 title.addEventListener('input',()=>{if(generatedHtml)publish.disabled=true;});
 generate.addEventListener('click',async()=>{
  if(!docxFile||!validPath())return;
- generate.disabled=true;publish.disabled=true;say('Converting the Word document and building the page…');
+ generate.disabled=true;publish.disabled=true;say('Converting the source document and building the page…');
  try{
-  if(!window.mammoth)throw Error('Word converter did not load. Refresh and try again.');
-  const buffer=await docxFile.arrayBuffer();
-  const result=await mammoth.convertToHtml({arrayBuffer:buffer},{convertImage:mammoth.images.inline(function(image){return image.read('base64').then(function(data){return {src:'data:'+image.contentType+';base64,'+data}})})});
-  if(!result.value.trim())throw Error('No document content was found.');
+  let contentHtml='', conversionNotes=[];
+  if(/\.docx$/i.test(docxFile.name)){
+   if(!window.mammoth)throw Error('Word converter did not load. Refresh and try again.');
+   const buffer=await docxFile.arrayBuffer();
+   const result=await mammoth.convertToHtml({arrayBuffer:buffer},{convertImage:mammoth.images.inline(function(image){return image.read('base64').then(function(data){return {src:'data:'+image.contentType+';base64,'+data}})})});
+   contentHtml=result.value;conversionNotes=result.messages||[];
+  }else{
+   const sourceText=await docxFile.text();
+   const sourceDoc=new DOMParser().parseFromString(sourceText,'text/html');
+   const sourceArticle=sourceDoc.querySelector('.article, article, main');
+   if(!sourceArticle)throw Error('The HTML file has no .article, article, or main content area. No conversion was made.');
+   if(sourceArticle.querySelector('script, iframe, object, embed'))throw Error('The HTML contains active embedded content (script, iframe, object, or embed). Remove it before converting.');
+   contentHtml=sourceArticle.innerHTML;
+   if(!contentHtml.trim())throw Error('The HTML content area is empty.');
+   const styleCount=sourceDoc.querySelectorAll('style').length;
+   if(styleCount)conversionNotes.push({message:styleCount+' source style block(s) are not copied into the standard template; inline formatting is preserved.'});
+  }
+  if(!contentHtml.trim())throw Error('No document content was found.');
   let html=await loadTemplate();const parsed=new DOMParser().parseFromString(html,'text/html');
   const article=parsed.querySelector('.article');if(!article)throw Error('Template has no article content area.');
   article.innerHTML=contentHtml;
