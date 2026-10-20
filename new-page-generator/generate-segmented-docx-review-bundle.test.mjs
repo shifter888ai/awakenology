@@ -25,7 +25,22 @@ test("real trilingual DOCX produces a validated non-publishable language bundle"
   assert.equal(result.pages[lang].imageCount,1);
  }
  assert.equal(result.htmlPageSetValidation.ok,true);
- assert.match(result.note,/no approved production shell/i);
+ assert.match(result.note,/draft shell is not the approved production shell/i);
+ assert.equal(result.previewShell.publishable,false);
+ assert.equal(result.previewShell.containsReviewWatermark,true);
+ for(const lang of ["en","ja","zh-Hant"]) {
+  const html=result.pages[lang].previewHtml;
+  assert.ok(html.startsWith("<!doctype html>"));
+  assert.match(html,/REVIEW PREVIEW — NOT FOR PUBLICATION/);
+  assert.match(html,/<header class="site-header">/);
+  assert.match(html,/<footer class="footer">/);
+  assert.match(html,/<link rel="canonical"/);
+  assert.match(html,/hreflang="en"/);
+  assert.match(html,/hreflang="ja"/);
+  assert.match(html,/hreflang="zh-Hant"/);
+  assert.match(html,/class="theme-toggle"/);
+  assert.match(html,/class="return-top"/);
+ }
 });
 
 test("source-bound approval mismatch blocks the review bundle",async()=>{
