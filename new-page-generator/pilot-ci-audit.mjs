@@ -291,7 +291,7 @@ try {
       const sourceSegment=segmentRichContentInventory(sourceRich,sourceRange);
       const rendered=inspectRenderedRichContent(htmlRange.html,parse5DomParser);
       const comparison=sourceSegment.ok&&rendered.ok
-        ? compareRichContent(sourceSegment,rendered,{floatingImageReviewApproved:reviewMatchesSource,imageAltTextBySrc:reviewMatchesSource?(review.imageAltTextBySrc??{}):{}})
+        ? compareRichContent(sourceSegment,rendered,{floatingImageReviewApproved:reviewMatchesSource,approvedNeutralTextColorOverride:reviewMatchesSource,imageAltTextBySrc:reviewMatchesSource?(review.imageAltTextBySrc??{}):{}})
         : {ok:false,issues:[]};
       const sourceParagraphTexts=Array.from({length:sourceSegment.paragraphCount??0},(_,index)=>sourceSegment.runs.filter(run=>run.paragraphIndex===index).map(run=>run.text).join(''));
       const renderedParagraphTexts=Array.from({length:rendered.paragraphCount??0},(_,index)=>rendered.runs.filter(run=>run.paragraphIndex===index).map(run=>run.text).join(''));
