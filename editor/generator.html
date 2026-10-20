@@ -65,7 +65,7 @@ generate.addEventListener('click',async()=>{
   const canonical=parsed.querySelector('link[rel="canonical"]');
   const rawFinalPath=validPath();
   const finalPath=rawFinalPath.replace(/index\.html?$/i,'');
-  const canonicalUrl='https://awakenology.space/'+finalPath.split('/').filter(Boolean).map(encodeURIComponent).join('/')+(/index\.html?$/i.test(rawFinalPath)&&finalPath&&!finalPath.endsWith('/')?'/':'');
+  const canonicalUrl='https://awakenology.space/'+finalPath.split('/').filter(Boolean).map(encodeURIComponent).join('/')+(/index\.html?$/i.test(rawFinalPath)&&finalPath?'/':'');
   if(canonical)canonical.href=canonicalUrl;
   const og=parsed.querySelector('meta[property="og:url"]');if(og)og.content=canonicalUrl;
   const desc=parsed.querySelector('meta[name="description"]');if(desc)desc.content=(title.value.trim()||docxFile.name.replace(/\.docx$/i,''))+'. Awakenology article.';
