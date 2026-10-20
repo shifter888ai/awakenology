@@ -362,3 +362,18 @@ Implemented:
 
 Validation: CI run https://github.com/shifter888ai/awakenology/actions/runs/39351130574 — passed. Fresh standalone previews were extracted from that run's artifact and inspected for direct handlers and the zh-Hant switch. These remain review-only files; no production publishing, merge, or deployment is authorized.
 
+## Third owner feedback fixes: direct mobile taps and TC/SC selector (2026-10-20)
+
+Owner reports: EN and JA floating controls still do not respond to mobile taps; zh-Hant has no visible TC/SC button.
+
+Changes on the feature branch:
+- Added explicit `ontouchstart` forwarding to native `click()` on floating theme, return-to-top, and TC/SC buttons, while retaining normal click/keyboard handlers.
+- Raised the theme button stacking order to the top-level control layer and made the fixed controls explicitly accept pointer input.
+- Made the Traditional/Simplified Chinese selector persistently visible with `visibility:visible!important`, a fixed bottom-left position, and a clear `繁／简` label; conversion remains backed by OpenCC when its module loads.
+- Added automated assertions for touch forwarding, fixed-position controls, and the visible TC/SC selector in the zh-Hant preview only.
+- Fixed the test gate's JavaScript quoting and updated it to expect smooth-scroll behavior.
+
+Validation: CI run https://github.com/shifter888ai/awakenology/actions/runs/39352034729 — passed. Fresh EN, JA, and zh-Hant preview files are included in the workflow artifact.
+
+These files are still review-only, with no merge or deployment. A passing CI run confirms markup and handlers are present, but does not prove physical touch response on the owner's phone; manual mobile verification remains necessary.
+
