@@ -102,7 +102,11 @@ export function compareRichContent(source, output, options = {}) {
     for (let i=0;i<Math.min(source.paragraphLayouts.length,output.paragraphLayouts.length);i++) {
       const a=source.paragraphLayouts[i], b=output.paragraphLayouts[i];
       for (const field of ['paragraphIndex','alignment']) if (a[field] !== b[field]) issues.push({kind:'paragraph-layout-mismatch',index:i,field,expected:a[field],actual:b[field]});
-      for (const field of ['left','right','firstLine','hanging']) if ((a.indentation[field] ?? null) !== (b.indentation[field] ?? null)) issues.push({kind:'paragraph-indentation-mismatch',index:i,field,expected:a.indentation[field] ?? null,actual:b.indentation[field] ?? null});
+      for (const field of ['left','right','firstLine','hanging']) {
+        const expectedIndent=a.indentation[field]===undefined||a.indentation[field]===null?0:a.indentation[field];
+        const actualIndent=b.indentation[field]===undefined||b.indentation[field]===null?0:b.indentation[field];
+        if(expectedIndent!==actualIndent) issues.push({kind:'paragraph-indentation-mismatch',index:i,field,expected:expectedIndent,actual:actualIndent});
+      }
       if (a.spacing !== undefined || b.spacing !== undefined) {
         if (!a.spacing || !b.spacing) issues.push({kind:'paragraph-spacing-missing',index:i});
         else for (const field of ['beforePt','afterPt','lineHeightPt','lineHeight']) if ((a.spacing[field] ?? null) !== (b.spacing[field] ?? null)) issues.push({kind:'paragraph-spacing-mismatch',index:i,field,expected:a.spacing[field] ?? null,actual:b.spacing[field] ?? null});
