@@ -73,6 +73,29 @@ jobs:
           }
           console.log('Per-language source/rendered fidelity PASS: zh-Hant, en, ja; no unexplained rich-content issues.');
           NODE
+          test -s pilot-artifacts/pilot-language-bundle.json
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const bundle=JSON.parse(readFileSync('pilot-artifacts/pilot-language-bundle.json','utf8'));
+          const expected=['en','ja','zh-Hant'];
+          if(bundle.ok!==true || bundle.stage!=='review-only-trilingual-bundle' || bundle.publishable!==false ||
+             !bundle.htmlPageSetValidation?.ok || bundle.languageRichComparison?.ok!==true) {
+            console.error('Review-only generation bundle is blocked or incorrectly labelled:',JSON.stringify({ok:bundle.ok,stage:bundle.stage,publishable:bundle.publishable,errors:bundle.errors}));
+            process.exit(1);
+          }
+          if(JSON.stringify(Object.keys(bundle.pages).sort())!==JSON.stringify(expected)) {
+            console.error('Bundle language set mismatch:',Object.keys(bundle.pages));
+            process.exit(1);
+          }
+          for(const lang of expected) {
+            const page=bundle.pages[lang];
+            if(page.publishable!==false || typeof page.articleHtml!=='string' || !page.articleHtml.trim() || page.imageCount!==1) {
+              console.error('Invalid review-only page fragment:',lang);
+              process.exit(1);
+            }
+          }
+          console.log('Review-only trilingual bundle PASS: three language fragments, one source image each, no production shell.');
+          NODE
           grep -q 'NOT APPROVED FOR PUBLICATION' pilot-artifacts/pilot-converted-preview.html || { echo "::error::Missing expected review marker: NOT APPROVED FOR PUBLICATION in pilot-artifacts/pilot-converted-preview.html"; exit 1; }
           grep -q 'LAYOUT PREVIEW ONLY' pilot-artifacts/shell-layout-preview.html || { echo "::error::Missing expected review marker: LAYOUT PREVIEW ONLY in pilot-artifacts/shell-layout-preview.html"; exit 1; }
           grep -q 'class="theme-toggle"' pilot-artifacts/shell-layout-preview.html || { echo "::error::Missing expected review marker: class="theme-toggle" in pilot-artifacts/shell-layout-preview.html"; exit 1; }
@@ -88,6 +111,7 @@ jobs:
             new-page-generator/pilot-artifacts/shell-layout-preview.html
             new-page-generator/pilot-artifacts/pilot-converted-preview.html
             new-page-generator/pilot-artifacts/pilot-language-segments.html
+            new-page-generator/pilot-artifacts/pilot-language-bundle.json
           if-no-files-found: warn
       - name: Publish pilot findings in job summary
         if: always()
