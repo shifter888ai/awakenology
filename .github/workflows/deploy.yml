@@ -40,6 +40,8 @@ jobs:
           s=re.sub(r'(<head\b[^>]*>)',r'\1<meta name="robots" content="noindex,nofollow,noarchive">',s,count=1,flags=re.I)
           p.write_text(s,encoding='utf-8')
           PY
+            # Also publish flat aliases; these avoid directory-index routing ambiguity.
+            cp "three-page-test/$lang/index.html" "review-$lang.html"
           done
 
       - name: Deploy to Cloudflare
