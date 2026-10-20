@@ -15,7 +15,11 @@ export function renderStaticShell({ language, title, description, route, alterna
   if (!approvedHeader?.trim() || !approvedFooter?.trim() || !reviewedArticleHtml?.trim()) throw Error("Approved shell components and reviewed content are required.");
   if (!alternates || !["en","ja","zh-Hant"].every(lang => routeOK(alternates[lang]))) throw Error("Complete alternate-language routes required.");
   const canonical = absolute(route);
-  const headerMarkup = approvedHeader.includes('class="theme-toggle"') ? approvedHeader : approvedHeader.replace(/<\/header>/i, '<button class="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch theme" onclick="var r=document.documentElement;var d=r.getAttribute('data-aw-theme')!=='light';r.setAttribute('data-aw-theme',d?'light':'dark');this.innerHTML=d?'☾':'☀';this.setAttribute('aria-label',d?'Switch to dark theme':'Switch to light theme');this.setAttribute('aria-pressed',String(!d))"><span aria-hidden="true">☀</span></button></header>');
+  const themeToggleHandler = "var r=document.documentElement;var d=r.getAttribute('data-aw-theme')!=='light';r.setAttribute('data-aw-theme',d?'light':'dark');this.innerHTML=d?'☾':'☀';this.setAttribute('aria-label',d?'Switch to dark theme':'Switch to light theme');this.setAttribute('aria-pressed',String(!d))";
+  const addThemeHandler = markup => markup.replace(/<button class="theme-toggle"([^>]*)>/, (tag, attrs) => attrs.includes("onclick=") ? tag : '<button class="theme-toggle"' + attrs + ' onclick="' + themeToggleHandler + '">');
+  const headerMarkup = approvedHeader.includes('class="theme-toggle"')
+    ? addThemeHandler(approvedHeader)
+    : addThemeHandler(approvedHeader.replace(/<\/header>/i, '<button class="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch theme"><span aria-hidden="true">☀</span></button></header>'));
   if (!/<header\b/i.test(headerMarkup)) throw Error("Approved header must contain a header element.");
   if (/class="site-header"/.test(headerMarkup)) {
     if (!/<nav\b/i.test(headerMarkup) || !/class="brand"/.test(headerMarkup)) throw Error("Complete site header must include the brand and navigation.");
