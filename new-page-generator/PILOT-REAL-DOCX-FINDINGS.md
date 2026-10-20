@@ -295,3 +295,17 @@ The integration path now exposes a non-publishable preview, flags the missing al
 
 **Important distinction:** this proves the current reviewed preview's source-to-rendered fidelity by language; it does not mean the actual page-set generator has emitted three final article pages. The conversion audit still deliberately labels the floating-image path as a non-publishable review preview. Next, wire these same segment-specific source inventories and reviewed HTML fragments into the generation coordinator, retain all route/content-integrity gates, and test that it produces a non-publishable three-language output bundle without duplicating or omitting language sections.
 
+## Review-only trilingual bundle coordinator (2026-10-20)
+
+- Wired the source-bound review record, source paragraph ranges, converted language fragments, language-local rich inventories, and existing page-set validators into `generateSegmentedDocxReviewBundle`.
+- The coordinator verifies the exact source path and SHA-256, validates each language's text/formatting/images/line breaks, and then reuses the existing route and source/output inventory checks.
+- CI now emits `pilot-language-bundle.json` with three separate article fragments and explicitly sets `publishable: false` on the bundle and every language fragment. It does **not** emit a production shell or write any site files.
+- Latest CI run: https://github.com/shifter888ai/awakenology/actions/runs/39346231105 — passed. The workflow fails if any of the three language fragments is absent, a rich-content issue remains, text differs, or the bundle is not marked non-publishable.
+- Verified bundle inventory:
+  - zh-Hant: 58 paragraphs, 64 rich-text runs, 1 image.
+  - en: 67 paragraphs, 159 rich-text runs, 1 image, 1 explicit line break.
+  - ja: 59 paragraphs, 57 rich-text runs, 1 image.
+  - All three paragraph-text comparisons match and all rich-content issue lists are empty.
+
+**Current milestone:** a validated, non-publishable trilingual article-fragment bundle is produced by the coordinator. It is not yet a finished page-generator release: the shared production shell still needs explicit approval, and the generated fragments remain review artifacts only. No PR, merge, or deployment has been created.
+
