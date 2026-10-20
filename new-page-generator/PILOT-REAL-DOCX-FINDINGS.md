@@ -319,3 +319,19 @@ The integration path now exposes a non-publishable preview, flags the missing al
 
 **Next human gate:** owner visual review of the generated EN/JA/Traditional Chinese page shells and the article placement inside each. Only after that review should the production header/footer be selected or approved. This does not authorize merging, deployment, or publishing.
 
+## Owner feedback fixes: complete shell, title de-duplication, mobile controls (2026-10-20)
+
+Owner reviewed the initial EN/JA/zh-Hant previews and reported: incomplete header/footer; duplicate title; theme/return-to-top controls not functional on mobile; other layout/content looked OK.
+
+Implemented on the feature branch:
+- Replaced the abbreviated header/footer with the Awakenology brand mark, language navigation, Search / Ask, Contact, three official Reddit icon links, Disclaimer, and `© 2017 Awakenology`.
+- Removed the shell-inserted article `h1`; the title already present in the DOCX content is retained exactly once in the visible article. Document title remains in the HTML metadata.
+- Added explicit pointer/touch activation to theme and return-to-top controls, keyboard activation support, `touch-action: manipulation`, accessible labels, and mobile-sized controls.
+- Added regression gates for the full navigation/footer, exactly one theme toggle, no shell-level duplicate title, and mobile activation handlers.
+- Embedded the official Reddit SVG marks in the self-contained HTML previews so those icons render without a web server.
+- Preserved the prominent non-publishing review watermark.
+
+Validation: CI run https://github.com/shifter888ai/awakenology/actions/runs/39348998611 — passed. The refreshed artifacts contain standalone EN, JA, and zh-Hant HTML pages with embedded source article images.
+
+These remain review previews, not production pages. No PR, merge, or deployment was created. Next gate is the owner's visual re-check of the updated three files, especially the header/footer and mobile controls.
+
