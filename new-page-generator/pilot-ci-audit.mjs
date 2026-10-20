@@ -8,6 +8,7 @@ import {segmentRichContentInventory} from './segment-rich-content.mjs';
 import {inspectRenderedRichContent} from './inspect-rendered-rich-content.mjs';
 import {compareRichContent} from './compare-rich-content.mjs';
 import {parse5DomParser} from './parse5-dom-parser.mjs';
+import {generateSegmentedDocxReviewBundle} from './generate-reviewed-page-set.mjs';
 import {inspectDocxAssets} from './inspect-docx-assets.mjs';
 import {inspectDocxImagePlacement} from './inspect-docx-image-placement.mjs';
 import {inspectDocxRichContent} from './inspect-docx-rich-content.mjs';
@@ -312,12 +313,39 @@ try {
 } catch(error) {
   languageRichComparison={ok:false,errors:['Language-local rich-content comparison exception: '+error.message],segments:[]};
 }
-const report = {sourcePath, byteLength:buffer.length, sha256, diagnostic, stages, languageSegmentation, languageHtmlSegmentation, languageRichComparison,
+const bundlePageSet={pages:{
+  'zh-Hant':{title:'多重時空是什麽',mode:'docx',source:'new-page-generator/'+sourcePath,route:'/pilot-review/zh-Hant/'},
+  en:{title:'What is Multidimensional Space-Time',mode:'docx',source:'new-page-generator/'+sourcePath,route:'/pilot-review/en/'},
+  ja:{title:'多重時空とは',mode:'docx',source:'new-page-generator/'+sourcePath,route:'/pilot-review/ja/'}
+}};
+let generatedReviewBundle;
+try {
+  generatedReviewBundle=await generateSegmentedDocxReviewBundle({
+    sourceBuffer:buffer,sourcePath:'new-page-generator/'+sourcePath,pageSet:bundlePageSet
+  });
+} catch(error) {
+  generatedReviewBundle={ok:false,stage:'coordinator-exception',publishable:false,errors:[String(error?.message??error)],pages:{}};
+}
+const generationBundle={
+  ok:generatedReviewBundle.ok,stage:generatedReviewBundle.stage,publishable:generatedReviewBundle.publishable,
+  sourcePath:generatedReviewBundle.sourcePath??'new-page-generator/'+sourcePath,
+  sourceSha256:generatedReviewBundle.sourceSha256??sha256,
+  errors:generatedReviewBundle.errors??[],
+  pages:Object.fromEntries(Object.entries(generatedReviewBundle.pages??{}).map(([lang,page])=>[lang,{
+    language:page.language,route:page.route,publishable:page.publishable,
+    paragraphCount:page.paragraphCount,imageCount:page.imageCount,textCharacterCount:page.textCharacterCount
+  }])),
+  languageRichComparison:generatedReviewBundle.languageRichComparison??null,
+  htmlPageSetValidation:generatedReviewBundle.htmlPageSetValidation??null,
+  note:generatedReviewBundle.note??'Bundle generation blocked; inspect errors before proceeding.'
+};
+const report = {sourcePath, byteLength:buffer.length, sha256, diagnostic, stages, languageSegmentation, languageHtmlSegmentation, languageRichComparison, generationBundle,
   conversionPreview:{publishable:false,previewAvailable:typeof conversionCandidate.previewHtml==='string',errors:conversionCandidate.errors},
   pilotApproved:false,
-  note:'Diagnostic only. Language ranges, converted preview fragments, and per-language rich-content comparisons are review evidence; trilingual output remains unapproved and non-publishable.'};
+  note:'Diagnostic only. The segmented coordinator emits review-only article fragments; no final page shell or publishable page set is approved.'};
 await mkdir('pilot-artifacts',{recursive:true});
 await writeFile(outputPath, JSON.stringify(report,null,2)+'\n');
+await writeFile('pilot-artifacts/pilot-language-bundle.json',JSON.stringify(generatedReviewBundle,null,2)+'\n');
 
 // A language-separated visual aid for checking boundaries. This remains a
 // review artifact; it is not passed to the page-set generator or published.
