@@ -2,6 +2,12 @@
 // Expected runs: [{paragraphIndex, text, bold, italic, underline, color, href}] in document order.
 // Expected images: [{assetPath, paragraphIndex, order, alt, textOffset, markerOrder}] in document order.
 const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+const isDarkNeutralHex = value => {
+  const match=/^#([0-9a-f]{6})$/i.exec(value??"");
+  if(!match) return false;
+  const rgb=[0,2,4].map(i=>parseInt(match[1].slice(i,i+2),16));
+  return Math.max(...rgb)-Math.min(...rgb)<=8 && Math.max(...rgb)<128;
+};
 const stable = value => Array.isArray(value) ? "["+value.map(stable).join(",")+"]" : value && typeof value==="object" ? "{"+Object.keys(value).filter(key=>value[key]!==undefined).sort().map(key=>JSON.stringify(key)+":"+stable(value[key])).join(",")+"}" : JSON.stringify(value);
 const required = (o, keys, where) => {
   if (!o || typeof o !== 'object' || keys.some(k => !own(o, k))) {
@@ -119,7 +125,8 @@ export function compareRichContent(source, output, options = {}) {
       for (const field of fields) {
         const expected = source[key][i][field], actual = output[key][i][field];
         const approvedAltOverride=key==='images'&&field==='alt'&&(expected===null||expected==='')&&typeof options.imageAltTextBySrc?.[source[key][i].assetPath]==='string'&&options.imageAltTextBySrc[source[key][i].assetPath]===actual;
-        const equal = approvedAltOverride || (['placement','language','fontFamily'].includes(field) ? stable(expected) === stable(actual) : (typeof expected === typeof actual && expected === actual));
+        const approvedNeutralColorOverride=key==='runs'&&field==='color'&&options.approvedNeutralTextColorOverride===true&&isDarkNeutralHex(expected)&&actual==='var(--fg)';
+        const equal = approvedAltOverride || approvedNeutralColorOverride || (['placement','language','fontFamily'].includes(field) ? stable(expected) === stable(actual) : (typeof expected === typeof actual && expected === actual));
         if (!equal) {
           issues.push({kind: key + '-mismatch', index: i, field, expected: source[key][i][field], actual: output[key][i][field]});
         }
