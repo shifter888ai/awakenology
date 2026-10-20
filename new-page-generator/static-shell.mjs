@@ -64,7 +64,9 @@ ${language === "zh-Hant" ? '<button class="cn-variant-toggle" id="awakenology-cn
   var root=document.documentElement;
   root.setAttribute("data-aw-theme","dark");
   var toggle=document.querySelector(".theme-toggle");
-  if(toggle){toggle.innerHTML='<span aria-hidden="true">☀</span>';toggle.setAttribute("aria-label","Switch to light theme");toggle.setAttribute("aria-pressed","false");}
+  if(toggle){toggle.innerHTML='<span aria-hidden="true">☀</span>';toggle.setAttribute("aria-label","Switch to light theme");toggle.setAttribute("aria-pressed","false");if(!toggle.hasAttribute("onclick"))toggle.addEventListener("click",function(){var d=root.getAttribute("data-aw-theme")!=="light";root.setAttribute("data-aw-theme",d?"light":"dark");toggle.innerHTML=d?"☾":"☀";toggle.setAttribute("aria-label",d?"Switch to dark theme":"Switch to light theme");});}
+  var topButton=document.querySelector(".return-top");
+  if(topButton&&!topButton.hasAttribute("onclick"))topButton.addEventListener("click",function(){window.scrollTo({top:0,behavior:"smooth"});});
   var variantButton=document.getElementById("awakenology-cn-toggle");
   if(variantButton){
     import("https://cdn.jsdelivr.net/npm/opencc-js@1.4.1/dist/esm/full.js").then(function(module){
