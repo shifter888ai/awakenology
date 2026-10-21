@@ -97,12 +97,14 @@ publish.addEventListener('click',async()=>{
   const reviewed=new DOMParser().parseFromString(generatedHtml,'text/html');
   const assets=[];const imageNodes=[...reviewed.querySelectorAll('.article img[src^="data:"]')];
   const folder=validPath().replace(/[^/]+$/,'')+'assets/';
+  // Give every publishing attempt its own asset namespace; never overwrite existing images.
+  const assetBatch=crypto.randomUUID().replace(/-/g,'').slice(0,16);
   for(let i=0;i<imageNodes.length;i++){
    const src=imageNodes[i].getAttribute('src');
    const match=/^data:(image\/(?:png|jpeg|gif|webp));base64,([A-Za-z0-9+/=]+)$/.exec(src);
    if(!match)throw Error('Unsupported embedded image format. No image was omitted.');
    const extension={'image/png':'png','image/jpeg':'jpg','image/gif':'gif','image/webp':'webp'}[match[1]];
-   const name='docx-image-'+String(i+1).padStart(3,'0')+'.'+extension;
+   const name='docx-'+assetBatch+'-image-'+String(i+1).padStart(3,'0')+'.'+extension;
    const assetPath=folder+name;
    assets.push({path:assetPath,contentBase64:match[2]});
    imageNodes[i].setAttribute('src','/'+assetPath.split('/').map(encodeURIComponent).join('/'));
