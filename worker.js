@@ -222,7 +222,7 @@ async function createReviewedDraftPR(request, env) {
   let assetBytes = 0;
   for (const asset of assets) {
     if (!asset || typeof asset.path !== "string" || typeof asset.contentBase64 !== "string" ||
-        !/^[A-Za-z0-9/_-]+\/assets\/docx-image-[0-9]{3}\.(?:png|jpg|gif|webp)$/.test(asset.path) ||
+        !/^[A-Za-z0-9/_-]+\/assets\/(?:docx-image-[0-9]{3}|docx-[a-f0-9]{16}-image-[0-9]{3})\.(?:png|jpg|gif|webp)$/.test(asset.path) ||
         !/^[A-Za-z0-9+/]+={0,2}$/.test(asset.contentBase64) ||
         asset.contentBase64.length % 4 !== 0 || assetPaths.has(asset.path)) return jsonResponse({ error: "Invalid or duplicate image asset." }, 400);
     assetPaths.add(asset.path);
@@ -270,7 +270,7 @@ async function createReviewedDraftPR(request, env) {
         if (String(error.message).includes("GitHub API 404:")) return null;
         throw error;
       });
-      if (existing) throw new Error("Asset path already exists: " + asset.path);
+      if (existing && !asset.path.startsWith("New-Article/assets/")) throw new Error("Asset path already exists: " + asset.path);
       const blob = await githubApi("/repos/" + GITHUB_REPO + "/git/blobs", token, { method: "POST", body: JSON.stringify({ content: asset.contentBase64, encoding: "base64" }) });
       treeItems.push({ path: asset.path, mode: "100644", type: "blob", sha: blob.sha });
     }
