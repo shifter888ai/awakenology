@@ -15,7 +15,7 @@
 <label>Word document (.docx)<input id="docx" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"></label>
 <label>Page title<input id="title" placeholder="Article title"></label></section>
 <section class="panel"><h2 style="font-size:17px;margin:0 0 12px">2. Generate and review</h2><div class="actions"><button id="generate" disabled>Generate preview</button><button id="publish" disabled>Approve &amp; Create Draft PR</button></div>
-<div id="status" role="status" aria-live="polite">Choose one Word document. The generator preserves text, headings, lists, tables, links and basic emphasis. Publishing stays disabled until the target page is checked and a preview is generated.</div>
+<div id="imageTools" hidden style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0"><strong style="font-size:13px">Selected image</strong><label>Width <select id="imageWidth"><option value="">Original</option><option value="25%">25%</option><option value="50%">50%</option><option value="75%">75%</option><option value="100%">100%</option><option value="custom">Custom (px)</option></select></label><input id="imageCustom" type="number" min="1" max="4000" placeholder="Width px" hidden style="width:110px" aria-label="Custom image width in pixels"><label>Align <select id="imageAlign"><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option></select></label><button id="imageReset" type="button">Reset</button><small>Aspect ratio preserved; original file unchanged.</small></div><div id="status" role="status" aria-live="polite">Choose one Word document. The generator preserves text, headings, lists, tables, links and basic emphasis. Publishing stays disabled until the target page is checked and a preview is generated.</div>
 <p class="hint">Approval creates a GitHub draft pull request. Nothing is deployed until you review and merge that PR. This is direct publishing, not a pull request.</p></section>
 <section class="panel"><h2 style="font-size:17px;margin:0 0 12px">3. Page preview</h2><iframe id="preview" title="Generated page preview" sandbox="allow-same-origin"></iframe></section>
 </main>
@@ -23,6 +23,17 @@
 <script>
 (()=>{'use strict';
 const $=s=>document.querySelector(s), lang=$('#lang'), path=$('#path'), file=$('#docx'), title=$('#title'), generate=$('#generate'), publish=$('#publish'), preview=$('#preview'), status=$('#status');
+
+let selectedImage=null;
+const imageTools=$('#imageTools'),imageWidth=$('#imageWidth'),imageCustom=$('#imageCustom'),imageAlign=$('#imageAlign');
+function selectImage(img){selectedImage=img;imageTools.hidden=!img;if(!img)return;const w=img.style.width;imageWidth.value=['25%','50%','75%','100%'].includes(w)?w:w?'custom':'';imageCustom.hidden=imageWidth.value!=='custom';imageCustom.value=w.endsWith('px')?parseInt(w,10):'';imageAlign.value=img.style.marginLeft==='auto'&&img.style.marginRight==='auto'?'center':img.style.marginLeft==='auto'?'right':'left';}
+function imageDocumentClick(e){const img=e.target.closest?.('.article img');if(img){selectImage(img);e.preventDefault();}}
+function applyImageSize(){if(!selectedImage)return;const w=imageWidth.value==='custom'?(Math.max(1,Math.min(4000,Number(imageCustom.value)||1))+'px'):imageWidth.value;selectedImage.style.width=w;selectedImage.style.height=w?'auto':'';selectedImage.style.maxWidth=w?'100%':'';selectedImage.removeAttribute('width');selectedImage.removeAttribute('height');}
+imageWidth.addEventListener('change',()=>{imageCustom.hidden=imageWidth.value!=='custom';if(imageWidth.value==='custom'&&!imageCustom.value){imageCustom.value=selectedImage?.naturalWidth||600;}applyImageSize()});
+imageCustom.addEventListener('change',()=>{if(imageWidth.value==='custom')applyImageSize()});
+imageAlign.addEventListener('change',()=>{if(!selectedImage)return;selectedImage.style.display='block';selectedImage.style.marginLeft=imageAlign.value==='left'?'0':'auto';selectedImage.style.marginRight=imageAlign.value==='right'?'0':'auto';});
+$('#imageReset').addEventListener('click',()=>{if(!selectedImage)return;['width','height','max-width','display','margin-left','margin-right'].forEach(p=>selectedImage.style.removeProperty(p));selectedImage.removeAttribute('width');selectedImage.removeAttribute('height');selectImage(selectedImage)});
+
 let docxFile=null, templateHtml='', generatedHtml='', baselineSha256='NEW', targetLoaded=false, edited=false;
 const templates={zh:'/與退化派對話8/index.html',ja:'/アインシュタイン協議百年催眠実験/index.html',en:'/Destruction-Occurs-in-an-Instant/index.html'};
 function say(s){status.textContent=s}
@@ -72,7 +83,7 @@ generate.addEventListener('click',async()=>{
   const desc=parsed.querySelector('meta[name="description"]');if(desc)desc.content=(title.value.trim()||docxFile.name.replace(/\.docx$/i,''))+'. Awakenology article.';
   const ogTitle=parsed.querySelector('meta[property="og:title"]');if(ogTitle)ogTitle.content=parsed.title;
   generatedHtml='<!doctype html>\n'+parsed.documentElement.outerHTML;
-  preview.srcdoc=generatedHtml;
+  preview.srcdoc=generatedHtml;preview.onload=()=>{selectImage(null);preview.contentDocument?.addEventListener('click',imageDocumentClick);};
   edited=false;publish.disabled=!(targetLoaded&&validPath());
   say('Preview ready. '+(result.messages.length?result.messages.length+' conversion note(s); check the page carefully. ':'')+'Review the page below, then click Approve & Publish.');
  }catch(e){generatedHtml='';say('Generation failed: '+e.message)}finally{controls();generate.disabled=!(docxFile&&validPath())}
@@ -82,6 +93,7 @@ publish.addEventListener('click',async()=>{
  if(!confirm('Create a GitHub draft pull request for this reviewed page? Nothing will be deployed until you review and merge the PR.'))return;
  publish.disabled=true;generate.disabled=true;say('Creating the draft pull request…');
  try{
+  if(preview.contentDocument?.querySelector('.article'))generatedHtml='<!doctype html>\n'+preview.contentDocument.documentElement.outerHTML;
   const reviewed=new DOMParser().parseFromString(generatedHtml,'text/html');
   const assets=[];const imageNodes=[...reviewed.querySelectorAll('.article img[src^="data:"]')];
   const folder=validPath().replace(/[^/]+$/,'')+'assets/';
