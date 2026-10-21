@@ -68,5 +68,7 @@
       "Workers Builds"
     ],
     "governance": "The-Master.md defines approved behavior; AUDIT.md defines mandatory regression checks. Do not alter implementation as part of baseline documentation."
-  }
+  },
+  "snapshot_scope": "Historical migration baseline recorded on 2026-10-12; counts, commits, and audit statuses below are not a current production inventory or October 21 live audit.",
+  "audit_summary_note": "FINALIZED_BASELINE denotes the migration baseline only. PENDING audit entries remain pending until separately evidenced and explicitly updated."
 }
