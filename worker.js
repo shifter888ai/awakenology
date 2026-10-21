@@ -210,12 +210,26 @@ async function createReviewedDraftPR(request, env) {
   if (request.method !== "POST") return jsonResponse({ error: "Method not allowed." }, 405);
   if (!(request.headers.get("content-type") || "").toLowerCase().includes("application/json")) return jsonResponse({ error: "JSON content type required." }, 415);
   const length = Number(request.headers.get("content-length") || 0);
-  if (length > 600000) return jsonResponse({ error: "Reviewed HTML payload is too large." }, 413);
+  if (length > 20000000) return jsonResponse({ error: "Reviewed page and assets exceed the 20 MB publishing limit." }, 413);
   let body;
   try { body = await request.json(); } catch { return jsonResponse({ error: "Invalid JSON request." }, 400); }
   const path = body.path;
   const reviewedHtml = body.reviewedHtml;
   const baselineSha256 = body.baselineSha256;
+  const assets = body.assets === undefined ? [] : body.assets;
+  if (!Array.isArray(assets) || assets.length > 100) return jsonResponse({ error: "Invalid asset manifest (maximum 100 images)." }, 400);
+  const assetPaths = new Set();
+  let assetBytes = 0;
+  for (const asset of assets) {
+    if (!asset || typeof asset.path !== "string" || typeof asset.contentBase64 !== "string" ||
+        !/^[A-Za-z0-9/_-]+\/assets\/docx-image-[0-9]{3}\.(?:png|jpg|gif|webp)$/.test(asset.path) ||
+        !/^[A-Za-z0-9+/]+={0,2}$/.test(asset.contentBase64) ||
+        asset.contentBase64.length % 4 !== 0 || assetPaths.has(asset.path)) return jsonResponse({ error: "Invalid or duplicate image asset." }, 400);
+    assetPaths.add(asset.path);
+    assetBytes += asset.contentBase64.length;
+  }
+  if (assetBytes > 19000000) return jsonResponse({ error: "Image assets exceed publishing limit." }, 413);
+
   if (typeof path !== "string" || path.length > 500 || path.startsWith("/") || path.includes("\\") ||
       !/\.html?$/i.test(path) || path.split("/").some(part => !part || part === "." || part === ".." || part.startsWith("."))) {
     return jsonResponse({ error: "Invalid repository-relative article path." }, 400);
@@ -223,6 +237,7 @@ async function createReviewedDraftPR(request, env) {
   if (typeof reviewedHtml !== "string" || reviewedHtml.length > 1500000 || !/<html[\s>]/i.test(reviewedHtml) || !/class\s*=\s*["'][^"']*\barticle\b/i.test(reviewedHtml)) {
     return jsonResponse({ error: "Reviewed HTML is missing the full document or .article element, or exceeds the 1.5 MB limit." }, 400);
   }
+  if (assets.length && (typeof path !== "string" || assets.some(asset => !asset.path.startsWith(path.replace(/[^/]+$/, "") + "assets/") || !reviewedHtml.includes("/" + asset.path.split("/").map(encodeURIComponent).join("/"))))) return jsonResponse({ error: "Image asset paths do not match the reviewed page." }, 400);
   if (typeof baselineSha256 !== "string" || !(baselineSha256 === "NEW" || /^[a-f0-9]{64}$/i.test(baselineSha256))) return jsonResponse({ error: "Missing valid baseline fingerprint." }, 400);
   try {
     const token = await createGitHubInstallationToken(env);
@@ -249,9 +264,20 @@ async function createReviewedDraftPR(request, env) {
     const slug = path.replace(/\.html?$/i, "").split("/").map(part => part.replace(/[^A-Za-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "")).filter(Boolean).join("-").slice(-45) || "article";
     const branch = "page-generator/" + new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14) + "-" + crypto.randomUUID().slice(0, 8) + "-" + slug;
     await githubApi("/repos/" + GITHUB_REPO + "/git/refs", token, { method: "POST", body: JSON.stringify({ ref: "refs/heads/" + branch, sha: mainRef.object.sha }) });
-    const payload = { message: (current ? "Update generated page: " : "Add generated page: ") + path, content: toBase64(new TextEncoder().encode(reviewedHtml)), branch };
-    if (current) payload.sha = current.sha;
-    await githubApi("/repos/" + GITHUB_REPO + "/contents/" + encodedPath, token, { method: "PUT", body: JSON.stringify(payload) });
+    const treeItems = [{ path, mode: "100644", type: "blob", content: reviewedHtml }];
+    for (const asset of assets) {
+      const existing = await githubApi("/repos/" + GITHUB_REPO + "/contents/" + asset.path.split("/").map(encodeURIComponent).join("/") + "?ref=main", token, { method: "GET" }).catch(error => {
+        if (String(error.message).includes("GitHub API 404:")) return null;
+        throw error;
+      });
+      if (existing) throw new Error("Asset path already exists: " + asset.path);
+      const blob = await githubApi("/repos/" + GITHUB_REPO + "/git/blobs", token, { method: "POST", body: JSON.stringify({ content: asset.contentBase64, encoding: "base64" }) });
+      treeItems.push({ path: asset.path, mode: "100644", type: "blob", sha: blob.sha });
+    }
+    const baseCommit = await githubApi("/repos/" + GITHUB_REPO + "/git/commits/" + mainRef.object.sha, token);
+    const tree = await githubApi("/repos/" + GITHUB_REPO + "/git/trees", token, { method: "POST", body: JSON.stringify({ base_tree: baseCommit.tree.sha, tree: treeItems }) });
+    const commit = await githubApi("/repos/" + GITHUB_REPO + "/git/commits", token, { method: "POST", body: JSON.stringify({ message: (current ? "Update generated page: " : "Add generated page: ") + path, tree: tree.sha, parents: [mainRef.object.sha] }) });
+    await githubApi("/repos/" + GITHUB_REPO + "/git/refs/heads/" + branch, token, { method: "PATCH", body: JSON.stringify({ sha: commit.sha }) });
     const pr = await githubApi("/repos/" + GITHUB_REPO + "/pulls", token, {
       method: "POST",
       body: JSON.stringify({

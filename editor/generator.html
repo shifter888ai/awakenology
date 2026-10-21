@@ -82,7 +82,24 @@ publish.addEventListener('click',async()=>{
  if(!confirm('Create a GitHub draft pull request for this reviewed page? Nothing will be deployed until you review and merge the PR.'))return;
  publish.disabled=true;generate.disabled=true;say('Creating the draft pull request…');
  try{
-  const response=await fetch('/api/editor/create-draft-pr',{method:'POST',headers:{'content-type':'application/json','accept':'application/json'},body:JSON.stringify({path:validPath(),reviewedHtml:generatedHtml,baselineSha256})});
+  const reviewed=new DOMParser().parseFromString(generatedHtml,'text/html');
+  const assets=[];const imageNodes=[...reviewed.querySelectorAll('.article img[src^="data:"]')];
+  const folder=validPath().replace(/[^/]+$/,'')+'assets/';
+  for(let i=0;i<imageNodes.length;i++){
+   const src=imageNodes[i].getAttribute('src');
+   const match=/^data:(image\/(?:png|jpeg|gif|webp));base64,([A-Za-z0-9+/=]+)$/.exec(src);
+   if(!match)throw Error('Unsupported embedded image format. No image was omitted.');
+   const extension={'image/png':'png','image/jpeg':'jpg','image/gif':'gif','image/webp':'webp'}[match[1]];
+   const name='docx-image-'+String(i+1).padStart(3,'0')+'.'+extension;
+   const assetPath=folder+name;
+   assets.push({path:assetPath,contentBase64:match[2]});
+   imageNodes[i].setAttribute('src','/'+assetPath.split('/').map(encodeURIComponent).join('/'));
+  }
+  const reviewedHtml='<!doctype html>\n'+reviewed.documentElement.outerHTML;
+  const payload=JSON.stringify({path:validPath(),reviewedHtml,baselineSha256,assets});
+  const bytes=new TextEncoder().encode(payload).length;
+  if(bytes>20000000)throw Error('The reviewed page and images exceed the 20 MB publishing limit. No files were submitted.');
+  const response=await fetch('/api/editor/create-draft-pr',{method:'POST',headers:{'content-type':'application/json','accept':'application/json'},body:payload});
   const data=await response.json().catch(()=>({}));if(!response.ok)throw Error(data.error||('Draft PR creation failed: HTTP '+response.status));
   say('Draft PR #'+data.number+' created. Nothing has been deployed. ');
   const a=document.createElement('a');a.href=data.pullRequestUrl;a.target='_blank';a.rel='noopener noreferrer';a.textContent='Open draft PR #'+data.number;a.style.color='inherit';status.append(a);
