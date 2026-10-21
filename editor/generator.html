@@ -3,7 +3,7 @@
 <title>Awakenology · Word Page Generator</title><meta name="robots" content="noindex,nofollow">
 <style>
 :root{font:15px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:dark;background:#111;color:#f2f2f2;--panel:#191919;--line:#3c3c3c;--muted:#b5b5b5}
-*{box-sizing:border-box}body{margin:0}header{padding:16px max(16px,calc((100vw - 1100px)/2));border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#151515}h1{font-size:18px;margin:0 auto 0 0;font-weight:650}header a{color:inherit;border:1px solid #555;border-radius:7px;padding:8px 11px;text-decoration:none}header a[aria-current=page]{background:#eee;color:#111;border-color:#eee}main{max-width:1100px;margin:22px auto;padding:0 16px}label{display:block;font-size:13px;color:#ddd;margin:0 0 14px}input,select{display:block;width:100%;margin-top:5px;padding:9px;background:#222;color:#eee;border:1px solid #555;border-radius:7px;font:inherit}input[type=file]{padding:7px}button{border:1px solid #666;background:#292929;color:inherit;border-radius:7px;padding:9px 13px;cursor:pointer;font:inherit}button:hover:not(:disabled){border-color:#aaa}button:disabled{opacity:.38;cursor:not-allowed}.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}iframe{display:block;width:100%;height:68vh;border:1px solid #555;background:white;border-radius:8px}#status{color:#ddd;font-size:13px;margin:14px 0;padding:12px 14px;min-height:22px;background:#202020;border:1px solid var(--line);border-radius:8px}.hint{font-size:12px;color:#aaa}#publish{background:#eee;color:#111;border-color:#eee;font-weight:650}.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin:14px 0}.step{color:#aaa;font-size:12px;text-transform:uppercase;letter-spacing:.07em;margin:0 0 8px}p{margin:8px 0 14px}@media(max-width:650px){.fields{grid-template-columns:1fr}header{padding:12px}header h1{width:100%;margin:0}main{padding:0 12px}}
+[hidden]{display:none!important}*{box-sizing:border-box}body{margin:0}header{padding:16px max(16px,calc((100vw - 1100px)/2));border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#151515}h1{font-size:18px;margin:0 auto 0 0;font-weight:650}header a{color:inherit;border:1px solid #555;border-radius:7px;padding:8px 11px;text-decoration:none}header a[aria-current=page]{background:#eee;color:#111;border-color:#eee}main{max-width:1100px;margin:22px auto;padding:0 16px}label{display:block;font-size:13px;color:#ddd;margin:0 0 14px}input,select{display:block;width:100%;margin-top:5px;padding:9px;background:#222;color:#eee;border:1px solid #555;border-radius:7px;font:inherit}input[type=file]{padding:7px}button{border:1px solid #666;background:#292929;color:inherit;border-radius:7px;padding:9px 13px;cursor:pointer;font:inherit}button:hover:not(:disabled){border-color:#aaa}button:disabled{opacity:.38;cursor:not-allowed}.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}iframe{display:block;width:100%;height:68vh;border:1px solid #555;background:white;border-radius:8px}#status{color:#ddd;font-size:13px;margin:14px 0;padding:12px 14px;min-height:22px;background:#202020;border:1px solid var(--line);border-radius:8px}.hint{font-size:12px;color:#aaa}#publish{background:#eee;color:#111;border-color:#eee;font-weight:650}.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin:14px 0}.step{color:#aaa;font-size:12px;text-transform:uppercase;letter-spacing:.07em;margin:0 0 8px}p{margin:8px 0 14px}@media(max-width:650px){.fields{grid-template-columns:1fr}header{padding:12px}header h1{width:100%;margin:0}main{padding:0 12px}}
 </style></head><body>
 <header><h1>Awakenology · Word Generator</h1><a href="/editor/generator.html" aria-current="page">Word Generator</a><a href="/editor/html-generator.html">HTML Generator</a><a href="/editor/">Git Editor</a></header>
 <main>
@@ -15,7 +15,7 @@
 <label>Word document (.docx)<input id="docx" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"></label>
 <label>Page title<input id="title" placeholder="Article title"></label></section>
 <section class="panel"><h2 style="font-size:17px;margin:0 0 12px">2. Generate and review</h2><div class="actions"><button id="generate" disabled>Generate preview</button><button id="publish" disabled>Approve &amp; Create Draft PR</button></div>
-<div id="status" role="status" aria-live="polite">Choose one Word document. The generator preserves text, headings, lists, tables, links and basic emphasis. Publishing stays disabled until the target page is checked and a preview is generated.</div>
+<div id="imageTools" hidden style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0"><strong style="font-size:13px">Selected image</strong><label>Width <select id="imageWidth"><option value="">Original</option><option value="25%">25%</option><option value="50%">50%</option><option value="75%">75%</option><option value="100%">100%</option><option value="custom">Custom (px)</option></select></label><input id="imageCustom" type="number" min="1" max="4000" placeholder="Width px" hidden style="width:110px" aria-label="Custom image width in pixels"><label>Align <select id="imageAlign"><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option></select></label><button id="imageReset" type="button">Reset</button><small>Aspect ratio preserved; original file unchanged.</small></div><div id="status" role="status" aria-live="polite">Choose one Word document. The generator preserves text, headings, lists, tables, links and basic emphasis. Publishing stays disabled until the target page is checked and a preview is generated.</div>
 <p class="hint">Approval creates a GitHub draft pull request. Nothing is deployed until you review and merge that PR. This is direct publishing, not a pull request.</p></section>
 <section class="panel"><h2 style="font-size:17px;margin:0 0 12px">3. Page preview</h2><iframe id="preview" title="Generated page preview" sandbox="allow-same-origin"></iframe></section>
 </main>
@@ -23,6 +23,17 @@
 <script>
 (()=>{'use strict';
 const $=s=>document.querySelector(s), lang=$('#lang'), path=$('#path'), file=$('#docx'), title=$('#title'), generate=$('#generate'), publish=$('#publish'), preview=$('#preview'), status=$('#status');
+
+let selectedImage=null;
+const imageTools=$('#imageTools'),imageWidth=$('#imageWidth'),imageCustom=$('#imageCustom'),imageAlign=$('#imageAlign');
+function selectImage(img){selectedImage=img;imageTools.hidden=!img;if(!img)return;const w=img.style.width;imageWidth.value=['25%','50%','75%','100%'].includes(w)?w:w?'custom':'';imageCustom.hidden=imageWidth.value!=='custom';imageCustom.value=w.endsWith('px')?parseInt(w,10):'';imageAlign.value=img.style.marginLeft==='auto'&&img.style.marginRight==='auto'?'center':img.style.marginLeft==='auto'?'right':'left';}
+function imageDocumentClick(e){const img=e.target.closest?.('.article img');if(img){selectImage(img);e.preventDefault();}}
+function applyImageSize(){if(!selectedImage)return;const w=imageWidth.value==='custom'?(Math.max(1,Math.min(4000,Number(imageCustom.value)||1))+'px'):imageWidth.value;selectedImage.style.width=w;selectedImage.style.height=w?'auto':'';selectedImage.style.maxWidth=w?'100%':'';selectedImage.removeAttribute('width');selectedImage.removeAttribute('height');}
+imageWidth.addEventListener('change',()=>{imageCustom.hidden=imageWidth.value!=='custom';if(imageWidth.value==='custom'&&!imageCustom.value){imageCustom.value=selectedImage?.naturalWidth||600;}applyImageSize()});
+imageCustom.addEventListener('change',()=>{if(imageWidth.value==='custom')applyImageSize()});
+imageAlign.addEventListener('change',()=>{if(!selectedImage)return;selectedImage.style.display='block';selectedImage.style.marginLeft=imageAlign.value==='left'?'0':'auto';selectedImage.style.marginRight=imageAlign.value==='right'?'0':'auto';});
+$('#imageReset').addEventListener('click',()=>{if(!selectedImage)return;['width','height','max-width','display','margin-left','margin-right'].forEach(p=>selectedImage.style.removeProperty(p));selectedImage.removeAttribute('width');selectedImage.removeAttribute('height');selectImage(selectedImage)});
+
 let docxFile=null, templateHtml='', generatedHtml='', baselineSha256='NEW', targetLoaded=false, edited=false;
 const templates={zh:'/與退化派對話8/index.html',ja:'/アインシュタイン協議百年催眠実験/index.html',en:'/Destruction-Occurs-in-an-Instant/index.html'};
 function say(s){status.textContent=s}
@@ -72,7 +83,7 @@ generate.addEventListener('click',async()=>{
   const desc=parsed.querySelector('meta[name="description"]');if(desc)desc.content=(title.value.trim()||docxFile.name.replace(/\.docx$/i,''))+'. Awakenology article.';
   const ogTitle=parsed.querySelector('meta[property="og:title"]');if(ogTitle)ogTitle.content=parsed.title;
   generatedHtml='<!doctype html>\n'+parsed.documentElement.outerHTML;
-  preview.srcdoc=generatedHtml;
+  preview.srcdoc=generatedHtml;preview.onload=()=>{selectImage(null);preview.contentDocument?.addEventListener('click',imageDocumentClick);};
   edited=false;publish.disabled=!(targetLoaded&&validPath());
   say('Preview ready. '+(result.messages.length?result.messages.length+' conversion note(s); check the page carefully. ':'')+'Review the page below, then click Approve & Publish.');
  }catch(e){generatedHtml='';say('Generation failed: '+e.message)}finally{controls();generate.disabled=!(docxFile&&validPath())}
@@ -82,6 +93,7 @@ publish.addEventListener('click',async()=>{
  if(!confirm('Create a GitHub draft pull request for this reviewed page? Nothing will be deployed until you review and merge the PR.'))return;
  publish.disabled=true;generate.disabled=true;say('Creating the draft pull request…');
  try{
+  if(preview.contentDocument?.querySelector('.article'))generatedHtml='<!doctype html>\n'+preview.contentDocument.documentElement.outerHTML;
   const reviewed=new DOMParser().parseFromString(generatedHtml,'text/html');
   const assets=[];const imageNodes=[...reviewed.querySelectorAll('.article img[src^="data:"]')];
   const folder=validPath().replace(/[^/]+$/,'')+'assets/';
