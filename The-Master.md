@@ -11,7 +11,7 @@
 7. **System fonts only** — No external fonts. Serif may be used selectively for major headings.
 8. **Responsive by default** — Desktop and mobile must work properly.
 9. **Consistent navigation** — English / 日本語 / 中文 / Search / Ask, with the active language clear.
-10. **Consistent footer** — Contact email icon → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer, then © 2017 Awakenology. The Contact icon links to `mailto:contact@awakenology.org` and is a standardized global footer component, not article content.
+10. **Consistent footer** — Contact email icon → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer, then © 2017–CURRENT_YEAR Awakenology. The Contact icon links to `mailto:contact@awakenology.org` and is a standardized global footer component, not article content.
 11. **Common lightweight article template** — All articles use the approved global structure.
 12. **Preserve intentional wording** — Never silently correct unusual English or intentional formatting.
 13. **Accessibility and readability** — Maintain readable typography, spacing, contrast, links, and responsive behavior.
@@ -212,7 +212,7 @@ The inventory is the **page-specific evidence of what was there**; the Audit che
       2. **↑ Return-to-top floating button** — Worker-owned
       3. **Chinese 简/繁 floating toggle** — Worker-owned
       4. **Global navigation menu:** English / 日本語 / 中文 / Search / Ask — page-template-owned
-      5. **Global footer:** Contact → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer → © 2017 Awakenology — Worker-delivered globally; page source must remain structurally compatible
+      5. **Global footer:** Contact → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer → © 2017–CURRENT_YEAR Awakenology — Worker-delivered globally; page source must remain structurally compatible
     - Global component ownership is explicit:
       - **Cloudflare Worker:** global floating/behavioral components: Dark/Light, ↑ Return-to-top, and Chinese 简/繁 switching.
       - **Rebuilt page template:** global structural components: English / 日本語 / 中文 / Search / Ask navigation. The Worker owns the delivered global footer; committed page markup and CSS must not conflict with or duplicate it.
@@ -291,7 +291,7 @@ Reddit icons:
 
 Copyright:
 
-**© 2017 Awakenology**
+**© 2017–CURRENT_YEAR Awakenology**
 
 ### Duplication Check — Global Component Duplication
 
@@ -366,7 +366,7 @@ When an original content element is converted to a different HTML element, its o
     - Before live testing, inspect the committed page source for the actual footer element, its class names, child structure, and page-specific footer CSS.
     - Legacy footer classes such as .footer must not remain when they can conflict with the approved .site-footer / .footer-inner / .footer-links structure or page-specific CSS cascade.
     - The approved footer must be normalized at source level whenever a legacy page's footer structure or CSS can affect rendering.
-    - Verify exactly one footer, the approved footer hierarchy, the approved icon links, © 2017 Awakenology, and explicit no-underline rules for the Email and Disclaimer icons.
+    - Verify exactly one footer, the approved footer hierarchy, the approved icon links, © 2017–CURRENT_YEAR Awakenology, and explicit no-underline rules for the Email and Disclaimer icons.
     - Worker footer injection/replacement is supplementary runtime behavior and is not a substitute for source-level footer normalization.
     - A page that passes source content checks but still contains a structurally conflicting legacy footer is a hard failure before live testing.
 
@@ -515,7 +515,7 @@ This section consolidates approved visual decisions that must be treated as the 
 - Keep one shared visual system across the homepage, language TOCs, articles, Search/Ask, and Disclaimer.
 - Preserve the established header/footer structure and component ownership. Do not add page-local copies of Worker-owned theme, return-to-top, or Chinese variant controls.
 - Keep the theme switcher, return-to-top control, and Chinese 简/繁 toggle single-instance and usable in both themes.
-- Keep the approved footer content/order and `© 2017 Awakenology`; do not reintroduce duplicate separators, in-body global disclaimers, or duplicate global components.
+- Keep the approved footer content/order and `© 2017–CURRENT_YEAR Awakenology`; do not reintroduce duplicate separators, in-body global disclaimers, or duplicate global components.
 
 ### Change-control rule
 - The current approved appearance is the baseline. A design audit must identify a concrete mismatch before recommending a visual change.
@@ -608,3 +608,6 @@ The private visual editor at `https://editor.awakenology.space/editor/` is an ap
 - A successful build or a “Ready” deployment status alone is not proof of production rollout. Verify the live canonical page after deployment.
 - Treat the behavior verified by PR #160 as the regression baseline. Any future change to editor publishing, baseline validation, review gating, authentication, or deployment behavior must include focused regression tests and must not weaken these safeguards.
 - Do not change the editor or Worker merely as part of “freezing” the baseline. This section documents the approved behavior; implementation changes require a separate, scoped change.
+
+### Global copyright year range
+The Worker must emit `© 2017–CURRENT_YEAR Awakenology` directly in the delivered footer HTML, substituting the current UTC calendar year at request time. 2017 is the fixed founding year. Do not rely on browser JavaScript to rewrite the copyright text.

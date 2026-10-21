@@ -124,7 +124,7 @@ Inspect the actual DOM, not only extracted text or CSS.
 - [ ] Global navigation: English / 日本語 / 中文 / Search / Ask.
 - [ ] Global navigation appears only in the header; it is not duplicated inside the article body or TOC.
 - [ ] Footer order is exactly:
-  Contact email icon → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer → © 2017 Awakenology
+  Contact email icon → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer → © 2017–CURRENT_YEAR Awakenology
 - [ ] Contact is represented by the standardized email icon, linking to `mailto:contact@awakenology.org`; it is not treated as article content.
 - [ ] Exactly three Reddit anchors exist in the footer, in the required order:
   1. https://www.reddit.com/r/EscapeReincarnation/
@@ -385,7 +385,7 @@ For every content element whose HTML element type changes during reconstruction,
 - [ ] Confirm the footer uses the approved source structure: .site-footer, .footer-inner, and .footer-links.
 - [ ] Check for legacy footer classes or page-specific footer CSS that could override or conflict with the approved structure.
 - [ ] If a legacy footer structure can affect rendering, normalize the footer at source level before live testing.
-- [ ] Verify the approved Email, three Reddit, and Disclaimer links/icons and © 2017 Awakenology.
+- [ ] Verify the approved Email, three Reddit, and Disclaimer links/icons and © 2017–CURRENT_YEAR Awakenology.
 - [ ] Verify explicit text-decoration:none behavior for Email and Disclaimer icons, including hover.
 - [ ] Do not treat Worker runtime footer replacement as sufficient when the page source contains a conflicting legacy footer structure or CSS.
 - [ ] Re-fetch the committed file and repeat these checks after the update.
@@ -494,7 +494,7 @@ Use this section to verify consistency with the approved design baseline. These 
 - [ ] The shared header and footer match the approved baseline.
 - [ ] The homepage Coach lion image is inverted in dark mode and displayed normally in light mode.
 - [ ] Theme, return-to-top, and Chinese 简/繁 controls each appear once and remain usable.
-- [ ] Footer order and `© 2017 Awakenology` remain correct.
+- [ ] Footer order and `© 2017–CURRENT_YEAR Awakenology` remain correct.
 - [ ] No duplicate separators, duplicated global disclaimer, duplicate brand mark, or page-local copy of a globally owned component has been introduced.
 
 ### Change isolation and final rendering
@@ -671,3 +671,7 @@ Use this gate whenever the private visual editor, its publishing endpoint, GitHu
 - [ ] Record the outcome. Any failed gate blocks merge/deployment until resolved; do not bypass checks to preserve a green status.
 
 Reference end-to-end acceptance test: PR #160 (article whitespace correction), merged after all five checks passed and the live page was confirmed OK by the site owner on 2026-10-18. This is a verified example, not permission to merge future PRs automatically.
+
+### Global copyright runtime verification
+- [ ] Worker-delivered footer HTML shows `© 2017–CURRENT_YEAR Awakenology` with the current UTC calendar year, without requiring browser JavaScript.
+- [ ] Footer copyright remains identical with JavaScript enabled or disabled across homepage, Search/Ask, TOCs, and articles.
