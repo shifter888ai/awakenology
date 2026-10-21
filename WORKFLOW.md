@@ -265,4 +265,5 @@ Some legacy pages contain a .footer structure and page-specific footer CSS that 
 3. Preserve the approved Email, three Reddit, and Disclaimer links/icons and © 2017 Awakenology.
 4. Explicitly prevent underline on Email and Disclaimer icons, including hover.
 5. Re-fetch the committed file and verify exactly one footer and the approved structure before asking the user to live-test.
-6. Worker runtime replacement must be treated as supplementary; it must not be relied upon to compensate for a structurally conflicting page source.
+6. The Worker is the source of truth for the delivered global footer. Source HTML and CSS must remain structurally compatible; runtime replacement is not permission to retain conflicting legacy styles or duplicate active footers.
+7. Preserve 2017 as the founding year. An approved displayed year range must not be interpreted as changing that founding date.
