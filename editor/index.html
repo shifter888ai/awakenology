@@ -50,7 +50,9 @@ function normalizeEditorDocument(text){
  // Repair legacy pages that placed metadata/styles before the site header but inside body.
  for(const node of [...parsed.body.childNodes]){
   if(node.nodeType===Node.TEXT_NODE){
-   if(node.nodeValue.trim()==='\\n'){node.remove();continue;}
+   // Strip the legacy literal backslash-n prefix, including any real whitespace after it.
+   node.nodeValue=node.nodeValue.replace(/^\\\\n\\s*/,'');
+   if(!node.nodeValue){node.remove();continue;}
    if(!node.nodeValue.trim()){parsed.head.append(node);continue;}
   }
   if(node.matches?.('header, .site-header, main, article, .article'))break;
