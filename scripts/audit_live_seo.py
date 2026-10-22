@@ -4,7 +4,7 @@ import collections, csv, sys, time, urllib.error, urllib.request
 import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 DOMAIN = "https://awakenology.space"
@@ -91,7 +91,7 @@ def main():
         errors, status, title, desc, canonical, robots, lang = [], "", "", "", "", "", ""
         path = urlsplit(url).path or "/"
         is_ai = path.rstrip("/") == "/ai-search"
-        source_path = "index.html" if path == "/" else path.lstrip("/") + "index.html"
+        source_path = "index.html" if path == "/" else unquote(path.lstrip("/")) + "index.html"
         expected = DOMAIN + (path if path.endswith("/") or path == "/" else path + "/")
         try:
             if url not in deployed_urls and not is_ai:
