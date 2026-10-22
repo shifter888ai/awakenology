@@ -20,6 +20,7 @@
 <section class="panel"><h2 style="font-size:17px;margin:0 0 12px">3. Page preview</h2><iframe id="preview" title="Generated page preview" sandbox="allow-same-origin"></iframe></section>
 </main>
 <script src="https://unpkg.com/mammoth@1.9.0/mammoth.browser.min.js"></script>
+<script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
 <script>
 (()=>{'use strict';
 const $=s=>document.querySelector(s), lang=$('#lang'), path=$('#path'), file=$('#docx'), title=$('#title'), generate=$('#generate'), publish=$('#publish'), preview=$('#preview'), status=$('#status');
@@ -33,6 +34,58 @@ imageWidth.addEventListener('change',()=>{imageCustom.hidden=imageWidth.value!==
 imageCustom.addEventListener('change',()=>{if(imageWidth.value==='custom')applyImageSize()});
 imageAlign.addEventListener('change',()=>{if(!selectedImage)return;selectedImage.style.display='block';selectedImage.style.marginLeft=imageAlign.value==='left'?'0':'auto';selectedImage.style.marginRight=imageAlign.value==='right'?'0':'auto';});
 $('#imageReset').addEventListener('click',()=>{if(!selectedImage)return;['width','height','max-width','display','margin-left','margin-right'].forEach(p=>selectedImage.style.removeProperty(p));selectedImage.removeAttribute('width');selectedImage.removeAttribute('height');selectImage(selectedImage)});
+
+// Restore DOCX formatting that Mammoth does not export (paragraph alignment and underline).
+// Match whole paragraphs by their exact text; never apply formatting to an uncertain match.
+async function restoreWordFormatting(buffer,article){
+ if(!window.JSZip)throw Error('Word formatting reader did not load.');
+ const zip=await JSZip.loadAsync(buffer), entry=zip.file('word/document.xml');
+ if(!entry)throw Error('Missing Word document.xml.');
+ const xml=new DOMParser().parseFromString(await entry.async('string'),'application/xml');
+ if(xml.querySelector('parsererror'))throw Error('Invalid Word document XML.');
+ const ns='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+ const direct=(n,name)=>[...n.childNodes].filter(x=>x.nodeType===1&&x.namespaceURI===ns&&x.localName===name);
+ const all=(n,name)=>[...n.getElementsByTagNameNS(ns,name)];
+ const blocks=[...article.querySelectorAll('p,h1,h2,h3,h4,h5,h6,li')].filter(n=>!n.querySelector('p,h1,h2,h3,h4,h5,h6,li'));
+ let cursor=0,unmatched=0;
+ for(const para of all(xml,'p')){
+  const runs=all(para,'r').map(r=>{
+   const value=all(r,'t').map(t=>t.textContent).join('');
+   const rp=direct(r,'rPr')[0], u=rp&&direct(rp,'u')[0];
+   return {value,underlined:!!u&&!['none','0','false'].includes(u.getAttributeNS(ns,'val'))};
+  });
+  const source=runs.map(r=>r.value).join('');
+  if(!source.trim())continue;
+  const index=blocks.findIndex((b,i)=>i>=cursor&&b.textContent===source);
+  if(index<0){unmatched++;continue}
+  const block=blocks[index];cursor=index+1;
+  const pp=direct(para,'pPr')[0],jc=pp&&direct(pp,'jc')[0],alignment=jc?.getAttributeNS(ns,'val');
+  if(['left','center','right','both'].includes(alignment))block.style.textAlign=alignment==='both'?'justify':alignment;
+  if(!runs.some(r=>r.underlined))continue;
+  const ranges=[];let offset=0;
+  for(const r of runs){if(r.underlined&&r.value.length)ranges.push([offset,offset+r.value.length]);offset+=r.value.length}
+  const walker=article.ownerDocument.createTreeWalker(block,NodeFilter.SHOW_TEXT);
+  const nodes=[];let node;while((node=walker.nextNode()))nodes.push(node);
+  let position=0;
+  for(const original of nodes){
+   const start=position,end=start+original.length;position=end;
+   const cuts=new Set([0,original.length]);
+   for(const [a,b] of ranges){if(a>start&&a<end)cuts.add(a-start);if(b>start&&b<end)cuts.add(b-start)}
+   const boundaries=[...cuts].sort((a,b)=>a-b);
+   if(boundaries.length===2&&!ranges.some(([a,b])=>a<end&&b>start))continue;
+   const fragment=article.ownerDocument.createDocumentFragment();
+   for(let i=0;i<boundaries.length-1;i++){
+    const a=boundaries[i],b=boundaries[i+1],text=original.data.slice(a,b);
+    if(!text)continue;
+    if(ranges.some(([x,y])=>x<=start+a&&y>=start+b)){
+     const u=article.ownerDocument.createElement('u');u.textContent=text;fragment.append(u);
+    }else fragment.append(article.ownerDocument.createTextNode(text));
+   }
+   original.replaceWith(fragment);
+  }
+ }
+ if(unmatched)throw Error(unmatched+' Word paragraph(s) could not be matched safely to HTML; no draft generated. Check conversion formatting.');
+}
 
 let docxFile=null, templateHtml='', generatedHtml='', baselineSha256='NEW', targetLoaded=false, edited=false;
 const templates={zh:'/與退化派對話8/index.html',ja:'/アインシュタイン協議百年催眠実験/index.html',en:'/Destruction-Occurs-in-an-Instant/index.html'};
@@ -72,6 +125,7 @@ generate.addEventListener('click',async()=>{
   let html=await loadTemplate();const parsed=new DOMParser().parseFromString(html,'text/html');
   const article=parsed.querySelector('.article');if(!article)throw Error('Template has no article content area.');
   article.innerHTML=result.value;
+  await restoreWordFormatting(buffer,article);
   const heading=parsed.querySelector('main h1, h1');if(heading)heading.textContent=title.value.trim()||docxFile.name.replace(/\.docx$/i,'');
   parsed.title=(title.value.trim()||docxFile.name.replace(/\.docx$/i,''))+' | Awakenology';
   const canonical=parsed.querySelector('link[rel="canonical"]');
@@ -123,3 +177,4 @@ publish.addEventListener('click',async()=>{
 loadTarget();
 })();
 </script></body></html>
+<!-- CI refresh after sitemap/audit correction -->
