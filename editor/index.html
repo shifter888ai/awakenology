@@ -51,24 +51,19 @@ function normalizeEditorDocument(text){
  let charset=parsed.head.querySelector('meta[charset]');
  if(!charset){charset=parsed.createElement('meta');charset.setAttribute('charset','utf-8');}
  parsed.head.prepend(charset);
- // Older fallback versions accidentally added the two literal characters "\\n" before the document.
+ // Remove the literal backslash-n accidentally emitted by older fallback code.
  for(const node of [...parsed.body.childNodes]){
-  if(node.nodeType===Node.TEXT_NODE&&/^\\\\n\\s*$/.test(node.nodeValue||'')){node.remove();break;}
+  if(node.nodeType===Node.TEXT_NODE&&/^\\n\s*$/.test(node.nodeValue||'')){node.remove();break;}
   if(node.nodeType!==Node.TEXT_NODE||node.nodeValue.trim())break;
  }
- return '<!doctype html>\\n'+parsed.documentElement.outerHTML;
+ let target=parsed.querySelector('.article');
+ if(!target){target=parsed.querySelector('article, main')||parsed.body;target.classList.add('article');}
+ return '<!doctype html>\n'+parsed.documentElement.outerHTML;
 }
 function loadHtmlText(text,name,sourcePath='',allowGeneric=false){
-let parsed=new DOMParser().parseFromString(text,'text/html');
-let target=parsed.querySelector('.article');
-if(!target){
- target=parsed.querySelector('article, main')||parsed.body;
- if(target){target.classList.add('article');text=normalizeEditorDocument(text);parsed=new DOMParser().parseFromString(text,'text/html');target=parsed.querySelector('.article');}
-}else{
  text=normalizeEditorDocument(text);
- parsed=new DOMParser().parseFromString(text,'text/html');
- target=parsed.querySelector('.article');
-}
+ let parsed=new DOMParser().parseFromString(text,'text/html');
+ let target=parsed.querySelector('.article');
 if(!target){setStatus('This HTML file has no usable article, main, or body content. No changes made.');return false}
 original=text;filename=name;loadedRepoPath=sourcePath;githubBaseline=null;baselineRequest++;hasActualArticleChanges=false;loaded=false;save.disabled=true;review.disabled=true;panel.hidden=true;main.hidden=false;reviewedHtml=null;fullPageReady=!!(parsed.querySelector('header, .site-header')&&parsed.querySelector('footer, .site-footer, .footer-inner'));controls.forEach(x=>x.disabled=true);
 frame.onload=()=>{selectImage(null);doc()?.addEventListener('click',imageDocumentClick);const a=article();if(!a){setStatus('Could not load article.');return}a.contentEditable='true';a.spellcheck=false;loaded=true;review.disabled=false;controls.forEach(x=>x.disabled=false);setStatus(fullPageReady?'Editing '+filename+'. Full-page header/footer detected; review will preserve the surrounding page.':'Local HTML loaded. Content area detected automatically; review the full-page preview before downloading.')};
