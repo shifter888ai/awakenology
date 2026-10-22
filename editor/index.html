@@ -47,15 +47,19 @@ function ready(){return loaded && !!article()}
 function withinSelection(){const sel=frame.contentWindow.getSelection();return !!(sel&&sel.rangeCount&&article().contains(sel.getRangeAt(0).commonAncestorContainer))}
 function normalizeEditorDocument(text){
  const parsed=new DOMParser().parseFromString(text,'text/html');
- // srcdoc must declare UTF-8 in the actual head; a charset meta left in body is ignored.
+ // Repair legacy pages that placed metadata/styles before the site header but inside body.
+ for(const node of [...parsed.body.childNodes]){
+  if(node.nodeType===Node.TEXT_NODE){
+   if(/^\\\\n\\s*$/.test(node.nodeValue||'')){node.remove();continue;}
+   if(!node.nodeValue.trim()){parsed.head.append(node);continue;}
+  }
+  if(node.matches?.('header, .site-header, main, article, .article'))break;
+  parsed.head.append(node);
+ }
+ // srcdoc needs an explicit UTF-8 declaration in the actual head.
  let charset=parsed.head.querySelector('meta[charset]');
  if(!charset){charset=parsed.createElement('meta');charset.setAttribute('charset','utf-8');}
  parsed.head.prepend(charset);
- // Remove the literal backslash-n accidentally emitted by older fallback code.
- for(const node of [...parsed.body.childNodes]){
-  if(node.nodeType===Node.TEXT_NODE&&/^\\n\s*$/.test(node.nodeValue||'')){node.remove();break;}
-  if(node.nodeType!==Node.TEXT_NODE||node.nodeValue.trim())break;
- }
  let target=parsed.querySelector('.article');
  if(!target){target=parsed.querySelector('article, main')||parsed.body;target.classList.add('article');}
  return '<!doctype html>\n'+parsed.documentElement.outerHTML;
