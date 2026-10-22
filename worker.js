@@ -221,8 +221,16 @@ async function createReviewedDraftPR(request, env) {
   const assetPaths = new Set();
   let assetBytes = 0;
   for (const asset of assets) {
-    if (!asset || typeof asset.path !== "string" || typeof asset.contentBase64 !== "string" ||
-        !/^[A-Za-z0-9/_-]+\/assets\/(?:docx-image-[0-9]{3}|docx-[a-f0-9]{16}-image-[0-9]{3})\.(?:png|jpg|gif|webp)$/.test(asset.path) ||
+    // Page folder names may contain Chinese, Japanese, or other Unicode characters.
+    // Validate path segments and the generated filename separately instead of restricting
+    // the entire repository path to ASCII.
+    const assetPath = asset && typeof asset.path === "string" ? asset.path : "";
+    const assetParts = assetPath.split("/");
+    const assetNameValid = /^docx-(?:image-[0-9]{3}|[a-f0-9]{16}-image-[0-9]{3})\.(?:png|jpg|gif|webp)$/.test(assetParts[assetParts.length - 1] || "");
+    const assetFolderValid = assetParts.length >= 3 && assetParts[assetParts.length - 2] === "assets" &&
+      !assetPath.startsWith("/") &&
+      !assetParts.some(part => !part || part === "." || part === ".." || part.includes("\\") || /[\u0000-\u001f]/.test(part));
+    if (!asset || !assetFolderValid || !assetNameValid || typeof asset.contentBase64 !== "string" ||
         !/^[A-Za-z0-9+/]+={0,2}$/.test(asset.contentBase64) ||
         asset.contentBase64.length % 4 !== 0 || assetPaths.has(asset.path)) return jsonResponse({ error: "Invalid or duplicate image asset." }, 400);
     assetPaths.add(asset.path);
