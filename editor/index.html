@@ -51,7 +51,7 @@ function normalizeEditorDocument(text){
  for(const node of [...parsed.body.childNodes]){
   if(node.nodeType===Node.TEXT_NODE){
    // Strip the legacy literal backslash-n prefix, including any real whitespace after it.
-   node.nodeValue=node.nodeValue.replace(/^\\\\n\\s*/,'');
+   node.nodeValue=node.nodeValue.replace(/^\\n\s*/,'');
    if(!node.nodeValue){node.remove();continue;}
    if(!node.nodeValue.trim()){parsed.head.append(node);continue;}
   }
