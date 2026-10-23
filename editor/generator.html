@@ -47,7 +47,8 @@ async function restoreWordFormatting(buffer,article){
  const direct=(n,name)=>[...n.childNodes].filter(x=>x.nodeType===1&&x.namespaceURI===ns&&x.localName===name);
  const all=(n,name)=>[...n.getElementsByTagNameNS(ns,name)];
  const blocks=[...article.querySelectorAll('p,h1,h2,h3,h4,h5,h6,li')].filter(n=>!n.querySelector('p,h1,h2,h3,h4,h5,h6,li'));
- let cursor=0,unmatched=0;
+ let cursor=0,unmatched=0,pendingBlanks=0,lastBlock=null;
+ const blank=()=>{const p=article.ownerDocument.createElement('p');p.className='word-blank-paragraph';p.setAttribute('aria-hidden','true');return p;};
  for(const para of all(xml,'p')){
   const runs=all(para,'r').map(r=>{
    const value=all(r,'t').map(t=>t.textContent).join('');
@@ -55,10 +56,12 @@ async function restoreWordFormatting(buffer,article){
    return {value,underlined:!!u&&!['none','0','false'].includes(u.getAttributeNS(ns,'val'))};
   });
   const source=runs.map(r=>r.value).join('');
-  if(!source.trim())continue;
+  if(!source.trim()){pendingBlanks++;continue;}
   const index=blocks.findIndex((b,i)=>i>=cursor&&b.textContent===source);
   if(index<0){unmatched++;continue}
   const block=blocks[index];cursor=index+1;
+  if(pendingBlanks){for(let k=0;k<pendingBlanks;k++)block.before(blank());pendingBlanks=0;}
+  lastBlock=block;
   const pp=direct(para,'pPr')[0],jc=pp&&direct(pp,'jc')[0],alignment=jc?.getAttributeNS(ns,'val');
   if(['left','center','right','both'].includes(alignment))block.style.textAlign=alignment==='both'?'justify':alignment;
   if(!runs.some(r=>r.underlined))continue;
@@ -84,6 +87,7 @@ async function restoreWordFormatting(buffer,article){
    original.replaceWith(fragment);
   }
  }
+ if(pendingBlanks){for(let k=0;k<pendingBlanks;k++)(lastBlock||article).after?.(blank());}
  if(unmatched)throw Error(unmatched+' Word paragraph(s) could not be matched safely to HTML; no draft generated. Check conversion formatting.');
 }
 
@@ -125,17 +129,21 @@ generate.addEventListener('click',async()=>{
   let html=await loadTemplate();const parsed=new DOMParser().parseFromString(html,'text/html');
   const article=parsed.querySelector('.article');if(!article)throw Error('Template has no article content area.');
   article.innerHTML=result.value;
+  // An empty Word paragraph is a deliberate line, not an ordinary collapsed HTML paragraph.
+  if(!parsed.querySelector('#word-blank-style')){const style=parsed.createElement('style');style.id='word-blank-style';style.textContent='.article p.word-blank-paragraph{min-height:1.7em;margin:0;white-space:normal}';parsed.head.append(style);}
   await restoreWordFormatting(buffer,article);
-  const heading=parsed.querySelector('main h1, h1');if(heading)heading.textContent=title.value.trim()||docxFile.name.replace(/\.docx$/i,'');
-  parsed.title=(title.value.trim()||docxFile.name.replace(/\.docx$/i,''))+' | Awakenology';
+  const suppliedTitle=title.value.trim(), isExisting=baselineSha256!=='NEW';
+  const heading=parsed.querySelector('main h1, h1');
+  if(suppliedTitle){if(heading)heading.textContent=suppliedTitle;parsed.title=suppliedTitle+' | Awakenology';}
+  else if(!isExisting){heading?.remove();parsed.title='Awakenology Article | Awakenology';}
   const canonical=parsed.querySelector('link[rel="canonical"]');
   const rawFinalPath=validPath();
   const finalPath=rawFinalPath.replace(/index\.html?$/i,'');
   const canonicalUrl='https://awakenology.space/'+finalPath.split('/').filter(Boolean).map(encodeURIComponent).join('/')+(/index\.html?$/i.test(rawFinalPath)&&finalPath?'/':'');
   if(canonical)canonical.href=canonicalUrl;
   const og=parsed.querySelector('meta[property="og:url"]');if(og)og.content=canonicalUrl;
-  const desc=parsed.querySelector('meta[name="description"]');if(desc)desc.content=(title.value.trim()||docxFile.name.replace(/\.docx$/i,''))+'. Awakenology article.';
-  const ogTitle=parsed.querySelector('meta[property="og:title"]');if(ogTitle)ogTitle.content=parsed.title;
+  const desc=parsed.querySelector('meta[name="description"]');if(desc&&(suppliedTitle||!isExisting))desc.content=suppliedTitle?suppliedTitle+'。Awakenology article.':'Awakenology article.';
+  const ogTitle=parsed.querySelector('meta[property="og:title"]');if(ogTitle&&(suppliedTitle||!isExisting))ogTitle.content=parsed.title;
   generatedHtml='<!doctype html>\n'+parsed.documentElement.outerHTML;
   preview.srcdoc=generatedHtml;preview.onload=()=>{selectImage(null);preview.contentDocument?.addEventListener('click',imageDocumentClick);};
   edited=false;publish.disabled=!(targetLoaded&&validPath());
