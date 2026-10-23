@@ -141,7 +141,7 @@ lang.addEventListener('change',()=>{if(baselineSha256!=='NEW')return;templateHtm
 title.addEventListener('input',()=>{invalidatePreview();controls()});
 generate.addEventListener('click',async()=>{
  if(!docxFile||!validPath()||!targetLoaded||checkedPath!==validPath())return;
- const generatingPath=validPath(),generatingBaseline=baselineSha256;
+ const generatingPath=validPath(),generatingBaseline=baselineSha256, generatingRequest=targetRequest;
  generate.disabled=true;publish.disabled=true;say('Converting the Word document and building the page…');
  try{
   if(!window.mammoth)throw Error('Word converter did not load. Refresh and try again.');
@@ -166,7 +166,7 @@ generate.addEventListener('click',async()=>{
   const og=parsed.querySelector('meta[property="og:url"]');if(og)og.content=canonicalUrl;
   const desc=parsed.querySelector('meta[name="description"]');if(desc&&(suppliedTitle||!isExisting))desc.content=suppliedTitle?suppliedTitle+'。Awakenology article.':'Awakenology article.';
   const ogTitle=parsed.querySelector('meta[property="og:title"]');if(ogTitle&&(suppliedTitle||!isExisting))ogTitle.content=parsed.title;
-  if(generatingPath!==validPath()||generatingBaseline!==baselineSha256||!targetLoaded)throw Error('Target changed during generation. Check the path and generate again.');
+  if(generatingPath!==validPath()||generatingBaseline!==baselineSha256||generatingRequest!==targetRequest||!targetLoaded)throw Error('Target changed during generation. Check the path and generate again.');
   generatedHtml='<!doctype html>\n'+parsed.documentElement.outerHTML;
   preview.srcdoc=generatedHtml;preview.onload=()=>{selectImage(null);preview.contentDocument?.addEventListener('click',imageDocumentClick);};
   edited=false;publish.disabled=!(targetLoaded&&validPath());
@@ -203,7 +203,7 @@ publish.addEventListener('click',async()=>{
   say('Draft PR #'+data.number+' created. Nothing has been deployed. ');
   const a=document.createElement('a');a.href=data.pullRequestUrl;a.target='_blank';a.rel='noopener noreferrer';a.textContent='Open draft PR #'+data.number;a.style.color='inherit';status.append(a);
   generatedHtml='';publish.disabled=true;
- }catch(e){say('Could not create draft PR: '+e.message);controls()}finally{generate.disabled=!(docxFile&&validPath())}
+ }catch(e){say('Could not create draft PR: '+e.message);controls()}finally{controls()}
 });
 const fontSize=$('#fontSize');$('#applyFontSize').addEventListener('click',()=>{const d=preview.contentDocument,sel=preview.contentWindow?.getSelection();try{AwakenologyEditingCore.applyFontSize(d,sel,fontSize.value,d?.querySelector('.article'));edited=true;controls();say('Font size updated in preview. Review before creating the draft PR.')}catch(e){say('Could not apply font size: '+e.message)}});
 loadTarget();
