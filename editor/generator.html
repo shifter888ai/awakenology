@@ -133,8 +133,8 @@ generate.addEventListener('click',async()=>{
   await restoreWordFormatting(buffer,article);
   const suppliedTitle=title.value.trim(), isExisting=baselineSha256!=='NEW';
   const heading=parsed.querySelector('main h1, h1');
-  if(suppliedTitle){if(heading)heading.textContent=suppliedTitle;parsed.title=suppliedTitle+' | Awakenology';}
-  else if(!isExisting){heading?.remove();parsed.title='Awakenology Article | Awakenology';}
+  if(suppliedTitle){if(heading)heading.textContent=suppliedTitle;else{const main=parsed.querySelector('main');if(main){const h=parsed.createElement('h1');h.textContent=suppliedTitle;main.prepend(h);}}parsed.title=suppliedTitle+' | Awakenology';}
+  else {heading?.remove();if(!isExisting)parsed.title='Awakenology Article | Awakenology';}
   const canonical=parsed.querySelector('link[rel="canonical"]');
   const rawFinalPath=validPath();
   const finalPath=rawFinalPath.replace(/index\.html?$/i,'');
