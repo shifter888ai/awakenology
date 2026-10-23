@@ -52,8 +52,8 @@ async function restoreWordFormatting(buffer,article){
  for(const para of all(xml,'p')){
   const runs=all(para,'r').map(r=>{
    const value=all(r,'t').map(t=>t.textContent).join('');
-   const rp=direct(r,'rPr')[0], u=rp&&direct(rp,'u')[0];
-   return {value,underlined:!!u&&!['none','0','false'].includes(u.getAttributeNS(ns,'val'))};
+   const rp=direct(r,'rPr')[0], u=rp&&direct(rp,'u')[0], sz=rp&&direct(rp,'sz')[0];
+   return {value,underlined:!!u&&!['none','0','false'].includes(u.getAttributeNS(ns,'val')),fontPt:sz?Number(sz.getAttributeNS(ns,'val'))/2:null};
   });
   const source=runs.map(r=>r.value).join('');
   if(!source.trim()){pendingBlanks++;continue;}
@@ -64,25 +64,24 @@ async function restoreWordFormatting(buffer,article){
   lastBlock=block;
   const pp=direct(para,'pPr')[0],jc=pp&&direct(pp,'jc')[0],alignment=jc?.getAttributeNS(ns,'val');
   if(['left','center','right','both'].includes(alignment))block.style.textAlign=alignment==='both'?'justify':alignment;
-  if(!runs.some(r=>r.underlined))continue;
   const ranges=[];let offset=0;
-  for(const r of runs){if(r.underlined&&r.value.length)ranges.push([offset,offset+r.value.length]);offset+=r.value.length}
+  for(const r of runs){if(r.value.length)ranges.push({start:offset,end:offset+r.value.length,underlined:r.underlined,fontPt:r.fontPt});offset+=r.value.length}
+  if(!ranges.some(r=>r.underlined||r.fontPt))continue;
   const walker=article.ownerDocument.createTreeWalker(block,NodeFilter.SHOW_TEXT);
   const nodes=[];let node;while((node=walker.nextNode()))nodes.push(node);
   let position=0;
   for(const original of nodes){
    const start=position,end=start+original.length;position=end;
    const cuts=new Set([0,original.length]);
-   for(const [a,b] of ranges){if(a>start&&a<end)cuts.add(a-start);if(b>start&&b<end)cuts.add(b-start)}
+   for(const r of ranges){if(r.start>start&&r.start<end)cuts.add(r.start-start);if(r.end>start&&r.end<end)cuts.add(r.end-start)}
    const boundaries=[...cuts].sort((a,b)=>a-b);
-   if(boundaries.length===2&&!ranges.some(([a,b])=>a<end&&b>start))continue;
+   if(boundaries.length===2&&!ranges.some(r=>r.start<end&&r.end>start&&(r.underlined||r.fontPt)))continue;
    const fragment=article.ownerDocument.createDocumentFragment();
    for(let i=0;i<boundaries.length-1;i++){
-    const a=boundaries[i],b=boundaries[i+1],text=original.data.slice(a,b);
-    if(!text)continue;
-    if(ranges.some(([x,y])=>x<=start+a&&y>=start+b)){
-     const u=article.ownerDocument.createElement('u');u.textContent=text;fragment.append(u);
-    }else fragment.append(article.ownerDocument.createTextNode(text));
+    const a=boundaries[i],b=boundaries[i+1],text=original.data.slice(a,b);if(!text)continue;
+    const covered=ranges.filter(r=>r.start<=start+a&&r.end>=start+b);const span=article.ownerDocument.createElement('span');span.textContent=text;
+    const pt=[...covered].reverse().find(r=>r.fontPt)?.fontPt;if(pt&&pt>0)span.style.fontSize=pt+'pt';
+    if(covered.some(r=>r.underlined)){const u=article.ownerDocument.createElement('u');u.append(span);fragment.append(u)}else fragment.append(span);
    }
    original.replaceWith(fragment);
   }
