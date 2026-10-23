@@ -1,3 +1,6 @@
 User-agent: *
+Disallow: /editor/
+Disallow: /auth/
+Disallow: /api/editor/
 Allow: /
 Sitemap: https://awakenology.space/sitemap.xml
