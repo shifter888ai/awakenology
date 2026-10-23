@@ -24,7 +24,7 @@ def run(page, markup, start, end, size):
     return page.evaluate("""({start,end,size}) => {
       const article=document.querySelector('article');
       const before=article.textContent;
-      const text=[...document.createTreeWalker(article,NodeFilter.SHOW_TEXT)].filter(n=>n.data.length);
+      const text=[];const walker=document.createTreeWalker(article,NodeFilter.SHOW_TEXT);let node;while((node=walker.nextNode()))if(node.data.length)text.push(node);
       const r=document.createRange();
       r.setStart(text[start[0]],start[1]);r.setEnd(text[end[0]],end[1]);
       const selection=getSelection();selection.removeAllRanges();selection.addRange(r);
