@@ -16,8 +16,6 @@
    if(!node.data.length||!range.intersectsNode(node))continue;
    // Derive offsets by comparing boundary points, including selections whose
    // endpoints are element nodes (e.g. across paragraphs).
-   const probe=doc.createRange();
-   probe.selectNodeContents(node);
    let start=0,end=node.length;
    const overlap=doc.createRange();
    overlap.selectNodeContents(node);
@@ -42,8 +40,13 @@
      // unselected suffix in a clone, including other inline attributes.
      const suffix=parent.cloneNode(false);
      while(target.nextSibling)suffix.append(target.nextSibling);
-     parent.after(target);
-     if(suffix.hasChildNodes())target.after(suffix);
+     const selected=parent.cloneNode(false);
+     selected.style.removeProperty('font-size');
+     parent.after(selected);
+     selected.append(target);
+     if(!selected.attributes.length)selected.replaceWith(target);
+     const anchor=selected.isConnected?selected:target;
+     if(suffix.hasChildNodes())anchor.after(suffix);
      if(!parent.hasChildNodes())parent.remove();
     }
 
