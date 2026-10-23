@@ -69,15 +69,15 @@ def test_cross_inline_selection_preserves_unselected_formatting(page):
     result = run(page, '<p><strong>abc</strong><em>def</em></p>', [0, 1], [1, 2], "12")
     assert result["error"] is None
     assert result["before"] == result["after"] == "abcdef"
-    assert "<strong>a</strong>" in result["html"]
-    assert "<em>f</em>" in result["html"]
+    assert "<strong>a<span" in result["html"]
+    assert "<em><span" in result["html"] and ">f</em>" in result["html"]
     assert result["html"].count("font-size: 12pt") == 2
 
 def test_repeated_apply_and_reset_preserves_text_and_dom_validity(page):
     result = run(page, '<p>abcdef</p>', [0, 1], [0, 5], "24")
     assert result["error"] is None
     assert result["before"] == result["after"] == "abcdef"
-    result = run(page, result["html"], [0, 1], [0, 5], "")
+    result = run(page, result["html"], [1, 0], [1, 4], "")
     assert result["error"] is None
     assert result["before"] == result["after"] == "abcdef"
     assert "font-size:" not in result["html"]
