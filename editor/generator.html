@@ -109,8 +109,8 @@ async function restoreWordFormatting(buffer,article){
  if(unmatched)throw Error(unmatched+' Word paragraph(s) could not be matched safely to HTML; no draft generated. Check conversion formatting.');
 }
 
-let docxFile=null, templateHtml='', generatedHtml='', baselineSha256='NEW', targetLoaded=false, edited=false, checkedPath='', targetRequest=0;
-function invalidatePreview(){generatedHtml='';publish.disabled=true;preview.removeAttribute('srcdoc');selectImage(null);}
+let docxFile=null, templateHtml='', generatedHtml='', baselineSha256='NEW', targetLoaded=false, edited=false, checkedPath='', targetRequest=0, previewRevision=0;
+function invalidatePreview(){previewRevision++;generatedHtml='';publish.disabled=true;preview.removeAttribute('srcdoc');selectImage(null);}
 const templates={zh:'/與退化派對話8/index.html',ja:'/アインシュタイン協議百年催眠実験/index.html',en:'/Destruction-Occurs-in-an-Instant/index.html'};
 function say(s){status.textContent=s}
 function validPath(){const p=path.value.trim().replace(/^\/+|\/+$/g,'');return p&&/\.html?$/i.test(p)&&!p.split('/').some(x=>!x||x==='.'||x==='..'||x.startsWith('.'))?p:''}
@@ -141,7 +141,7 @@ lang.addEventListener('change',()=>{if(baselineSha256!=='NEW')return;templateHtm
 title.addEventListener('input',()=>{invalidatePreview();controls()});
 generate.addEventListener('click',async()=>{
  if(!docxFile||!validPath()||!targetLoaded||checkedPath!==validPath())return;
- const generatingPath=validPath(),generatingBaseline=baselineSha256, generatingRequest=targetRequest;
+ const generatingPath=validPath(),generatingBaseline=baselineSha256, generatingRequest=targetRequest, generatingRevision=previewRevision;
  generate.disabled=true;publish.disabled=true;say('Converting the Word document and building the page…');
  try{
   if(!window.mammoth)throw Error('Word converter did not load. Refresh and try again.');
@@ -166,7 +166,7 @@ generate.addEventListener('click',async()=>{
   const og=parsed.querySelector('meta[property="og:url"]');if(og)og.content=canonicalUrl;
   const desc=parsed.querySelector('meta[name="description"]');if(desc&&(suppliedTitle||!isExisting))desc.content=suppliedTitle?suppliedTitle+'。Awakenology article.':'Awakenology article.';
   const ogTitle=parsed.querySelector('meta[property="og:title"]');if(ogTitle&&(suppliedTitle||!isExisting))ogTitle.content=parsed.title;
-  if(generatingPath!==validPath()||generatingBaseline!==baselineSha256||generatingRequest!==targetRequest||!targetLoaded)throw Error('Target changed during generation. Check the path and generate again.');
+  if(generatingPath!==validPath()||generatingBaseline!==baselineSha256||generatingRequest!==targetRequest||generatingRevision!==previewRevision||!targetLoaded)throw Error('Target changed during generation. Check the path and generate again.');
   generatedHtml='<!doctype html>\n'+parsed.documentElement.outerHTML;
   preview.srcdoc=generatedHtml;preview.onload=()=>{selectImage(null);preview.contentDocument?.addEventListener('click',imageDocumentClick);};
   edited=false;publish.disabled=!(targetLoaded&&validPath());
