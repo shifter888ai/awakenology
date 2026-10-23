@@ -362,6 +362,7 @@ export default {
     const isEditorApi = url.pathname === "/api/editor/create-draft-pr";
     const isPublishApi = url.pathname === "/api/editor/publish-page";
     if (isEditorHost) {
+      if (url.pathname === "/robots.txt") return new Response("User-agent: *\\nDisallow: /\\n", { headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "public, max-age=3600" } });
       if (url.pathname === "/auth/github" && request.method === "GET") return startGitHubLogin(request, env);
       if (url.pathname === "/auth/github/callback" && request.method === "GET") return finishGitHubLogin(request, env);
       if (url.pathname === "/auth/logout" && request.method === "POST") {
@@ -380,7 +381,11 @@ export default {
         if (isEditorApi) return createReviewedDraftPR(request, env);
         if (isPublishApi) return publishReviewedPage(request, env);
         if (url.pathname === "/") return authRedirect("https://" + EDITOR_HOST + "/editor/");
-        return env.ASSETS.fetch(request);
+        const editorResponse = await env.ASSETS.fetch(request);
+        const editorHeaders = new Headers(editorResponse.headers);
+        editorHeaders.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+        editorHeaders.set("Cache-Control", "private, no-store");
+        return new Response(editorResponse.body, {status:editorResponse.status,statusText:editorResponse.statusText,headers:editorHeaders});
       }
     }
     // Never expose the editor or publishing API on the public website or temporary preview hosts.
