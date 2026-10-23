@@ -31,7 +31,7 @@ jobs:
           python-version: "3.12"
       - name: Install browser audit dependencies
         run: |
-          python3 -m pip install playwright
+          python3 -m pip install playwright pytest
           python3 -m playwright install --with-deps chromium
       - name: Compile audit scripts and run parser tests
         if: always()
