@@ -21,6 +21,7 @@
 </main>
 <script src="https://unpkg.com/mammoth@1.9.0/mammoth.browser.min.js"></script>
 <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="/editor/shared-editing-core.js"></script>
 <script>
 (()=>{'use strict';
 const $=s=>document.querySelector(s), lang=$('#lang'), path=$('#path'), file=$('#docx'), title=$('#title'), generate=$('#generate'), publish=$('#publish'), preview=$('#preview'), status=$('#status');
@@ -181,7 +182,7 @@ publish.addEventListener('click',async()=>{
   generatedHtml='';publish.disabled=true;
  }catch(e){say('Could not create draft PR: '+e.message);controls()}finally{generate.disabled=!(docxFile&&validPath())}
 });
-const fontSize=$('#fontSize');$('#applyFontSize').addEventListener('click',()=>{const d=preview.contentDocument,sel=preview.contentWindow?.getSelection();if(!d||!sel||!sel.rangeCount||sel.isCollapsed){say('Select text in the preview first.');return}const range=sel.getRangeAt(0);if(!preview.contentDocument.querySelector('.article')?.contains(range.commonAncestorContainer)){say('Select text inside the article.');return}try{if(!fontSize.value){const frag=range.extractContents();const walker=d.createTreeWalker(frag,NodeFilter.SHOW_ELEMENT);const nodes=[];let n;while((n=walker.nextNode()))if(n.style?.fontSize)n.style.removeProperty('font-size');range.insertNode(frag)}else{const span=d.createElement('span');span.style.fontSize=fontSize.value+'pt';span.append(range.extractContents());range.insertNode(span)}sel.removeAllRanges();edited=true;publish.disabled=true;say('Font size updated in preview. Review before creating the draft PR.')}catch(e){say('Could not apply font size: '+e.message)}});
+const fontSize=$('#fontSize');$('#applyFontSize').addEventListener('click',()=>{const d=preview.contentDocument,sel=preview.contentWindow?.getSelection();try{AwakenologyEditingCore.applyFontSize(d,sel,fontSize.value,d?.querySelector('.article'));edited=true;publish.disabled=true;say('Font size updated in preview. Review before creating the draft PR.')}catch(e){say('Could not apply font size: '+e.message)}});
 loadTarget();
 })();
 </script></body></html>
