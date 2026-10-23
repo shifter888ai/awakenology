@@ -19,18 +19,24 @@
    if(end>start)nodes.push({node,start,end});
   }
   if(!nodes.length)throw Error('No text selected.');
+  // Refuse unsupported nested font-size resets before mutating any content.
+  if(size===null&&nodes.some(({node})=>{let p=node.parentElement, count=0;while(p&&p!==article){if(p.style?.fontSize)count++;p=p.parentElement;}return count>1;}))throw Error('Nested font-size formatting needs manual review; no changes made.');
   for(const item of nodes.reverse()){
    let target=item.node;
    if(item.end<target.length)target.splitText(item.end);
    if(item.start>0)target=target.splitText(item.start);
    if(size===null){
-    let parent=target.parentElement;
-    // Only remove font-size from a wrapper when its entire text is selected.
-    // Split a partially selected wrapper so unrelated text keeps its formatting.
+    const parent=target.parentElement;
     if(parent&&parent.tagName==='SPAN'&&parent.style.fontSize){
-     if(parent.textContent===target.data){parent.style.removeProperty('font-size');if(!parent.attributes.length)parent.replaceWith(...parent.childNodes);}
-     else {const replacement=parent.cloneNode(false);replacement.style.removeProperty('font-size');target.replaceWith(replacement);replacement.append(target);if(!replacement.attributes.length)replacement.replaceWith(target);}
+     // Move the selected text outside its styled wrapper. Preserve the
+     // unselected suffix in a clone, including other inline attributes.
+     const suffix=parent.cloneNode(false);
+     while(target.nextSibling)suffix.append(target.nextSibling);
+     parent.after(target);
+     if(suffix.hasChildNodes())target.after(suffix);
+     if(!parent.hasChildNodes())parent.remove();
     }
+
    }else{
     const span=doc.createElement('span');span.style.fontSize=size+'pt';target.replaceWith(span);span.append(target);
    }
