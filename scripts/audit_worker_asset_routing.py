@@ -90,7 +90,7 @@ if 'decodedPathname === "/New-Article/"' not in worker_source:
     errors.append("Word generator route is missing the runtime noindex safeguard.")
 if 'decodedPathname === "/New-Article/" ? "noindex,nofollow"' not in worker_source:
     errors.append("Word generator must use noindex,nofollow.")
-if 'content=\\""+seoRobotsContent+"\\">' not in worker_source:
+if "seoRobotsContent" not in worker_source or "seoNoindex&&!seoHasRobots" not in worker_source:
     errors.append("Runtime robots metadata is not using the route-specific policy.")
 
 print(f"Public sitemap routes checked: {len(public_routes)}")
