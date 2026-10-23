@@ -14,10 +14,15 @@
     "run_worker_first": [
       "/",
       "/*/",
+      "/editor",
       "/editor/*",
+      "/github-editor",
       "/github-editor/*",
+      "/New-Article",
       "/New-Article/*",
+      "/auth",
       "/auth/*",
+      "/api/editor",
       "/api/editor/*"
     ]
   },
