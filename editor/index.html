@@ -17,6 +17,7 @@
 </section>
 <button id="cancelReview">Cancel review</button></section>
 <main><iframe id="preview" title="Article editing preview" sandbox="allow-same-origin"></iframe></main>
+<script src="/editor/shared-editing-core.js"></script>
 <script>
 (()=>{'use strict';
 const $=s=>document.querySelector(s);
@@ -111,7 +112,7 @@ const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw new Err
 const text=await response.text();if(loadHtmlText(text,rawPath.split('/').pop(),rawPath)){githubBaseline=text;setStatus('Loaded '+rawPath+' from GitHub (read-only). Edits are local until you export the reviewed HTML.');}
 }catch(err){setStatus('Could not load from GitHub: '+(err?.message||String(err)))}finally{button.disabled=false}
 });
-document.querySelector('#applyFontSize').addEventListener('mousedown',e=>e.preventDefault());document.querySelector('#applyFontSize').addEventListener('click',()=>{if(!ready()||!withinSelection()){setStatus('Select text inside the article first.');return}const sel=frame.contentWindow.getSelection(),range=sel.getRangeAt(0),size=document.querySelector('#fontSize').value;try{if(!size){const frag=range.extractContents();const walker=doc().createTreeWalker(frag,NodeFilter.SHOW_ELEMENT);const nodes=[];let n;while((n=walker.nextNode()))if(n.style?.fontSize)n.style.removeProperty('font-size');range.insertNode(frag)}else{const span=doc().createElement('span');span.style.fontSize=size+'pt';span.append(range.extractContents());range.insertNode(span)}sel.removeAllRanges();article().focus();setStatus('Font size applied to selected text. Review the changes before downloading or creating a PR.')}catch(err){setStatus('Could not apply font size: '+(err?.message||String(err)))}});
+document.querySelector('#applyFontSize').addEventListener('mousedown',e=>e.preventDefault());document.querySelector('#applyFontSize').addEventListener('click',()=>{if(!ready()||!withinSelection()){setStatus('Select text inside the article first.');return}try{AwakenologyEditingCore.applyFontSize(doc(),frame.contentWindow.getSelection(),document.querySelector('#fontSize').value,article());article().focus();setStatus('Font size applied to selected text. Review the changes before downloading or creating a PR.')}catch(err){setStatus('Could not apply font size: '+(err?.message||String(err)))}});
 document.querySelectorAll('[data-cmd]').forEach(b=>b.addEventListener('mousedown',e=>e.preventDefault()));
 document.querySelectorAll('[data-cmd]').forEach(b=>b.addEventListener('click',()=>{if(!ready()||!withinSelection())return;doc().execCommand(b.dataset.cmd,false,null);article().focus()}));
 document.querySelector('#color').addEventListener('input',e=>{if(!ready()||!withinSelection())return;doc().execCommand('foreColor',false,e.target.value)});
