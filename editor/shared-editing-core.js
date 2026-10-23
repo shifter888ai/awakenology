@@ -14,8 +14,18 @@
   let node;
   while((node=walker.nextNode())){
    if(!node.data.length||!range.intersectsNode(node))continue;
-   const start=node===range.startContainer?range.startOffset:0;
-   const end=node===range.endContainer?range.endOffset:node.length;
+   // Derive offsets by comparing boundary points, including selections whose
+   // endpoints are element nodes (e.g. across paragraphs).
+   const probe=doc.createRange();
+   probe.selectNodeContents(node);
+   let start=0,end=node.length;
+   const overlap=doc.createRange();
+   overlap.selectNodeContents(node);
+   if(range.compareBoundaryPoints(range.START_TO_START,overlap)>0)overlap.setStart(range.startContainer,range.startOffset);
+   if(range.compareBoundaryPoints(range.END_TO_END,overlap)<0)overlap.setEnd(range.endContainer,range.endOffset);
+   const prefix=doc.createRange();prefix.setStart(node,0);prefix.setEnd(overlap.startContainer,overlap.startOffset);
+   start=prefix.toString().length;
+   end=start+overlap.toString().length;
    if(end>start)nodes.push({node,start,end});
   }
   if(!nodes.length)throw Error('No text selected.');
