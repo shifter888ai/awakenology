@@ -13,3 +13,4 @@ jobs:
         with:
           python-version: '3.12'
       - run: python3 scripts/audit_sitemap.py
+      - run: python3 scripts/audit_worker_asset_routing.py
