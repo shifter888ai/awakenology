@@ -65,7 +65,7 @@ for url in urls:
 protected_paths = [
     "/editor", "/editor/", "/editor/index.html",
     "/github-editor", "/github-editor/", "/github-editor/index.html",
-    "/New-Article", "/New-Article/", "/New-Article/index.html",
+    "/New-Article", "/New-Article/",
     "/auth/github", "/api/editor/create-draft-pr", "/api/editor/publish-page",
 ]
 for path in protected_paths:
@@ -74,6 +74,7 @@ for path in protected_paths:
 
 static_paths = [
     "/assets/reddit-one.svg",
+    "/New-Article/assets/docx-image-001.jpg",
     "/gallery/dialog8-image-2.jpg",
     "/css/site.css",
     "/js/site.js",
@@ -83,6 +84,10 @@ static_paths = [
 for path in static_paths:
     if routed(path):
         errors.append(f"Static asset unexpectedly invokes Worker first: {path}")
+
+worker_source = (ROOT / "worker.js").read_text(encoding="utf-8")
+if 'decodedPathname === "/New-Article/"' not in worker_source:
+    errors.append("Word generator route is missing the runtime noindex safeguard.")
 
 print(f"Public sitemap routes checked: {len(public_routes)}")
 print(f"Worker-first patterns configured: {len(patterns)}")
