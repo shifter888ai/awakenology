@@ -420,7 +420,7 @@ export default {
       "/零能量空間是什麽/": "零能量空間是什麽：介紹零能量空間及其相關概念。"
     };
     const seoDescription = seoDescriptions[decodedPathname] || "";
-    const seoNoindex = decodedPathname === "/ai-search/";
+    const seoNoindex = decodedPathname === "/ai-search/" || decodedPathname === "/New-Article/";
     var seoHasDescription = false;
     var seoHasCanonical = false;
     var seoCanonicalCount = 0;
