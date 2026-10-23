@@ -47,14 +47,32 @@ async function restoreWordFormatting(buffer,article){
  const ns='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
  const direct=(n,name)=>[...n.childNodes].filter(x=>x.nodeType===1&&x.namespaceURI===ns&&x.localName===name);
  const all=(n,name)=>[...n.getElementsByTagNameNS(ns,name)];
+ // Word stores effective font sizes in run, character style, paragraph style or defaults.
+ const stylesEntry=zip.file('word/styles.xml');
+ const styles=stylesEntry?new DOMParser().parseFromString(await stylesEntry.async('string'),'application/xml'):null;
+ if(styles?.querySelector('parsererror'))throw Error('Invalid Word styles XML.');
+ const child=(n,name)=>n&&direct(n,name)[0];
+ const val=n=>n?.getAttributeNS(ns,'val');
+ const size=pr=>{const n=child(pr,'sz')||child(pr,'szCs');if(!n)return null;const v=Number(val(n));return Number.isFinite(v)&&v>0?v/2:null;};
+ const styleMap=new Map();
+ if(styles)for(const st of all(styles,'style')){const id=val(st) || st.getAttributeNS(ns,'styleId');if(id)styleMap.set(id,st);}
+ const inherited=(id,seen=new Set())=>{
+  if(!id||seen.has(id))return null;
+  seen.add(id);const st=styleMap.get(id);if(!st)return null;
+  return size(child(st,'rPr'))??inherited(val(child(st,'basedOn')),seen);
+ };
+ const defaults=styles?size(child(child(child(styles.documentElement,'docDefaults'),'rPrDefault'),'rPr')):null;
  const blocks=[...article.querySelectorAll('p,h1,h2,h3,h4,h5,h6,li')].filter(n=>!n.querySelector('p,h1,h2,h3,h4,h5,h6,li'));
  let cursor=0,unmatched=0,pendingBlanks=0,lastBlock=null;
  const blank=()=>{const p=article.ownerDocument.createElement('p');p.className='word-blank-paragraph';p.setAttribute('aria-hidden','true');return p;};
  for(const para of all(xml,'p')){
+  const pp=direct(para,'pPr')[0];
+  const paraSize=inherited(val(child(pp,'pStyle')));
   const runs=all(para,'r').map(r=>{
    const value=all(r,'t').map(t=>t.textContent).join('');
-   const rp=direct(r,'rPr')[0], u=rp&&direct(rp,'u')[0], sz=rp&&direct(rp,'sz')[0];
-   return {value,underlined:!!u&&!['none','0','false'].includes(u.getAttributeNS(ns,'val')),fontPt:sz?Number(sz.getAttributeNS(ns,'val'))/2:null};
+   const rp=direct(r,'rPr')[0], u=rp&&direct(rp,'u')[0];
+   const fontPt=size(rp)??inherited(val(child(rp,'rStyle')))??paraSize??defaults;
+   return {value,underlined:!!u&&!['none','0','false'].includes(u.getAttributeNS(ns,'val')),fontPt};
   });
   const source=runs.map(r=>r.value).join('');
   if(!source.trim()){pendingBlanks++;continue;}
@@ -63,7 +81,7 @@ async function restoreWordFormatting(buffer,article){
   const block=blocks[index];cursor=index+1;
   if(pendingBlanks){for(let k=0;k<pendingBlanks;k++)block.before(blank());pendingBlanks=0;}
   lastBlock=block;
-  const pp=direct(para,'pPr')[0],jc=pp&&direct(pp,'jc')[0],alignment=jc?.getAttributeNS(ns,'val');
+  const jc=pp&&direct(pp,'jc')[0],alignment=jc?.getAttributeNS(ns,'val');
   if(['left','center','right','both'].includes(alignment))block.style.textAlign=alignment==='both'?'justify':alignment;
   const ranges=[];let offset=0;
   for(const r of runs){if(r.value.length)ranges.push({start:offset,end:offset+r.value.length,underlined:r.underlined,fontPt:r.fontPt});offset+=r.value.length}

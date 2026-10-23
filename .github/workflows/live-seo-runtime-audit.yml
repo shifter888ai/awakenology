@@ -38,6 +38,7 @@ jobs:
         run: |
           python3 -m py_compile scripts/*.py
           python3 -m unittest discover -s tests -p 'test_*.py' -v
+          python3 -m pytest tests/test_shared_editing_core.py tests/test_generator_word_style_inheritance.py -v
 
       - name: Generate local reference inventory
         if: always()
