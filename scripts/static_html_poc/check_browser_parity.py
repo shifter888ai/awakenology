@@ -5,7 +5,7 @@ import difflib
 from pathlib import Path
 from urllib.parse import quote
 from playwright.async_api import async_playwright
-from bs4 import BeautifulSoup
+from PIL import Image, ImageChops
 from check_real_pages import FIXTURES, ROOT
 from html_transformer import transform
 from page_rules import SITE
@@ -102,6 +102,7 @@ async def snapshot(browser, html, url, width, height, label, output, route):
 
 async def main():
     failures = []
+    visual = []
     output = Path("browser-parity-screenshots")
     output.mkdir(exist_ok=True)
     async with async_playwright() as p:
@@ -117,6 +118,26 @@ async def main():
                                                            key + "-" + viewport + "-live", output, route)
                         built, built_errors = await snapshot(browser, generated, url, width, height,
                                                              key + "-" + viewport + "-built", output, route)
+                        live_image = output / (key + "-" + viewport + "-live.png")
+                        built_image = output / (key + "-" + viewport + "-built.png")
+                        with Image.open(live_image) as left, Image.open(built_image) as right:
+                            left, right = left.convert("RGB"), right.convert("RGB")
+                            if left.size == right.size:
+                                bounds = ImageChops.difference(left, right).getbbox()
+                                # Record exact-pixel difference; do not claim screenshot equivalence
+                                # until fonts, remote assets and dynamic content are stabilized.
+                                import numpy as np
+                                a = np.asarray(left, dtype=np.int16)
+                                b = np.asarray(right, dtype=np.int16)
+                                changed = np.any(np.abs(a - b) > 12, axis=2)
+                                score = round(float(changed.mean()), 6)
+                                visual.append({"route": route, "viewport": viewport, "size": left.size,
+                                               "changed_pixel_fraction_threshold12": score,
+                                               "exact_match": bounds is None})
+                            else:
+                                visual.append({"route": route, "viewport": viewport,
+                                               "live_size": left.size, "built_size": right.size,
+                                               "exact_match": False, "note": "different screenshot dimensions"})
                         # Browser serialization normalizes HTML independently of BeautifulSoup.
                         fields = ("article", "text", "images", "title", "bodyClasses", "footer", "links", "mainVisible", "theme", "themeRoundTrip", "returnTop", "chineseRoundTrip")
                         diff = [field for field in fields if live.get(field) != built.get(field)]
@@ -140,7 +161,8 @@ async def main():
             finally:
                 await browser.close()
     report = {"fixtures": len(FIXTURES), "viewports": list(VIEWPORTS),
-              "failures": failures, "scope": "browser DOM/behavior baseline, not pixel equivalence"}
+              "failures": failures, "visual_observations": visual,
+              "scope": "DOM and interaction parity enforced; visual pixel differences measured but not yet gated"}
     Path("browser-parity-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     if failures:
         raise SystemExit(f"{len(failures)} browser parity comparisons differ; no deployment authorized")
