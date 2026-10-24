@@ -9,7 +9,7 @@ FIXTURES = {
     "/": ("index.html", "2308340cc91e8119fa276a9ff033e7ee9eb64d52"),
     "/English/": ("English/index.html", "4a94b52348f3783999d48e9e1e4fa95a11a1bb64"),
     "/Japanese/": ("Japanese/index.html", "b3cac68d40b7cefd89070b4eb3d726f4a4529b8a"),
-    "/Chinese/": ("Chinese/index.html", "de774f1818b324e1a315bec415353c55ca4201a7"),
+    "/Chinese/": ("Chinese/index.html", "c4a4e73ada9e67f2900b1cfc36d8f81d47442ae8"),
     "/ai-search/": ("ai-search/index.html", "9bb335d6ef466e1e21e1547694377bbddb92e764"),
 }
 
