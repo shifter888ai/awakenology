@@ -36,11 +36,24 @@ def validate(source: str, output: str, *, require_markup: bool = True) -> dict:
 
 def validate_metadata(html: str, *, canonical: str | None, noindex: bool) -> None:
     soup = BeautifulSoup(html, "html.parser")
-    links = soup.head.select('link[rel="canonical"]') if soup.head else []
-    robots = soup.head.select('meta[name="robots"]') if soup.head else []
+    if soup.head is None:
+        raise ValueError("Missing document head")
+    links = [link for link in soup.head.find_all("link")
+             if "canonical" in [str(rel).lower() for rel in link.get("rel", [])]]
+    robots = [meta for meta in soup.head.find_all("meta")
+              if (meta.get("name") or "").lower() == "robots"]
     if len(links) != (0 if canonical is None else 1):
         raise ValueError("Canonical count mismatch")
     if canonical is not None and links[0].get("href") != canonical:
         raise ValueError("Canonical URL mismatch")
-    if noindex and (len(robots) != 1 or "noindex" not in robots[0].get("content", "").lower()):
-        raise ValueError("Missing unique noindex metadata")
+    if len(robots) > 1:
+        raise ValueError("Duplicate robots metadata")
+    if noindex:
+        if len(robots) != 1 or "noindex" not in {
+            token.strip().lower() for token in robots[0].get("content", "").split(",")
+        }:
+            raise ValueError("Missing unique noindex metadata")
+    elif robots and "noindex" in {
+        token.strip().lower() for token in robots[0].get("content", "").split(",")
+    }:
+        raise ValueError("Unexpected noindex metadata on indexable route")
