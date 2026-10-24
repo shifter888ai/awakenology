@@ -43,7 +43,7 @@ def main():
         rules = rules_for(route)
         validate_metadata(result, canonical=rules.canonical, noindex=rules.noindex)
         print(f"PASS {path}: content, images, markup, metadata, idempotence")
-    print(f"{len(FIXTURES)}/{len(FIXTURES)} real-page preliminary fixtures passed; Worker-rendered parity NOT tested.")
+    print(f"{len(FIXTURES)}/{len(FIXTURES)} real-page source fixtures passed; live Worker parity is checked separately.")
 
 if __name__ == "__main__":
     main()
