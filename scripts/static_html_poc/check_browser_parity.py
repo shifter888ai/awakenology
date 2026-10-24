@@ -124,8 +124,7 @@ async def main():
                             left, right = left.convert("RGB"), right.convert("RGB")
                             if left.size == right.size:
                                 bounds = ImageChops.difference(left, right).getbbox()
-                                # Record exact-pixel difference; do not claim screenshot equivalence
-                                # until fonts, remote assets and dynamic content are stabilized.
+                                # Exact pixels are now a gate for these pinned viewports.
                                 import numpy as np
                                 a = np.asarray(left, dtype=np.int16)
                                 b = np.asarray(right, dtype=np.int16)
@@ -138,6 +137,10 @@ async def main():
                                 visual.append({"route": route, "viewport": viewport,
                                                "live_size": left.size, "built_size": right.size,
                                                "exact_match": False, "note": "different screenshot dimensions"})
+                        if not visual[-1]["exact_match"]:
+                            failures.append({"route": route, "viewport": viewport,
+                                             "differences": ["visual exact-pixel mismatch"],
+                                             "details": visual[-1]})
                         # Browser serialization normalizes HTML independently of BeautifulSoup.
                         fields = ("article", "text", "images", "title", "bodyClasses", "footer", "links", "mainVisible", "theme", "themeRoundTrip", "returnTop", "chineseRoundTrip")
                         diff = [field for field in fields if live.get(field) != built.get(field)]
@@ -162,11 +165,11 @@ async def main():
                 await browser.close()
     report = {"fixtures": len(FIXTURES), "viewports": list(VIEWPORTS),
               "failures": failures, "visual_observations": visual,
-              "scope": "DOM and interaction parity enforced; visual pixel differences measured but not yet gated"}
+              "scope": "DOM, interaction and exact-pixel visual parity enforced for nine fixtures at two pinned viewports"}
     Path("browser-parity-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     if failures:
         raise SystemExit(f"{len(failures)} browser parity comparisons differ; no deployment authorized")
-    print("18 browser DOM comparisons passed; screenshot captures were observation-only.")
+    print("18 browser DOM, interaction and exact-pixel screenshot comparisons passed.")
 
 if __name__ == "__main__":
     asyncio.run(main())
