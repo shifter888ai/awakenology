@@ -5,7 +5,7 @@ be applied during generation. BeautifulSoup serialization can normalize legacy H
 the article subtree preservation gate remains mandatory.
 """
 from pathlib import Path
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 from page_rules import rules_for
 
 ASSETS = Path(__file__).parent / "assets"
@@ -199,4 +199,17 @@ def transform(source: str, route: str) -> str:
             '<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Awakenology","url":"https://awakenology.space/"}</script>',
             "html.parser").script)
 
-    return str(soup).replace("<!DOCTYPE html>\n\n", "<!DOCTYPE html>\n", 1)
+    # Legacy pages may leave runs of blank text nodes when icon links are removed.
+    # Collapse whitespace-only head nodes to one newline so repeated transforms are stable.
+    previous_was_whitespace = False
+    for node in list(soup.head.contents):
+        if isinstance(node, NavigableString) and not str(node).strip():
+            if previous_was_whitespace:
+                node.extract()
+            else:
+                node.replace_with("\\n")
+                previous_was_whitespace = True
+        else:
+            previous_was_whitespace = False
+
+    return str(soup).replace("<!DOCTYPE html>\\n\\n", "<!DOCTYPE html>\\n", 1)
