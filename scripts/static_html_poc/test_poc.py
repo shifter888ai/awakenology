@@ -44,6 +44,12 @@ class ParityTests(unittest.TestCase):
     def test_search_noindex_and_no_canonical(self):
         result = transform(SOURCE, "/ai-search/")
         validate_metadata(result, canonical=None, noindex=True)
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(result, "html.parser")
+        self.assertEqual(
+            soup.head.find("meta", attrs={"property": "og:url"})["content"],
+            "https://awakenology.space/ai-search/",
+        )
         self.assertTrue(validate(SOURCE, result)["pass"])
 
     def test_mutation_fails_closed(self):
