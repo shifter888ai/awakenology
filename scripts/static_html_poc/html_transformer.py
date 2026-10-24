@@ -207,9 +207,14 @@ def transform(source: str, route: str) -> str:
             if previous_was_whitespace:
                 node.extract()
             else:
-                node.replace_with("\\n")
+                node.replace_with(chr(10))
                 previous_was_whitespace = True
         else:
             previous_was_whitespace = False
 
-    return str(soup).replace("<!DOCTYPE html>\\n\\n", "<!DOCTYPE html>\\n", 1)
+    output = str(soup)
+    doctype_prefix = "<!DOCTYPE html>"
+    if output.startswith(doctype_prefix):
+        remainder = output[len(doctype_prefix):].lstrip(chr(10))
+        output = doctype_prefix + chr(10) + remainder
+    return output
