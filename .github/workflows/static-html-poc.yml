@@ -9,6 +9,7 @@ on:
     paths:
       - 'scripts/static_html_poc/**'
       - '.github/workflows/static-html-poc.yml'
+      - 'docs/static-html-poc/**'
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,6 +24,5 @@ jobs:
       - run: python -m pip install beautifulsoup4
       - run: python -m unittest discover -s scripts/static_html_poc -p 'test_*.py' -v
       - run: python scripts/static_html_poc/check_real_pages.py
-      - name: Observe current live Worker parity (diagnostic; not a release gate)
-        continue-on-error: true
+      - name: Require current live Worker signature parity (five fixtures only)
         run: python scripts/static_html_poc/check_live_parity.py
