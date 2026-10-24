@@ -55,6 +55,21 @@ async def snapshot(browser, html, url, width, height, label, output):
                 raise AssertionError(f"{label}: generated document did not load")
         await page.wait_for_timeout(1200)
         data = await page.evaluate(JS)
+        theme_button = page.locator("#awakenology-theme-toggle")
+        if await theme_button.count() != 1:
+            raise AssertionError(f"{label}: missing unique theme toggle")
+        initial = await page.locator("html").get_attribute("data-aw-theme")
+        await theme_button.click()
+        switched = await page.locator("html").get_attribute("data-aw-theme")
+        saved = await page.evaluate("localStorage.getItem('awakenology-theme')")
+        await theme_button.click()
+        restored = await page.locator("html").get_attribute("data-aw-theme")
+        if (initial, switched, saved, restored) != ("dark", "light", "light", "dark"):
+            raise AssertionError(f"{label}: theme round-trip failed: {initial, switched, saved, restored}")
+        data["themeRoundTrip"] = [initial, switched, saved, restored]
+        top = page.locator("#awakenology-return-top")
+        if await top.count() != 1:
+            raise AssertionError(f"{label}: missing unique return-to-top control")
         await page.screenshot(path=str(output / (label + ".png")), full_page=True,
                               animations="disabled", timeout=30000)
         return data, errors
@@ -79,7 +94,7 @@ async def main():
                         built, built_errors = await snapshot(browser, generated, url, width, height,
                                                              key + "-" + viewport + "-built", output)
                         # Browser serialization normalizes HTML independently of BeautifulSoup.
-                        fields = ("article", "text", "images", "title", "bodyClasses", "footer", "links", "mainVisible", "theme")
+                        fields = ("article", "text", "images", "title", "bodyClasses", "footer", "links", "mainVisible", "theme", "themeRoundTrip")
                         diff = [field for field in fields if live[field] != built[field]]
                         if built["brokenImages"]:
                             diff.append("generated brokenImages: " + str(built["brokenImages"]))
