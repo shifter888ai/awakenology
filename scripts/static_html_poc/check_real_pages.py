@@ -19,10 +19,12 @@ FIXTURES = {
 
 def main():
     for route, (path, baseline_git_blob_sha) in FIXTURES.items():
-        source = (ROOT / path).read_text(encoding="utf-8")
+        # Hash raw repository bytes: read_text() normalizes legacy CRLF.
+        blob = (ROOT / path).read_bytes()
+        source = blob.decode("utf-8")
         # Git's SHA-1 blob format, so changed fixtures fail closed.
         import hashlib
-        blob = source.encode("utf-8")
+        # Keep original bytes for Git blob fingerprint.
         actual = hashlib.sha1(b"blob " + str(len(blob)).encode() + bytes([0]) + blob).hexdigest()
         if actual != baseline_git_blob_sha:
             raise AssertionError(f"Fixture changed: {path}: {actual}")
