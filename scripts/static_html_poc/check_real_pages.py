@@ -19,7 +19,7 @@ def main():
         # Git's SHA-1 blob format, so changed fixtures fail closed.
         import hashlib
         blob = source.encode("utf-8")
-        actual = hashlib.sha1(b"blob " + str(len(blob)).encode() + b"\\0" + blob).hexdigest()
+        actual = hashlib.sha1(b"blob " + str(len(blob)).encode() + bytes([0]) + blob).hexdigest()
         if actual != baseline_git_blob_sha:
             raise AssertionError(f"Fixture changed: {path}: {actual}")
         result = transform(source, route)
