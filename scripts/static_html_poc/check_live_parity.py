@@ -5,10 +5,20 @@ An HTTP failure or mismatch exits nonzero. This is an observation-only audit.
 """
 from pathlib import Path
 from urllib.request import Request, urlopen
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag, NavigableString
 from html_transformer import transform
 from page_rules import rules_for
 from check_real_pages import FIXTURES, ROOT
+
+def semantic_node(node):
+    """Ignore attribute serialization order, but preserve elements, text and values."""
+    if isinstance(node, NavigableString):
+        return str(node)
+    if isinstance(node, Tag):
+        return (node.name, tuple(sorted((key, tuple(value) if isinstance(value, list) else value)
+                                        for key, value in node.attrs.items())),
+                tuple(semantic_node(child) for child in node.children))
+    return str(node)
 
 def signature(html):
     soup = BeautifulSoup(html, "html.parser")
@@ -31,7 +41,7 @@ def signature(html):
         "cn_styles": len(soup.select("#awakenology-cn-style")),
         "favicon": sorted(x.get("href") for x in soup.head.find_all("link") if "icon" in (x.get("rel") or [])),
         "body_classes": sorted(soup.body.get("class", [])),
-        "footer": str(soup.footer) if soup.footer else None,
+        "footer": semantic_node(soup.footer) if soup.footer else None,
     }
 
 def main():
