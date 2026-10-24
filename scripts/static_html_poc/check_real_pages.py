@@ -24,7 +24,15 @@ def main():
             raise AssertionError(f"Fixture changed: {path}: {actual}")
         result = transform(source, route)
         validate(source, result)
-        if result != transform(result, route):
+        second = transform(result, route)
+        if result != second:
+            import difflib
+            diff = difflib.unified_diff(
+                result.splitlines(), second.splitlines(),
+                fromfile=f"{path}:first-pass", tofile=f"{path}:second-pass",
+                lineterm="", n=2,
+            )
+            print("\\n".join(list(diff)[:100]))
             raise AssertionError(f"Non-idempotent: {path}")
         rules = rules_for(route)
         validate_metadata(result, canonical=rules.canonical, noindex=rules.noindex)
