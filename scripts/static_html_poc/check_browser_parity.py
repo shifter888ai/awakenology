@@ -1,7 +1,7 @@
 """Observation-only Chromium parity gate; generated HTML is never deployed."""
 import asyncio
 import json
-import tempfile
+import difflib
 from pathlib import Path
 from urllib.parse import quote
 from playwright.async_api import async_playwright
@@ -59,9 +59,9 @@ async def snapshot(browser, html, url, width, height, label, output):
 
 async def main():
     failures = []
-    with tempfile.TemporaryDirectory(prefix="awakenology-browser-parity-") as tmp:
-        output = Path(tmp)
-        async with async_playwright() as p:
+    output = Path("browser-parity-screenshots")
+    output.mkdir(exist_ok=True)
+    async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
             try:
                 for route, (path, _) in FIXTURES.items():
@@ -82,14 +82,23 @@ async def main():
                         if built["horizontalOverflow"] != live["horizontalOverflow"]:
                             diff.append("horizontalOverflow")
                         if diff:
+                            details = {}
+                            for field in diff:
+                                if field in ("article", "text", "footer"):
+                                    a, b = str(live[field]), str(built[field])
+                                    details[field] = {"live_length": len(a), "built_length": len(b),
+                                        "first_difference": next((i for i, (x, y) in enumerate(zip(a, b)) if x != y), min(len(a), len(b))),
+                                        "diff_sample": list(difflib.unified_diff(a.splitlines(), b.splitlines(), fromfile="live", tofile="built", lineterm=""))[:24]}
+                                else:
+                                    details[field] = {"live": live.get(field), "built": built.get(field)}
                             failures.append({"route": route, "viewport": viewport, "differences": diff,
-                                             "live_errors": live_errors, "built_errors": built_errors})
+                                             "details": details, "live_errors": live_errors, "built_errors": built_errors})
                         print(f"{route} {viewport}: " + ("MATCH" if not diff else "DIFF " + ", ".join(diff)), flush=True)
             finally:
                 await browser.close()
-        report = {"fixtures": len(FIXTURES), "viewports": list(VIEWPORTS),
-                  "failures": failures, "scope": "browser DOM/behavior baseline, not pixel equivalence"}
-        Path("browser-parity-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    report = {"fixtures": len(FIXTURES), "viewports": list(VIEWPORTS),
+              "failures": failures, "scope": "browser DOM/behavior baseline, not pixel equivalence"}
+    Path("browser-parity-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     if failures:
         raise SystemExit(f"{len(failures)} browser parity comparisons differ; no deployment authorized")
     print("18 browser DOM comparisons passed; screenshot captures were observation-only.")
