@@ -19,6 +19,20 @@ class ParityTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             rules_for("relative")
 
+    def test_unicode_canonical_and_invalid_routes(self):
+        from urllib.parse import quote
+        unicode_route = "/與退化派對話8/"
+        self.assertEqual(rules_for(unicode_route).canonical,
+                         "https://awakenology.space" + quote(unicode_route, safe="/%"))
+        self.assertEqual(rules_for("/與退化派對話8").canonical,
+                         rules_for(unicode_route).canonical)
+        self.assertEqual(rules_for("/What-Is-Hypnosis/index.html").canonical,
+                         "https://awakenology.space/What-Is-Hypnosis/index.html")
+        for invalid in ("", "relative", "//evil.example/", "/path?x=1",
+                        "/path#fragment", "/path//nested"):
+            with self.subTest(invalid=invalid), self.assertRaises(ValueError):
+                rules_for(invalid)
+
     def test_content_preservation_and_idempotence(self):
         result = transform(SOURCE, "/English/")
         self.assertTrue(validate(SOURCE, result)["pass"])
