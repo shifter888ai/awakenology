@@ -33,7 +33,7 @@ JS = """() => {
  };
 }"""
 
-async def snapshot(browser, html, url, width, height, label, output):
+async def snapshot(browser, html, url, width, height, label, output, route):
     context = await browser.new_context(viewport={"width": width, "height": height},
                                         device_scale_factor=1, color_scheme="dark",
                                         reduced_motion="reduce")
@@ -79,6 +79,21 @@ async def snapshot(browser, html, url, width, height, label, output):
             await top.click()
             await page.wait_for_function("window.scrollY < 20", timeout=5000)
         data["returnTop"] = "clicked" if scrollable else "short-page"
+        if route == "/Chinese/":
+            toggle = page.locator("#awakenology-cn-toggle")
+            await toggle.wait_for(state="visible", timeout=20000)
+            initial_lang = await page.locator("html").get_attribute("lang")
+            original_text = await page.locator("main").inner_text()
+            await toggle.click()
+            await page.wait_for_function("document.documentElement.lang === 'zh-CN'", timeout=10000)
+            simplified_text = await page.locator("main").inner_text()
+            simplified_saved = await page.evaluate("localStorage.getItem('awakenology-cn-variant')")
+            await toggle.click()
+            await page.wait_for_function("document.documentElement.lang === 'zh-Hant'", timeout=10000)
+            traditional_text = await page.locator("main").inner_text()
+            if initial_lang != "zh-Hant" or simplified_saved != "cn" or original_text == simplified_text or original_text != traditional_text:
+                raise AssertionError(f"{label}: Chinese conversion round-trip failed")
+            data["chineseRoundTrip"] = [initial_lang, "zh-CN", simplified_saved, "zh-Hant", original_text == traditional_text]
         await page.screenshot(path=str(output / (label + ".png")), full_page=True,
                               animations="disabled", timeout=30000)
         return data, errors
@@ -99,12 +114,12 @@ async def main():
                     for viewport, (width, height) in VIEWPORTS.items():
                         key = quote(route, safe="").replace("%", "_") or "root"
                         live, live_errors = await snapshot(browser, None, url, width, height,
-                                                           key + "-" + viewport + "-live", output)
+                                                           key + "-" + viewport + "-live", output, route)
                         built, built_errors = await snapshot(browser, generated, url, width, height,
-                                                             key + "-" + viewport + "-built", output)
+                                                             key + "-" + viewport + "-built", output, route)
                         # Browser serialization normalizes HTML independently of BeautifulSoup.
-                        fields = ("article", "text", "images", "title", "bodyClasses", "footer", "links", "mainVisible", "theme", "themeRoundTrip", "returnTop")
-                        diff = [field for field in fields if live[field] != built[field]]
+                        fields = ("article", "text", "images", "title", "bodyClasses", "footer", "links", "mainVisible", "theme", "themeRoundTrip", "returnTop", "chineseRoundTrip")
+                        diff = [field for field in fields if live.get(field) != built.get(field)]
                         if built["brokenImages"]:
                             diff.append("generated brokenImages: " + str(built["brokenImages"]))
                         if built["horizontalOverflow"] != live["horizontalOverflow"]:
