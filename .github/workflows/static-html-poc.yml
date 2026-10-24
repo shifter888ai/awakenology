@@ -3,6 +3,12 @@ on:
   push:
     branches:
       - poc/static-html-build-parity
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'scripts/static_html_poc/**'
+      - '.github/workflows/static-html-poc.yml'
   workflow_dispatch:
 permissions:
   contents: read
