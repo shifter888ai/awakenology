@@ -33,4 +33,4 @@ def transform(source: str, route: str) -> str:
                 duplicate.decompose()
         else:
             soup.head.append(soup.new_tag("meta", attrs={"name": "robots", "content": "noindex,follow"}))
-    return str(soup)
+    return str(soup).replace("<!DOCTYPE html>\n\n", "<!DOCTYPE html>\n", 1)
