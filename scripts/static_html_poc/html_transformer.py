@@ -81,22 +81,30 @@ def _inject_runtime_fragments(soup, route):
     if not soup.select_one("#awakenology-theme-style"):
         fragment = BeautifulSoup((ASSETS / "theme.html").read_text(encoding="utf-8"), "html.parser")
         for node in list(fragment.contents):
-            soup.head.append(node)
+            if getattr(node, "name", None):
+                soup.head.append(node)
     if not soup.find("script", string=lambda text: text and 'var KEY="awakenology-theme"' in text):
         fragment = BeautifulSoup((ASSETS / "theme-toggle.html").read_text(encoding="utf-8"), "html.parser")
         for node in list(fragment.contents):
-            soup.head.append(node)
+            if getattr(node, "name", None):
+                soup.head.append(node)
     if not soup.find("script", attrs={"type": "module"}):
         fragment = BeautifulSoup((ASSETS / "chinese-toggle.html").read_text(encoding="utf-8"), "html.parser")
         for node in list(fragment.contents):
-            soup.head.append(node)
+            if getattr(node, "name", None):
+                soup.head.append(node)
 
     # The Worker removes existing icon declarations before adding the canonical favicon.
     for link in list(soup.head.find_all("link")):
         rel = [item.lower() for item in (link.get("rel") or [])]
         if "icon" in rel or "apple-touch-icon" in rel:
             link.decompose()
-    soup.head.append(soup.new_tag("link", rel="icon", type="image/png", href=FAVICON))
+    favicon = soup.new_tag("link", rel="icon", type="image/png", href=FAVICON)
+    structured_data = soup.head.find("script", attrs={"type": "application/ld+json"})
+    if structured_data:
+        structured_data.insert_before(favicon)
+    else:
+        soup.head.append(favicon)
 
     body = soup.body
     classes = list(body.get("class", []))
