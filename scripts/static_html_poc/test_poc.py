@@ -11,6 +11,11 @@ class ParityTests(unittest.TestCase):
         self.assertEqual(rules_for("/Chinese/").language, "zh-Hant")
         self.assertIsNone(rules_for("/ai-search/").canonical)
         self.assertTrue(rules_for("/ai-search/").noindex)
+        self.assertEqual(rules_for("/Chinese").language, "zh-Hant")
+        self.assertEqual(rules_for("/Chinese").route, "/Chinese/")
+        self.assertTrue(rules_for("/ai-search").noindex)
+        self.assertIsNone(rules_for("/ai-search").canonical)
+        self.assertEqual(rules_for("/ai-search").route, "/ai-search/")
         with self.assertRaises(ValueError):
             rules_for("relative")
 
