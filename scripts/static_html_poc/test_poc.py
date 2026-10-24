@@ -18,6 +18,14 @@ class ParityTests(unittest.TestCase):
         result = transform(SOURCE, "/English/")
         self.assertTrue(validate(SOURCE, result)["pass"])
         self.assertEqual(result, transform(result, "/English/"))
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(result, "html.parser")
+        self.assertEqual(len(soup.select("#awakenology-theme-style")), 1)
+        self.assertEqual(len(soup.select('link[rel="icon"][href="/gallery/favicons/favicon.png"]')), 1)
+        self.assertIn("awakenology-toc-page", soup.body.get("class", []))
+        self.assertEqual(soup.footer.get("class"), ["footer", "site-footer"])
+        self.assertIn("contact@awakenology.org", str(soup.footer))
+        self.assertEqual(len(soup.select("a.brand svg.brand-symbol")), 1)
         validate_metadata(result, canonical="https://awakenology.space/English/", noindex=False)
 
     def test_open_graph_defaults_and_title(self):
