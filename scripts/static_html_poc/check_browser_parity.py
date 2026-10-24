@@ -70,6 +70,15 @@ async def snapshot(browser, html, url, width, height, label, output):
         top = page.locator("#awakenology-return-top")
         if await top.count() != 1:
             raise AssertionError(f"{label}: missing unique return-to-top control")
+        scrollable = await page.evaluate("document.documentElement.scrollHeight > innerHeight + 450")
+        if scrollable:
+            await page.evaluate("window.scrollTo(0, 450)")
+            await page.wait_for_timeout(150)
+            if not await top.is_visible():
+                raise AssertionError(f"{label}: return-to-top hidden after scrolling")
+            await top.click()
+            await page.wait_for_function("window.scrollY < 20", timeout=5000)
+        data["returnTop"] = "clicked" if scrollable else "short-page"
         await page.screenshot(path=str(output / (label + ".png")), full_page=True,
                               animations="disabled", timeout=30000)
         return data, errors
@@ -94,7 +103,7 @@ async def main():
                         built, built_errors = await snapshot(browser, generated, url, width, height,
                                                              key + "-" + viewport + "-built", output)
                         # Browser serialization normalizes HTML independently of BeautifulSoup.
-                        fields = ("article", "text", "images", "title", "bodyClasses", "footer", "links", "mainVisible", "theme", "themeRoundTrip")
+                        fields = ("article", "text", "images", "title", "bodyClasses", "footer", "links", "mainVisible", "theme", "themeRoundTrip", "returnTop")
                         diff = [field for field in fields if live[field] != built[field]]
                         if built["brokenImages"]:
                             diff.append("generated brokenImages: " + str(built["brokenImages"]))
