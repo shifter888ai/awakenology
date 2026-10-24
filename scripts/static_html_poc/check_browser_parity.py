@@ -16,14 +16,16 @@ JS = """() => {
  if (!node) throw new Error('Missing article/main');
  const rect = node.getBoundingClientRect();
  const imgs = [...node.querySelectorAll('img')];
+ const semantic = n => n.nodeType === 3 ? (n.textContent.trim() ? ["text", n.textContent] : null) :
+   n.nodeType === 1 ? [n.tagName.toLowerCase(), [...n.attributes].map(a => [a.name, a.value]).sort((a,b) => a[0].localeCompare(b[0])), [...n.childNodes].map(semantic).filter(x => x !== null)] : null;
  return {
-   article: node.innerHTML,
-   text: node.textContent,
+   article: JSON.stringify(semantic(node)),
+   text: node.textContent.replace(/\\s+/g, " ").trim(),
    images: imgs.map(x => [x.getAttribute('src'), x.getAttribute('alt'), x.getAttribute('width'), x.getAttribute('height'), x.getAttribute('style')]),
    brokenImages: imgs.filter(x => x.complete && x.naturalWidth === 0).map(x => x.getAttribute('src')),
    title: document.title,
    bodyClasses: [...document.body.classList].sort(),
-   footer: document.querySelector('footer')?.innerHTML ?? null,
+   footer: document.querySelector('footer') ? JSON.stringify(semantic(document.querySelector('footer'))) : null,
    horizontalOverflow: document.documentElement.scrollWidth > innerWidth + 2,
    mainVisible: rect.width > 0 && rect.height > 0,
    theme: document.documentElement.getAttribute('data-theme'),
