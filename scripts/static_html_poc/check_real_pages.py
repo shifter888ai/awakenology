@@ -30,6 +30,9 @@ def main():
             raise AssertionError(f"Fixture changed: {path}: {actual}")
         result = transform(source, route)
         validate(source, result)
+        independent = transform(source, route)
+        if result.encode("utf-8") != independent.encode("utf-8"):
+            raise AssertionError(f"Non-reproducible build output: {path}")
         second = transform(result, route)
         if result != second:
             import difflib
@@ -42,7 +45,7 @@ def main():
             raise AssertionError(f"Non-idempotent: {path}")
         rules = rules_for(route)
         validate_metadata(result, canonical=rules.canonical, noindex=rules.noindex)
-        print(f"PASS {path}: content, images, markup, metadata, idempotence")
+        print(f"PASS {path}: content, images, markup, metadata, reproducibility, idempotence")
     print(f"{len(FIXTURES)}/{len(FIXTURES)} real-page source fixtures passed; live Worker parity is checked separately.")
 
 if __name__ == "__main__":
