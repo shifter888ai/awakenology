@@ -139,9 +139,9 @@ def _replace_footer(soup):
     inner = BeautifulSoup(
         '<div class="footer-inner"><span class="footer-links">'
         '<a class="contact-icon" href="mailto:contact@awakenology.org" aria-label="Email Awakenology" title="Contact"><span aria-hidden="true">✉</span></a>'
-        '<a class="reddit-icon reddit-one" href="https://www.reddit.com/r/EscapeReincarnation/" title="https://www.reddit.com/r/EscapeReincarnation/" aria-label="Reddit: Escape Reincarnation"><img src="/assets/reddit-one.svg" alt=""></a>'
-        '<a class="reddit-icon reddit-two" href="https://www.reddit.com/r/EscapePrisonPlanet/" title="https://www.reddit.com/r/EscapePrisonPlanet/" aria-label="Reddit: Escape Prison Planet"><img src="/assets/reddit-two.svg" alt=""></a>'
-        '<a class="reddit-icon reddit-three" href="https://www.reddit.com/user/Lower-Lingonberry-40/" title="https://www.reddit.com/user/Lower-Lingonberry-40/" aria-label="Reddit: Lower-Lingonberry-40"><img src="/assets/reddit-three.svg" alt=""></a>'
+        '<a class="reddit-icon reddit-one" href="https://www.reddit.com/r/EscapeReincarnation/" aria-label="Reddit: Escape Reincarnation" title="https://www.reddit.com/r/EscapeReincarnation/"><img src="/assets/reddit-one.svg" alt=""></a>'
+        '<a class="reddit-icon reddit-two" href="https://www.reddit.com/r/EscapePrisonPlanet/" aria-label="Reddit: Escape Prison Planet" title="https://www.reddit.com/r/EscapePrisonPlanet/"><img src="/assets/reddit-two.svg" alt=""></a>'
+        '<a class="reddit-icon reddit-three" href="https://www.reddit.com/user/Lower-Lingonberry-40/" aria-label="Reddit: Lower-Lingonberry-40" title="https://www.reddit.com/user/Lower-Lingonberry-40/"><img src="/assets/reddit-three.svg" alt=""></a>'
         '<a class="disclaimer-icon" href="/Disclaimer/" aria-label="Disclaimer" title="Disclaimer"><span aria-hidden="true">ⓘ</span></a>'
         '</span><span>© 2017–YEAR Awakenology</span></div>', "html.parser").div
     copyright = inner.find("span", string=lambda text: text and "© 2017–YEAR" in text)
