@@ -18,5 +18,5 @@ def rules_for(route: str) -> PageRules:
     if not route.startswith("/") or "?" in route or "#" in route or "//" in route:
         raise ValueError("Expected normalized route")
     normalized = route if route == "/" or route.endswith(("/", ".html")) else route + "/"
-    canonical = None if route in NOINDEX else SITE + quote(normalized, safe="/%")
-    return PageRules(route, canonical, LANGUAGE_INDEX.get(route), route in NOINDEX, route in LANGUAGE_INDEX)
+    canonical = None if normalized in NOINDEX else SITE + quote(normalized, safe="/%")
+    return PageRules(normalized, canonical, LANGUAGE_INDEX.get(normalized), normalized in NOINDEX, normalized in LANGUAGE_INDEX)
