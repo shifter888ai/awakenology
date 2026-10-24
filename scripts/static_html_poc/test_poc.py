@@ -20,6 +20,17 @@ class ParityTests(unittest.TestCase):
         self.assertEqual(result, transform(result, "/English/"))
         validate_metadata(result, canonical="https://awakenology.space/English/", noindex=False)
 
+    def test_open_graph_defaults_and_title(self):
+        result = transform(SOURCE, "/English/")
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(result, "html.parser")
+        self.assertEqual(soup.html.get("lang"), "en")
+        self.assertEqual(soup.head.find("meta", attrs={"property": "og:title"})["content"], "Example")
+        self.assertEqual(soup.head.find("meta", attrs={"property": "og:type"})["content"], "website")
+        self.assertEqual(soup.head.find("meta", attrs={"property": "og:site_name"})["content"], "Awakenology")
+        self.assertEqual(soup.head.find("meta", attrs={"property": "og:image"})["content"],
+                         "https://images.squarespace-cdn.com/content/v1/5e46c1ddfed24d662efc3817/6e1d6965-c6b2-49d0-971e-4d42f9bcfaaa/Cosmic%2BEye.jpg")
+
     def test_search_noindex_and_no_canonical(self):
         result = transform(SOURCE, "/ai-search/")
         validate_metadata(result, canonical=None, noindex=True)
