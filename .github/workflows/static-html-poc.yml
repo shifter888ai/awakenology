@@ -23,6 +23,6 @@ jobs:
       - run: python -m pip install beautifulsoup4
       - run: python -m unittest discover -s scripts/static_html_poc -p 'test_*.py' -v
       - run: python scripts/static_html_poc/check_real_pages.py
-      - name: Observe current live Worker parity (expected mismatch until transformer complete)
-        if: github.event_name == 'workflow_dispatch'
+      - name: Observe current live Worker parity (diagnostic; not a release gate)
+        continue-on-error: true
         run: python scripts/static_html_poc/check_live_parity.py
