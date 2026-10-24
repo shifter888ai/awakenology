@@ -52,6 +52,28 @@ class ParityTests(unittest.TestCase):
         )
         self.assertTrue(validate(SOURCE, result)["pass"])
 
+    def test_live_signature_detects_metadata_and_footer_mutations(self):
+        from check_live_parity import signature
+        baseline = transform(SOURCE, "/English/")
+        reference = signature(baseline)
+        self.assertEqual(reference, signature(baseline))
+        mutations = (
+            ('<title>Example</title>', '<title>Changed</title>', "title"),
+            ('href="https://awakenology.space/English/"', 'href="https://invalid.example/"', "canonical"),
+            ('content="Awakenology"', 'content="Changed"', "og_site_name"),
+            ('class="footer site-footer"', 'class="footer altered"', "footer"),
+        )
+        for before, after, field in mutations:
+            with self.subTest(field=field):
+                self.assertIn(before, baseline)
+                altered = baseline.replace(before, after, 1)
+                self.assertNotEqual(reference[field], signature(altered)[field])
+
+    def test_live_signature_rejects_incomplete_html(self):
+        from check_live_parity import signature
+        with self.assertRaises(ValueError):
+            signature("<html><head><title>Broken</title></head></html>")
+
     def test_mutation_fails_closed(self):
         with self.assertRaises(ValueError):
             validate(SOURCE, SOURCE.replace('width="250"', 'width="300"'))
