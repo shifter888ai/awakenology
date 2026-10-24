@@ -91,6 +91,27 @@ class ParityTests(unittest.TestCase):
             validate_metadata("<html><body><main>Missing head</main></body></html>",
                               canonical=None, noindex=False)
 
+    def test_private_editor_excluded_from_public_crawl_inventory(self):
+        from pathlib import Path
+        from urllib.parse import urlsplit, unquote
+        from xml.etree import ElementTree
+        root = Path(__file__).resolve().parents[2]
+        robots = (root / "robots.txt").read_text(encoding="utf-8")
+        disallowed = {line.split(":", 1)[1].strip() for line in robots.splitlines()
+                      if line.lower().startswith("disallow:")}
+        for prefix in ("/editor/", "/auth/", "/api/editor/"):
+            with self.subTest(prefix=prefix):
+                self.assertIn(prefix, disallowed)
+        sitemap = ElementTree.parse(root / "sitemap.xml")
+        for loc in sitemap.iter("{http://www.sitemaps.org/schemas/sitemap/0.9}loc"):
+            route = unquote(urlsplit(loc.text or "").path)
+            with self.subTest(route=route):
+                self.assertFalse(any(route.startswith(prefix) for prefix in disallowed))
+                self.assertFalse(route.startswith("/ai-search/"))
+                self.assertFalse(any(part in route.lower() for part in
+                                     ("/new-page-generator/", "/word-generator/", "/html-generator/")))
+        # This is a static inventory guard, not an authenticated live-host audit.
+
     def test_mutation_fails_closed(self):
         with self.assertRaises(ValueError):
             validate(SOURCE, SOURCE.replace('width="250"', 'width="300"'))
