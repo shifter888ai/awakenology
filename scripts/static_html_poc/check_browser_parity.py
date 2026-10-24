@@ -45,10 +45,12 @@ async def snapshot(browser, html, url, width, height, label, output):
             if response is None or response.status != 200:
                 raise AssertionError(f"{label}: live HTTP status not 200")
         else:
-            # A base URL resolves site assets without publishing the generated document.
-            base = '<base href="' + url + '">'
-            html = html.replace("<head>", "<head>" + base, 1)
-            await page.set_content(html, wait_until="domcontentloaded", timeout=45000)
+            # Fulfill only the requested document at its real origin; assets remain live.
+            # Unlike set_content(), this gives localStorage and same-origin scripts a valid origin.
+            await page.route(url, lambda route: route.fulfill(status=200, content_type="text/html; charset=utf-8", body=html))
+            response = await page.goto(url, wait_until="domcontentloaded", timeout=45000)
+            if response is None or response.status != 200:
+                raise AssertionError(f"{label}: generated document did not load")
         await page.wait_for_timeout(1200)
         data = await page.evaluate(JS)
         await page.screenshot(path=str(output / (label + ".png")), full_page=True,
