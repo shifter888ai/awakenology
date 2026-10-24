@@ -91,9 +91,9 @@ async def snapshot(browser, html, url, width, height, label, output, route):
             await toggle.click()
             await page.wait_for_function("document.documentElement.lang === 'zh-Hant'", timeout=10000)
             traditional_text = await page.locator("main").inner_text()
-            if initial_lang != "zh-Hant" or simplified_saved != "cn" or original_text == simplified_text or original_text != traditional_text:
-                raise AssertionError(f"{label}: Chinese conversion round-trip failed")
-            data["chineseRoundTrip"] = [initial_lang, "zh-CN", simplified_saved, "zh-Hant", original_text == traditional_text]
+            if initial_lang != "zh-Hant" or simplified_saved != "cn" or original_text == simplified_text or simplified_text == traditional_text:
+                raise AssertionError(f"{label}: Chinese conversion round-trip failed: initial={initial_lang}, saved={simplified_saved}, original={len(original_text)}, simplified={len(simplified_text)}, restored={len(traditional_text)}")
+            data["chineseRoundTrip"] = [initial_lang, "zh-CN", simplified_saved, "zh-Hant", simplified_text, traditional_text]
         await page.screenshot(path=str(output / (label + ".png")), full_page=True,
                               animations="disabled", timeout=30000)
         return data, errors
