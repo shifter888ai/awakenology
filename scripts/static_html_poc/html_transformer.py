@@ -5,8 +5,9 @@ be applied during generation. BeautifulSoup serialization can normalize legacy H
 the article subtree preservation gate remains mandatory.
 """
 from pathlib import Path
+from urllib.parse import quote
 from bs4 import BeautifulSoup, NavigableString
-from page_rules import rules_for
+from page_rules import SITE, rules_for
 
 ASSETS = Path(__file__).parent / "assets"
 DEFAULT_OG_IMAGE = (
@@ -177,7 +178,8 @@ def transform(source: str, route: str) -> str:
         _dedupe_meta(soup, "property", "og:description", description_value)
 
     for prop, value in (
-        ("og:image", DEFAULT_OG_IMAGE), ("og:url", rules.canonical),
+        ("og:image", DEFAULT_OG_IMAGE),
+        ("og:url", SITE + quote(rules.route, safe="/%")),
         ("og:type", "website"), ("og:site_name", SITE_NAME),
     ):
         if value and not soup.head.find("meta", attrs={"property": prop}):
