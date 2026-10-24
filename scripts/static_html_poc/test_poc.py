@@ -25,7 +25,9 @@ class ParityTests(unittest.TestCase):
         self.assertIn("awakenology-toc-page", soup.body.get("class", []))
         self.assertEqual(soup.footer.get("class"), ["footer", "site-footer"])
         self.assertIn("contact@awakenology.org", str(soup.footer))
-        self.assertEqual(len(soup.select("a.brand svg.brand-symbol")), 1)
+        branded = transform(SOURCE.replace("<main>", '<a class="brand" href="/">Home</a><main>'), "/English/")
+        branded_soup = BeautifulSoup(branded, "html.parser")
+        self.assertEqual(len(branded_soup.select("a.brand svg.brand-symbol")), 1)
         validate_metadata(result, canonical="https://awakenology.space/English/", noindex=False)
 
     def test_open_graph_defaults_and_title(self):
