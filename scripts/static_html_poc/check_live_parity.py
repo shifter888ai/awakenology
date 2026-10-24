@@ -51,7 +51,7 @@ def main():
         failures += bool(differing)
     if failures:
         raise SystemExit(f"{failures} pages differ from current Worker output; do not deploy")
-    print("Five-page signature parity passed (not a byte-for-byte or visual comparison).")
+    print(f"{len(FIXTURES)}-page signature parity passed (not a byte-for-byte or visual comparison).")
 
 if __name__ == "__main__":
     main()
