@@ -74,6 +74,23 @@ class ParityTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             signature("<html><head><title>Broken</title></head></html>")
 
+    def test_metadata_validator_rejects_duplicates_and_conflicts(self):
+        result = transform(SOURCE, "/English/")
+        canonical = "https://awakenology.space/English/"
+        with self.assertRaises(ValueError):
+            validate_metadata(result.replace("</head>", '<link rel="CANONICAL" href="' + canonical + '"></head>'),
+                              canonical=canonical, noindex=False)
+        with self.assertRaises(ValueError):
+            validate_metadata(result.replace("</head>", '<meta name="robots" content="noindex,follow"></head>'),
+                              canonical=canonical, noindex=False)
+        search = transform(SOURCE, "/ai-search/")
+        with self.assertRaises(ValueError):
+            validate_metadata(search.replace("</head>", '<meta name="robots" content="index,follow"></head>'),
+                              canonical=None, noindex=True)
+        with self.assertRaises(ValueError):
+            validate_metadata("<html><body><main>Missing head</main></body></html>",
+                              canonical=None, noindex=False)
+
     def test_mutation_fails_closed(self):
         with self.assertRaises(ValueError):
             validate(SOURCE, SOURCE.replace('width="250"', 'width="300"'))
