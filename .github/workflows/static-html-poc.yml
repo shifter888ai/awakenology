@@ -43,5 +43,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: static-html-browser-parity
-          path: browser-parity-report.json
+          path: |
+            browser-parity-report.json
+            browser-parity-screenshots/
           if-no-files-found: warn
