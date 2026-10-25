@@ -11,7 +11,7 @@ FIXTURES = {
     "/Japanese/": ("Japanese/index.html", "b3cac68d40b7cefd89070b4eb3d726f4a4529b8a"),
     "/Chinese/": ("Chinese/index.html", "daf2be37bc85af3d77064c262a1c4045559ea3a7"),
     "/ai-search/": ("ai-search/index.html", "9bb335d6ef466e1e21e1547694377bbddb92e764"),
-    "/大揭露2/": ("大揭露2/index.html", "d9bc3b04e240264c62caba1f2864307eab4aa21a"),
+    "/大揭露2/": ("大揭露2/index.html", "252d797d7d93f4fcd4cb10d3d45d130f3437e192"),
     "/與退化派對話8/": ("與退化派對話8/index.html", "bc62b6b2266c4b826a12168237294062352a4d53"),
     "/What-Is-Hypnosis/": ("What-Is-Hypnosis/index.html", "8639f0376b704e8f3e6aed1328fd4df4bfe1abef"),
     "/アインシュタイン協議百年催眠実験/": ("アインシュタイン協議百年催眠実験/index.html", "ae7755914dde8b02b66c1dd6970059a6a3991d03"),
