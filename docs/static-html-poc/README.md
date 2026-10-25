@@ -40,3 +40,7 @@ Phase 3: the new `check_full_inventory.py` discovers tracked public `index.html`
 - `SoC-AssessPoints-4-Thought-Expansion-Area/index.html`: text and markup integrity failure; images passed.
 
 Do not suppress either failure or modify article source merely to pass. Investigate the parser/transformer against the original and live Worker DOM, preserve original content 100%, and rerun the complete gate. Full live Worker comparison for every route, private-host HTTP/auth checks, performance, redirects/404 behavior, and rollback rehearsal remain pending. This branch is not deployable or merge-approved.
+
+### Investigation of the two blockers
+
+Both affected English SoC assessment source files contain malformed head markup: the `hreflang="en"` alternate `<link>` has no closing `>` before the next `<link>`, and the next tag has an extra `>`. This can change parser recovery and cause source-to-build article subtree differences. The diagnostic `python scripts/static_html_poc/diagnose_malformed_head.py` asserts these exact source defects. **No article text, formatting or source metadata was edited in this investigation.** Preferred remedy: separately review a narrowly scoped metadata-only correction, then re-run the 122-route inventory and nine-route live/browser gates. Do not bypass content integrity checks.
