@@ -219,4 +219,14 @@ def transform(source: str, route: str) -> str:
     if output.startswith(doctype_prefix):
         remainder = output[len(doctype_prefix):].lstrip(chr(10))
         output = doctype_prefix + chr(10) + remainder
+    # BeautifulSoup drops one of two trailing article newline text nodes on
+    # two legacy English SoC pages. Restore only that source whitespace;
+    # never normalize, rewrite or suppress an article-content mismatch.
+    source_article_end = source.find("</article>")
+    if source_article_end >= 2 and source[source_article_end - 2:source_article_end] == "\\n\\n":
+        output_article_end = output.find("</article>")
+        if output_article_end >= 1 and output[output_article_end - 1:output_article_end] == "\\n" and (
+            output_article_end < 2 or output[output_article_end - 2:output_article_end] != "\\n\\n"
+        ):
+            output = output[:output_article_end] + "\\n" + output[output_article_end:]
     return output
