@@ -219,18 +219,4 @@ def transform(source: str, route: str) -> str:
     if output.startswith(doctype_prefix):
         remainder = output[len(doctype_prefix):].lstrip(chr(10))
         output = doctype_prefix + chr(10) + remainder
-    # Preserve a source article's second trailing newline when BeautifulSoup
-    # serialization collapses precisely that one whitespace character.
-    # Replace only the exact parsed article subtree; no other mismatch is masked.
-    source_article = BeautifulSoup(source, "html.parser").select_one("article.article, .article")
-    output_article = BeautifulSoup(output, "html.parser").select_one("article.article, .article")
-    if source_article is not None and output_article is not None:
-        original_markup, generated_markup = str(source_article), str(output_article)
-        newline = chr(10)
-        if (original_markup.endswith(newline * 2 + "</article>") and
-                generated_markup.endswith(newline + "</article>") and
-                original_markup == generated_markup[:-len("</article>")] + newline + "</article>"):
-            if output.count(generated_markup) != 1:
-                raise ValueError("Ambiguous article whitespace restoration")
-            output = output.replace(generated_markup, original_markup, 1)
     return output
