@@ -219,18 +219,14 @@ def transform(source: str, route: str) -> str:
     if output.startswith(doctype_prefix):
         remainder = output[len(doctype_prefix):].lstrip(chr(10))
         output = doctype_prefix + chr(10) + remainder
-    # Match the parsed source article's trailing whitespace exactly. Some
-    # legacy sources gain a second newline during BeautifulSoup parse recovery.
-    # This only restores a missing newline; the full integrity gate still checks
-    # every article text node, image and markup byte after serialization.
+    # Restore exactly the trailing article newline run from the raw source.
+    # HTML parser serialization may collapse this run; never modify article text.
     newline = chr(10)
-    original_article = BeautifulSoup(source, "html.parser").select_one("article.article, .article")
-    built_article = BeautifulSoup(output, "html.parser").select_one("article.article, .article")
-    if original_article and built_article:
-        original_markup = str(original_article)
-        built_markup = str(built_article)
-        if original_markup.endswith(newline * 2 + "</article>") and built_markup.endswith(newline + "</article>"):
-            output_article_end = output.find("</article>")
-            if output_article_end >= 0:
-                output = output[:output_article_end] + newline + output[output_article_end:]
+    source_end = source.find("</article>")
+    output_end = output.find("</article>")
+    if source_end >= 0 and output_end >= 0:
+        source_run = len(source[:source_end]) - len(source[:source_end].rstrip(newline))
+        output_run = len(output[:output_end]) - len(output[:output_end].rstrip(newline))
+        if source_run > output_run:
+            output = output[:output_end] + newline * (source_run - output_run) + output[output_end:]
     return output
