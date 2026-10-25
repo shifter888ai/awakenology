@@ -166,7 +166,7 @@ def transform(source: str, route: str) -> str:
     original_article = None
     parse_source = source
     if rules.route in OPAQUE_ARTICLE_ROUTES:
-        matches = list(re.finditer(r"<article\\b[^>]*>.*?</article\\s*>", source, re.I | re.S))
+        matches = list(re.finditer(r"<article\b[^>]*>.*?</article\s*>", source, re.I | re.S))
         if len(matches) != 1 or ARTICLE_PLACEHOLDER in source:
             raise ValueError(f"Expected exactly one unmodified legacy article block: matches={len(matches)}, marker_present={ARTICLE_PLACEHOLDER in source}")
         match = matches[0]
