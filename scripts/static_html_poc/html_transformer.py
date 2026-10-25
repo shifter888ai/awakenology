@@ -4,6 +4,7 @@ The runtime fragments are copied from worker.js into this isolated PoC so they c
 be applied during generation. BeautifulSoup serialization can normalize legacy HTML;
 the article subtree preservation gate remains mandatory.
 """
+import re
 from pathlib import Path
 from urllib.parse import quote
 from bs4 import BeautifulSoup, NavigableString
@@ -150,9 +151,28 @@ def _replace_footer(soup):
     footer.append(inner)
 
 
+# These two legacy articles contain markup that BeautifulSoup rewrites on serialization.
+# Keep their complete original article blocks opaque while modifying page chrome/SEO.
+# Never silently fall back to a lossy transformation if the expected block changes.
+OPAQUE_ARTICLE_ROUTES = {
+    "/SoC-AssessPoints-3-Spiritual-Connection-Area/",
+    "/SoC-AssessPoints-4-Thought-Expansion-Area/",
+}
+ARTICLE_PLACEHOLDER = "AWAKENOLOGY_OPAQUE_ARTICLE_6f8e2d"
+
+
 def transform(source: str, route: str) -> str:
     rules = rules_for(route)
-    soup = BeautifulSoup(source, "html.parser")
+    original_article = None
+    parse_source = source
+    if rules.route in OPAQUE_ARTICLE_ROUTES:
+        matches = list(re.finditer(r"<article\\b[^>]*>.*?</article\\s*>", source, re.I | re.S))
+        if len(matches) != 1 or ARTICLE_PLACEHOLDER in source:
+            raise ValueError("Expected exactly one unmodified legacy article block")
+        match = matches[0]
+        original_article = match.group(0)
+        parse_source = source[:match.start()] + "<!--" + ARTICLE_PLACEHOLDER + "-->" + source[match.end():]
+    soup = BeautifulSoup(parse_source, "html.parser")
     if not soup.html or not soup.head or not soup.body:
         raise ValueError("Incomplete HTML document")
 
@@ -219,4 +239,9 @@ def transform(source: str, route: str) -> str:
     if output.startswith(doctype_prefix):
         remainder = output[len(doctype_prefix):].lstrip(chr(10))
         output = doctype_prefix + chr(10) + remainder
+    if original_article is not None:
+        marker = "<!--" + ARTICLE_PLACEHOLDER + "-->"
+        if output.count(marker) != 1:
+            raise ValueError("Opaque article placeholder missing or duplicated")
+        output = output.replace(marker, original_article)
     return output
