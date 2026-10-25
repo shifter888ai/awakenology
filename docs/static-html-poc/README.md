@@ -28,3 +28,15 @@ These are limited tests: a matching signature does **not** establish full HTML, 
 - Existing repository Content Integrity, Sitemap route parity, SEO metadata inventory, and Live SEO runtime audit workflows.
 
 No Worker routing or production deployment change is authorized by this PoC.
+
+
+## Phase 2 and Phase 3 status (2026-10-25)
+
+Phase 2: nine pinned routes × desktop/iPhone Chromium passed rendered DOM, theme round-trip, return-to-top and Chinese conversion checks. Screenshots are compared with equal dimensions and a strict 0.05% changed-pixel tolerance (per-pixel channel difference >12); exact matches are also reported. This is scoped to pinned fixtures, not every route.
+
+Phase 3: the new `check_full_inventory.py` discovers tracked public `index.html` routes directly from Git and excludes private Editor/Word Generator/HTML Generator assets. It records SHA-256 fingerprints and validates source content, markup, image preservation, metadata, reproducibility and idempotence without deployment. Initial run: **120 of 122 public routes passed; two blocked**:
+
+- `SoC-AssessPoints-3-Spiritual-Connection-Area/index.html`: text and markup integrity failure; images passed.
+- `SoC-AssessPoints-4-Thought-Expansion-Area/index.html`: text and markup integrity failure; images passed.
+
+Do not suppress either failure or modify article source merely to pass. Investigate the parser/transformer against the original and live Worker DOM, preserve original content 100%, and rerun the complete gate. Full live Worker comparison for every route, private-host HTTP/auth checks, performance, redirects/404 behavior, and rollback rehearsal remain pending. This branch is not deployable or merge-approved.
