@@ -1,11 +1,4 @@
-"""Diagnose known malformed source head tags without modifying source articles.
-
-These two source documents have an unterminated hreflang=en link immediately
-followed by another <link, then a doubled closing >. Record this explicitly:
-the full-inventory integrity gate must continue to fail closed until a
-separately reviewed source-metadata repair or proven parser-safe fix lands.
-"""
-from pathlib import Path
+"""Regression guard for repaired SoC alternate-link metadata; article bodies untouched."""
 from check_real_pages import ROOT
 
 AFFECTED = (
@@ -23,10 +16,10 @@ def main():
         assert head.count('hreflang="x-default"') == 1, path
         en = head.index('hreflang="en"')
         next_link = head.index("<link", en)
-        assert head[en:next_link].endswith('"'), path
-        assert head[next_link:].find('">>') != -1, path
-        print(f"CONFIRMED {path}: malformed hreflang metadata in head; article source left untouched")
-    print("Two metadata defects documented; full-route integrity failures remain release blockers.")
+        assert head[en:next_link].endswith('">'), path
+        assert '">><link rel="alternate" hreflang="ja"' not in head, path
+        print(f"PASS {path}: alternate links are delimited correctly")
+    print("Two metadata repairs verified; full-route content gate still required.")
 
 
 if __name__ == "__main__":
