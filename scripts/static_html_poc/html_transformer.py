@@ -219,14 +219,4 @@ def transform(source: str, route: str) -> str:
     if output.startswith(doctype_prefix):
         remainder = output[len(doctype_prefix):].lstrip(chr(10))
         output = doctype_prefix + chr(10) + remainder
-    # Restore exactly the trailing article newline run from the raw source.
-    # HTML parser serialization may collapse this run; never modify article text.
-    newline = chr(10)
-    source_end = source.find("</article>")
-    output_end = output.find("</article>")
-    if source_end >= 0 and output_end >= 0:
-        source_run = len(source[:source_end]) - len(source[:source_end].rstrip(newline))
-        output_run = len(output[:output_end]) - len(output[:output_end].rstrip(newline))
-        if source_run > output_run:
-            output = output[:output_end] + newline * (source_run - output_run) + output[output_end:]
     return output
