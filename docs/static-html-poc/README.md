@@ -44,3 +44,9 @@ Phase 3: complete. At commit `81b353f`, both full-inventory CI runs passed **122
 - Demonstrate a reproducible build and a measured performance improvement with comparable sampling; document exact deployment and rollback commands, prior known-good Worker revision, DNS/routing implications, and a rehearsal in an isolated environment. No production switch as part of the rehearsal.
 - Refresh this document with observed evidence and unresolved differences before seeking explicit human approval. Keep PR #255 draft, unmerged and undeployed.
 
+
+### Phase 4 Worker routing inventory (source inspection)
+
+`wrangler.jsonc` sets `assets.run_worker_first=true`, `assets.not_found_handling=404-page`, and `main=./worker.js`. The Worker intercepts requests before assets, separates `editor.awakenology.space` by hostname, and performs authenticated editor and publishing actions. The public host returns 404 for editor paths and publishing APIs. On the editor host, the OAuth start/callback/logout routes and signed session gate remain dynamic; authenticated editor assets receive `X-Robots-Tag: noindex, nofollow, noarchive` and `Cache-Control: private, no-store`. Public HTML alone is transformed by HTMLRewriter; non-HTML assets pass through unchanged. AI Search receives noindex treatment. These are source-observed contracts, not a live private-host audit.
+
+**Architecture constraint:** build-time HTML may replace only the public HTML rewriting layer. Keep the Worker as the request router and authentication/API boundary, or establish independently tested equivalent handling before proposing removal. Never put editor credentials or authenticated private-host requests into public CI artifacts. Missing-path, redirect, query-string, Unicode and HTTP-header observations remain pending.
