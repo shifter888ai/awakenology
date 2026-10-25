@@ -35,6 +35,8 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m pip install beautifulsoup4
+      - name: Diagnose known malformed source metadata
+        run: python scripts/static_html_poc/diagnose_malformed_head.py
       - name: Validate all tracked public HTML routes
         run: python scripts/static_html_poc/check_full_inventory.py
       - name: Upload complete route inventory and failure report
