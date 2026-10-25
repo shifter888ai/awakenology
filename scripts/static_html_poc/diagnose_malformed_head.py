@@ -23,7 +23,7 @@ def main():
         assert head.count('hreflang="x-default"') == 1, path
         en = head.index('hreflang="en"')
         next_link = head.index("<link", en)
-        assert head[en:next_link].endswith('"<'), path
+        assert head[en:next_link].endswith('"'), path
         assert head[next_link:].find('">>') != -1, path
         print(f"CONFIRMED {path}: malformed hreflang metadata in head; article source left untouched")
     print("Two metadata defects documented; full-route integrity failures remain release blockers.")
