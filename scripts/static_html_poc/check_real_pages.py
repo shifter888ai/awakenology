@@ -9,7 +9,7 @@ FIXTURES = {
     "/": ("index.html", "2308340cc91e8119fa276a9ff033e7ee9eb64d52"),
     "/English/": ("English/index.html", "4a94b52348f3783999d48e9e1e4fa95a11a1bb64"),
     "/Japanese/": ("Japanese/index.html", "b3cac68d40b7cefd89070b4eb3d726f4a4529b8a"),
-    "/Chinese/": ("Chinese/index.html", "c4a4e73ada9e67f2900b1cfc36d8f81d47442ae8"),
+    "/Chinese/": ("Chinese/index.html", "daf2be37bc85af3d77064c262a1c4045559ea3a7"),
     "/ai-search/": ("ai-search/index.html", "9bb335d6ef466e1e21e1547694377bbddb92e764"),
     "/大揭露2/": ("大揭露2/index.html", "252d797d7d93f4fcd4cb10d3d45d130f3437e192"),
     "/與退化派對話8/": ("與退化派對話8/index.html", "bc62b6b2266c4b826a12168237294062352a4d53"),
