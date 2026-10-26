@@ -119,7 +119,7 @@ function cleanGeneratedArticle(article){
  // Merge adjacent spans only when every attribute (including inline styles) matches exactly.
  for(const parent of [article,...article.querySelectorAll('*')]){
   let child=parent.firstElementChild;
-  while(child){const next=child.nextElementSibling;
+  while(child){const next=child.nextSibling;
    if(next&&child.localName==='span'&&next.localName==='span'&&child.attributes.length===next.attributes.length&&[...child.attributes].every(a=>next.getAttribute(a.name)===a.value)){
     child.append(...next.childNodes);next.remove();continue;
    }child=next;
