@@ -9,9 +9,9 @@ NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
 def test_word_size_inheritance_and_text_fidelity():
     source = GENERATOR.read_text(encoding="utf-8")
-    match = re.search(r"async function restoreWordFormatting\(buffer,article\)\{.*?\n\}\n\nlet docxFile=", source, re.S)
+    match = re.search(r"async function restoreWordFormatting\(buffer,article\)\{.*?\n\}(?=\n\n(?:\/\/|function |let docxFile=))", source, re.S)
     assert match, "Word restoration function missing"
-    function = match.group(0).rsplit("\n\nlet docxFile=", 1)[0]
+    function = match.group(0)
     styles = f'''<w:styles xmlns:w="{NS}">
       <w:docDefaults><w:rPrDefault><w:rPr><w:sz w:val="20"/></w:rPr></w:rPrDefault></w:docDefaults>
       <w:style w:type="paragraph" w:styleId="Parent"><w:rPr><w:sz w:val="28"/></w:rPr></w:style>
