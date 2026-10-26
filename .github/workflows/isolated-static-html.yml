@@ -1,0 +1,39 @@
+name: Isolated static HTML artifact (no deployment)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/static_html_migration/**'
+      - '.github/workflows/isolated-static-html.yml'
+permissions:
+  contents: read
+jobs:
+  isolated-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current proposed source
+        uses: actions/checkout@v4
+        with:
+          path: source
+          persist-credentials: false
+      - name: Checkout frozen PoC transformer
+        uses: actions/checkout@v4
+        with:
+          ref: 8197b9391f4c3fc55331ce1b0c35bbe00b3f86ee
+          path: poc
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install beautifulsoup4
+      - name: Build source-only isolated output
+        env:
+          POC_SCRIPTS: ${{ github.workspace }}/poc/scripts/static_html_poc
+        run: python source/scripts/static_html_migration/build_isolated.py
+      - name: Upload diagnostic output (never deploy)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: isolated-static-html-diagnostic
+          path: source/static-html-isolated-output/
+          if-no-files-found: warn
