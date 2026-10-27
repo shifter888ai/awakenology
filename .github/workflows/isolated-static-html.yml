@@ -30,6 +30,8 @@ jobs:
         env:
           POC_SCRIPTS: ${{ github.workspace }}/poc/scripts/static_html_poc
         run: python source/scripts/static_html_migration/build_isolated.py
+      - name: Verify isolated route inventory and artifact hashes
+        run: python source/scripts/static_html_migration/verify_inventory.py
       - name: Upload diagnostic output (never deploy)
         if: always()
         uses: actions/upload-artifact@v4
