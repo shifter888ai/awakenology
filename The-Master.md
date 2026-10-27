@@ -611,3 +611,14 @@ The private visual editor at `https://editor.awakenology.space/editor/` is an ap
 
 ### Global copyright year range
 The Worker must emit `© 2017–CURRENT_YEAR Awakenology` directly in the delivered footer HTML, substituting the current UTC calendar year at request time. 2017 is the fixed founding year. Do not rely on browser JavaScript to rewrite the copyright text.
+
+
+## DOCX article fidelity and rendered-layout baseline (Article 5, 2026-10-27)
+
+- Preserve source article wording, punctuation, whitespace, order, image sources/attributes, and meaningful emphasis, colors, alignment, and spacing unless the site owner explicitly approves a correction. A text-equivalent HTML rewrite is not automatically a visually equivalent rewrite.
+- Generated DOCX HTML must be cleaned conservatively: merge only genuinely equivalent redundant spans; reject malformed Word/Office residue and stale or cross-article SEO/social metadata. Never indiscriminately strip styles, list markers, or layout semantics. Fail closed on ambiguous conversion and keep the original DOCX as the reference.
+- Represent list bullets with portable HTML list semantics or explicit Unicode bullet markers, never depend on a Wingdings/private font glyph such as the letter l. Preserve the number, order, labels, and text of every item.
+- List indentation must remain readable on narrow mobile viewports: the bullet sits to the left of its item text and continuation lines align under the text, not the bullet; legacy Word pt margins and negative text-indent must not cause overflow or excessive inset.
+- Check actual rendered output in both dark/light modes and TC/ST variants where applicable. Source/CI checks alone cannot certify visual fidelity. The live canonical page and user confirmation close a visual correction.
+- Keep article-specific regressions (including the frozen Article 5 text/image fixture and three bullet markers) as permanent safeguards; update a fixture only for an explicitly documented, approved intentional content/glyph change, never to make a failing test green.
+- Keep Generator fixes, individual article corrections, and production deployment as separately scoped, reviewable changes. PR creation/merge is not proof of deployment; human approval and live verification remain required.

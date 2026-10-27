@@ -267,3 +267,13 @@ Some legacy pages contain a .footer structure and page-specific footer CSS that 
 5. Re-fetch the committed file and verify exactly one footer and the approved structure before asking the user to live-test.
 6. The Worker is the source of truth for the delivered global footer. Source HTML and CSS must remain structurally compatible; runtime replacement is not permission to retain conflicting legacy styles or duplicate active footers.
 7. Preserve 2017 as the founding year. An approved displayed year range must not be interpreted as changing that founding date.
+
+
+### Locked DOCX / article correction sequence (Article 5 lessons)
+
+1. Diagnose against the committed source and original DOCX or approved baseline; inventory article text, images, headings, formatting, bullets, and metadata before editing.
+2. Fix the upstream Generator separately from any previously generated article. Use a scoped PR; never silently regenerate or rewrite an approved article.
+3. For an article cleanup, make the smallest safe change, retain meaningful formatting, and add a frozen text/image regression where useful. Confirm the test is *executed* by CI, not merely present in the repository.
+4. Verify visible list markers and responsive hanging indentation, not just exact extracted text. Avoid Wingdings glyph dependencies and legacy Word margin/text-indent on mobile.
+5. Run required CI, inspect the diff, obtain human approval, merge, verify deployment, and check the live canonical page on a narrow phone and desktop as appropriate. Ask for the site owner's final visual confirmation before closing.
+6. When a live defect is reported, repair only the affected element and extend the regression to cover the missed failure mode. Never relax a fixture solely to pass CI.

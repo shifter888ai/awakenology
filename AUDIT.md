@@ -675,3 +675,13 @@ Reference end-to-end acceptance test: PR #160 (article whitespace correction), m
 ### Global copyright runtime verification
 - [ ] Worker-delivered footer HTML shows `© 2017–CURRENT_YEAR Awakenology` with the current UTC calendar year, without requiring browser JavaScript.
 - [ ] Footer copyright remains identical with JavaScript enabled or disabled across homepage, Search/Ask, TOCs, and articles.
+
+
+### DOCX-generated article and visual-parity gate (Article 5 regression)
+- [ ] Compare article text including whitespace/entities and image tags/attributes against the original source or frozen fixture; independently verify emphasis, colors, headings, spacing, and list structure.
+- [ ] Count every original bullet/list item and verify its visible marker, label, order, and content after conversion; flag Wingdings/font-dependent markers and Word conditional-list comments even when text parity passes.
+- [ ] Inspect phone-width rendering for bullet/continuation-line alignment, wrapping, overflow, excessive Word indentation, and image placement; inspect desktop as well.
+- [ ] Validate title, description, canonical, OG title/description/image against the *current* article, not an earlier page/template.
+- [ ] Ensure relevant regression tests are actually discovered and executed in CI logs; a green workflow with an undiscovered test is insufficient.
+- [ ] Treat PR live audits as checks of currently deployed production, not proof that unmerged or newly merged changes are live; verify deployment and obtain live-page visual confirmation separately.
+- [ ] Preserve Article 5's frozen text/image fixture and its three intentionally repaired bullet glyphs; fixture edits require explicit documented justification.
