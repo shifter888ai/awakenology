@@ -77,14 +77,12 @@ clean.addEventListener('click',()=>{
   if(JSON.stringify(before)!==JSON.stringify(after))throw Error('Content or media parity failed; no output generated.');
   if(!(stats.merged+stats.unwrapped+stats.removed)){say('No safe redundant spans found. Original Git HTML remains unchanged.');return}
   // Replace only the original article inner HTML: keep all head, theme CSS, shared layout and metadata bytes unchanged.
-  const original=new DOMParser().parseFromString(existingHtml,'text/html');
-  const originalArticle=original.querySelector('.article');
-  const opening=existingHtml.indexOf(originalArticle.outerHTML);
-  if(opening<0)throw Error('Cannot isolate original article without rewriting the full page.');
-  const oldOuter=originalArticle.outerHTML;
-  const newOuter=oldOuter.replace(originalArticle.innerHTML,article.innerHTML);
-  if(newOuter===oldOuter)throw Error('No serializable cleanup changes found.');
-  generatedHtml=existingHtml.slice(0,opening)+newOuter+existingHtml.slice(opening+oldOuter.length);
+  const match=/<article\\b[^>]*class=["'][^"']*\\barticle\\b[^"']*["'][^>]*>[\\s\\S]*?<\\/article>/i.exec(existingHtml);
+  if(!match)throw Error('Cannot isolate original article without rewriting the full page.');
+  const openTag=match[0].match(/^<article\\b[^>]*>/i)[0];
+  const newOuter=openTag+article.innerHTML+'</article>';
+  if(newOuter===match[0])throw Error('No serializable cleanup changes found.');
+  generatedHtml=existingHtml.slice(0,match.index)+newOuter+existingHtml.slice(match.index+match[0].length);
   preview.srcdoc=generatedHtml;
   say('Cleanup preview ready: '+stats.merged+' identical adjacent spans merged; '+stats.unwrapped+' empty-attribute wrappers unwrapped; '+stats.removed+' empty spans removed. Article text and media parity passed. Review both themes before creating the draft PR.');
  }catch(e){generatedHtml='';say('Cleanup stopped: '+e.message)}
