@@ -19,6 +19,14 @@ SOURCE_REPORT = ROOT / "site-integrity-report.csv"
 OUT = ROOT / "live-link-asset-report.csv"
 UA = "Awakenology-Link-Asset-Audit/1.0 (+https://awakenology.space/)"
 SKIP = ("#", "data:", "javascript:", "mailto:", "tel:", "sms:")
+# These tools are served only from editor.awakenology.space. The public Worker
+# deliberately returns 404 for /editor/*; that is a security boundary, not a
+# broken public link. Keep private-tool references out of production probes.
+PRIVATE_SOURCE_PREFIXES = ("editor/", "github-editor/")
+PRIVATE_URL_PREFIXES = ("/editor", "/github-editor")
+
+def is_private_url_path(path):
+    return any(path == prefix or path.startswith(prefix + "/") for prefix in PRIVATE_URL_PREFIXES)
 
 def source_base(source):
     if source == "index.html":
@@ -28,6 +36,9 @@ def source_base(source):
     return DOMAIN + "/" + source
 
 def make_url(source, reference):
+    # Private Editor/Generator source files are not deployed on the public host.
+    if source.startswith(PRIVATE_SOURCE_PREFIXES):
+        return ""
     ref = (reference or "").strip()
     if not ref or ref.lower().startswith(SKIP):
         return ""
@@ -35,6 +46,8 @@ def make_url(source, reference):
     absolute = urljoin(base, ref)
     parts = urlsplit(absolute)
     if parts.scheme not in ("http", "https") or parts.netloc.lower() not in {"awakenology.space", "www.awakenology.space"}:
+        return ""
+    if is_private_url_path(parts.path):
         return ""
     # Fragments do not affect the HTTP resource; preserve query strings.
     absolute, _ = urldefrag(absolute)
