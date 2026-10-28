@@ -127,8 +127,8 @@ function cleanGeneratedArticle(article){
  }
  article.normalize();
  if(article.textContent!==before||JSON.stringify([...article.querySelectorAll('img')].map(n=>[n.getAttribute('src'),n.getAttribute('alt')]))!==JSON.stringify(images))throw Error('Cleanup changed article text or images; draft blocked.');
- const residue=article.querySelector('font, o\\:p, [class="15"]');
- if(residue||/mso-|<!--\\[if|<\\/?font\\b/i.test(article.innerHTML))throw Error('Unsupported Word HTML residue remains; draft blocked. Please use the original DOCX and review its formatting.');
+ const residue=article.querySelector('font, o\:p, [class="15"]');
+ if(residue||/mso-|<!--\[if|<\/?font\b/i.test(article.innerHTML))throw Error('Unsupported Word HTML residue remains; draft blocked. Please use the original DOCX and review its formatting.');
 }
 function updateGeneratedMetadata(parsed,article,suppliedTitle){
  const articleTitle=suppliedTitle||article.querySelector('h1,h2,p')?.textContent.trim().slice(0,110);
@@ -136,7 +136,7 @@ function updateGeneratedMetadata(parsed,article,suppliedTitle){
  parsed.title=articleTitle+' | Awakenology';
  const set=(selector,value)=>{let node=parsed.querySelector(selector);if(node)node.content=value;};
  set('meta[property="og:title"]',parsed.title);
- const summary=article.textContent.replace(/\\s+/g,' ').trim().slice(0,155);
+ const summary=article.textContent.replace(/\s+/g,' ').trim().slice(0,155);
  set('meta[name="description"]',summary);
  set('meta[property="og:description"]',summary);
  // Template social image may refer to a completely different article.
