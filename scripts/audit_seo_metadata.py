@@ -55,19 +55,22 @@ def normalize(s):
         s = s[:-len(" | Awakenology")]
     return " ".join(s.split()).casefold()
 
+def page_scope(relative):
+    """Classify private tools separately from public SEO pages."""
+    if relative == "404.html":
+        return "special-404"
+    if relative == "ai-search/index.html":
+        return "special-ai-search"
+    if relative.startswith(("editor/", "github-editor/")):
+        return "special-editor"
+    return "normal"
+
 rows = []
 for path in sorted(ROOT.rglob("*.html")):
     if any(part in (".git", "node_modules") for part in path.parts):
         continue
     relative = path.relative_to(ROOT).as_posix()
-    if relative == "404.html":
-        scope = "special-404"
-    elif relative == "ai-search/index.html":
-        scope = "special-ai-search"
-    elif relative == "editor/index.html":
-        scope = "special-editor"
-    else:
-        scope = "normal"
+    scope = page_scope(relative)
     parser = HeadParser()
     parser.feed(path.read_text(encoding="utf-8"))
     title = parser.titles[0].strip() if parser.titles else ""
@@ -77,7 +80,7 @@ for path in sorted(ROOT.rglob("*.html")):
         flags.append("missing-title")
     if len(parser.titles) > 1:
         flags.append("duplicate-title")
-    if not desc:
+    if not desc and scope == "normal":
         flags.append("missing-description")
     if len(parser.descriptions) > 1:
         flags.append("duplicate-description")
