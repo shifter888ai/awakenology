@@ -149,7 +149,7 @@ const templates={zh:'/與退化派對話8/index.html',ja:'/アインシュタイ
 function say(s){status.textContent=s}
 function validPath(){const p=path.value.trim().replace(/^\/+|\/+$/g,'');return p&&/\.html?$/i.test(p)&&!p.split('/').some(x=>!x||x==='.'||x==='..'||x.startsWith('.'))?p:''}
 async function sha(text){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
-function controls(){generate.disabled=!(docxFile&&validPath()&&targetLoaded&&checkedPath===validPath());publish.disabled=!(generatedHtml&&targetLoaded&&checkedPath===validPath())}
+function controls(){generate.disabled=!(docxFile&&validPath());publish.disabled=!(generatedHtml&&targetLoaded&&checkedPath===validPath())}
 async function loadTarget(){
  const request=++targetRequest;
  targetLoaded=false;checkedPath='';invalidatePreview();baselineSha256='NEW';lang.disabled=false;templateHtml='';
@@ -174,7 +174,11 @@ path.addEventListener('change',loadTarget);path.addEventListener('blur',()=>{if(
 lang.addEventListener('change',()=>{if(baselineSha256!=='NEW')return;templateHtml='';invalidatePreview();controls()});
 title.addEventListener('input',()=>{invalidatePreview();controls()});
 generate.addEventListener('click',async()=>{
- if(!docxFile||!validPath()||!targetLoaded||checkedPath!==validPath())return;
+ if(!docxFile||!validPath())return;
+ if(!targetLoaded||checkedPath!==validPath()){
+  await loadTarget();
+  if(!targetLoaded||checkedPath!==validPath()){controls();return;}
+ }
  const generatingPath=validPath(),generatingBaseline=baselineSha256, generatingRequest=targetRequest, generatingRevision=previewRevision;
  generate.disabled=true;publish.disabled=true;say('Converting the Word document and building the page…');
  try{
