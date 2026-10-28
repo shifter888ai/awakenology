@@ -10,12 +10,12 @@
 <p class="step">One-page publishing workflow</p><p>Choose one HTML file, generate one page, inspect the preview, then publish explicitly.</p>
 <section class="panel"><h2 style="font-size:17px;margin:0 0 12px">1. Page settings</h2><div class="fields">
 <label>Page language<select id="lang"><option value="zh">Traditional Chinese</option><option value="ja">Japanese</option><option value="en">English</option></select></label>
-<label>Final page URL path<input id="path" value="New-Article/index.html" placeholder="Folder/index.html" autocomplete="off"></label>
+<label>GitHub HTML Path (Load / Replace)<input id="path" value="New-Article/index.html" placeholder="Folder/index.html" autocomplete="off"></label>
 </div>
 <label>Source HTML file<input id="docx" type="file" accept=".html,.htm,.xhtml,text/html,application/xhtml+xml"></label>
 <label>Page title<input id="title" placeholder="Article title"></label></section>
 <section class="panel"><h2 style="font-size:17px;margin:0 0 12px">2. Generate and review</h2><div class="actions"><button id="generate" disabled>Generate preview</button><button id="clean" disabled>Clean existing Git HTML</button><button id="publish" disabled>Approve &amp; Create Draft PR</button></div>
-<div id="status" role="status" aria-live="polite">Choose one HTML file. The generator transfers article content into the standard Awakenology page template. Publishing stays disabled until the target page is checked and a preview is generated.</div>
+<div id="status" role="status" aria-live="polite">Enter an existing GitHub HTML path to load and clean it. The same file will be replaced only after draft PR approval. For HTML upload, choose a source file and generate a preview.</div>
 <p class="hint">Approval creates a GitHub draft pull request. Nothing is deployed until you review and merge that PR.</p></section>
 <section class="panel"><h2 style="font-size:17px;margin:0 0 12px">3. Page preview</h2><p class="hint">Clean existing Git HTML retains the full original document and only merges identical adjacent spans, removes attribute-free wrappers and empty spans. It checks article text and media references before enabling a draft PR. Review Light and Dark mode in the draft diff before merging.</p><iframe id="preview" title="Generated page preview" sandbox="allow-same-origin"></iframe></section>
 </main>
@@ -34,7 +34,7 @@ async function loadTarget(){
  say('Checking whether the final URL already exists…');
  try{
   const response=await fetch('https://raw.githubusercontent.com/shifter888ai/awakenology/main/'+p.split('/').map(encodeURIComponent).join('/'),{cache:'no-store'});
-  if(response.ok){const current=await response.text();if(!new DOMParser().parseFromString(current,'text/html').querySelector('.article'))throw Error('The existing target is not a standard article page.');baselineSha256=await sha(current);templateHtml=current;existingHtml=current;targetLoaded=true;const existingLang=new DOMParser().parseFromString(current,'text/html').documentElement.lang;if(existingLang==='ja'||existingLang==='en'||existingLang==='zh-Hant'||existingLang==='zh-CN'){lang.value=existingLang==='ja'?'ja':existingLang==='en'?'en':'zh';}lang.disabled=true;say('Existing page loaded. Publishing will replace this one page after a version check.')}
+  if(response.ok){const current=await response.text();if(!new DOMParser().parseFromString(current,'text/html').querySelector('.article'))throw Error('The existing target is not a standard article page.');baselineSha256=await sha(current);templateHtml=current;existingHtml=current;targetLoaded=true;const existingLang=new DOMParser().parseFromString(current,'text/html').documentElement.lang;if(existingLang==='ja'||existingLang==='en'||existingLang==='zh-Hant'||existingLang==='zh-CN'){lang.value=existingLang==='ja'?'ja':existingLang==='en'?'en':'zh';}lang.disabled=true;say('Loaded GitHub HTML: '+p+'. Clean Existing Git HTML will clean this file; an approved draft PR will replace this same path after a version check.')}
   else if(response.status===404){baselineSha256='NEW';targetLoaded=true;templateHtml='';lang.disabled=false;say('New page path confirmed. A matching site template will be used.')}
   else throw Error('GitHub returned HTTP '+response.status);
  }catch(e){say('Could not check target: '+e.message);targetLoaded=false}
