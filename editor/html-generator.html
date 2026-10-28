@@ -77,10 +77,11 @@ clean.addEventListener('click',()=>{
   if(JSON.stringify(before)!==JSON.stringify(after))throw Error('Content or media parity failed; no output generated.');
   if(!(stats.merged+stats.unwrapped+stats.removed)){say('No safe redundant spans found. Original Git HTML remains unchanged.');return}
   // Replace only the original article inner HTML: keep all head, theme CSS, shared layout and metadata bytes unchanged.
-  const match=/<article\\b[^>]*class=["'][^"']*\\barticle\\b[^"']*["'][^>]*>[\\s\\S]*?<\\/article>/i.exec(existingHtml);
+  const tag='art'+'icle';
+  const match=new RegExp('<'+tag+'\\b[^>]*class=["\\x27][^"\\x27]*\\b'+tag+'\\b[^"\\x27]*["\\x27][^>]*>[\\s\\S]*?<\\/'+tag+'>','i').exec(existingHtml);
   if(!match)throw Error('Cannot isolate original article without rewriting the full page.');
-  const openTag=match[0].match(/^<article\\b[^>]*>/i)[0];
-  const newOuter=openTag+article.innerHTML+'</article>';
+  const openTag=match[0].slice(0,match[0].indexOf('>')+1);
+  const newOuter=openTag+article.innerHTML+'</'+tag+'>';
   if(newOuter===match[0])throw Error('No serializable cleanup changes found.');
   generatedHtml=existingHtml.slice(0,match.index)+newOuter+existingHtml.slice(match.index+match[0].length);
   preview.srcdoc=generatedHtml;
