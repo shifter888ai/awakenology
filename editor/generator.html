@@ -90,11 +90,11 @@ async function restoreWordFormatting(buffer,article){
   const nodes=[];let node;while((node=walker.nextNode()))nodes.push(node);
   let position=0;
   for(const original of nodes){
-   const start=position,end=start+original.length;position=end;
-   const cuts=new Set([0,original.length]);
+   const start=position,end=start+original.data.length;position=end;
+   const cuts=new Set([0,original.data.length]);
    for(const r of ranges){if(r.start>start&&r.start<end)cuts.add(r.start-start);if(r.end>start&&r.end<end)cuts.add(r.end-start)}
    const boundaries=[...cuts].sort((a,b)=>a-b);
-   if(boundaries.length===2&&!ranges.some(r=>r.start<end&&r.end>start&&(r.underlined||r.fontPt)))continue;
+   if(boundaries.length===2&&!ranges.some(r=>r.start<end&&r.end>start&&(r.underlined||r.fontPt||r.fontColor)))continue;
    const fragment=article.ownerDocument.createDocumentFragment();
    for(let i=0;i<boundaries.length-1;i++){
     const a=boundaries[i],b=boundaries[i+1],text=original.data.slice(a,b);if(!text)continue;
