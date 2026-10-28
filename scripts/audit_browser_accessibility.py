@@ -6,7 +6,7 @@ import csv
 import urllib.request
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 from playwright.async_api import async_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,7 +37,7 @@ def sample_routes(routes, limit):
     for url in routes:
         if url == home:
             continue
-        path = urlparse(url).path.lower()
+        path = unquote(urlparse(url).path).lower()
         if any(token in path for token in ("/english/", "/en/", "/en-", "/en_")):
             buckets["en"].append(url)
         elif any(token in path for token in ("/japanese/", "/日本語/", "/ja/", "/ja-", "/ja_")):
