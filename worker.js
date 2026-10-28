@@ -440,6 +440,13 @@ export default {
     if (!contentType.toLowerCase().includes("text/html")) return response;
 
     const theme = `<style id="awakenology-theme-style">
+/* Shared language typography; explicit article formatting remains untouched. */
+html:lang(en) body{font-family:Arial,Helvetica,sans-serif}
+html:lang(zh) body{font-family:"Microsoft YaHei","PingFang TC","Noto Sans TC",sans-serif}
+html:lang(ja) body{font-family:"Yu Gothic","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif}
+html:lang(en) .article{font-family:Arial,Helvetica,sans-serif}
+html:lang(zh) .article{font-family:"Microsoft YaHei","PingFang TC","Noto Sans TC",sans-serif}
+html:lang(ja) .article{font-family:"Yu Gothic","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif}
 html[data-aw-theme="dark"] body,html[data-aw-theme="dark"] #wb_root,html[data-aw-theme="dark"] .wb_sbg{background-color:#0D0F12!important;color:#ffffff!important}
 html[data-aw-theme="dark"] body.awakenology-toc-page .wb_content{background-color:#0D0F12!important;color:#ffffff!important}
 body.awakenology-toc-page #wb_main_a188dda41444018c179704becd58d6e8,body.awakenology-toc-page #wb_main_a188dda414440213c8768efbfc4fa4d8,body.awakenology-toc-page #wb_main_a188dda4144403b540310ab683472666{padding-top:18px!important}
