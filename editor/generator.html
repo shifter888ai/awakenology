@@ -54,25 +54,34 @@ async function restoreWordFormatting(buffer,article){
  const child=(n,name)=>n&&direct(n,name)[0];
  const val=n=>n?.getAttributeNS(ns,'val');
  const size=pr=>{const n=child(pr,'sz')||child(pr,'szCs');if(!n)return null;const v=Number(val(n));return Number.isFinite(v)&&v>0?v/2:null;};
+ const color=pr=>{const n=child(pr,'color');if(!n)return null;const v=val(n);return v&&/^[0-9a-fA-F]{6}$/.test(v)?'#'+v:null;};
  const styleMap=new Map();
  if(styles)for(const st of all(styles,'style')){const id=val(st) || st.getAttributeNS(ns,'styleId');if(id)styleMap.set(id,st);}
+ const inheritedColor=(id,seen=new Set())=>{
+  if(!id||seen.has(id))return null;
+  seen.add(id);const st=styleMap.get(id);if(!st)return null;
+  return color(child(st,'rPr'))??inheritedColor(val(child(st,'basedOn')),seen);
+ };
  const inherited=(id,seen=new Set())=>{
   if(!id||seen.has(id))return null;
   seen.add(id);const st=styleMap.get(id);if(!st)return null;
   return size(child(st,'rPr'))??inherited(val(child(st,'basedOn')),seen);
  };
- const defaults=styles?size(child(child(child(styles.documentElement,'docDefaults'),'rPrDefault'),'rPr')):null;
+ const defaultRunPr=styles?child(child(child(styles.documentElement,'docDefaults'),'rPrDefault'),'rPr'):null;
+ const defaults=size(defaultRunPr),defaultColor=color(defaultRunPr);
  const blocks=[...article.querySelectorAll('p,h1,h2,h3,h4,h5,h6,li')].filter(n=>!n.querySelector('p,h1,h2,h3,h4,h5,h6,li'));
  let cursor=0,unmatched=0,pendingBlanks=0,lastBlock=null;
  const blank=()=>{const p=article.ownerDocument.createElement('p');p.className='word-blank-paragraph';p.setAttribute('aria-hidden','true');return p;};
  for(const para of all(xml,'p')){
   const pp=direct(para,'pPr')[0];
-  const paraSize=inherited(val(child(pp,'pStyle')));
+  const paraStyle=val(child(pp,'pStyle'));
+  const paraSize=inherited(paraStyle),paraColor=inheritedColor(paraStyle);
   const runs=all(para,'r').map(r=>{
    const value=all(r,'t').map(t=>t.textContent).join('');
    const rp=direct(r,'rPr')[0], u=rp&&direct(rp,'u')[0];
    const fontPt=size(rp)??inherited(val(child(rp,'rStyle')))??paraSize??defaults;
-   return {value,underlined:!!u&&!['none','0','false'].includes(u.getAttributeNS(ns,'val')),fontPt};
+   const fontColor=color(rp)??inheritedColor(val(child(rp,'rStyle')))??paraColor??defaultColor;
+  return {value,underlined:!!u&&!['none','0','false'].includes(u.getAttributeNS(ns,'val')),fontPt,fontColor};
   });
   const source=runs.map(r=>r.value).join('');
   if(!source.trim()){pendingBlanks++;continue;}
