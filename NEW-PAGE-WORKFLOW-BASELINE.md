@@ -52,3 +52,14 @@ This confirmation locks the demonstrated end-to-end process and its operating ru
 ## Final baseline
 
 **The New Page Generator / Editor workflow is accepted as the confirmed development baseline as of 2026-10-20. Keep it stable; no further workflow changes are planned unless explicitly requested.**
+
+## Confirmed DOCX color and theme regression (2026-10-28)
+
+Acceptance evidence: Generator fix PR #293 and existing-page fix PR #294 were merged, deployed, and both confirmed visually OK by the site owner.
+
+- Preserve source DOCX wording, structure, images, and intentional run-level RGB colors. Light mode must retain the original imported colors exactly.
+- In Dark mode, improve contrast for imported dark-blue runs only, using the approved readable blue `#83baff` where the Generator identifies those runs. Do not globally recolor blue or override unrelated intentional colors.
+- The theme-specific styling must be present in both Generate Preview and the generated/published HTML; switching themes must not mutate source content or permanently replace inline DOCX color values.
+- An upstream Generator correction does not retroactively repair published pages. Patch affected existing pages separately and minimally; do not silently regenerate approved content.
+- Regression verification must include representative imported dark-blue runs in both themes, preview and generated HTML, and confirm other text/colors remain unchanged. The site owner's live visual acceptance is the final check.
+- Keep the Generator/Editor workflow and the existing publishing approval gates unchanged.
