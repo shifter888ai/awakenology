@@ -45,7 +45,14 @@ jobs:
         run: python3 scripts/audit_site_integrity.py
       - name: Audit live references and assets
         if: always() && hashFiles('site-integrity-report.csv') != ''
-        run: python3 scripts/audit_live_links_assets.py
+        env:
+          FULL_LIVE_AUDIT: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          if [ "$FULL_LIVE_AUDIT" = "true" ]; then
+            python3 scripts/audit_live_links_assets.py
+          else
+            python3 scripts/audit_live_links_assets.py --max-urls 100
+          fi
       - name: Audit anchors and accessibility source
         if: always()
         run: python3 scripts/audit_anchor_accessibility.py
@@ -54,10 +61,24 @@ jobs:
         run: python3 scripts/audit_seo_metadata.py
       - name: Audit production-rendered metadata
         if: always()
-        run: python3 scripts/audit_live_seo.py
+        env:
+          FULL_LIVE_AUDIT: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          if [ "$FULL_LIVE_AUDIT" = "true" ]; then
+            python3 scripts/audit_live_seo.py
+          else
+            python3 scripts/audit_live_seo.py --max-routes 12
+          fi
       - name: Audit live pages in Chromium
         if: always()
-        run: python3 scripts/audit_browser_smoke.py --screenshots
+        env:
+          FULL_LIVE_AUDIT: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          if [ "$FULL_LIVE_AUDIT" = "true" ]; then
+            python3 scripts/audit_browser_smoke.py --screenshots
+          else
+            python3 scripts/audit_browser_smoke.py --max-routes 6 --screenshots
+          fi
       - name: Audit rendered accessibility and keyboard focus
         if: always()
         run: python3 scripts/audit_browser_accessibility.py
