@@ -11,6 +11,26 @@ DOMAIN = "https://awakenology.space"
 OUT = ROOT / "seo-runtime-report.csv"
 UA = "Awakenology-SEO-Audit/1.0 (+https://awakenology.space/)"
 
+
+def read_url_with_retries(opener, request, timeout=20, attempts=2):
+    """Read a URL with one bounded retry for transient network timeouts/errors."""
+    last_error = None
+    for attempt in range(attempts):
+        try:
+            with opener.open(request, timeout=timeout) as response:
+                status = response.status
+                final_url = response.geturl()
+                content_type = response.headers.get("Content-Type", "")
+                charset = response.headers.get_content_charset() or "utf-8"
+                raw = response.read(3000000)
+                return status, final_url, content_type, charset, raw
+        except (urllib.error.URLError, TimeoutError, OSError) as error:
+            last_error = error
+            if attempt + 1 < attempts:
+                time.sleep(1)
+    raise last_error
+
+
 class Head(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
@@ -128,10 +148,7 @@ def main():
                 raw = local.read_bytes()
             else:
                 req = urllib.request.Request(url, headers={"User-Agent": UA})
-                with opener.open(req, timeout=20) as res:
-                    status, final, ctype = res.status, res.geturl(), res.headers.get("Content-Type", "")
-                    charset = res.headers.get_content_charset() or "utf-8"
-                    raw = res.read(3000000)
+                status, final, ctype, charset, raw = read_url_with_retries(opener, req)
             if status != 200: errors.append("http-status-" + str(status))
             if "text/html" not in ctype.lower(): errors.append("non-html-content-type")
             if final.rstrip("/") != url.rstrip("/"): errors.append("redirected-url")
