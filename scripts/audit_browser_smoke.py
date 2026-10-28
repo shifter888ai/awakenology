@@ -11,7 +11,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 from playwright.async_api import async_playwright
 
@@ -39,7 +39,7 @@ def get_routes():
     return sorted(set(routes))
 
 def route_language(url):
-    path = urlparse(url).path.lower()
+    path = unquote(urlparse(url).path).lower()
     if path == "/":
         return "home"
     if any(token in path for token in ("/english/", "/en/", "/en-", "/en_")):
