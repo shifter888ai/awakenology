@@ -84,11 +84,23 @@ def classify_response(url, kind, status, content_type, final_url, error):
         return "CONTENT_TYPE_MISMATCH"
     return "PASS"
 
+def sample_urls(urls, limit):
+    """Select a deterministic, evenly distributed subset of unique URLs."""
+    ordered = sorted(set(urls))
+    if limit <= 0 or limit >= len(ordered):
+        return ordered
+    if limit == 1:
+        return [ordered[len(ordered) // 2]]
+    indices = [round(i * (len(ordered) - 1) / (limit - 1)) for i in range(limit)]
+    return [ordered[i] for i in indices]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--timeout", type=int, default=15)
     ap.add_argument("--strict", action="store_true", help="exit non-zero for HTTP errors, request failures, and asset content-type mismatches")
+    ap.add_argument("--max-urls", type=int, default=0, help="maximum unique production URLs to probe; 0 means all")
     args = ap.parse_args()
     if not SOURCE_REPORT.exists():
         print("FAIL: site-integrity-report.csv is missing; run scripts/audit_site_integrity.py first")
@@ -108,7 +120,13 @@ def main():
         unique[url]["references"].add(row.get("reference", ""))
         if kind == "link":
             unique[url]["kind"] = "link"
-    print(f"Unique production URLs to probe: {len(unique)}")
+    total_urls = len(unique)
+    if args.max_urls > 0 and args.max_urls < total_urls:
+        sampled = sample_urls(list(unique), args.max_urls)
+        unique = {url: unique[url] for url in sampled}
+        print(f"Bounded live-resource sample: {len(unique)} of {total_urls} unique URLs")
+    else:
+        print(f"Unique production URLs to probe: {len(unique)}")
     results = []
     with ThreadPoolExecutor(max_workers=max(1, min(args.workers, 16))) as pool:
         futures = {pool.submit(request_url, item["url"], item["kind"], args.timeout): url for url, item in unique.items()}
