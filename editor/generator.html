@@ -36,7 +36,7 @@ imageCustom.addEventListener('change',()=>{if(imageWidth.value==='custom')applyI
 imageAlign.addEventListener('change',()=>{if(!selectedImage)return;selectedImage.style.display='block';selectedImage.style.marginLeft=imageAlign.value==='left'?'0':'auto';selectedImage.style.marginRight=imageAlign.value==='right'?'0':'auto';});
 $('#imageReset').addEventListener('click',()=>{if(!selectedImage)return;['width','height','max-width','display','margin-left','margin-right'].forEach(p=>selectedImage.style.removeProperty(p));selectedImage.removeAttribute('width');selectedImage.removeAttribute('height');selectImage(selectedImage)});
 
-// Restore DOCX formatting that Mammoth does not export (paragraph alignment and underline).
+// Restore DOCX formatting that Mammoth does not export (paragraph alignment, underline and text color).
 // Match whole paragraphs by their exact text; never apply formatting to an uncertain match.
 async function restoreWordFormatting(buffer,article){
  if(!window.JSZip)throw Error('Word formatting reader did not load.');
@@ -84,8 +84,8 @@ async function restoreWordFormatting(buffer,article){
   const jc=pp&&direct(pp,'jc')[0],alignment=jc?.getAttributeNS(ns,'val');
   if(['left','center','right','both'].includes(alignment))block.style.textAlign=alignment==='both'?'justify':alignment;
   const ranges=[];let offset=0;
-  for(const r of runs){if(r.value.length)ranges.push({start:offset,end:offset+r.value.length,underlined:r.underlined,fontPt:r.fontPt});offset+=r.value.length}
-  if(!ranges.some(r=>r.underlined||r.fontPt))continue;
+  for(const r of runs){if(r.value.length)ranges.push({start:offset,end:offset+r.value.length,underlined:r.underlined,fontPt:r.fontPt,fontColor:r.fontColor});offset+=r.value.length}
+  if(!ranges.some(r=>r.underlined||r.fontPt||r.fontColor))continue;
   const walker=article.ownerDocument.createTreeWalker(block,NodeFilter.SHOW_TEXT);
   const nodes=[];let node;while((node=walker.nextNode()))nodes.push(node);
   let position=0;
@@ -99,7 +99,7 @@ async function restoreWordFormatting(buffer,article){
    for(let i=0;i<boundaries.length-1;i++){
     const a=boundaries[i],b=boundaries[i+1],text=original.data.slice(a,b);if(!text)continue;
     const covered=ranges.filter(r=>r.start<=start+a&&r.end>=start+b);const span=article.ownerDocument.createElement('span');span.textContent=text;
-    const pt=[...covered].reverse().find(r=>r.fontPt)?.fontPt;if(pt&&pt>0)span.style.fontSize=pt+'pt';
+    const pt=[...covered].reverse().find(r=>r.fontPt)?.fontPt;if(pt&&pt>0)span.style.fontSize=pt+'pt';const ink=[...covered].reverse().find(r=>r.fontColor)?.fontColor;if(ink)span.style.color=ink;
     if(covered.some(r=>r.underlined)){const u=article.ownerDocument.createElement('u');u.append(span);fragment.append(u)}else fragment.append(span);
    }
    original.replaceWith(fragment);
