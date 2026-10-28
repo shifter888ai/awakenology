@@ -24,6 +24,42 @@ def get_routes():
                    and urlparse(node.text.strip()).scheme == "https"
                    and urlparse(node.text.strip()).netloc.lower() == "awakenology.space"})
 
+def sample_routes(routes, limit):
+    """Choose a deterministic sample that retains homepage and language coverage."""
+    routes = sorted(set(routes))
+    if limit <= 0 or limit >= len(routes):
+        return routes
+    selected = []
+    home = next((url for url in routes if urlparse(url).path == "/"), None)
+    if home:
+        selected.append(home)
+    buckets = {"en": [], "ja": [], "zh": [], "other": []}
+    for url in routes:
+        if url == home:
+            continue
+        path = urlparse(url).path.lower()
+        if any(token in path for token in ("/english/", "/en/", "/en-", "/en_")):
+            buckets["en"].append(url)
+        elif any(token in path for token in ("/japanese/", "/日本語/", "/ja/", "/ja-", "/ja_")):
+            buckets["ja"].append(url)
+        elif any(token in path for token in ("/chinese/", "/中文/", "/繁體中文/", "/简体中文/", "/zh/", "/zh-", "/zh_")):
+            buckets["zh"].append(url)
+        else:
+            buckets["other"].append(url)
+    for language in ("en", "ja", "zh", "other"):
+        bucket = buckets[language]
+        if bucket and len(selected) < limit:
+            selected.append(bucket[len(bucket) // 2])
+    remaining = [url for url in routes if url not in selected]
+    slots = limit - len(selected)
+    if slots > 0 and remaining:
+        indices = ([len(remaining) // 2] if slots == 1 else
+                   [round(i * (len(remaining) - 1) / (slots - 1)) for i in range(slots)])
+        selected.extend(remaining[i] for i in indices)
+    chosen = set(selected)
+    return [url for url in routes if url in chosen]
+
+
 def classify_language(value):
     value = (value or "").strip().lower()
     if not value:
@@ -97,7 +133,7 @@ async def inspect(browser, url, semaphore, width=1365, height=900):
         return findings
 
 async def run(routes, workers, max_routes):
-    targets = routes[:max_routes] if max_routes else routes
+    targets = sample_routes(routes, max_routes) if max_routes else routes
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         sem = asyncio.Semaphore(max(1, min(workers, 8)))
@@ -111,6 +147,8 @@ def main():
     ap.add_argument("--max-routes", type=int, default=0, help="optional cap for local smoke tests")
     args = ap.parse_args()
     routes = get_routes()
+    if args.max_routes > 0 and args.max_routes < len(routes):
+        print(f"Bounded rendered-accessibility sample: {args.max_routes} of {len(routes)} published routes; representative language sampling enabled")
     targets, findings = asyncio.run(run(routes, args.workers, args.max_routes))
     fields = ["url","viewport","check","severity","detail"]
     with OUT.open("w", encoding="utf-8", newline="") as stream:
