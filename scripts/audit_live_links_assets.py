@@ -86,7 +86,7 @@ def classify_response(url, kind, status, content_type, final_url, error):
 
 def sample_urls(urls, limit):
     """Select a deterministic, evenly distributed subset of unique URLs."""
-    ordered = sorted(urls)
+    ordered = sorted(set(urls))
     if limit <= 0 or limit >= len(ordered):
         return ordered
     if limit == 1:
