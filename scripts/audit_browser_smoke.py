@@ -184,7 +184,7 @@ async def run(routes, workers, max_routes, screenshots):
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         semaphore = asyncio.Semaphore(max(1, min(workers, 8)))
-        targets = routes[:max_routes] if max_routes else routes
+        targets = select_mobile_routes(routes, max_routes) if max_routes else routes
         mobile_targets = select_mobile_routes(targets, 12)
         tasks = [inspect_route(browser, url, semaphore, DESKTOP_VIEWPORT,
                                screenshot=screenshots and url == DOMAIN + "/", interactions=False)
@@ -204,6 +204,8 @@ def main():
     parser.add_argument("--screenshots", action="store_true", help="save homepage and representative mobile screenshots")
     args = parser.parse_args()
     routes = get_routes()
+    if args.max_routes > 0 and args.max_routes < len(routes):
+        print(f"Bounded browser sample: {args.max_routes} of {len(routes)} published routes; representative language sampling enabled")
     findings, desktop_count, mobile_count = asyncio.run(run(routes, args.workers, args.max_routes, args.screenshots))
     fields = ["url","viewport","check","status","detail"]
     with REPORT.open("w", encoding="utf-8", newline="") as stream:
