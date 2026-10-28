@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Read-only production SEO audit. Run after audit_seo_metadata.py."""
-import collections, csv, sys, time, urllib.error, urllib.request
+import argparse, collections, csv, sys, time, urllib.error, urllib.request
 import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
 from pathlib import Path
@@ -38,7 +38,30 @@ class Head(HTMLParser):
     def handle_data(self, data):
         if self.title_on and self.titles: self.titles[-1] += data
 
+def select_sample_urls(urls, limit):
+    """Return a deterministic, evenly distributed route sample with key routes retained."""
+    if limit <= 0 or limit >= len(urls):
+        return list(urls)
+    selected = []
+    for key in (DOMAIN + "/", DOMAIN + "/ai-search/"):
+        if key in urls and key not in selected and len(selected) < limit:
+            selected.append(key)
+    remaining = [url for url in urls if url not in selected]
+    slots = limit - len(selected)
+    if slots > 0 and remaining:
+        if slots == 1:
+            indices = [len(remaining) // 2]
+        else:
+            indices = [round(i * (len(remaining) - 1) / (slots - 1)) for i in range(slots)]
+        selected.extend(remaining[i] for i in indices)
+    selected_set = set(selected)
+    return [url for url in urls if url in selected_set]
+
+
 def main():
+    parser = argparse.ArgumentParser(description="Audit deployed metadata; --max-routes bounds production requests.")
+    parser.add_argument("--max-routes", type=int, default=0, help="maximum routes to fetch after sitemap validation; 0 means all")
+    args = parser.parse_args()
     try:
         root = ET.parse(ROOT / "sitemap.xml").getroot()
         urls = [n.text.strip() for n in root.findall(".//{http://www.sitemaps.org/schemas/sitemap/0.9}loc") if n.text]
@@ -86,6 +109,10 @@ def main():
     except (urllib.error.URLError, TimeoutError, OSError, ET.ParseError) as e:
         print("FAIL: cannot verify production sitemap: " + type(e).__name__)
         return 1
+    total_routes = len(urls)
+    if args.max_routes > 0 and args.max_routes < total_routes:
+        urls = select_sample_urls(urls, args.max_routes)
+        print(f"Bounded production metadata sample: {len(urls)} of {total_routes} routes; full sitemap/robots checks retained")
     opener, rows = urllib.request.build_opener(), []
     for i, url in enumerate(urls, 1):
         errors, status, title, desc, canonical, robots, lang = [], "", "", "", "", "", ""
