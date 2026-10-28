@@ -108,7 +108,7 @@ async function restoreWordFormatting(buffer,article){
    for(let i=0;i<boundaries.length-1;i++){
     const a=boundaries[i],b=boundaries[i+1],text=original.data.slice(a,b);if(!text)continue;
     const covered=ranges.filter(r=>r.start<=start+a&&r.end>=start+b);const span=article.ownerDocument.createElement('span');span.textContent=text;
-    const pt=[...covered].reverse().find(r=>r.fontPt)?.fontPt;if(pt&&pt>0)span.style.fontSize=pt+'pt';const ink=[...covered].reverse().find(r=>r.fontColor)?.fontColor;if(ink)span.style.color=ink;
+    const pt=[...covered].reverse().find(r=>r.fontPt)?.fontPt;if(pt&&pt>0)span.style.fontSize=pt+'pt';const ink=[...covered].reverse().find(r=>r.fontColor)?.fontColor;if(ink){span.style.color=ink;const rgb=ink.slice(1).match(/../g).map(h=>parseInt(h,16));const linear=rgb.map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4});const luminance=.2126*linear[0]+.7152*linear[1]+.0722*linear[2];if(rgb[2]>rgb[0]*1.2&&rgb[2]>rgb[1]*1.1&&luminance<.32)span.classList.add('word-dark-blue');}
     if(covered.some(r=>r.underlined)){const u=article.ownerDocument.createElement('u');u.append(span);fragment.append(u)}else fragment.append(span);
    }
    original.replaceWith(fragment);
@@ -201,6 +201,9 @@ generate.addEventListener('click',async()=>{
   // An empty Word paragraph is a deliberate line, not an ordinary collapsed HTML paragraph.
   if(!parsed.querySelector('#word-blank-style')){const style=parsed.createElement('style');style.id='word-blank-style';style.textContent='.article p.word-blank-paragraph{min-height:1.7em;margin:0;white-space:normal}';parsed.head.append(style);}
   await restoreWordFormatting(buffer,article);
+  // Preserve Word's exact color in Light mode; improve only dark-blue contrast in Dark mode.
+  if(!parsed.querySelector('#word-theme-color-style')){const style=parsed.createElement('style');style.id='word-theme-color-style';style.textContent='html[data-aw-theme="dark"] .article .word-dark-blue{color:#83baff !important}';parsed.head.append(style);}
+
   const suppliedTitle=title.value.trim(), isExisting=baselineSha256!=='NEW';
   const heading=parsed.querySelector('main h1, h1');
   if(suppliedTitle){if(heading)heading.textContent=suppliedTitle;else{const main=parsed.querySelector('main');if(main){const h=parsed.createElement('h1');h.textContent=suppliedTitle;main.prepend(h);}}parsed.title=suppliedTitle+' | Awakenology';}
