@@ -7,6 +7,7 @@ import subprocess
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "static-html-isolated-output"
 EXCLUDED = ("editor/", "github-editor/", "scripts/", "tests/", "docs/", ".github/")
+SCOPE = "source-only isolated build; no live Worker or browser equivalence"
 
 def digest(data):
     return hashlib.sha256(data).hexdigest()
@@ -16,8 +17,15 @@ def verify():
         ["git", "ls-files", "-z", "--", "*.html"], cwd=ROOT
     ).decode("utf-8").split("\0")
     expected = sorted(p for p in paths if p and not p.startswith(EXCLUDED) and p != "404.html")
+    # The diagnostic must be self-contained: never accept linked files or directories.
+    if OUT.is_symlink() or any(p.is_symlink() for p in OUT.rglob("*")):
+        raise AssertionError("Symlink in isolated artifact")
     manifest = json.loads((OUT / "manifest.json").read_text(encoding="utf-8"))
-    if manifest.get("failures"):
+    if manifest.get("scope") != SCOPE:
+        raise AssertionError("Build manifest scope mismatch")
+    if not isinstance(manifest.get("failures"), list):
+        raise AssertionError("Build manifest missing failures list")
+    if manifest["failures"]:
         raise AssertionError("Build manifest reports failures")
     rows = manifest["routes"]
     actual = [row["path"] for row in rows]
