@@ -15,5 +15,7 @@ class Revelation5ParityTests(unittest.TestCase):
      images = re.findall(r'<img\b[^>]*>', article, flags=re.I)
      expected = json.loads((ROOT / "tests/fixtures/revelation5_article_parity.json").read_text(encoding="utf-8"))
      assert text == expected["article_text"], "Article 5 text or whitespace changed"
-     assert images == expected["image_tags"], "Article 5 images or their attributes changed"
+     normalized_images = [re.sub(r'\s+alt="[^"]*"', "", image) for image in images]
+     assert normalized_images == expected["image_tags"], "Article 5 image source/style attributes changed"
+     assert all(re.search(r'\salt="[^"]*"', image) for image in images), "Article 5 images must have alt text"
      assert not re.search(r'<!--\[if|<!--\[endif\]-->|</?font\b|<o:p>\s*</o:p>', article, flags=re.I)
