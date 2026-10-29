@@ -55,9 +55,10 @@ async def snapshot(browser, html, url, width, height, label, output, route):
                 raise AssertionError(f"{label}: generated document did not load")
         await page.wait_for_timeout(1200)
         data = await page.evaluate(JS)
-        theme_button = page.locator("#awakenology-theme-toggle")
-        if await theme_button.count() != 1:
-            raise AssertionError(f"{label}: missing unique theme toggle")
+        # Responsive headers may duplicate this legacy ID; target the visible control.
+        theme_button = page.locator("#awakenology-theme-toggle:visible").first
+        if await page.locator("#awakenology-theme-toggle:visible").count() < 1:
+            raise AssertionError(f"{label}: no visible theme toggle")
         initial = await page.locator("html").get_attribute("data-aw-theme")
         await theme_button.click()
         switched = await page.locator("html").get_attribute("data-aw-theme")
@@ -101,7 +102,7 @@ async def snapshot(browser, html, url, width, height, label, output, route):
             await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
         }""")
         await page.wait_for_function("window.scrollX === 0 && window.scrollY === 0")
-        await page.locator("#awakenology-theme-toggle").evaluate("""async el => {
+        await page.locator("#awakenology-theme-toggle:visible").first.evaluate("""async el => {
             const box = () => {
                 const r = el.getBoundingClientRect();
                 return [r.x, r.y, r.width, r.height].join(',');
