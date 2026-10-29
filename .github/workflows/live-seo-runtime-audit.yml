@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'scripts/**'
+      - '!scripts/static_html_poc/**'
       - 'tests/**'
       - '.github/workflows/live-seo-runtime-audit.yml'
       - 'worker.js'
