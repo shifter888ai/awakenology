@@ -94,6 +94,27 @@ async def snapshot(browser, html, url, width, height, label, output, route):
             if initial_lang != "zh-Hant" or simplified_saved != "cn" or original_text == simplified_text or simplified_text == traditional_text:
                 raise AssertionError(f"{label}: Chinese conversion round-trip failed: initial={initial_lang}, saved={simplified_saved}, original={len(original_text)}, simplified={len(simplified_text)}, restored={len(traditional_text)}")
             data["chineseRoundTrip"] = [initial_lang, "zh-CN", simplified_saved, "zh-Hant", simplified_text, traditional_text]
+        # Let smooth scrolling and floating-control transitions finish after interaction checks.
+        await page.evaluate("""async () => {
+            await document.fonts.ready;
+            window.scrollTo({top: 0, left: 0, behavior: 'instant'});
+            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        }""")
+        await page.wait_for_function("window.scrollX === 0 && window.scrollY === 0")
+        await page.locator("#awakenology-theme-toggle").evaluate("""async el => {
+            const box = () => {
+                const r = el.getBoundingClientRect();
+                return [r.x, r.y, r.width, r.height].join(',');
+            };
+            let previous = box(), stable = 0;
+            for (let i = 0; i < 30 && stable < 3; i++) {
+                await new Promise(resolve => requestAnimationFrame(resolve));
+                const current = box();
+                stable = current === previous ? stable + 1 : 0;
+                previous = current;
+            }
+            if (stable < 3) throw new Error('Theme toggle did not settle before screenshot');
+        }""")
         await page.screenshot(path=str(output / (label + ".png")), full_page=True,
                               animations="disabled", timeout=30000)
         return data, errors
