@@ -19,6 +19,17 @@ class LiveLinkAssetTests(unittest.TestCase):
     def test_removes_fragments_but_keeps_query(self):
         self.assertEqual(AUDIT.make_url("index.html", "/page/?v=2#section"), "https://awakenology.space/page/?v=2")
 
+    def test_private_editor_sources_and_public_host_paths_are_not_probed(self):
+        self.assertEqual(AUDIT.make_url("editor/index.html", "/editor/generator.html"), "")
+        self.assertEqual(AUDIT.make_url("editor/generator.html", "/gallery/logo.svg"), "")
+        self.assertEqual(AUDIT.make_url("github-editor/index.html", "/gallery/logo.svg"), "")
+        self.assertEqual(AUDIT.make_url("index.html", "/editor/shared-editing-core.js"), "")
+        self.assertEqual(AUDIT.make_url("index.html", "/editor"), "")
+        self.assertEqual(AUDIT.make_url("index.html", "/github-editor/"), "")
+        # Prefix matching must not hide ordinary public routes.
+        self.assertEqual(AUDIT.make_url("index.html", "/editorial/"),
+                         "https://awakenology.space/editorial/")
+
     def test_ignores_external_and_non_http_schemes(self):
         self.assertEqual(AUDIT.make_url("index.html", "https://example.com/a.png"), "")
         self.assertEqual(AUDIT.make_url("index.html", "mailto:test@example.com"), "")
