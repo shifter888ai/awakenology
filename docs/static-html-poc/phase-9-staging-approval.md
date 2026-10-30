@@ -1,25 +1,26 @@
-# Phase 9 — isolated staging deployment approval gate
+# Phase 9 — simple reversible integration plan (no cutover)
 
-**Status: NOT APPROVED; NO DEPLOYMENT.** This document is a release checklist, not an executable deploy workflow. The static build has passed offline audits; it has not demonstrated real staging HTTP equivalence, authenticated Editor/Generator parity, physical iOS Safari parity, or rollback.
+**Status: planning only. No staging Worker, no feature activation, no production cutover.** Supersedes the separate staging deployment proposal.
 
-## Proposed scope for a separately approved deployment
+## Architecture
 
-- Create only a distinct Worker named `awakenology-static-stage-isolated` on its own workers.dev endpoint, with no custom domains, production routes, DNS modifications, or production traffic.
-- Stage only public generated HTML and required public assets. Do not copy production secrets or enable Editor OAuth, sessions, publishing APIs, Word/HTML Generator or any authenticated endpoints.
-- Force `X-Robots-Tag: noindex, nofollow, noarchive` on **all** staging responses (including errors and assets where applicable); robots.txt disallows all. Verify this with HTTP probes rather than assuming configuration suffices.
-- Review whether public Search/Ask AI can be safely exercised without paid dependencies or secret copying; otherwise mark these as untested blockers, not passes.
-- Keep production `worker.js`, `wrangler.jsonc`, deploy workflow and custom domains unchanged.
-- Confirm Cloudflare request budget, exact Git commit, package manifest SHA-256, and asset count before staging upload.
+Keep the existing production Worker as the sole router and security boundary. Editor, Generator, OAuth/session, APIs, Search and Ask AI continue on their current paths. Only eligible public HTML responses may eventually use generated static output. Do not modify DNS, custom domains, private routes or the production deployment workflow as part of this planning PR.
 
-## Required evidence after approval, before any cutover
+## Fail-closed switch design (future implementation, not enabled)
 
-1. Record the stage deployment ID, configuration and commit (no secret values).
-2. Compare actual staging responses to the production 13-route baseline with `compare_http_reports.py`; the current baseline includes private Editor routes that staging deliberately must not serve, so classify and document those as intentional isolation differences rather than weakening security checks or claiming blanket equivalence.
-3. Verify public route inventory, 404s, Unicode, query strings, canonical URLs, assets, headers, robots/noindex, browser interaction and Search/Ask behavior.
-4. Check TC/ST followed by Dark/Light on physical iOS Safari. Chromium viewport checks do not substitute.
-5. Rehearse **staging-only** rollback to a recorded previous staging version, then rerun smoke tests and record evidence. Never rehearse rollback against production without separate authorization.
-6. Any content, SEO, security, routing, performance or rollback regression blocks production cutover.
+- Explicit default: `runtime` (existing HTMLRewriter output). Never infer static mode from a missing environment variable or asset presence.
+- `static` may be enabled only after all required parity checks and separate explicit approval. Limit to an audited allowlist of public HTML routes; no blanket host/path matching.
+- Reject invalid mode values and mismatched/missing static manifest or content hashes. Preserve runtime behavior without exposing private content.
+- Define and test rollback: set the mode back to `runtime` using the prior known-good Worker release/config, then verify homepage, representative multilingual articles, 404, Search/Ask and private Editor/Generator boundaries. A code flag alone is not proof of an operational rollback.
+- Ensure a generated static asset does not accidentally bypass Worker response headers, canonical/noindex rules, routing, auth or API handlers. Check Cloudflare asset binding behavior and request limits.
 
-## Explicit approval required
+## Gates before any activation
 
-Approval of this document or merge of its PR does **not** approve deployment. Ask separately: “Approve deploying the isolated `awakenology-static-stage-isolated` Worker to its workers.dev address, with no production routes/domains or secrets?” Do not execute until answered affirmatively. Production cutover requires another explicit approval after evidence review.
+1. Source and generated digests, all-route inventory, content integrity, metadata and sitemap parity.
+2. Actual response/DOM/header parity for eligible public routes; Unicode/query/404/redirect tests; assets and responsive behavior.
+3. Physical iOS Safari check, including TC/ST followed by Dark/Light.
+4. Explicitly test private Editor/Generator and Search/Ask boundaries. Do not claim that offline HTML checks establish their runtime parity.
+5. Document measured performance benefit, known-good Worker revision and exact rollback rehearsal evidence.
+6. Request separate approval for production activation; merging this documentation does not grant it.
+
+No separate staging Worker is required by this plan. Offline tests may continue, but any live production experiment or feature activation requires explicit approval.
