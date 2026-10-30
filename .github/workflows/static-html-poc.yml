@@ -36,12 +36,16 @@ jobs:
         run: python scripts/static_html_poc/diagnose_malformed_head.py
       - name: Validate all tracked public HTML routes
         run: python scripts/static_html_poc/check_full_inventory.py
-      - name: Upload complete route inventory and failure report
+      - name: Build isolated temporary HTML staging tree
+        run: python scripts/static_html_poc/build_staging.py
+      - name: Upload staging and inventory reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: static-html-full-inventory
-          path: static-html-full-inventory-report.json
+          name: static-html-staging-and-inventory
+          path: |
+            static-html-full-inventory-report.json
+            static-html-staging-report.json
           if-no-files-found: warn
   browser-parity:
     runs-on: ubuntu-latest

@@ -54,3 +54,10 @@ Phase 3: complete. At commit `81b353f`, both full-inventory CI runs passed **122
 ### Cloudflare request budget safeguard (2026-10-25)
 
 Earlier PoC push and pull-request events could duplicate live checks. Automatic PoC PR checks now run source/unit/full-inventory only; nine-fixture live Worker signature and desktop/mobile browser parity require explicit `workflow_dispatch`. The shared live SEO workflow excludes changes solely in `scripts/static_html_poc/**` from its PR path filter; scheduled and main-branch audits remain unchanged. Previous live validation evidence remains recorded at `81b353f`, but future code changes require an explicitly approved live rerun before release. Do not interpret skipped live checks as a fresh pass. This minimizes, but does not eliminate, production requests from unrelated audits and visitors.
+
+
+## Batch 2: isolated staging output prototype
+
+The batch workflow builds all tracked public HTML routes into a temporary directory, reads each generated file back, checks deterministic/idempotent transformation and metadata, confirms the staged route set exactly matches the public inventory, and checks local image/script/stylesheet/icon/preload references against tracked files. The temporary output is deleted automatically after the run. The report records that this is an HTML-only build: non-HTML assets continue to be served by the existing Worker/ASSETS layer, and the build does not test or replace HTTP status codes, redirects, cache headers, 404 behavior, or authenticated Editor/Generator behavior.
+
+The consolidated workflow runs unit tests, representative source parity, live Worker signatures, all-route inventory, the temporary staging build, and desktop/mobile Chromium parity. It uploads one staging/inventory report and one browser report. Passing this batch is evidence for an isolated build prototype only; it does not authorize production deployment or Worker routing changes.
