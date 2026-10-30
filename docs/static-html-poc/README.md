@@ -66,3 +66,8 @@ The consolidated workflow runs unit tests, representative source parity, live Wo
 ## Phase 4A: read-only live HTTP contract batch
 
 The isolated PoC workflow now probes a small set of production HTTP contracts without credentials or writes: public homepage response, missing-route 404, public-host denial of private Editor/API paths, AI Search noindex, and unauthenticated Editor host redirects/denials. It records a JSON report and fails closed when a contract does not match the documented expectation. This is observation-only and does not deploy or compare against a staging hostname. It does not replace a real isolated staging environment, authenticated Editor/Generator smoke tests, full route/header sampling, or rollback rehearsal.
+
+
+## Phase 4B: expanded HTTP contract batch
+
+The read-only probe now extracts robots meta tags from the complete sampled HTML response rather than assuming they occur in the first 2,000 characters. Additional unauthenticated checks cover query-string homepages, encoded Unicode article routes (with and without a query), public/editor robots resources, and rejection of an OAuth callback without state. No secrets, authenticated actions, writes, staging deployment or production routing changes are involved. These checks observe production behavior; staging equivalence and rollback remain separate blockers.
