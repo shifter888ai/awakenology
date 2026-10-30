@@ -1,3 +1,4 @@
+import { publicHtmlMode } from "./scripts/static_html_poc/public-html-mode.mjs";
 /* Awakenology Runtime Implementation — Full Automated Migration & Redesign Pipeline v2
  * Runtime/global implementation lives here.
  * Source migration rules: The-Master.md
@@ -390,6 +391,7 @@ export default {
     }
     // Never expose the editor or publishing API on the public website or temporary preview hosts.
     if (isEditorPath || isEditorApi || isPublishApi) return new Response("Not found", { status: 404 });
+    publicHtmlMode(env.PUBLIC_HTML_MODE);
     const response = await env.ASSETS.fetch(request);
     const contentType = response.headers.get("content-type") || "";
     const pathname = new URL(request.url).pathname;
