@@ -1,0 +1,23 @@
+name: Static HTML staging preflight (no deploy)
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/static_html_staging/**'
+      - '.github/workflows/static-html-staging-preflight.yml'
+permissions:
+  contents: read
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify current Worker boundaries and public route parity
+        run: python scripts/static_html_staging/preflight.py
+      - name: Existing sitemap audit
+        run: python scripts/audit_sitemap.py
