@@ -1,0 +1,11 @@
+{
+  "worker_name": "awakenology-static-stage-isolated",
+  "deploy_enabled": false,
+  "routes": [],
+  "custom_domains": [],
+  "copy_production_secrets": false,
+  "private_editor_enabled": false,
+  "indexing_allowed": false,
+  "required_approval": "separate explicit staging deployment approval",
+  "note": "Planning metadata only. No Wrangler deployment config or deploy workflow. Stage must not receive Editor OAuth/API credentials."
+}
