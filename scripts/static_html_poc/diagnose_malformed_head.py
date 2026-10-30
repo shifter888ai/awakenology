@@ -18,6 +18,9 @@ def main():
         next_link = head.index("<link", en)
         assert head[en:next_link].endswith('">'), path
         assert '">><link rel="alternate" hreflang="ja"' not in head, path
+        xdefault = head.index('hreflang="x-default"')
+        ja_link = head.index("<link", xdefault)
+        assert head[xdefault:ja_link].endswith('">\'), path
         print(f"PASS {path}: alternate links are delimited correctly")
     print("Two metadata repairs verified; full-route content gate still required.")
 
