@@ -1,0 +1,29 @@
+name: Static HTML offline package audit
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/static_html_poc/package_audit.py'
+      - 'scripts/static_html_poc/test_package_audit.py'
+      - '.github/workflows/static-html-package-audit.yml'
+      - 'docs/static-html-poc/phase-7-package-audit.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-package-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install beautifulsoup4
+      - run: python -m unittest discover -s scripts/static_html_poc -p 'test_package_audit.py' -v
+      - run: python scripts/static_html_poc/package_audit.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: static-html-offline-package-audit
+          path: static-html-package-audit.json
+          if-no-files-found: warn
