@@ -1,0 +1,17 @@
+name: Static HTML staging comparison gate (offline)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/static_html_poc/compare_http_reports.py'
+      - 'scripts/static_html_poc/test_compare_http_reports.py'
+      - 'docs/static-html-poc/phase-6-comparison.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  comparator-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m unittest discover -s scripts/static_html_poc -p 'test_compare_http_reports.py' -v
