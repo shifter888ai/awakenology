@@ -38,6 +38,15 @@ jobs:
         run: python scripts/static_html_poc/check_full_inventory.py
       - name: Build isolated temporary HTML staging tree
         run: python scripts/static_html_poc/build_staging.py
+      - name: Probe live HTTP routing and security contracts (read-only)
+        run: python scripts/static_html_poc/check_runtime_contracts.py
+      - name: Upload runtime contract report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: static-html-runtime-contract-report
+          path: static-html-runtime-contract-report.json
+          if-no-files-found: warn
       - name: Upload staging and inventory reports
         if: always()
         uses: actions/upload-artifact@v4
