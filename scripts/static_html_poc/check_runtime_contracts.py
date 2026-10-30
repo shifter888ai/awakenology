@@ -4,7 +4,7 @@
 No cookies, credentials, writes, or authenticated actions are used.
 """
 import json
-import re
+from bs4 import BeautifulSoup
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
@@ -29,7 +29,7 @@ def probe(url):
         return {"url": url, "error": type(exc).__name__ + ": " + str(exc)}
     body = response.read(512_000).decode("utf-8", "replace")
     headers = {k.lower(): v for k, v in response.headers.items()}
-    robots_meta = re.findall(r"<meta\\b[^>]*\\bname=[\\\"\x27]robots[\\\"\x27][^>]*>", body, flags=re.I)
+    robots_meta = [str(tag) for tag in BeautifulSoup(body, "html.parser").find_all("meta", attrs={"name": "robots"})]
     return {
         "robots_meta": robots_meta,
         "url": url,
