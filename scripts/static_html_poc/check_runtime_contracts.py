@@ -38,6 +38,10 @@ def probe(url):
         "cache_control": headers.get("cache-control", ""),
         "x_robots_tag": headers.get("x-robots-tag", ""),
         "content_type": headers.get("content-type", ""),
+        "vary": headers.get("vary", ""),
+        "content_security_policy": headers.get("content-security-policy", ""),
+        "strict_transport_security": headers.get("strict-transport-security", ""),
+        "etag": headers.get("etag", ""),
         "body_bytes_sampled": len(body.encode("utf-8")),
         "body_sample": "",
     }
@@ -64,9 +68,25 @@ def main():
     add("public robots.txt", PUBLIC + "/robots.txt", lambda r: r.get("status") == 200 and "text/plain" in r.get("content_type", ""), "public robots resource available")
     add("editor robots.txt", EDITOR + "/robots.txt", lambda r: r.get("status") == 200 and "text/plain" in r.get("content_type", ""), "private host serves robots policy")
     add("editor OAuth callback without state", EDITOR + "/auth/github/callback", lambda r: r.get("status") == 400 and "no-store" in r.get("cache_control", ""), "invalid OAuth callback rejected without initiating login")
+    # Observational baseline: record redirects and headers without asserting an
+    # unapproved static-host behavior. Differences require review before cutover.
+    matrix_urls = [
+        PUBLIC + "/", PUBLIC + "/index.html", PUBLIC + "/?phase5=1",
+        PUBLIC + "/%E5%A4%A7%E6%8F%AD%E9%9C%B26/",
+        PUBLIC + "/%E5%A4%A7%E6%8F%AD%E9%9C%B26/?phase5=1",
+        PUBLIC + "/robots.txt", PUBLIC + "/sitemap.xml",
+        PUBLIC + "/ai-search/", PUBLIC + "/editor/",
+        PUBLIC + "/__static_html_phase5_missing__/",
+        EDITOR + "/", EDITOR + "/editor/", EDITOR + "/robots.txt",
+    ]
+    matrix = [probe(url) for url in matrix_urls]
+    matrix_errors = [item for item in matrix if "error" in item]
+    print(f"Observed HTTP baseline matrix: {len(matrix)} routes; {len(matrix_errors)} transport errors")
     report = {
+        "http_baseline_matrix": matrix,
+        "http_baseline_transport_errors": matrix_errors,
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "mode": "read-only; unauthenticated; no writes or secrets",
+        "mode": "read-only; unauthenticated; no writes or secrets; Phase 5 HTTP baseline matrix is observational",
         "checks_passed": sum(c["pass"] for c in checks),
         "checks_total": len(checks),
         "checks": checks,
@@ -79,7 +99,7 @@ def main():
     with open(REPORT, "w", encoding="utf-8") as f:
         json.dump(report, f, ensure_ascii=False, indent=2)
     print(f"Runtime contract checks: {report['checks_passed']}/{report['checks_total']} passed")
-    if report["checks_passed"] != report["checks_total"]:
+    if report["checks_passed"] != report["checks_total"] or matrix_errors:
         raise SystemExit(1)
 
 if __name__ == "__main__":

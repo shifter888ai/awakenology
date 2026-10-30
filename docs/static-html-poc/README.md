@@ -71,3 +71,8 @@ The isolated PoC workflow now probes a small set of production HTTP contracts wi
 ## Phase 4B: expanded HTTP contract batch
 
 The read-only probe now extracts robots meta tags from the complete sampled HTML response rather than assuming they occur in the first 2,000 characters. Additional unauthenticated checks cover query-string homepages, encoded Unicode article routes (with and without a query), public/editor robots resources, and rejection of an OAuth callback without state. No secrets, authenticated actions, writes, staging deployment or production routing changes are involved. These checks observe production behavior; staging equivalence and rollback remain separate blockers.
+
+
+## Phase 5: HTTP baseline matrix (review-only)
+
+The runtime-contract CI report also records 13 unauthenticated public/private URL observations, including index aliases, query strings, encoded Unicode, robots, sitemap, missing routes and Editor access. It captures status, Location, Content-Type, Cache-Control, Vary, CSP, HSTS, ETag and extracted robots tags. The matrix fails only on transport errors; existing explicit security/routing contracts remain hard gates. A staging host must later be compared to this baseline and discrepancies reviewed before any cutover. No staging Worker, DNS, custom domain or production routing is created by this PR.
