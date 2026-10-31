@@ -622,3 +622,13 @@ The Worker must emit `© 2017–CURRENT_YEAR Awakenology` directly in the delive
 - Check actual rendered output in both dark/light modes and TC/ST variants where applicable. Source/CI checks alone cannot certify visual fidelity. The live canonical page and user confirmation close a visual correction.
 - Keep article-specific regressions (including the frozen Article 5 text/image fixture and three bullet markers) as permanent safeguards; update a fixture only for an explicitly documented, approved intentional content/glyph change, never to make a failing test green.
 - Keep Generator fixes, individual article corrections, and production deployment as separately scoped, reviewable changes. PR creation/merge is not proof of deployment; human approval and live verification remain required.
+
+## Markdown Drafts and Finalized Article Source-of-Truth Rule
+
+- Use Markdown (`.md`) for internal test pages, working drafts, and review/validation documents.
+- When an article is finalized and approved for publication, convert the approved content to HTML (`.html`) and publish the HTML at its intended website route.
+- For a finalized/published article, the HTML file is the **single authoritative source of truth** and is maintained through the existing Private HTML Editor workflow.
+- Do not keep a permanent Markdown twin for the same finalized/published article. Avoid competing copies and synchronization drift.
+- After conversion and approval, make subsequent article edits to the authoritative HTML file. If further substantive drafting is needed, use a separate internal draft/test file only as a temporary working document, then apply approved changes to the HTML source and retire/archive the temporary draft as appropriate.
+- This rule applies prospectively to new work. Do not bulk-convert or modify existing published HTML articles just to adopt Markdown.
+- Markdown-to-HTML conversion experiments, including PR #336, must remain isolated and must not change production publishing or deployment until separately validated and explicitly approved.
