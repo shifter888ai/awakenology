@@ -13,7 +13,7 @@ class SeoMetadataScopeTests(unittest.TestCase):
         self.assertEqual(audit.page_scope("English/index.html"), "normal")
 
     def test_private_tool_metadata_does_not_raise_public_seo_flags(self):
-        by_path = {row["path"]: row for row in audit.rows}
+        by_path = {row["path"]: row for row in audit.build_rows()}
         for path in ("editor/generator.html", "editor/html-generator.html",
                      "github-editor/index.html"):
             self.assertEqual(by_path[path]["scope"], "special-editor")
