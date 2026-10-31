@@ -42,6 +42,16 @@ def read_document(path: Path) -> tuple[dict[str, str], str]:
 
 
 def build(source: Path, output: Path) -> None:
+    # This PoC must never overwrite tracked site files, even if a caller supplies
+    # a destination under the repository or a symlink that resolves into it.
+    repo_root = Path(__file__).resolve().parents[2]
+    source_path = source.resolve()
+    output_path = output.resolve()
+    if output_path == source_path:
+        raise ValueError("Output must not overwrite the source Markdown file.")
+    if output_path.is_relative_to(repo_root):
+        raise ValueError("Output must be outside the repository tree for this isolated PoC.")
+
     metadata, source_body = read_document(source)
     body_html = markdown.markdown(
         source_body,
@@ -70,8 +80,8 @@ def build(source: Path, output: Path) -> None:
 </body>
 </html>
 """
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(document, encoding="utf-8", newline="\n")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(document, encoding="utf-8", newline="\n")
 
 
 def main() -> int:
