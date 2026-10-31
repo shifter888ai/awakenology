@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/static_html_migration/**'
+      - 'scripts/markdown_publish_poc/**'
       - '.github/workflows/isolated-static-html.yml'
 permissions:
   contents: read
@@ -41,3 +42,30 @@ jobs:
           name: isolated-static-html-diagnostic
           path: source/static-html-isolated-output/
           if-no-files-found: warn
+
+  markdown-publish-poc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout proposed source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned Markdown renderer
+        run: python -m pip install 'Markdown==3.8.2'
+      - name: Run converter regression tests
+        run: python -m unittest discover -s scripts/markdown_publish_poc -p 'test_*.py' -v
+      - name: Generate isolated preview artifact
+        run: >-
+          python scripts/markdown_publish_poc/build.py
+          --source scripts/markdown_publish_poc/fixtures/sample-article.md
+          --output /tmp/markdown-publish-preview/index.html
+      - name: Upload preview for inspection (never deploy)
+        uses: actions/upload-artifact@v4
+        with:
+          name: markdown-publish-poc-preview
+          path: /tmp/markdown-publish-preview/index.html
+          if-no-files-found: error
