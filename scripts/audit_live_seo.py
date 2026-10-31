@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Read-only production SEO audit. Run after audit_seo_metadata.py."""
-import argparse, collections, csv, sys, time, urllib.error, urllib.request
+import argparse, collections, csv, os, subprocess, sys, time, urllib.error, urllib.request
 import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
 from pathlib import Path
@@ -129,6 +129,24 @@ def main():
     except (urllib.error.URLError, TimeoutError, OSError, ET.ParseError) as e:
         print("FAIL: cannot verify production sitemap: " + type(e).__name__)
         return 1
+    # In pull requests, use the base branch sitemap to distinguish genuinely new
+    # routes from routes already deployed. Production sitemap/CDN state can be ahead
+    # of or inconsistent with the checked-out PR HTML, so it is not a reliable test
+    # of whether a PR route should be audited locally.
+    base_urls = set()
+    if os.environ.get("GITHUB_EVENT_NAME") == "pull_request":
+        base_ref = os.environ.get("GITHUB_BASE_REF", "").strip()
+        if base_ref:
+            try:
+                base_xml = subprocess.run(
+                    ["git", "show", f"origin/{base_ref}:sitemap.xml"],
+                    check=True, capture_output=True, text=True, timeout=10
+                ).stdout
+                base_root = ET.fromstring(base_xml)
+                base_urls = {n.text.strip() for n in base_root.findall(".//{http://www.sitemaps.org/schemas/sitemap/0.9}loc") if n.text}
+                print(f"PR base sitemap routes loaded: {len(base_urls)} ({base_ref})")
+            except (subprocess.SubprocessError, ET.ParseError):
+                print("WARNING: could not read base-branch sitemap; falling back to production sitemap comparison")
     total_routes = len(urls)
     if args.max_routes > 0 and args.max_routes < total_routes:
         urls = select_sample_urls(urls, args.max_routes)
@@ -141,7 +159,8 @@ def main():
         source_path = "index.html" if path == "/" else unquote(path.lstrip("/")) + "index.html"
         expected = DOMAIN + (path if path.endswith("/") or path == "/" else path + "/")
         try:
-            if url not in deployed_urls and not is_ai:
+            use_local_pr_html = bool(base_urls) and url not in base_urls
+            if (use_local_pr_html or (not base_urls and url not in deployed_urls)) and not is_ai:
                 local = ROOT / source_path
                 if not local.is_file(): raise OSError("new route missing local HTML")
                 status, final, ctype, charset = 200, url, "text/html", "utf-8"
