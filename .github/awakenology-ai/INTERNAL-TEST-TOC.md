@@ -5,7 +5,7 @@
 ## 1. Knowledge Base
 
 - [Awakenology directionality principles](../../docs/awakenology-directionality-principles.md)
-- [Awakenology terminology glossary (visual website page)](https://awakenology.space/Awakenology-Glossary/)
+- [Awakenology terminology glossary — repository HTML preview](https://raw.githack.com/shifter888ai/awakenology/main/Awakenology-Glossary/index.html)
 
 ## 2. Test Pages
 
