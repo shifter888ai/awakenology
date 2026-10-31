@@ -96,6 +96,8 @@ async def snapshot(browser, html, url, width, height, label, output, route):
                 raise AssertionError(f"{label}: Chinese conversion round-trip failed: initial={initial_lang}, saved={simplified_saved}, original={len(original_text)}, simplified={len(simplified_text)}, restored={len(traditional_text)}")
             data["chineseRoundTrip"] = [initial_lang, "zh-CN", simplified_saved, "zh-Hant", simplified_text, traditional_text]
             # Regression: Chinese conversion must not replace the body and detach the theme button.
+            controls = await page.locator("#awakenology-theme-toggle").evaluate_all("""nodes => nodes.map(el => ({outerHTML: el.outerHTML, rect: (() => {const r = el.getBoundingClientRect(); return [r.x, r.y, r.width, r.height]})(), topmost: document.elementFromPoint(el.getBoundingClientRect().x + el.getBoundingClientRect().width / 2, el.getBoundingClientRect().y + el.getBoundingClientRect().height / 2)?.outerHTML}))""")
+            print(f"{label}: theme controls after Chinese conversion: {controls}", flush=True)
             theme_after_conversion = page.locator("#awakenology-theme-toggle:visible").first
             if await page.locator("#awakenology-theme-toggle:visible").count() < 1:
                 raise AssertionError(f"{label}: theme toggle disappeared after Chinese conversion")
