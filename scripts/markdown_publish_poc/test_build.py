@@ -24,7 +24,7 @@ class MarkdownPublishPocTests(unittest.TestCase):
             self.assertIn("<strong>Markdown source</strong>", rendered)
             self.assertIn("<table>", rendered)
             self.assertIn('<a href="https://awakenology.space">Awakenology</a>', rendered)
-            self.assertIn("<pre><code>", rendered)
+            self.assertIn("<pre><code class=\"language-text\">", rendered)
             self.assertNotIn("## Content integrity", rendered)
 
     def test_missing_required_metadata_is_rejected(self):
