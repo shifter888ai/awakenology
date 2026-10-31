@@ -20,13 +20,17 @@ These are the user's framework-specific definitions. They should not be silently
 
 Do not assign hypnosis or awakenosis exclusively to a₋₁ or a₊₁ until the user explicitly defines that mapping. Do not infer that either sign automatically means increase or decrease.
 
-## Keep the three directional terms distinct
+## The three directional terms — Chinese and English
 
 The terms **递增**, **递减**, and **递归** describe different directions or processes in this framework; they must not be treated as interchangeable variants of one operation.
 
-- **递增:** increasing. The exact quantity/state that increases, and its starting point and destination, must be stated in context.
-- **递减:** decreasing. The exact quantity/state that decreases, and its starting point and destination, must be stated in context.
-- **递归:** in this Awakenology framework, a layer-by-layer process of passing through layers and returning toward the original point a₀. The return is essential to this framework-specific use of the term.
+| Chinese term | Recommended English term | Meaning in the Awakenology framework |
+|---|---|---|
+| **递增** | **Progressive Increase** | Increasing progressively. State what is increasing, from which starting point, and toward what destination. |
+| **递减** | **Progressive Decrease** | Decreasing progressively. State what is decreasing, from which starting point, and toward what destination. |
+| **递归** | **Layer-by-Layer Return** | Passing through successive layers to return toward the original point a₀. The return direction is essential to this framework-specific meaning. |
+
+**Translation note:** “Progressive Increase” and “Progressive Decrease” are explanatory English labels. “Layer-by-Layer Return” is recommended as the clearest explanatory label for the user's specific meaning of 递归. The word **recursion** may be mentioned as a related technical term, but should not be used alone where it could obscure the intended return direction.
 
 The user's character-based explanation is:
 - **递:** one layer at a time / passing along successively.
@@ -42,6 +46,7 @@ This is the user's conceptual definition in Awakenology. It is not a claim that 
 4. Do not assume that objective observation and return to a₀ are identical; their relationship needs an explicit definition.
 5. Do not map a₋₁ and a₊₁ to hypnosis, awakenosis, increase, or decrease without the user's explicit definition.
 6. Do not silently change existing formulas, examples, or course wording while this terminology is being clarified.
+7. When writing in English, use **Progressive Increase**, **Progressive Decrease**, and **Layer-by-Layer Return** as the current recommended explanatory terms, while preserving the Chinese terms alongside them where useful.
 
 ## Items still to define
 
@@ -57,4 +62,6 @@ Before revising course formulas, establish:
 **Awakenosis:** objective observation.  
 **a₀:** origin.  
 **a₋₁ / a₊₁:** opposite directions relative to the origin.  
-**递增 / 递减 / 递归:** three distinct directional concepts; define each by its direction, starting point, and destination.
+**递增 / Progressive Increase:** progressive increase.  
+**递减 / Progressive Decrease:** progressive decrease.  
+**递归 / Layer-by-Layer Return:** passing through successive layers to return toward a₀.
