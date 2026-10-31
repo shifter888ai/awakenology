@@ -111,6 +111,7 @@ async def snapshot(browser, html, url, width, height, label, output, route):
         # Let smooth scrolling and floating-control transitions finish after interaction checks.
         await page.evaluate("""async () => {
             await document.fonts.ready;
+            await Promise.all([...document.images].map(img => img.decode().catch(() => {})));
             window.scrollTo({top: 0, left: 0, behavior: 'instant'});
             await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
         }""")
