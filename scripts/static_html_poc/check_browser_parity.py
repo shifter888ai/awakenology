@@ -95,9 +95,23 @@ async def snapshot(browser, html, url, width, height, label, output, route):
             if initial_lang != "zh-Hant" or simplified_saved != "cn" or original_text == simplified_text or simplified_text == traditional_text:
                 raise AssertionError(f"{label}: Chinese conversion round-trip failed: initial={initial_lang}, saved={simplified_saved}, original={len(original_text)}, simplified={len(simplified_text)}, restored={len(traditional_text)}")
             data["chineseRoundTrip"] = [initial_lang, "zh-CN", simplified_saved, "zh-Hant", simplified_text, traditional_text]
+            # Regression: Chinese conversion must not replace the body and detach the theme button.
+            theme_after_conversion = page.locator("#awakenology-theme-toggle:visible").first
+            if await page.locator("#awakenology-theme-toggle").count() != 1:
+                raise AssertionError(f"{label}: expected exactly one theme toggle after Chinese conversion")
+            before_post_conversion = await page.locator("html").get_attribute("data-aw-theme")
+            await theme_after_conversion.click()
+            switched_post_conversion = await page.locator("html").get_attribute("data-aw-theme")
+            saved_post_conversion = await page.evaluate("localStorage.getItem('awakenology-theme')")
+            await theme_after_conversion.click()
+            restored_post_conversion = await page.locator("html").get_attribute("data-aw-theme")
+            if (before_post_conversion, switched_post_conversion, saved_post_conversion, restored_post_conversion) != ("dark", "light", "light", "dark"):
+                raise AssertionError(f"{label}: theme toggle failed after Chinese conversion: {(before_post_conversion, switched_post_conversion, saved_post_conversion, restored_post_conversion)}")
+            data["themeAfterChineseRoundTrip"] = [before_post_conversion, switched_post_conversion, saved_post_conversion, restored_post_conversion]
         # Let smooth scrolling and floating-control transitions finish after interaction checks.
         await page.evaluate("""async () => {
             await document.fonts.ready;
+            await Promise.all([...document.images].map(img => img.decode().catch(() => {})));
             window.scrollTo({top: 0, left: 0, behavior: 'instant'});
             await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
         }""")
