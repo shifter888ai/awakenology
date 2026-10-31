@@ -6,6 +6,7 @@ from build import build, read_document
 
 
 ROOT = Path(__file__).parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 FIXTURE = ROOT / "fixtures" / "sample-article.md"
 
 
@@ -43,6 +44,25 @@ class MarkdownPublishPocTests(unittest.TestCase):
             )
             with self.assertRaisesRegex(ValueError, "Unsupported metadata"):
                 read_document(source)
+
+    def test_output_inside_repository_is_rejected(self):
+        output = REPO_ROOT / "should-not-be-created-by-markdown-poc.html"
+        with self.assertRaisesRegex(ValueError, "outside the repository tree"):
+            build(FIXTURE, output)
+        self.assertFalse(output.exists(), "blocked output must not be created")
+
+    def test_source_cannot_be_overwritten(self):
+        original = FIXTURE.read_bytes()
+        with self.assertRaisesRegex(ValueError, "must not overwrite the source"):
+            build(FIXTURE, FIXTURE)
+        self.assertEqual(FIXTURE.read_bytes(), original)
+
+    def test_symlink_resolving_into_repository_is_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / "output.html"
+            output.symlink_to(REPO_ROOT / "docs" / "markdown-publishing-poc.md")
+            with self.assertRaisesRegex(ValueError, "outside the repository tree"):
+                build(FIXTURE, output)
 
 
 if __name__ == "__main__":
