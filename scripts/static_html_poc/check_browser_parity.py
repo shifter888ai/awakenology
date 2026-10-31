@@ -130,6 +130,9 @@ async def snapshot(browser, html, url, width, height, label, output, route):
             }
             if (stable < 3) throw new Error('Theme toggle did not settle before screenshot');
         }""")
+        if route == "/" and width == 390:
+            icons = await page.locator("footer .reddit-icon img").evaluate_all("""nodes => nodes.map(el => ({rect: (() => {const r=el.getBoundingClientRect();return [r.x,r.y,r.width,r.height]})(), css: [getComputedStyle(el).width,getComputedStyle(el).height,getComputedStyle(el).maxWidth,getComputedStyle(el).maxHeight], natural: [el.naturalWidth,el.naturalHeight]}))""")
+            print(f"{label}: footer icon geometry {icons}", flush=True)
         await page.screenshot(path=str(output / (label + ".png")), full_page=True,
                               animations="disabled", timeout=30000)
         return data, errors
