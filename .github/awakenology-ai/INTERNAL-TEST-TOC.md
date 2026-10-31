@@ -5,12 +5,14 @@
 ## 1. Knowledge Base
 
 - [Awakenology directionality principles](../../docs/awakenology-directionality-principles.md)
-- [Awakenology terminology glossary — repository HTML preview](https://raw.githack.com/shifter888ai/awakenology/main/Awakenology-Glossary/index.html)
+- [Awakenology terminology glossary — Markdown working copy](./TERMINOLOGY-GLOSSARY.md)
 
 ## 2. Test Pages
 
+- **Format:** use `.md` for test pages while they are being drafted, reviewed, and validated; GitHub renders them directly.
+- **Publication:** once a test page is finalized and approved for publication, convert it to `.html` as needed. Keep the Markdown working copy for internal review and traceability.
 - **Inventory status:** to be populated after a repository-wide review of existing test and experimental pages.
-- Add each test page here with its purpose, language, current status, and the test or workflow that validates it.
+- For each test page, record its purpose, language, current status, source, expected result, actual result, and validating workflow.
 - Keep experimental pages distinct from official articles.
 
 ## 3. Mixed-Tendency Cases
