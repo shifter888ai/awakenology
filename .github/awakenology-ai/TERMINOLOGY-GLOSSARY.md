@@ -1,7 +1,5 @@
 # Awakenology Terminology Glossary
 
-# Awakenology Terminology Glossary
-
 Awakenology / Awakenosis / Hypnosis — Chinese–English working glossary
 
 This glossary collects terms found in Awakenology course materials and related discussions. It records the framework's own terminology; it does not independently validate the claims expressed in the source materials.
@@ -14,7 +12,7 @@ Status: Initial working glossary, based on terms used in the Awakenology course 
 
 ## Related framework comparison
 
-Neutral vs Hypnotic vs Awakenotic: basic form, distortion, and reversal
+[Neutral vs Hypnotic vs Awakenotic: basic form, distortion, and reversal](/Neutral-Hypnotic-Awakenotic/)
 
 ## Core terms
 
@@ -266,8 +264,7 @@ This expanded list is a source-grounded working inventory, not a claim that ever
 
 This expanded list draws on recurring terms and headings in Awakenology-course.txt, 实战经验.txt, a催醒聚乐部-课程.docx, and the user's prior Awakenology discussions. English equivalents not explicitly established by the user are marked as working, provisional, or context-dependent. The source note in 实战经验.txt says content should be based on practical experience rather than theoretical speculation. The glossary records source vocabulary and conversation-derived terms without independently validating claims or silently adding definitions.
 
-返回中文目錄 · Back to English contents
-
+[返回中文目錄](/Chinese/) · [Back to English contents](/English/)
 
 ---
 
