@@ -9,6 +9,9 @@ from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "seo-metadata-report.csv"
+NON_PUBLIC_ROOTS = {".github", "docs", "poc", "scripts", "source", "tests"}
+SKIP_PARTS = {".git", "node_modules", ".venv", "__pycache__"}
+
 
 class HeadParser(HTMLParser):
     def __init__(self):
@@ -20,6 +23,7 @@ class HeadParser(HTMLParser):
         self.canonicals = []
         self.open_graph = collections.defaultdict(list)
         self.lang = ""
+
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
         if tag == "html":
@@ -37,14 +41,17 @@ class HeadParser(HTMLParser):
             self.canonicals.append(a.get("href", "").strip())
         if tag == "meta" and a.get("property", "").lower().startswith("og:"):
             self.open_graph[a["property"].lower()].append(a.get("content", "").strip())
+
     def handle_endtag(self, tag):
         if tag == "title":
             self.in_title = False
         if tag == "head":
             self.in_head = False
+
     def handle_data(self, data):
         if self.in_title and self.titles:
             self.titles[-1] += data
+
 
 def normalize(s):
     s = html.unescape(s).strip()
@@ -54,6 +61,15 @@ def normalize(s):
     if s.endswith(" | Awakenology"):
         s = s[:-len(" | Awakenology")]
     return " ".join(s.split()).casefold()
+
+
+def should_inventory(relative):
+    """Only inventory HTML routes that can belong to the public site."""
+    parts = Path(relative).parts
+    if any(part in SKIP_PARTS for part in parts):
+        return False
+    return not parts or parts[0] not in NON_PUBLIC_ROOTS
+
 
 def page_scope(relative):
     """Classify private tools separately from public SEO pages."""
@@ -65,61 +81,73 @@ def page_scope(relative):
         return "special-editor"
     return "normal"
 
-rows = []
-for path in sorted(ROOT.rglob("*.html")):
-    if any(part in (".git", "node_modules") for part in path.parts):
-        continue
-    relative = path.relative_to(ROOT).as_posix()
-    scope = page_scope(relative)
-    parser = HeadParser()
-    parser.feed(path.read_text(encoding="utf-8"))
-    title = parser.titles[0].strip() if parser.titles else ""
-    desc = parser.descriptions[0] if parser.descriptions else ""
-    flags = []
-    if not title:
-        flags.append("missing-title")
-    if len(parser.titles) > 1:
-        flags.append("duplicate-title")
-    if not desc and scope == "normal":
-        flags.append("missing-description")
-    if len(parser.descriptions) > 1:
-        flags.append("duplicate-description")
-    if desc and normalize(desc) == normalize(title):
-        flags.append("title-only-description")
-    if scope == "normal":
-        if not parser.canonicals or not parser.canonicals[0]:
-            flags.append("missing-canonical")
-        if len(parser.canonicals) > 1:
-            flags.append("duplicate-canonical")
-    for prop, values in sorted(parser.open_graph.items()):
-        if len(values) > 1:
-            flags.append("duplicate-" + prop)
-        if any(not value for value in values):
-            flags.append("empty-" + prop)
-    for prop in ("og:url", "og:image"):
-        for value in parser.open_graph.get(prop, []):
-            parsed = urlparse(value)
-            if value and (parsed.scheme not in ("http", "https") or not parsed.netloc):
-                flags.append("nonabsolute-" + prop)
-    rows.append(dict(path=relative, scope=scope, lang=parser.lang, title=title,
-                     description=desc, title_count=len(parser.titles),
-                     description_count=len(parser.descriptions),
-                     canonical=parser.canonicals[0] if parser.canonicals else "",
-                     canonical_count=len(parser.canonicals),
-                     og_title_count=len(parser.open_graph.get("og:title", [])),
-                     og_description_count=len(parser.open_graph.get("og:description", [])),
-                     og_url_count=len(parser.open_graph.get("og:url", [])),
-                     og_image_count=len(parser.open_graph.get("og:image", [])),
-                     flags=";".join(flags)))
-with OUT.open("w", encoding="utf-8", newline="") as f:
-    writer = csv.DictWriter(f, fieldnames=list(rows[0]))
-    writer.writeheader()
-    writer.writerows(rows)
-normal = [r for r in rows if r["scope"] == "normal"]
-counts = collections.Counter(flag for r in normal for flag in r["flags"].split(";") if flag)
-print(f"HTML files: {len(rows)}; normal pages: {len(normal)}; special pages: {len(rows)-len(normal)}")
-print("Normal-page flags:", dict(sorted(counts.items())))
-for r in normal:
-    if r["flags"]:
-        print(f'{r["path"]}: {r["flags"]}')
-print(f"Full report: {OUT.name}")
+
+def build_rows(root=ROOT):
+    """Return metadata rows for public/special routes, excluding repository tooling."""
+    rows = []
+    for path in sorted(root.rglob("*.html")):
+        relative = path.relative_to(root).as_posix()
+        if not should_inventory(relative):
+            continue
+        scope = page_scope(relative)
+        parser = HeadParser()
+        parser.feed(path.read_text(encoding="utf-8"))
+        title = parser.titles[0].strip() if parser.titles else ""
+        desc = parser.descriptions[0] if parser.descriptions else ""
+        flags = []
+        if not title:
+            flags.append("missing-title")
+        if len(parser.titles) > 1:
+            flags.append("duplicate-title")
+        if not desc and scope == "normal":
+            flags.append("missing-description")
+        if len(parser.descriptions) > 1:
+            flags.append("duplicate-description")
+        if desc and normalize(desc) == normalize(title):
+            flags.append("title-only-description")
+        if scope == "normal":
+            if not parser.canonicals or not parser.canonicals[0]:
+                flags.append("missing-canonical")
+            if len(parser.canonicals) > 1:
+                flags.append("duplicate-canonical")
+        for prop, values in sorted(parser.open_graph.items()):
+            if len(values) > 1:
+                flags.append("duplicate-" + prop)
+            if any(not value for value in values):
+                flags.append("empty-" + prop)
+        for prop in ("og:url", "og:image"):
+            for value in parser.open_graph.get(prop, []):
+                parsed = urlparse(value)
+                if value and (parsed.scheme not in ("http", "https") or not parsed.netloc):
+                    flags.append("nonabsolute-" + prop)
+        rows.append(dict(path=relative, scope=scope, lang=parser.lang, title=title,
+                         description=desc, title_count=len(parser.titles),
+                         description_count=len(parser.descriptions),
+                         canonical=parser.canonicals[0] if parser.canonicals else "",
+                         canonical_count=len(parser.canonicals),
+                         og_title_count=len(parser.open_graph.get("og:title", [])),
+                         og_description_count=len(parser.open_graph.get("og:description", [])),
+                         og_url_count=len(parser.open_graph.get("og:url", [])),
+                         og_image_count=len(parser.open_graph.get("og:image", [])),
+                         flags=";".join(flags)))
+    return rows
+
+
+def main():
+    rows = build_rows()
+    with OUT.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    normal = [r for r in rows if r["scope"] == "normal"]
+    counts = collections.Counter(flag for r in normal for flag in r["flags"].split(";") if flag)
+    print(f"HTML files: {len(rows)}; normal pages: {len(normal)}; special pages: {len(rows)-len(normal)}")
+    print("Normal-page flags:", dict(sorted(counts.items())))
+    for r in normal:
+        if r["flags"]:
+            print(f'{r["path"]}: {r["flags"]}')
+    print(f"Full report: {OUT.name}")
+
+
+if __name__ == "__main__":
+    main()
