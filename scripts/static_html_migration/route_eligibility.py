@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Report-only, fail-closed static route eligibility; never enables Worker routing."""
 import json
+import re
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
@@ -43,7 +44,20 @@ def parse_sitemap(xml_bytes):
         url = urlsplit(raw)
         if url.scheme != "https" or url.netloc != "awakenology.space" or url.query or url.fragment:
             raise ValueError("Noncanonical sitemap URL: " + raw)
-        route = validate_route(unquote(url.path))
+        # Sitemap paths may percent-encode UTF-8 bytes for multilingual names, but
+        # percent-encoded ASCII creates aliases for characters that should be literal
+        # in a canonical route (notably slash, dot, backslash and unreserved letters).
+        # Reject those aliases while preserving valid percent-encoded UTF-8.
+        encoded_bytes = re.findall(r"%([0-9A-Fa-f]{2})", url.path)
+        if "%" in re.sub(r"%[0-9A-Fa-f]{2}", "", url.path):
+            raise ValueError("Malformed percent escape in sitemap URL: " + raw)
+        if any(int(byte, 16) < 0x80 for byte in encoded_bytes):
+            raise ValueError("Percent-encoded ASCII alias in sitemap URL: " + raw)
+        try:
+            decoded_path = unquote(url.path, encoding="utf-8", errors="strict")
+        except UnicodeDecodeError as exc:
+            raise ValueError("Invalid UTF-8 in sitemap URL: " + raw) from exc
+        route = validate_route(decoded_path)
         if route in routes:
             raise ValueError("Duplicate decoded sitemap route: " + route)
         routes.add(route)
