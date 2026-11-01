@@ -27,6 +27,12 @@ class AnchorAccessibilityTests(unittest.TestCase):
             ("bare.jpg", "blank-alt"),
         ])
 
+    def test_blank_image_alt_does_not_name_a_link(self):
+        p = AUDIT.PageParser()
+        p.feed('<a href="/target"><img src="blank.jpg" alt="   "></a><a href="/target"><img src="named.jpg" alt="Diagram"></a>')
+        self.assertFalse(p.links[0]["has_image"])
+        self.assertTrue(p.links[1]["has_image"])
+
     def test_page_resolution_supports_directory_routes(self):
         self.assertEqual(AUDIT.resolve_page("/").name, "index.html")
         self.assertEqual(AUDIT.resolve_page("/English/").name, "index.html")
