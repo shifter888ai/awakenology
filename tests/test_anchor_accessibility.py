@@ -18,6 +18,14 @@ class AnchorAccessibilityTests(unittest.TestCase):
         self.assertEqual(p.links[0]["href"], "")  # legacy named anchor is not a navigation link
         self.assertEqual(p.buttons[0]["text"].strip(), "Go")
 
+    def test_distinguishes_missing_blank_and_decorative_image_alt(self):
+        p = AUDIT.PageParser()
+        p.feed('<img src="missing.jpg"><img src="blank.jpg" alt="   "><img src="decorative.jpg" alt="">')
+        self.assertEqual(p.images, [
+            ("missing.jpg", "missing-alt"),
+            ("blank.jpg", "blank-alt"),
+        ])
+
     def test_page_resolution_supports_directory_routes(self):
         self.assertEqual(AUDIT.resolve_page("/").name, "index.html")
         self.assertEqual(AUDIT.resolve_page("/English/").name, "index.html")
