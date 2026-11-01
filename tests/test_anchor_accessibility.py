@@ -20,10 +20,11 @@ class AnchorAccessibilityTests(unittest.TestCase):
 
     def test_distinguishes_missing_blank_and_decorative_image_alt(self):
         p = AUDIT.PageParser()
-        p.feed('<img src="missing.jpg"><img src="blank.jpg" alt="   "><img src="decorative.jpg" alt="">')
+        p.feed('<img src="missing.jpg"><img src="blank.jpg" alt="   "><img src="bare.jpg" alt><img src="decorative.jpg" alt="">')
         self.assertEqual(p.images, [
             ("missing.jpg", "missing-alt"),
             ("blank.jpg", "blank-alt"),
+            ("bare.jpg", "blank-alt"),
         ])
 
     def test_page_resolution_supports_directory_routes(self):
