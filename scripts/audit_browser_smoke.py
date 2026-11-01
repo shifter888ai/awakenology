@@ -97,6 +97,11 @@ async def inspect_route(browser, url, semaphore, viewport, screenshot=False, int
               title: document.title || '',
               lang: document.documentElement.getAttribute('lang') || '',
               horizontalOverflow: document.documentElement.scrollWidth > window.innerWidth + 2,
+              overflowCandidates: Array.from(document.querySelectorAll("body *")).map(el => {
+                const r = el.getBoundingClientRect();
+                const css = getComputedStyle(el);
+                return {tag: el.tagName.toLowerCase(), id: el.id || "", className: typeof el.className === "string" ? el.className.slice(0,120) : "", left: Math.round(r.left), right: Math.round(r.right), width: Math.round(r.width), scrollWidth: el.scrollWidth, clientWidth: el.clientWidth, position: css.position, minWidth: css.minWidth};
+              }).filter(el => el.width > 0 && (el.left < -2 || el.right > window.innerWidth + 2 || el.scrollWidth > el.clientWidth + 2)).sort((a,b) => Math.max(b.right-window.innerWidth,-b.left) - Math.max(a.right-window.innerWidth,-a.left)).slice(0,8),
               images: Array.from(document.images).map(i => ({src:i.currentSrc||i.src, complete:i.complete, width:i.naturalWidth})),
               themeButton: !!document.querySelector('#awakenology-theme-toggle'),
               theme: document.documentElement.getAttribute('data-aw-theme') || '',
@@ -112,7 +117,7 @@ async def inspect_route(browser, url, semaphore, viewport, screenshot=False, int
             if not facts["lang"].strip():
                 rows.append(finding(url, viewport, "missing-document-lang", "warning", "Rendered html element has no lang"))
             if facts["horizontalOverflow"]:
-                rows.append(finding(url, viewport, "horizontal-overflow", "warning", "Document scroll width exceeds viewport"))
+                rows.append(finding(url, viewport, "horizontal-overflow", "warning", "Document width=" + str(await page.evaluate("document.documentElement.scrollWidth")) + "; candidates=" + str(facts["overflowCandidates"])))
             for img in facts["images"]:
                 if img["complete"] and img["src"] and img["width"] == 0:
                     rows.append(finding(url, viewport, "broken-rendered-image", "warning", img["src"]))
