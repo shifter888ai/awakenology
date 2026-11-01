@@ -40,7 +40,13 @@ class PageParser(HTMLParser):
             if a.get(key): self.ids.append((a[key], tag))
         if tag == "a" and a.get("name"): self.ids.append((a["name"], tag))
         if tag == "img":
-            if "alt" not in a: self.images.append((a.get("src", ""), "missing-alt"))
+            if "alt" not in a:
+                self.images.append((a.get("src", ""), "missing-alt"))
+            elif not a.get("alt", "").strip():
+                # An explicitly empty alt is intentional decorative markup; whitespace-only
+                # alt text is not an empty string and must not silently pass as meaningful.
+                if a.get("alt", "") != "":
+                    self.images.append((a.get("src", ""), "blank-alt"))
         if tag == "a":
             item = {"href":a.get("href","").strip(),"text":"","label":a.get("aria-label","").strip(),
                     "title":a.get("title","").strip(),"has_image":False,"tag":"a"}
