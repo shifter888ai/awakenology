@@ -74,6 +74,16 @@ class RouteEligibilityTests(unittest.TestCase):
     def test_sitemap_parses_unicode_url(self):
         self.assertEqual(parse_sitemap(xml("/", "/%E5%A4%A7%E6%8F%AD%E9%9C%B27/")), {"/", "/大揭露7/"})
 
+    def test_sitemap_rejects_percent_encoded_ascii_aliases(self):
+        for path in ("/foo%2Fbar/", "/foo%2Ebar/", "/%65ditor/"):
+            with self.subTest(path=path), self.assertRaisesRegex(ValueError, "Percent-encoded ASCII"):
+                parse_sitemap(xml(path))
+
+    def test_sitemap_rejects_malformed_or_invalid_utf8_escapes(self):
+        for path in ("/foo%2/", "/foo%GG/", "/%FF/"):
+            with self.subTest(path=path), self.assertRaises(ValueError):
+                parse_sitemap(xml(path))
+
     def test_sitemap_duplicate_decoded_route_fails(self):
         with self.assertRaisesRegex(ValueError, "Duplicate decoded"):
             parse_sitemap(xml("/Chinese/", "/Chinese/"))
