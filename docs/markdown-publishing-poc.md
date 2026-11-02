@@ -18,11 +18,11 @@ This proof of concept is deliberately isolated:
 - HTML output for paragraphs, emphasis, lists, links, tables, and fenced code.
 - Source Markdown remains unchanged.
 - Missing required metadata and unsupported metadata fail closed.
-- Conversion runs in a pull-request workflow with a pinned renderer version.
+- Conversion runs in a pull-request workflow with pinned Markdown and HTML-sanitizer versions.\n- The renderer fails closed when generated HTML contains markup, attributes, or URL schemes outside the explicit allowlist; raw HTML is not an authoring escape hatch.\n- Duplicate metadata fields are rejected.
 
 ## Before production integration
 
-A later stage must compare the generated output with an existing representative Awakenology article and validate content integrity, shared chrome, light/dark mode, fonts, responsive layout, SEO metadata, internal links, sitemap behavior, and the current publishing approval gate. Existing HTML remains authoritative until that validation passes and a deliberate migration is approved.
+A representative published article (`大揭露6/index.html`) was inspected. It contains speaker-specific blue text, inline font sizing, underlining, deliberate blank paragraphs, and images in addition to ordinary paragraphs and lists. No matching Markdown source exists in the repository, so a faithful source-to-output comparison cannot yet be claimed. A future real-article test must begin with an explicitly approved Markdown source and compare extracted article text and semantic structure without rewriting the published page. It must also validate shared chrome, light/dark mode, locked language fonts, responsive layout, SEO metadata, internal links, sitemap behavior, and the existing publishing approval gate. Existing HTML remains authoritative until all gates pass and a deliberate migration is approved.
 
 ## Run locally
 
