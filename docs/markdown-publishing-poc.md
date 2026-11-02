@@ -27,7 +27,7 @@ A representative published article (`大揭露6/index.html`) was inspected. It c
 ## Run locally
 
 ```sh
-python -m pip install 'Markdown==3.8.2'
+python -m pip install 'Markdown==3.8.2' 'bleach==6.2.0'
 python -m unittest discover -s scripts/markdown_publish_poc -p 'test_*.py' -v
 python scripts/markdown_publish_poc/build.py \
   --source scripts/markdown_publish_poc/fixtures/sample-article.md \
