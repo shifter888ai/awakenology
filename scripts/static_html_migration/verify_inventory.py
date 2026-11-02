@@ -4,9 +4,10 @@ import json
 from pathlib import Path
 import subprocess
 
+from route_exclusions import is_excluded_html_path
+
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "static-html-isolated-output"
-EXCLUDED = ("editor/", "github-editor/", "scripts/", "tests/", "docs/", ".github/")
 SCOPE = "source-only isolated build; no live Worker or browser equivalence"
 
 def digest(data):
@@ -16,7 +17,7 @@ def verify():
     paths = subprocess.check_output(
         ["git", "ls-files", "-z", "--", "*.html"], cwd=ROOT
     ).decode("utf-8").split("\0")
-    expected = sorted(p for p in paths if p and not p.startswith(EXCLUDED) and p != "404.html")
+    expected = sorted(p for p in paths if p and not is_excluded_html_path(p) and p != "404.html")
     # The diagnostic must be self-contained: never accept linked files or directories.
     if OUT.is_symlink() or any(p.is_symlink() for p in OUT.rglob("*")):
         raise AssertionError("Symlink in isolated artifact")
