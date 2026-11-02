@@ -33,7 +33,7 @@ class InventoryGateTests(unittest.TestCase):
 
     def write_manifest(self):
         (self.out / "manifest.json").write_text(
-            json.dumps({"failures": [], "routes": self.rows}), encoding="utf-8"
+            json.dumps({"scope": gate.SCOPE, "failures": [], "routes": self.rows}), encoding="utf-8"
         )
 
     def verify(self):
@@ -80,9 +80,46 @@ class InventoryGateTests(unittest.TestCase):
 
     def test_reported_build_failure_rejected(self):
         (self.out / "manifest.json").write_text(
-            json.dumps({"failures": ["deliberate"], "routes": self.rows}), encoding="utf-8"
+            json.dumps({"scope": gate.SCOPE, "failures": ["deliberate"], "routes": self.rows}), encoding="utf-8"
         )
         with self.assertRaisesRegex(AssertionError, "manifest reports failures"):
+            self.verify()
+
+    def test_missing_failures_list_rejected(self):
+        (self.out / "manifest.json").write_text(
+            json.dumps({"scope": gate.SCOPE, "routes": self.rows}), encoding="utf-8"
+        )
+        with self.assertRaisesRegex(AssertionError, "missing failures list"):
+            self.verify()
+
+    def test_wrong_scope_rejected(self):
+        (self.out / "manifest.json").write_text(
+            json.dumps({"scope": "deployable", "failures": [], "routes": self.rows}), encoding="utf-8"
+        )
+        with self.assertRaisesRegex(AssertionError, "scope mismatch"):
+            self.verify()
+
+    def test_symlinked_generated_html_rejected(self):
+        external = self.root / "external.html"
+        external.write_bytes(self.built)
+        (self.out / "index.html").unlink()
+        (self.out / "index.html").symlink_to(external)
+        with self.assertRaisesRegex(AssertionError, "Symlink in isolated artifact"):
+            self.verify()
+
+    def test_symlinked_manifest_rejected(self):
+        external = self.root / "external-manifest.json"
+        external.write_bytes((self.out / "manifest.json").read_bytes())
+        (self.out / "manifest.json").unlink()
+        (self.out / "manifest.json").symlink_to(external)
+        with self.assertRaisesRegex(AssertionError, "Symlink in isolated artifact"):
+            self.verify()
+
+    def test_symlinked_directory_rejected(self):
+        external = self.root / "external-directory"
+        external.mkdir()
+        (self.out / "linked-directory").symlink_to(external, target_is_directory=True)
+        with self.assertRaisesRegex(AssertionError, "Symlink in isolated artifact"):
             self.verify()
 
 
