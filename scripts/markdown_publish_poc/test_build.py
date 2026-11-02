@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 import tempfile
 import unittest
 
@@ -86,6 +87,28 @@ class MarkdownPublishPocTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "must not overwrite the source"):
             build(FIXTURE, FIXTURE)
         self.assertEqual(FIXTURE.read_bytes(), original)
+
+    def test_preexisting_output_is_never_overwritten(self):
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / "existing.html"
+            original = b"keep this file unchanged"
+            output.write_bytes(original)
+            with self.assertRaisesRegex(ValueError, "must not already exist"):
+                build(FIXTURE, output)
+            self.assertEqual(output.read_bytes(), original)
+
+    def test_hard_link_alias_to_source_is_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / "source-alias.md"
+            try:
+                os.link(FIXTURE, output)
+            except (OSError, NotImplementedError):
+                self.skipTest("hard links are unavailable on this filesystem")
+            original = FIXTURE.read_bytes()
+            with self.assertRaisesRegex(ValueError, "must not already exist"):
+                build(FIXTURE, output)
+            self.assertEqual(FIXTURE.read_bytes(), original)
+            self.assertEqual(output.read_bytes(), original)
 
     def test_symlink_resolving_into_repository_is_rejected(self):
         with tempfile.TemporaryDirectory() as temp:
