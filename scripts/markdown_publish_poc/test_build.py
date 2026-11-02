@@ -25,7 +25,7 @@ class MarkdownPublishPocTests(unittest.TestCase):
             self.assertIn("<strong>Markdown source</strong>", rendered)
             self.assertIn("<table>", rendered)
             self.assertIn('<a href="https://awakenology.space">Awakenology</a>', rendered)
-            self.assertIn("<pre><code class=\"language-text\">", rendered)
+            self.assertIn('<pre><code class="language-text">', rendered)
             self.assertNotIn("## Content integrity", rendered)
 
     def test_missing_required_metadata_is_rejected(self):
@@ -44,6 +44,36 @@ class MarkdownPublishPocTests(unittest.TestCase):
             )
             with self.assertRaisesRegex(ValueError, "Unsupported metadata"):
                 read_document(source)
+
+    def test_duplicate_metadata_is_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source = Path(temp) / "invalid.md"
+            source.write_text(
+                "---\ntitle: First\ntitle: Second\ndescription: Test\nlang: en\n---\nBody\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "Duplicate metadata"):
+                read_document(source)
+
+    def test_raw_script_html_is_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source = Path(temp) / "unsafe.md"
+            source.write_text(
+                "---\ntitle: Test\ndescription: Test\nlang: en\n---\n<script>alert(1)</script>\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "unsupported or unsafe markup"):
+                build(source, Path(temp) / "preview" / "index.html")
+
+    def test_javascript_link_is_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source = Path(temp) / "unsafe.md"
+            source.write_text(
+                "---\ntitle: Test\ndescription: Test\nlang: en\n---\n[click](javascript:alert%281%29)\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "unsupported or unsafe markup"):
+                build(source, Path(temp) / "preview" / "index.html")
 
     def test_output_inside_repository_is_rejected(self):
         output = REPO_ROOT / "should-not-be-created-by-markdown-poc.html"
