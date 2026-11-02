@@ -16,15 +16,15 @@ sys.path.insert(0, str(POC))
 from html_transformer import transform
 from page_rules import rules_for
 from parity_validator import validate, validate_metadata
+from route_exclusions import is_excluded_html_path
 
 OUT = ROOT / "static-html-isolated-output"
-EXCLUDED = ("editor/", "github-editor/", "scripts/", "tests/", "docs/", ".github/")
 paths = sorted(filter(None, subprocess.check_output(
     ["git", "ls-files", "-z", "--", "*.html"], cwd=ROOT
 ).decode("utf-8").split("\0")))
 report = {"scope": "source-only isolated build; no live Worker or browser equivalence", "routes": [], "failures": []}
 for path in paths:
-    if path.startswith(EXCLUDED) or path == "404.html":
+    if is_excluded_html_path(path) or path == "404.html":
         continue
     if path != "index.html" and not path.endswith("/index.html"):
         report["failures"].append({"path": path, "error": "Unclassified public HTML"})
