@@ -5,17 +5,32 @@ from __future__ import annotations
 import argparse
 import html
 from pathlib import Path
-import re
 import sys
 
+import bleach
 import markdown
+
+
+ALLOWED_TAGS = {
+    "a", "blockquote", "br", "code", "em", "h1", "h2", "h3", "h4",
+    "hr", "img", "li", "ol", "p", "pre", "strong", "table", "tbody",
+    "td", "th", "thead", "tr", "ul",
+}
+ALLOWED_ATTRIBUTES = {
+    "a": ["href", "title"],
+    "img": ["src", "alt", "title"],
+    "code": ["class"],
+    "td": ["align"],
+    "th": ["align"],
+}
+ALLOWED_PROTOCOLS = {"http", "https", "mailto"}
 
 
 def read_document(path: Path) -> tuple[dict[str, str], str]:
     text = path.read_text(encoding="utf-8")
-    if not text.startswith("---\n"):
+    if not text.startswith("---\\n"):
         raise ValueError("Markdown source must begin with YAML-style front matter.")
-    parts = text.split("---\n", 2)
+    parts = text.split("---\\n", 2)
     if len(parts) != 3:
         raise ValueError("Front matter must be closed by a second --- line.")
     metadata: dict[str, str] = {}
@@ -31,6 +46,8 @@ def read_document(path: Path) -> tuple[dict[str, str], str]:
             raise ValueError(f"Unsupported metadata field: {key}")
         if not value:
             raise ValueError(f"Metadata field {key} must not be empty.")
+        if key in metadata:
+            raise ValueError(f"Duplicate metadata field: {key}")
         metadata[key] = value
     for required in ("title", "description", "lang"):
         if required not in metadata:
@@ -58,6 +75,21 @@ def build(source: Path, output: Path) -> None:
         extensions=["tables", "fenced_code", "sane_lists"],
         output_format="html",
     )
+    # Fail closed rather than silently stripping scripts, event handlers,
+    # unsafe URL schemes, or unsupported raw HTML/style attributes.
+    safe_html = bleach.clean(
+        body_html,
+        tags=ALLOWED_TAGS,
+        attributes=ALLOWED_ATTRIBUTES,
+        protocols=ALLOWED_PROTOCOLS,
+        strip=True,
+    )
+    if safe_html != body_html:
+        raise ValueError(
+            "Generated HTML contains unsupported or unsafe markup/attributes/URLs; "
+            "remove raw HTML and use supported Markdown."
+        )
+
     title = html.escape(metadata["title"], quote=True)
     description = html.escape(metadata["description"], quote=True)
     lang = html.escape(metadata["lang"], quote=True)
@@ -81,7 +113,7 @@ def build(source: Path, output: Path) -> None:
 </html>
 """
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(document, encoding="utf-8", newline="\n")
+    output_path.write_text(document, encoding="utf-8", newline="\\n")
 
 
 def main() -> int:
