@@ -1,6 +1,7 @@
 """Offline negative tests for the report-only route eligibility gate."""
 import unittest
 from route_eligibility import classify, parse_sitemap, validate_route
+from route_exclusions import is_excluded_html_path
 
 SITE = "https://awakenology.space"
 
@@ -35,6 +36,13 @@ class RouteEligibilityTests(unittest.TestCase):
         self.config["routes"] = ["/Missing/"]
         with self.assertRaisesRegex(ValueError, "not an eligible"):
             classify(self.tracked, self.sitemap, self.config)
+
+    def test_shared_exclusion_policy_covers_draft_and_dynamic_routes(self):
+        for path in ("New-Article/index.html", "new-article/index.html",
+                     "ai-search/index.html", "AI-SEARCH/index.html"):
+            with self.subTest(path=path):
+                self.assertTrue(is_excluded_html_path(path))
+        self.assertFalse(is_excluded_html_path("Chinese/index.html"))
 
     def test_private_and_dynamic_routes_fail(self):
         for route in ("/editor/", "/github-editor/", "/New-Article/", "/ai-search/",
