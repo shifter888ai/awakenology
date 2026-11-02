@@ -28,9 +28,9 @@ ALLOWED_PROTOCOLS = {"http", "https", "mailto"}
 
 def read_document(path: Path) -> tuple[dict[str, str], str]:
     text = path.read_text(encoding="utf-8")
-    if not text.startswith("---\\n"):
+    if not text.startswith("---\n"):
         raise ValueError("Markdown source must begin with YAML-style front matter.")
-    parts = text.split("---\\n", 2)
+    parts = text.split("---\n", 2)
     if len(parts) != 3:
         raise ValueError("Front matter must be closed by a second --- line.")
     metadata: dict[str, str] = {}
@@ -113,7 +113,7 @@ def build(source: Path, output: Path) -> None:
 </html>
 """
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(document, encoding="utf-8", newline="\\n")
+    output_path.write_text(document, encoding="utf-8", newline="\n")
 
 
 def main() -> int:
