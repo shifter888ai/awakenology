@@ -28,7 +28,7 @@ class InventoryGateTests(unittest.TestCase):
             "path": "index.html", "route": "/",
             "source_sha256": sha(self.source), "built_sha256": sha(self.built)
         }]
-        self.paths = b"index.html\0"
+        self.paths = b"index.html\0New-Article/index.html\0ai-search/index.html\0"
         self.write_manifest()
 
     def write_manifest(self):
@@ -46,6 +46,15 @@ class InventoryGateTests(unittest.TestCase):
 
     def test_missing_route_rejected(self):
         self.rows = []
+        self.write_manifest()
+        with self.assertRaisesRegex(AssertionError, "inventory mismatch"):
+            self.verify()
+
+    def test_draft_and_dynamic_routes_are_excluded_from_expected_inventory(self):
+        self.rows = [dict(self.rows[0]), {
+            "path": "New-Article/index.html", "route": "/New-Article/",
+            "source_sha256": "0" * 64, "built_sha256": "0" * 64
+        }]
         self.write_manifest()
         with self.assertRaisesRegex(AssertionError, "inventory mismatch"):
             self.verify()
