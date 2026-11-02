@@ -1,0 +1,29 @@
+name: Static HTML route eligibility (offline only)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/static_html_migration/route_eligibility.py'
+      - 'scripts/static_html_migration/test_route_eligibility.py'
+      - 'scripts/static_html_migration/static-route-allowlist.json'
+      - '.github/workflows/static-html-route-eligibility.yml'
+      - 'docs/static-html-migration/ROUTE-ELIGIBILITY.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  report-only:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s scripts/static_html_migration -p 'test_route_eligibility.py' -v
+      - run: python scripts/static_html_migration/route_eligibility.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: static-route-eligibility-report
+          path: static-route-eligibility-report.json
+          if-no-files-found: warn
