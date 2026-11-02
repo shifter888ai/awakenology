@@ -68,6 +68,10 @@ def build(source: Path, output: Path) -> None:
         raise ValueError("Output must not overwrite the source Markdown file.")
     if output_path.is_relative_to(repo_root):
         raise ValueError("Output must be outside the repository tree for this isolated PoC.")
+    # Refuse every pre-existing destination. Besides preventing accidental
+    # replacement, this blocks hard-link aliases to the source or repo files.
+    if output.exists() or output.is_symlink():
+        raise ValueError("Output destination must not already exist.")
 
     metadata, source_body = read_document(source)
     body_html = markdown.markdown(
