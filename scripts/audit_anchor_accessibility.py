@@ -40,7 +40,15 @@ class PageParser(HTMLParser):
             if a.get(key): self.ids.append((a[key], tag))
         if tag == "a" and a.get("name"): self.ids.append((a["name"], tag))
         if tag == "img":
-            if "alt" not in a: self.images.append((a.get("src", ""), "missing-alt"))
+            if "alt" not in a:
+                self.images.append((a.get("src", ""), "missing-alt"))
+            elif a.get("alt") is None:
+                self.images.append((a.get("src", ""), "blank-alt"))
+            elif not a["alt"].strip():
+                # An explicitly empty alt is intentional decorative markup; whitespace-only
+                # alt text is not an empty string and must not silently pass as meaningful.
+                if a["alt"] != "":
+                    self.images.append((a.get("src", ""), "blank-alt"))
         if tag == "a":
             item = {"href":a.get("href","").strip(),"text":"","label":a.get("aria-label","").strip(),
                     "title":a.get("title","").strip(),"has_image":False,"tag":"a"}
@@ -48,7 +56,7 @@ class PageParser(HTMLParser):
             if self._link_stack and len(self._link_stack)>1:
                 # Nested anchors are invalid HTML; keep each tracked independently.
                 pass
-        if tag == "img" and self._link_stack and a.get("alt","").strip():
+        if tag == "img" and self._link_stack and isinstance(a.get("alt"), str) and a["alt"].strip():
             self._link_stack[-1]["has_image"] = True
         if tag == "button":
             self._button_stack.append({"text":"","label":a.get("aria-label","").strip(),
