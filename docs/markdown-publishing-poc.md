@@ -8,7 +8,7 @@ Use Markdown as the authoring source for suitable new or revised articles, then 
 
 This proof of concept is deliberately isolated:
 
-- It writes output only to the caller-supplied destination; the workflow uses a temporary directory.
+- It writes output only to a new, caller-supplied destination that does not already exist; the workflow uses a temporary directory.
 - The workflow uploads a preview artifact for inspection and never deploys it.
 - It does not modify existing published HTML or the production deploy workflow.
 - The generated shell is a conversion fixture, not a production Awakenology page. It does not yet integrate the shared header/footer, site CSS, theme controls, fonts, canonical URL rules, structured data, or existing article metadata conventions.
@@ -20,6 +20,7 @@ This proof of concept is deliberately isolated:
 - Source Markdown remains unchanged.
 - Missing required metadata and unsupported metadata fail closed.
 - Duplicate metadata fields are rejected.
+- Existing output destinations are never overwritten, including hard-link aliases to the source.
 - The renderer fails closed when generated HTML contains markup, attributes, or URL schemes outside the explicit allowlist; raw HTML is not an authoring escape hatch.
 - Conversion runs in a pull-request workflow with pinned Markdown and HTML-sanitizer versions.
 
