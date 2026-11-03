@@ -2,7 +2,7 @@
 
 ## Decision
 
-Use Markdown as the authoring source for suitable new or revised articles, then generate static HTML for publication after review and approval. Do not serve raw Markdown as the normal visitor-facing article experience.
+Use Markdown only for drafts and internal tests. Finalized articles are maintained as HTML; do not keep a permanent Markdown duplicate or change the established HTML publishing workflow. This proof of concept tests a safe, isolated conversion path only and does not propose a change to that source-of-truth rule.
 
 ## Safety boundary
 
