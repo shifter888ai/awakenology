@@ -195,7 +195,7 @@ async def inspect_route(browser, url, semaphore, viewport, screenshot=False, int
                     if not await cn_locator.count():
                         rows.append(finding(url, viewport, "chinese-variant-toggle-missing", "warning", "Chinese variant toggle not found after waiting for initialization"))
                     else:
-                        original_lang = await page.locator("html").get_attribute("lang")
+                        original_variant = await page.evaluate("localStorage.getItem('awakenology-cn-variant')") or "tw"
                         for direction in ("first", "reverse"):
                             before_lang = await page.locator("html").get_attribute("lang")
                             await cn_locator.click(timeout=3000)
@@ -226,10 +226,12 @@ async def inspect_route(browser, url, semaphore, viewport, screenshot=False, int
                                         restored_theme != before_theme):
                                     rows.append(finding(url, viewport, "theme-toggle-fails-after-chinese-variant", "warning",
                                         f"{direction}: before={before_theme!r}; after={after_theme!r}; saved={saved_theme!r}; restored={restored_theme!r}"))
+                        final_variant = await page.evaluate("localStorage.getItem('awakenology-cn-variant')")
                         final_lang = await page.locator("html").get_attribute("lang")
-                        if final_lang != original_lang:
+                        expected_lang = "zh-CN" if original_variant == "cn" else "zh-Hant"
+                        if final_variant != original_variant or final_lang != expected_lang:
                             rows.append(finding(url, viewport, "chinese-variant-round-trip-failed", "warning",
-                                f"expected original lang={original_lang!r}; got={final_lang!r}"))
+                                f"expected variant={original_variant!r} and lang={expected_lang!r}; got variant={final_variant!r} and lang={final_lang!r}"))
         except Exception as exc:
             rows.append(finding(url, viewport, "browser-navigation-error", "error", exc))
         finally:
