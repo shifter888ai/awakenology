@@ -179,6 +179,24 @@ async def inspect_route(browser, url, semaphore, viewport, screenshot=False, int
                         new_lang = await page.locator("html").get_attribute("lang")
                         if old_lang and new_lang == old_lang:
                             rows.append(finding(url, viewport, "chinese-variant-toggle-no-change", "warning", f"Language remained {new_lang!r} after toggle"))
+                        # Regression: changing Chinese text must not detach or disable the
+                        # shared theme control. Test a complete state round-trip after conversion.
+                        theme_after_variant = page.locator("#awakenology-theme-toggle")
+                        if await theme_after_variant.count() != 1:
+                            rows.append(finding(url, viewport, "theme-toggle-missing-after-chinese-variant", "warning", "Expected exactly one shared theme toggle after Chinese conversion"))
+                        else:
+                            before_theme = await page.locator("html").get_attribute("data-aw-theme")
+                            await theme_after_variant.click(timeout=3000)
+                            after_theme = await page.locator("html").get_attribute("data-aw-theme")
+                            saved_theme = await page.evaluate("localStorage.getItem('awakenology-theme')")
+                            await theme_after_variant.click(timeout=3000)
+                            restored_theme = await page.locator("html").get_attribute("data-aw-theme")
+                            if (before_theme not in ("dark", "light") or
+                                    after_theme == before_theme or
+                                    saved_theme != after_theme or
+                                    restored_theme != before_theme):
+                                rows.append(finding(url, viewport, "theme-toggle-fails-after-chinese-variant", "warning",
+                                    f"before={before_theme!r}; after={after_theme!r}; saved={saved_theme!r}; restored={restored_theme!r}"))
         except Exception as exc:
             rows.append(finding(url, viewport, "browser-navigation-error", "error", exc))
         finally:
