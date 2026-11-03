@@ -76,6 +76,28 @@ def select_mobile_routes(routes, limit=12):
             selected.append(remaining[min(len(remaining)-1, int((i + 0.5) * len(remaining) / min(slots, len(remaining))))])
     return list(dict.fromkeys(selected))[:limit]
 
+def is_chinese_content_route(url):
+    """Identify Han-script content routes, not only the Chinese TOC folder."""
+    path = unquote(urlparse(url).path)
+    return bool(re.search(r"[\\u3400-\\u9fff]", path) and
+                not re.search(r"[\\u3040-\\u30ff]", path))
+
+def select_chinese_interaction_routes(routes, limit=4):
+    """Add a small, spread sample of actual Chinese article routes to mobile tests."""
+    candidates = sorted(url for url in set(routes)
+                        if is_chinese_content_route(url) or route_language(url) == "zh")
+    if not candidates or limit <= 0:
+        return []
+    preferred = next((u for u in candidates if urlparse(u).path == "/Chinese/"), None)
+    selected = [preferred] if preferred else []
+    remaining = [u for u in candidates if u not in selected]
+    slots = min(limit - len(selected), len(remaining))
+    if slots > 0:
+        for i in range(slots):
+            selected.append(remaining[min(len(remaining)-1,
+                int((i + 0.5) * len(remaining) / slots))])
+    return selected[:limit]
+
 def finding(url, viewport, check, status="warning", detail=""):
     return {"url":url, "viewport":f'{viewport["width"]}x{viewport["height"]}',
             "check":check, "status":status, "detail":str(detail)[:500]}
@@ -167,36 +189,48 @@ async def inspect_route(browser, url, semaphore, viewport, screenshot=False, int
                         scroll_y = await page.evaluate("window.scrollY")
                         if scroll_y > 80:
                             rows.append(finding(url, viewport, "return-top-click-failed", "warning", f"Scroll position after click: {scroll_y}"))
-                if route_language(url) == "zh":
+                if route_language(url) == "zh" or is_chinese_content_route(url):
                     await page.wait_for_timeout(1200)
                     cn_locator = page.locator("#awakenology-cn-toggle")
                     if not await cn_locator.count():
                         rows.append(finding(url, viewport, "chinese-variant-toggle-missing", "warning", "Chinese variant toggle not found after waiting for initialization"))
                     else:
-                        old_lang = await page.locator("html").get_attribute("lang")
-                        await cn_locator.click(timeout=3000)
-                        await page.wait_for_timeout(200)
-                        new_lang = await page.locator("html").get_attribute("lang")
-                        if old_lang and new_lang == old_lang:
-                            rows.append(finding(url, viewport, "chinese-variant-toggle-no-change", "warning", f"Language remained {new_lang!r} after toggle"))
-                        # Regression: changing Chinese text must not detach or disable the
-                        # shared theme control. Test a complete state round-trip after conversion.
-                        theme_after_variant = page.locator("#awakenology-theme-toggle")
-                        if await theme_after_variant.count() != 1:
-                            rows.append(finding(url, viewport, "theme-toggle-missing-after-chinese-variant", "warning", "Expected exactly one shared theme toggle after Chinese conversion"))
-                        else:
-                            before_theme = await page.locator("html").get_attribute("data-aw-theme")
-                            await theme_after_variant.click(timeout=3000)
-                            after_theme = await page.locator("html").get_attribute("data-aw-theme")
-                            saved_theme = await page.evaluate("localStorage.getItem('awakenology-theme')")
-                            await theme_after_variant.click(timeout=3000)
-                            restored_theme = await page.locator("html").get_attribute("data-aw-theme")
-                            if (before_theme not in ("dark", "light") or
-                                    after_theme == before_theme or
-                                    saved_theme != after_theme or
-                                    restored_theme != before_theme):
-                                rows.append(finding(url, viewport, "theme-toggle-fails-after-chinese-variant", "warning",
-                                    f"before={before_theme!r}; after={after_theme!r}; saved={saved_theme!r}; restored={restored_theme!r}"))
+                        original_lang = await page.locator("html").get_attribute("lang")
+                        original_variant = await page.evaluate("localStorage.getItem('awakenology-cn-variant')")
+                        for direction in ("first", "reverse"):
+                            before_lang = await page.locator("html").get_attribute("lang")
+                            await cn_locator.click(timeout=3000)
+                            await page.wait_for_timeout(150)
+                            after_lang = await page.locator("html").get_attribute("lang")
+                            saved_variant = await page.evaluate("localStorage.getItem('awakenology-cn-variant')")
+                            if before_lang == after_lang:
+                                rows.append(finding(url, viewport, "chinese-variant-toggle-no-change", "warning",
+                                    f"{direction}: language remained {after_lang!r}"))
+                            if saved_variant not in ("tw", "cn"):
+                                rows.append(finding(url, viewport, "chinese-variant-preference-not-saved", "warning",
+                                    f"{direction}: saved variant={saved_variant!r}"))
+                            # Exercise the shared theme control after BOTH conversion directions.
+                            theme_after_variant = page.locator("#awakenology-theme-toggle")
+                            if await theme_after_variant.count() != 1:
+                                rows.append(finding(url, viewport, "theme-toggle-missing-after-chinese-variant", "warning",
+                                    f"{direction}: expected exactly one shared theme toggle"))
+                            else:
+                                before_theme = await page.locator("html").get_attribute("data-aw-theme")
+                                await theme_after_variant.click(timeout=3000)
+                                after_theme = await page.locator("html").get_attribute("data-aw-theme")
+                                saved_theme = await page.evaluate("localStorage.getItem('awakenology-theme')")
+                                await theme_after_variant.click(timeout=3000)
+                                restored_theme = await page.locator("html").get_attribute("data-aw-theme")
+                                if (before_theme not in ("dark", "light") or
+                                        after_theme == before_theme or
+                                        saved_theme != after_theme or
+                                        restored_theme != before_theme):
+                                    rows.append(finding(url, viewport, "theme-toggle-fails-after-chinese-variant", "warning",
+                                        f"{direction}: before={before_theme!r}; after={after_theme!r}; saved={saved_theme!r}; restored={restored_theme!r}"))
+                        final_lang = await page.locator("html").get_attribute("lang")
+                        if final_lang != original_lang:
+                            rows.append(finding(url, viewport, "chinese-variant-round-trip-failed", "warning",
+                                f"expected original lang={original_lang!r}; got={final_lang!r}"))
         except Exception as exc:
             rows.append(finding(url, viewport, "browser-navigation-error", "error", exc))
         finally:
@@ -208,7 +242,7 @@ async def run(routes, workers, max_routes, screenshots):
         browser = await p.chromium.launch()
         semaphore = asyncio.Semaphore(max(1, min(workers, 8)))
         targets = select_mobile_routes(routes, max_routes) if max_routes else routes
-        mobile_targets = select_mobile_routes(targets, 12)
+        mobile_targets = list(dict.fromkeys(select_mobile_routes(targets, 12) + select_chinese_interaction_routes(targets, 4)))
         tasks = [inspect_route(browser, url, semaphore, DESKTOP_VIEWPORT,
                                screenshot=screenshots and url == DOMAIN + "/", interactions=False)
                  for url in targets]
