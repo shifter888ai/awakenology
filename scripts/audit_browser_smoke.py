@@ -79,8 +79,8 @@ def select_mobile_routes(routes, limit=12):
 def is_chinese_content_route(url):
     """Identify Han-script content routes, not only the Chinese TOC folder."""
     path = unquote(urlparse(url).path)
-    return bool(re.search(r"[\\u3400-\\u9fff]", path) and
-                not re.search(r"[\\u3040-\\u30ff]", path))
+    return bool(re.search(r"[\u3400-\u9fff]", path) and
+                not re.search(r"[\u3040-\u30ff]", path))
 
 def select_chinese_interaction_routes(routes, limit=4):
     """Add a small, spread sample of actual Chinese article routes to mobile tests."""
@@ -196,7 +196,6 @@ async def inspect_route(browser, url, semaphore, viewport, screenshot=False, int
                         rows.append(finding(url, viewport, "chinese-variant-toggle-missing", "warning", "Chinese variant toggle not found after waiting for initialization"))
                     else:
                         original_lang = await page.locator("html").get_attribute("lang")
-                        original_variant = await page.evaluate("localStorage.getItem('awakenology-cn-variant')")
                         for direction in ("first", "reverse"):
                             before_lang = await page.locator("html").get_attribute("lang")
                             await cn_locator.click(timeout=3000)
