@@ -29,7 +29,7 @@ def visible_text(markup: str, *, skip_shell_title: bool = False) -> str:
         if shell_title is None:
             raise ValueError("Generated isolated shell is missing its title H1.")
         shell_title.decompose()
-    return re.sub(r"\\s+", " ", article.get_text(" ", strip=True)).strip()
+    return re.sub(r"\s+", " ", article.get_text(" ", strip=True)).strip()
 
 
 def image_inventory(markup: str) -> list[dict[str, str]]:
