@@ -19,10 +19,17 @@ from markdownify import markdownify
 from build import build
 
 
-def visible_text(markup: str) -> str:
+def visible_text(markup: str, *, skip_shell_title: bool = False) -> str:
     soup = BeautifulSoup(markup, "html.parser")
     article = soup.select_one("article.article") or soup
-    return re.sub(r"\s+", " ", article.get_text(" ", strip=True)).strip()
+    if skip_shell_title:
+        # build() adds a metadata-derived H1 to its isolated shell. It is not
+        # part of the source article body, so exclude only that direct child.
+        shell_title = article.find("h1", recursive=False)
+        if shell_title is None:
+            raise ValueError("Generated isolated shell is missing its title H1.")
+        shell_title.decompose()
+    return re.sub(r"\\s+", " ", article.get_text(" ", strip=True)).strip()
 
 
 def image_inventory(markup: str) -> list[dict[str, str]]:
@@ -98,7 +105,7 @@ def main() -> int:
         generated = args.output.read_text(encoding="utf-8")
 
     source_text = visible_text(str(article))
-    output_text = visible_text(generated)
+    output_text = visible_text(generated, skip_shell_title=True)
     source_images = image_inventory(str(article))
     output_images = image_inventory(generated)
     source_format = formatting_inventory(str(article))
@@ -109,7 +116,7 @@ def main() -> int:
         "temporary_markdown_committed": False,
         "temporary_markdown_uploaded": False,
         "output_isolated": True,
-        "text_content_exact_after_whitespace_normalization": source_text == output_text,
+        "text_content_exact_after_whitespace_normalization": source_text == output_text,\n        "generated_shell_title_excluded_from_body_comparison": True,
         "source_text_characters": len(source_text),
         "output_text_characters": len(output_text),
         "source_images": source_images,
@@ -122,7 +129,7 @@ def main() -> int:
             for key, value in source_format.items()
         },
         "assessment": "PASS" if source_text == output_text and source_images == output_images else "CONTENT_DIFFERS",
-        "note": "A passing text/image check does not imply visual fidelity. Compare formatting inventories and inspect the isolated HTML artifact.",
+        "note": "The generated shell title is excluded from body-text comparison. A passing text/image check does not imply visual fidelity; compare formatting inventories and inspect the isolated HTML artifact.",
     }
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

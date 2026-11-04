@@ -1,0 +1,55 @@
+"""Regression tests for source-vs-generated article body text comparison."""
+import unittest
+
+from real_article_fidelity import visible_text
+
+
+class RealArticleFidelityTextTests(unittest.TestCase):
+    def test_generated_shell_title_is_excluded_from_body_comparison(self):
+        source = (
+            '<article class="article">'
+            '<p>Original article title line</p>'
+            '<h2>Section heading</h2>'
+            '<p>Body text</p>'
+            '</article>'
+        )
+        generated = (
+            '<article class="article">'
+            '<h1>Metadata-derived page title</h1>'
+            '<p>Original article title line</p>'
+            '<h2>Section heading</h2>'
+            '<p>Body text</p>'
+            '</article>'
+        )
+        self.assertEqual(
+            visible_text(source),
+            visible_text(generated, skip_shell_title=True),
+        )
+
+    def test_source_article_h1_is_preserved_after_shell_title_is_removed(self):
+        source = (
+            '<article class="article">'
+            '<h1>Original content heading</h1>'
+            '<p>Body text</p>'
+            '</article>'
+        )
+        generated = (
+            '<article class="article">'
+            '<h1>Metadata-derived page title</h1>'
+            '<h1>Original content heading</h1>'
+            '<p>Body text</p>'
+            '</article>'
+        )
+        self.assertEqual(
+            visible_text(source),
+            visible_text(generated, skip_shell_title=True),
+        )
+
+    def test_missing_generated_shell_title_fails_closed(self):
+        generated = '<article class="article"><p>Body text</p></article>'
+        with self.assertRaisesRegex(ValueError, "missing its title H1"):
+            visible_text(generated, skip_shell_title=True)
+
+
+if __name__ == "__main__":
+    unittest.main()
