@@ -116,7 +116,7 @@ def main() -> int:
         "temporary_markdown_committed": False,
         "temporary_markdown_uploaded": False,
         "output_isolated": True,
-        "text_content_exact_after_whitespace_normalization": source_text == output_text,\n        "generated_shell_title_excluded_from_body_comparison": True,
+        "text_content_exact_after_whitespace_normalization": source_text == output_text,
         "source_text_characters": len(source_text),
         "output_text_characters": len(output_text),
         "source_images": source_images,
