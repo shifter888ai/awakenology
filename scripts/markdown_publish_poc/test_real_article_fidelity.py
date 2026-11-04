@@ -46,7 +46,7 @@ class RealArticleFidelityTextTests(unittest.TestCase):
         )
 
     def test_whitespace_normalization_collapses_runs(self):
-        markup = '<article class="article"><p>A   B\\nC</p></article>'
+        markup = '<article class="article"><p>A   B' + chr(10) + 'C</p></article>'
         self.assertEqual(visible_text(markup), "A B C")
 
     def test_missing_generated_shell_title_fails_closed(self):
