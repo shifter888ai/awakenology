@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from difflib import SequenceMatcher
 import re
 import tempfile
 from pathlib import Path
@@ -67,6 +68,41 @@ def formatting_inventory(markup: str) -> dict[str, int]:
     }
 
 
+def text_diff_summary(
+    source_text: str,
+    output_text: str,
+    *,
+    context: int = 48,
+    max_segments: int = 10,
+) -> dict[str, object]:
+    """Return bounded context for non-equal text spans in a fidelity comparison."""
+    matcher = SequenceMatcher(None, source_text, output_text)
+    changes = []
+    for operation, source_start, source_end, output_start, output_end in matcher.get_opcodes():
+        if operation == "equal":
+            continue
+        changes.append(
+            {
+                "operation": operation,
+                "source_range": [source_start, source_end],
+                "output_range": [output_start, output_end],
+                "source_fragment": source_text[source_start:source_end],
+                "output_fragment": output_text[output_start:output_end],
+                "source_context": source_text[
+                    max(0, source_start - context):min(len(source_text), source_end + context)
+                ],
+                "output_context": output_text[
+                    max(0, output_start - context):min(len(output_text), output_end + context)
+                ],
+            }
+        )
+    return {
+        "segment_count": len(changes),
+        "segments": changes[:max_segments],
+        "truncated": len(changes) > max_segments,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source-html", required=True, type=Path)
@@ -117,6 +153,7 @@ def main() -> int:
         "temporary_markdown_uploaded": False,
         "output_isolated": True,
         "text_content_exact_after_whitespace_normalization": source_text == output_text,
+        "text_diff": text_diff_summary(source_text, output_text),
         "source_text_characters": len(source_text),
         "output_text_characters": len(output_text),
         "source_images": source_images,
