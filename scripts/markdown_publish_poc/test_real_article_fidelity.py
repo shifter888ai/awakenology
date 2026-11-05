@@ -50,12 +50,12 @@ class RealArticleFidelityTextTests(unittest.TestCase):
         self.assertEqual(visible_text(markup), "A B C")
 
     def test_text_diff_summary_identifies_a_missing_fragment(self):
-        summary = text_diff_summary("before missing phrase after", "before after")
+        summary = text_diff_summary("before|missing phrase|after", "before||after")
         self.assertEqual(summary["segment_count"], 1)
         self.assertFalse(summary["truncated"])
         segment = summary["segments"][0]
         self.assertEqual(segment["operation"], "delete")
-        self.assertEqual(segment["source_fragment"], " missing phrase")
+        self.assertEqual(segment["source_fragment"], "missing phrase")
         self.assertEqual(segment["output_fragment"], "")
 
     def test_missing_generated_shell_title_fails_closed(self):
