@@ -73,7 +73,7 @@ def text_diff_summary(
     output_text: str,
     *,
     context: int = 48,
-    max_segments: int = 10,
+    max_segments: int = 50,
 ) -> dict[str, object]:
     """Return bounded context for non-equal text spans in a fidelity comparison."""
     matcher = SequenceMatcher(None, source_text, output_text)
