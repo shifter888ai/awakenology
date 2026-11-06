@@ -168,7 +168,7 @@ jobs:
               for item in re.findall(r"<li\b[^>]*>([\s\S]*?)</li\s*>", source, re.I):
                   if not re.fullmatch(r"\s*<a\b[^>]*>[\s\S]*?</a>\s*", item, re.I):
                       continue
-                  href = re.search(r"\bhref\s*=\s*(['"])(.*?)\1", item, re.I | re.S)
+                  href = re.search(r"\bhref\s*=\s*([\\\"\'])(.*?)\1", item, re.I | re.S)
                   if not href:
                       continue
                   label = re.sub(r"<[^>]+>", " ", item)
