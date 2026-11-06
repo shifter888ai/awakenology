@@ -1,0 +1,26 @@
+name: Public HTML runtime-default gate
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'worker.js'
+      - 'scripts/static_html_poc/public-html-mode.mjs'
+      - 'scripts/static_html_poc/public-html-mode.test.mjs'
+      - '.github/workflows/public-html-mode-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  runtime-default:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/static_html_poc/public-html-mode.test.mjs
+      - run: node --check worker.js
+      - run: |
+          if grep -q '"PUBLIC_HTML_MODE"' wrangler.jsonc; then
+            echo "No static-mode activation in this PR"; exit 1
+          fi
