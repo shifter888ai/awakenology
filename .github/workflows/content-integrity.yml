@@ -197,7 +197,7 @@ jobs:
                   if label not in remaining_text:
                       return False
                   remaining_text = remaining_text.replace(label, "", 1)
-              normalize = lambda value: re.sub(r"\\s+", " ", value).strip()
+              normalize = lambda value: re.sub(r"\s+", " ", value).strip()
               return normalize(remaining_text) == normalize(after_text)
 
           # Negative/positive self-tests protect the detector itself from regressions.
