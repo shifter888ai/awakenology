@@ -89,9 +89,11 @@ jobs:
               print("The content-loss-approved label is present; intentional large content changes are explicitly approved.")
               sys.exit(0)
 
-          changed = subprocess.check_output(
-              ["git", "diff", "--name-only", base, head], text=True
-          ).splitlines()
+          changed = [
+              path for path in subprocess.check_output(
+                  ["git", "diff", "--name-only", "-z", base, head], text=True
+              ).split("\\0") if path
+          ]
 
           def read_at(ref, path):
               result = subprocess.run(
