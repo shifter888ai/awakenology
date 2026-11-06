@@ -192,17 +192,13 @@ jobs:
                   return False
               _, before_text = extract_content(before)
               _, after_text = extract_content(after)
-              before_tokens = before_text.split()
-              after_tokens = after_text.split()
-              matcher = difflib.SequenceMatcher(None, before_tokens, after_tokens)
-              deleted_tokens = [
-                  token
-                  for tag, i1, i2, j1, j2 in matcher.get_opcodes()
-                  if tag in ("delete", "replace")
-                  for token in before_tokens[i1:i2]
-              ]
-              moved_tokens = " ".join(label for _, label in moved).split()
-              return bool(moved_tokens) and deleted_tokens == moved_tokens
+              remaining_text = before_text
+              for _, label in moved:
+                  if label not in remaining_text:
+                      return False
+                  remaining_text = remaining_text.replace(label, "", 1)
+              normalize = lambda value: re.sub(r"\\s+", " ", value).strip()
+              return normalize(remaining_text) == normalize(after_text)
 
           # Negative/positive self-tests protect the detector itself from regressions.
           sample_article = "<article><h1>Integrity test</h1><p>" + ("Preserved article text. " * 40) + "</p></article>"
@@ -218,7 +214,7 @@ jobs:
           if content_loss_reason(partial_before, partial_after) is None:
               print("SELF-TEST FAILED: substantial partial deletion above the old 60% threshold was not detected.")
               sys.exit(1)
-          relocation_before = "<main><ul><li><a href='/one'>Moved article title one</a></li><li><a href='/two'>Moved article title two</a></li></ul></main>"
+          relocation_before = "<main><p>Latest publication</p><ul><li><a href='/one'>Moved article title one</a></li><li><a href='/two'>Moved article title two</a></li></ul></main>"
           relocation_after = "<main><p>Latest publication</p></main>"
           relocation_destination = "<article><ul><li><a href='/one'>Moved article title one</a></li><li><a href='/two'>Moved article title two</a></li></ul></article>"
           unrelated_destination = "<article><p>Different destination content</p></article>"
