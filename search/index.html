@@ -75,20 +75,61 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
 <script type="module" src="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/assets/v0.0.40/search-snippet.es.js"></script>
 <script>
 (function(){
-  const icon='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"%3E%3Ccircle cx="10.8" cy="10.8" r="6.8" fill="none" stroke="black" stroke-width="2.2"/%3E%3Cpath d="m16 16 5 5" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round"/%3E%3C/svg%3E';
+  const ns='http://www.w3.org/2000/svg';
   function install(){
     const host=document.querySelector('search-bar-snippet');
     const root=host&&host.shadowRoot;
     if(!root)return;
-    if(root.querySelector('style[data-awakenology-search-icon]'))return;
-    const style=document.createElement('style');
-    style.setAttribute('data-awakenology-search-icon','');
-    style.textContent='.search-submit-label{display:inline-block!important;width:22px;height:22px;padding:0!important;overflow:hidden;font-size:0!important;line-height:0!important}.search-submit-label::before{content:"";display:block;width:22px;height:22px;background:currentColor;-webkit-mask:url("'+icon+'") center/contain no-repeat;mask:url("'+icon+'") center/contain no-repeat}';
-    root.appendChild(style);
+    function apply(){
+      const button=root.querySelector('.search-submit-button');
+      const label=root.querySelector('.search-submit-label');
+      if(!button||!label)return;
+      button.setAttribute('aria-label','Search');
+      button.title='Search';
+      if(!label.querySelector('svg[data-aw-search-icon]')){
+        const svg=document.createElementNS(ns,'svg');
+        svg.setAttribute('viewBox','0 0 24 24');
+        svg.setAttribute('width','22');
+        svg.setAttribute('height','22');
+        svg.setAttribute('aria-hidden','true');
+        svg.setAttribute('focusable','false');
+        svg.setAttribute('fill','none');
+        svg.setAttribute('stroke','currentColor');
+        svg.setAttribute('stroke-width','2.2');
+        svg.setAttribute('stroke-linecap','round');
+        svg.setAttribute('stroke-linejoin','round');
+        const c=document.createElementNS(ns,'circle');
+        c.setAttribute('cx','10.8');c.setAttribute('cy','10.8');c.setAttribute('r','6.8');
+        const p=document.createElementNS(ns,'path');
+        p.setAttribute('d','m16 16 5 5');
+        svg.append(c,p);
+        svg.setAttribute('data-aw-search-icon','');
+        label.replaceChildren(svg);
+      }
+      label.style.display='inline-flex';
+      label.style.width='22px';
+      label.style.height='22px';
+      label.style.alignItems='center';
+      label.style.justifyContent='center';
+      label.style.padding='0';
+      label.style.fontSize='0';
+      label.style.lineHeight='0';
+      label.style.overflow='hidden';
+      button.style.width='44px';
+      button.style.minWidth='44px';
+      button.style.padding='0';
+      button.style.display='inline-flex';
+      button.style.alignItems='center';
+      button.style.justifyContent='center';
+    }
+    apply();
+    const observer=new MutationObserver(apply);
+    observer.observe(root,{childList:true,subtree:true});
   }
   customElements.whenDefined('search-bar-snippet').then(install);
 })();
 </script>
+
 <script>document.querySelectorAll(".copyright-current-year").forEach(function(el){el.textContent=new Date().getFullYear()});</script>
 </body>
 </html>
