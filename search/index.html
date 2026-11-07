@@ -25,9 +25,10 @@ a:hover{text-decoration:underline}
 .nav-divider{color:var(--muted);user-select:none}
 .nav a.active{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:5px}
 main{max-width:760px;margin:0 auto;padding:58px 24px 70px}
-.page-header{text-align:center;margin-bottom:34px}
-.page-header h1{margin:0 0 12px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(28px,4vw,36px);font-weight:600;line-height:1.2}
-.page-header p{max-width:650px;margin:0 auto;color:var(--muted);font-size:16px;line-height:1.6}
+.page-header{text-align:center;margin-bottom:24px}
+.visual-intro{display:flex;align-items:center;justify-content:center;min-height:82px;color:var(--fg)}
+.visual-intro svg{display:block;width:58px;height:58px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 .utility-panel{border:1px solid var(--line);padding:24px;background:var(--soft)}
 .utility-label{margin:0 0 12px;font-size:14px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 search-bar-snippet{display:block;min-height:52px}
@@ -56,11 +57,9 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
 <a href="/links/">Links</a>
 </nav></div></header>
 <main>
-<header class="page-header"><h1>Search Awakenology</h1><p>Search the Awakenology article library and find relevant source material.</p></header>
+<header class="page-header"><h1 class="sr-only">Search Awakenology</h1><div class="visual-intro" aria-hidden="true"><svg viewBox="0 0 64 64"><circle cx="27" cy="27" r="18"/><path d="m40 40 16 16"/></svg></div><p class="sr-only">Search the Awakenology library.</p></header>
 <section class="utility-panel" aria-label="Search Awakenology articles">
-<p class="utility-label">Search the article library</p>
-<search-bar-snippet api-url="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/" placeholder="Search Awakenology..." max-results="10"></search-bar-snippet>
-<p class="utility-note">Find articles and source material across Awakenology.</p>
+<search-bar-snippet api-url="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/" placeholder="" max-results="10" aria-label="Search Awakenology"></search-bar-snippet>
 </section>
 </main>
 <footer class="footer"><div class="footer-inner">
