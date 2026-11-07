@@ -29,8 +29,13 @@ def probe(url):
         return {"url": url, "error": type(exc).__name__ + ": " + str(exc)}
     body = response.read(512_000).decode("utf-8", "replace")
     headers = {k.lower(): v for k, v in response.headers.items()}
-    robots_meta = [str(tag) for tag in BeautifulSoup(body, "html.parser").find_all("meta", attrs={"name": "robots"})]
+    soup = BeautifulSoup(body, "html.parser")
+    robots_meta = [str(tag) for tag in soup.find_all("meta", attrs={"name": "robots"})]
+    search_widgets = len(soup.find_all("search-bar-snippet"))
+    chat_widgets = len(soup.find_all("chat-page-snippet"))
     return {
+        "search_widgets": search_widgets,
+        "chat_page_widgets": chat_widgets,
         "robots_meta": robots_meta,
         "url": url,
         "status": response.code,
@@ -59,7 +64,40 @@ def main():
     add("public missing path", PUBLIC + "/__static_html_probe_missing_20261030__/", lambda r: r.get("status") == 404, "HTTP 404 for a unique nonexistent route")
     add("public editor path denied", PUBLIC + "/editor/", lambda r: r.get("status") == 404 and "editor.awakenology.space" not in r.get("location", ""), "public host must not expose or redirect to private editor")
     add("public draft API denied", PUBLIC + "/api/editor/create-draft-pr", lambda r: r.get("status") in (404, 405) and "editor.awakenology.space" not in r.get("location", ""), "public host must not expose private publishing API")
-    add("AI Search remains noindex", PUBLIC + "/ai-search/", lambda r: r.get("status") == 200 and ("noindex" in " ".join(r.get("robots_meta", [])).lower() or "noindex" in r.get("x_robots_tag", "").lower()), "AI Search response retains noindex treatment")
+    if is_pull_request:
+        # These routes and the Worker redirect are not live until this PR is deployed.
+        # Validate the proposed source locally; manual runs retain the live HTTP assertions.
+        root = Path(__file__).resolve().parents[2]
+        def local_contract(name, relative_path, predicate, explanation):
+            source = (root / relative_path).read_text(encoding="utf-8")
+            passed = bool(predicate(source))
+            checks.append({"name": name, "pass": passed, "expectation": explanation,
+                           "observation": {"source_path": relative_path, "mode": "pull-request source check"}})
+            print(("PASS" if passed else "FAIL") + ": " + name + " — " + explanation)
+            if not passed:
+                print("  source:", relative_path)
+        local_contract(
+            "legacy AI Search route redirects to Search", "worker.js",
+            lambda source: 'url.pathname === "/ai-search" || url.pathname === "/ai-search/"' in source
+                and 'Response.redirect(new URL("/search/" + url.search, url.origin).toString(), 301)' in source,
+            "Worker source permanently redirects the legacy route to /search/")
+        local_contract(
+            "Search page remains noindex", "search/index.html",
+            lambda source: source.count("<search-bar-snippet") == 1
+                and "<chat-page-snippet" not in source
+                and 'name="robots" content="noindex,follow"' in source,
+            "Search source contains only the Search widget and remains noindex")
+        local_contract(
+            "Ask page remains noindex", "ask/index.html",
+            lambda source: source.count("<chat-page-snippet") == 1
+                and "<search-bar-snippet" not in source
+                and "<chat-bubble-snippet" not in source
+                and 'name="robots" content="noindex,follow"' in source,
+            "Ask source contains only the full-page chat interface and remains noindex")
+    else:
+        add("legacy AI Search route redirects to Search", PUBLIC + "/ai-search/", lambda r: r.get("status") == 301 and r.get("location", "").rstrip("/").endswith("/search"), "legacy route permanently redirects to the dedicated Search page")
+        add("Search page remains noindex", PUBLIC + "/search/", lambda r: r.get("status") == 200 and r.get("search_widgets") == 1 and r.get("chat_page_widgets") == 0 and ("noindex" in " ".join(r.get("robots_meta", [])).lower() or "noindex" in r.get("x_robots_tag", "").lower()), "Search page contains only the Search widget and remains noindex")
+        add("Ask page remains noindex", PUBLIC + "/ask/", lambda r: r.get("status") == 200 and r.get("chat_page_widgets") == 1 and r.get("search_widgets") == 0 and ("noindex" in " ".join(r.get("robots_meta", [])).lower() or "noindex" in r.get("x_robots_tag", "").lower()), "Ask page contains only the full-page chat interface and remains noindex")
     add("editor root requires authentication", EDITOR + "/", lambda r: r.get("status") in (302, 303, 401, 403) and ("github.com/login/oauth/authorize" in r.get("location", "") or "/auth/github" in r.get("location", "") or r.get("status") in (401, 403)), "unauthenticated editor root redirects to OAuth or denies access")
     add("editor page requires authentication", EDITOR + "/editor/", lambda r: r.get("status") in (302, 303, 401, 403) and ("github.com/login/oauth/authorize" in r.get("location", "") or "/auth/github" in r.get("location", "") or r.get("status") in (401, 403)), "unauthenticated editor page redirects to OAuth or denies access")
     add("public query-string homepage", PUBLIC + "/?static_html_probe=1", lambda r: r.get("status") == 200 and "text/html" in r.get("content_type", ""), "query string must not break homepage")
@@ -75,7 +113,7 @@ def main():
         PUBLIC + "/%E5%A4%A7%E6%8F%AD%E9%9C%B26/",
         PUBLIC + "/%E5%A4%A7%E6%8F%AD%E9%9C%B26/?phase5=1",
         PUBLIC + "/robots.txt", PUBLIC + "/sitemap.xml",
-        PUBLIC + "/ai-search/", PUBLIC + "/editor/",
+        PUBLIC + "/ai-search/", PUBLIC + "/search/", PUBLIC + "/ask/", PUBLIC + "/editor/",
         PUBLIC + "/__static_html_phase5_missing__/",
         EDITOR + "/", EDITOR + "/editor/", EDITOR + "/robots.txt",
     ]

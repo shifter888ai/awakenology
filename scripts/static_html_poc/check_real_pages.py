@@ -7,14 +7,15 @@ from parity_validator import validate, validate_metadata
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = {
     "/": ("index.html", "2308340cc91e8119fa276a9ff033e7ee9eb64d52"),
-    "/English/": ("English/index.html", "dba7952319a9f65e242562761d783092fcb3ea2f"),
-    "/Japanese/": ("Japanese/index.html", "b3cac68d40b7cefd89070b4eb3d726f4a4529b8a"),
-    "/Chinese/": ("Chinese/index.html", "8ccefd86d219cf0c8ecd6a49dce99d59a1cb1a0a"),
-    "/ai-search/": ("ai-search/index.html", "9bb335d6ef466e1e21e1547694377bbddb92e764"),
-    "/大揭露2/": ("大揭露2/index.html", "a76fc5282d0bb511aa75789ec77ac510efa7d2ee"),
+    "/English/": ("English/index.html", "a635db1748fcd83e580c33c30595fca9a1fbdbf6"),
+    "/Japanese/": ("Japanese/index.html", "9e15acf25bc0cc1ada36cc07ae3ec07c752be906"),
+    "/Chinese/": ("Chinese/index.html", "98edbd8e2580988d2faf8bf32e9ba33f00b2eccf"),
+    "/search/": ("search/index.html", "62f97709ad90423e57d47941ced8cb6f3b02dd2b"),
+    "/ask/": ("ask/index.html", "169073c8a3da449d0287d0cecdfbb79d624485da"),
+    "/大揭露2/": ("大揭露2/index.html", "508ecaa0fdda1252d20b9f788e52b494b7b1c9a8"),
     "/與退化派對話8/": ("與退化派對話8/index.html", "bc62b6b2266c4b826a12168237294062352a4d53"),
-    "/What-Is-Hypnosis/": ("What-Is-Hypnosis/index.html", "8639f0376b704e8f3e6aed1328fd4df4bfe1abef"),
-    "/アインシュタイン協議百年催眠実験/": ("アインシュタイン協議百年催眠実験/index.html", "ae7755914dde8b02b66c1dd6970059a6a3991d03"),
+    "/What-Is-Hypnosis/": ("What-Is-Hypnosis/index.html", "dfd2e93bdfc9ce51d05e59423f071cc98a3d8220"),
+    "/アインシュタイン協議百年催眠実験/": ("アインシュタイン協議百年催眠実験/index.html", "29cfb52a5143ceb42f966b9c525d5340de9b8095"),
 }
 
 def main():

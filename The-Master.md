@@ -10,7 +10,7 @@
 6. **Black / white / gray foundation** — Restrained neutral palette with limited functional color.
 7. **System fonts only** — No external fonts. Serif may be used selectively for major headings.
 8. **Responsive by default** — Desktop and mobile must work properly.
-9. **Consistent navigation** — English / 日本語 / 中文 / Search / Ask, with the active language clear.
+9. **Consistent navigation** — English / 日本語 / 中文 / Search / Ask as separate links, with the active page clear.
 10. **Consistent footer** — Contact email icon → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer, then © 2017–CURRENT_YEAR Awakenology. The Contact icon links to `mailto:contact@awakenology.org` and is a standardized global footer component, not article content.
 11. **Common lightweight article template** — All articles use the approved global structure.
 12. **Preserve intentional wording** — Never silently correct unusual English or intentional formatting.
@@ -21,7 +21,7 @@
 17. **Maintainability** — Prefer simple structures that are easy to understand, update, and reuse.
 18. **One controlled change at a time** — Build → commit → deploy → test → approve → next.
 19. **Approved components become the baseline** — Once tested and approved, do not alter them without deliberate approval.
-20. **Official new site / domain** — `awakenology.space` is the official new Awakenology website and primary domain. `awakenology.org` is not being migrated to this new website and must remain outside this migration/rebuild.
+20. **Official website / domains** — `awakenology.space` remains the canonical primary domain. `awakenology.org` and `strengthofconsciousness.org` serve the same website through the existing Cloudflare Worker; canonical URLs remain on `awakenology.space`.
 21. **100% Original Content Match**
 
 ### Original-to-Rebuilt Content Inventory Gate

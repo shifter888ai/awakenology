@@ -63,7 +63,7 @@ def select_sample_urls(urls, limit):
     if limit <= 0 or limit >= len(urls):
         return list(urls)
     selected = []
-    for key in (DOMAIN + "/", DOMAIN + "/ai-search/"):
+    for key in (DOMAIN + "/", DOMAIN + "/search/", DOMAIN + "/ask/"):
         if key in urls and key not in selected and len(selected) < limit:
             selected.append(key)
     remaining = [url for url in urls if url not in selected]
@@ -102,8 +102,8 @@ def main():
             print("FAIL: robots.txt returned HTTP " + str(response.status))
             return 1
         for line in robots_text.splitlines():
-            if line.strip().lower().startswith("disallow:") and line.split(":", 1)[1].strip().rstrip("/") == "/ai-search":
-                print("FAIL: robots.txt blocks /ai-search/, preventing crawlers from seeing noindex")
+            if line.strip().lower().startswith("disallow:") and line.split(":", 1)[1].strip().rstrip("/") in {"/search", "/ask"}:
+                print("FAIL: robots.txt blocks /search/ or /ask/, preventing crawlers from seeing noindex")
                 return 1
         if "https://awakenology.space/sitemap.xml" not in robots_text:
             print("FAIL: robots.txt does not advertise the canonical sitemap URL")
@@ -111,9 +111,10 @@ def main():
     except (urllib.error.URLError, TimeoutError, OSError, UnicodeError) as e:
         print("FAIL: cannot verify robots.txt: " + type(e).__name__)
         return 1
-    print("PASS: robots.txt allows crawler access to /ai-search/ and advertises the canonical sitemap")
-    ai = DOMAIN + "/ai-search/"
-    if ai not in urls: urls.append(ai)
+    print("PASS: robots.txt allows crawler access to /search/ and /ask/ and advertises the canonical sitemap")
+    for route in ("/search/", "/ask/"):
+        utility_url = DOMAIN + route
+        if utility_url not in urls: urls.append(utility_url)
     source_file = ROOT / "seo-metadata-report.csv"
     source = {}
     if source_file.exists():
@@ -155,12 +156,12 @@ def main():
     for i, url in enumerate(urls, 1):
         errors, status, title, desc, canonical, robots, lang = [], "", "", "", "", "", ""
         path = urlsplit(url).path or "/"
-        is_ai = path.rstrip("/") == "/ai-search"
+        is_ai = path.rstrip("/") in {"/search", "/ask"}
         source_path = "index.html" if path == "/" else unquote(path.lstrip("/")) + "index.html"
         expected = DOMAIN + (path if path.endswith("/") or path == "/" else path + "/")
         try:
             use_local_pr_html = bool(base_urls) and url not in base_urls
-            if (use_local_pr_html or (not base_urls and url not in deployed_urls)) and not is_ai:
+            if use_local_pr_html or (not base_urls and url not in deployed_urls):
                 local = ROOT / source_path
                 if not local.is_file(): raise OSError("new route missing local HTML")
                 status, final, ctype, charset = 200, url, "text/html", "utf-8"
@@ -186,7 +187,7 @@ def main():
                 if len(p.canonicals) != 1: errors.append("canonical-count-" + str(len(p.canonicals)))
                 if canonical != expected: errors.append("canonical-mismatch")
             directives = {d.strip() for x in p.robots for d in x.replace(" ", ",").split(",") if d.strip()}
-            if is_ai and not {"noindex", "follow"}.issubset(directives): errors.append("ai-search-not-noindex-follow")
+            if is_ai and not {"noindex", "follow"}.issubset(directives): errors.append("utility-page-not-noindex-follow")
             if not is_ai and "noindex" in directives: errors.append("unexpected-noindex")
             for prop in ("og:title", "og:description", "og:url", "og:image"):
                 vals = p.og.get(prop, [])
@@ -210,7 +211,7 @@ def main():
         w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
     failed = sum(r["result"] == "FAIL" for r in rows)
     warnings = sum(r["source_runtime_comparison"] == "SOURCE_WARNING_RUNTIME_PASS" for r in rows)
-    print(f"Production URLs checked: {len(rows)} including /ai-search/; failed: {failed}; passed: {len(rows)-failed}")
+    print(f"Production URLs checked: {len(rows)} including /search/ and /ask/; failed: {failed}; passed: {len(rows)-failed}")
     print(f"Source warnings with passing runtime metadata: {warnings}")
     print(f"Report: {OUT.name}")
     return 1 if failed else 0

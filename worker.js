@@ -390,6 +390,9 @@ export default {
     }
     // Never expose the editor or publishing API on the public website or temporary preview hosts.
     if (isEditorPath || isEditorApi || isPublishApi) return new Response("Not found", { status: 404 });
+    if (url.pathname === "/ai-search" || url.pathname === "/ai-search/") {
+      return Response.redirect(new URL("/search/" + url.search, url.origin).toString(), 301);
+    }
     const response = await env.ASSETS.fetch(request);
     const contentType = response.headers.get("content-type") || "";
     const pathname = new URL(request.url).pathname;
@@ -402,7 +405,9 @@ export default {
     const isLegacyDarkPage = legacyDarkPages.includes(decodedPathname);
     const seoDescriptions = {
       "/Destruction-Occurs-in-an-Instant/": "Awakenology — an account of how 3,000 Domain team members were instantaneously captured 10,000 years ago on Earth.",
-      "/ai-search/": "Search the Awakenology site or ask questions about its material using AI.",
+      "/ai-search/": "Legacy Awakenology Search and Ask route; redirects to the dedicated Search page.",
+      "/search/": "Search the Awakenology article library.",
+      "/ask/": "Ask questions about Awakenology content using AI.",
       "/三十六計/": "《三十六計》：中國傳統兵法三十六計的全文整理。",
       "/人の多次元複合体構造1-単重複合体/": "人の多次元複合体構造（1）----単重複合体。肉体、霊体、霊串、霊核などの構造を整理。",
       "/人の多次元複合体構造2-二重複合体霊-体/": "人の多次元複合体構造（2）----二重複合体「霊+体」。霊と体の関係と各複合体を整理。",
@@ -420,7 +425,7 @@ export default {
       "/零能量空間是什麽/": "零能量空間是什麽：介紹零能量空間及其相關概念。"
     };
     const seoDescription = seoDescriptions[decodedPathname] || "";
-    const seoNoindex = decodedPathname === "/ai-search/";
+    const seoNoindex = ["/ai-search/", "/search/", "/ask/"].includes(decodedPathname);
     var seoHasDescription = false;
     var seoHasCanonical = false;
     var seoCanonicalCount = 0;
@@ -498,6 +503,8 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle{background:#222;color:#eee;bor
       .on("footer",{element(el){el.setAttribute("class","footer site-footer");el.setInnerContent('<div class="footer-inner"><span class="footer-links"><a class="contact-icon" href="mailto:contact@awakenology.org" aria-label="Email Awakenology" title="Contact"><span aria-hidden="true">✉</span></a><a class="reddit-icon reddit-one" href="https://www.reddit.com/r/EscapeReincarnation/" aria-label="Reddit: Escape Reincarnation"><img src="/assets/reddit-one.svg" alt=""></a><a class="reddit-icon reddit-two" href="https://www.reddit.com/r/EscapePrisonPlanet/" aria-label="Reddit: Escape Prison Planet"><img src="/assets/reddit-two.svg" alt=""></a><a class="reddit-icon reddit-three" href="https://www.reddit.com/user/Lower-Lingonberry-40/" aria-label="Reddit: Lower-Lingonberry-40"><img src="/assets/reddit-three.svg" alt=""></a><a class="disclaimer-icon" href="/Disclaimer/" aria-label="Disclaimer" title="Disclaimer"><span aria-hidden="true">ⓘ</span></a></span><span>© 2017–'+new Date().getUTCFullYear()+' Awakenology</span></div>',{html:true});}})
       .on("link",{element(el){var rel=(el.getAttribute("rel")||"").toLowerCase().split(/\\s+/);if(rel.includes("icon")||rel.includes("apple-touch-icon"))el.remove()}})
       .on("a.brand",{element(el){if(decodedPathname!=="/" && (el.getAttribute("href")||"")==="/"){el.prepend('<svg class="brand-symbol" viewBox="0 0 100 100" role="img" aria-label="Circled A" style="transform:rotate(5deg);transform-origin:center"><path d="M17 80 A44 44 0 1 1 26.7 87.3" fill="none" stroke="currentColor" stroke-width="7.5" stroke-linecap="butt"/><path d="M27 87 L50 20 L72 77 L58 59 Q52 54 46 55" fill="none" stroke="currentColor" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',{html:true});}}})
+      .on('.nav a[href="/ai-search/"]',{element(el){const searchActive=decodedPathname==="/search/";const askActive=decodedPathname==="/ask/";const searchAttrs=searchActive?' class="active" aria-current="page"':"";const askAttrs=askActive?' class="active" aria-current="page"':"";el.before('<a href="/search/"'+searchAttrs+'>Search</a><a href="/ask/"'+askAttrs+'>Ask</a>',{html:true});el.remove();}})
+      .on('.search-link a[href="/ai-search/"]',{element(el){el.before('<a href="/search/">Search</a> <a href="/ask/">Ask</a>',{html:true});el.remove();}})
       .on("body",{element(el){var current=el.getAttribute("class")||"";if(isLanguageTocPage)current+=" awakenology-toc-page";if(decodedPathname==="/English/")current+=" awakenology-lang-en";if(decodedPathname==="/Japanese/")current+=" awakenology-lang-ja";if(decodedPathname==="/Chinese/")current+=" awakenology-lang-zh";if(isLegacyDarkPage)current+=" awakenology-legacy-dark-page";if(isChinesePage)current+=" awakenology-chinese-page";el.setAttribute("class",current)}})
       .on("head",{element(el){
         el.onEndTag(function(endTag){
@@ -511,7 +518,7 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle{background:#222;color:#eee;bor
           if(!seoHasOgSiteName)og.push("<meta property=\"og:site_name\" content=\"Awakenology\">");
           if(og.length)endTag.before(og.join(""),{html:true});
           if(seoDescription&&!seoHasDescription)endTag.before("<meta name=\"description\" content=\""+seoDescription.replace(/&/g,"&amp;").replace(/"/g,"&quot;")+"\">",{html:true});
-          if(!seoHasCanonical&&decodedPathname!="/ai-search/")endTag.before("<link rel=\"canonical\" href=\""+seoCanonical+"\">",{html:true});
+          if(!seoHasCanonical&&!seoNoindex)endTag.before("<link rel=\"canonical\" href=\""+seoCanonical+"\">",{html:true});
           if(seoNoindex&&!seoHasRobots)endTag.before("<meta name=\"robots\" content=\"noindex,follow\">",{html:true});
           if(decodedPathname==="/")endTag.before("<script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"WebSite\",\"name\":\"Awakenology\",\"url\":\"https://awakenology.space/\"}</script>",{html:true});
           endTag.before(theme+script+chineseScript+"<link rel=\"icon\" type=\"image/png\" href=\"/gallery/favicons/favicon.png\">",{html:true});
@@ -554,7 +561,7 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle{background:#222;color:#eee;bor
           if(!ogContent)el.setAttribute("content","Awakenology");
         }
       }})
-      .on("link",{element(el){var rel=(el.getAttribute("rel")||"").toLowerCase().split(/\s+/);if(rel.includes("canonical")){seoHasCanonical=true;if(decodedPathname!=="/ai-search/"){if(seoCanonicalCount===0){el.setAttribute("href",seoCanonical);seoCanonicalCount++;}else{el.remove();}}}}})
+      .on("link",{element(el){var rel=(el.getAttribute("rel")||"").toLowerCase().split(/\s+/);if(rel.includes("canonical")){seoHasCanonical=true;if(!seoNoindex){if(seoCanonicalCount===0){el.setAttribute("href",seoCanonical);seoCanonicalCount++;}else{el.remove();}}}}})
       .transform(response);
   }
 };
