@@ -6,19 +6,21 @@ from scripts.audit_live_links_assets import sample_urls
 
 
 class LiveAuditSamplingTests(unittest.TestCase):
-    def test_metadata_sample_keeps_home_and_ai_search(self):
+    def test_metadata_sample_keeps_home_search_and_ask(self):
         urls = [
             DOMAIN + "/",
             DOMAIN + "/English/",
             DOMAIN + "/Japanese/",
             DOMAIN + "/Chinese/",
-            DOMAIN + "/ai-search/",
+            DOMAIN + "/search/",
+            DOMAIN + "/ask/",
             DOMAIN + "/other/",
         ]
         sample = select_sample_urls(urls, 4)
         self.assertEqual(len(sample), 4)
         self.assertIn(DOMAIN + "/", sample)
-        self.assertIn(DOMAIN + "/ai-search/", sample)
+        self.assertIn(DOMAIN + "/search/", sample)
+        self.assertIn(DOMAIN + "/ask/", sample)
 
     def test_metadata_sample_is_deterministic_and_bounded(self):
         urls = [DOMAIN + f"/route-{i:03d}/" for i in range(30)]
