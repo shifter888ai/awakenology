@@ -32,7 +32,8 @@ main{max-width:760px;margin:0 auto;padding:58px 24px 70px}
 .utility-panel{border:1px solid var(--line);padding:24px;background:var(--soft)}
 .utility-label{margin:0 0 12px;font-size:14px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 search-bar-snippet{display:block;min-height:52px}
-.utility-note{margin:18px 4px 0;color:var(--muted);font-size:13px;line-height:1.5}
+.utility-note{margin:18px 4px 0;color:var(--muted);font-size:13px;line-height:1.65}
+.utility-note span{display:block}
 .footer{border-top:1px solid var(--line);padding:24px}
 .footer-inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;color:var(--muted);font-size:13px}
 .footer-links{display:flex;align-items:center;gap:12px}
@@ -61,6 +62,7 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
 <section class="utility-panel" aria-label="Search Awakenology articles">
 <search-bar-snippet api-url="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/" placeholder="" max-results="10" aria-label="Search Awakenology" translations='{"searchButtonLabel":"Search"}'></search-bar-snippet>
 </section>
+<p class="utility-note" aria-label="Search this site in English, Japanese, and Chinese"><span lang="en">Search this site.</span><span lang="ja">このサイトを検索します。</span><span lang="zh-Hant">搜尋本網站。</span></p>
 </main>
 <footer class="footer"><div class="footer-inner">
 <span class="footer-links">
@@ -82,11 +84,10 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
     if(!root)return;
     function apply(){
       const button=root.querySelector('.search-submit-button');
-      const label=root.querySelector('.search-submit-label');
-      if(!button||!label)return;
+      if(!button)return;
       button.setAttribute('aria-label','Search');
       button.title='Search';
-      if(!label.querySelector('svg[data-aw-search-icon]')){
+      if(!(button.children.length===1 && button.firstElementChild?.hasAttribute('data-aw-search-arrow'))){
         const svg=document.createElementNS(ns,'svg');
         svg.setAttribute('viewBox','0 0 24 24');
         svg.setAttribute('width','22');
@@ -98,33 +99,24 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
         svg.setAttribute('stroke-width','2.2');
         svg.setAttribute('stroke-linecap','round');
         svg.setAttribute('stroke-linejoin','round');
-        const c=document.createElementNS(ns,'circle');
-        c.setAttribute('cx','10.8');c.setAttribute('cy','10.8');c.setAttribute('r','6.8');
-        const p=document.createElementNS(ns,'path');
-        p.setAttribute('d','m16 16 5 5');
-        svg.append(c,p);
-        svg.setAttribute('data-aw-search-icon','');
-        label.replaceChildren(svg);
+        const shaft=document.createElementNS(ns,'path');
+        shaft.setAttribute('d','M12 19V5');
+        const head=document.createElementNS(ns,'path');
+        head.setAttribute('d','m5 12 7-7 7 7');
+        svg.append(shaft,head);
+        svg.setAttribute('data-aw-search-arrow','');
+        button.replaceChildren(svg);
       }
-      label.style.display='inline-flex';
-      label.style.width='22px';
-      label.style.height='22px';
-      label.style.alignItems='center';
-      label.style.justifyContent='center';
-      label.style.padding='0';
-      label.style.fontSize='0';
-      label.style.lineHeight='0';
-      label.style.overflow='hidden';
       button.style.width='44px';
       button.style.minWidth='44px';
+      button.style.height='44px';
       button.style.padding='0';
       button.style.display='inline-flex';
       button.style.alignItems='center';
       button.style.justifyContent='center';
     }
     apply();
-    const observer=new MutationObserver(apply);
-    observer.observe(root,{childList:true,subtree:true});
+    new MutationObserver(apply).observe(root,{childList:true,subtree:true});
   }
   customElements.whenDefined('search-bar-snippet').then(install);
 })();
