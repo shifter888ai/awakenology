@@ -145,6 +145,11 @@ async def main():
             browser = await p.chromium.launch(headless=True)
             try:
                 for route, (path, _) in FIXTURES.items():
+                    # Search and Ask are new routes in this PR and do not exist on production yet.
+                    # Their source structure is covered by check_real_pages.py; live browser parity
+                    # becomes meaningful after deployment.
+                    if route in {"/search/", "/ask/"}:
+                        continue
                     source = (ROOT / path).read_bytes().decode("utf-8")
                     generated = transform(source, route)
                     url = SITE + quote(route, safe="/%")
