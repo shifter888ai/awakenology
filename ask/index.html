@@ -28,11 +28,13 @@ main{max-width:1040px;margin:0 auto;padding:42px 24px 60px}
 .page-header{text-align:center;margin-bottom:26px}
 .visual-intro{display:flex;align-items:center;justify-content:center;gap:18px;min-height:82px;color:var(--fg)}
 .visual-intro svg{display:block;width:54px;height:54px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ai-mark{display:inline-flex;align-items:center;justify-content:center;width:58px;height:58px;border:2px solid currentColor;border-radius:50%;font-size:25px;font-weight:750;letter-spacing:-1.5px;line-height:1}
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 .chat-shell{width:100%;min-height:640px;border:1px solid var(--line);background:var(--bg);overflow:hidden;--search-snippet-primary-color:#222;--search-snippet-primary-hover:#444;--search-snippet-background:var(--bg);--search-snippet-surface:var(--soft);--search-snippet-text-color:var(--fg);--search-snippet-text-secondary:var(--muted);--search-snippet-border-color:var(--line);--search-snippet-user-message-bg:#333;--search-snippet-user-message-text:#fff;--search-snippet-assistant-message-bg:var(--soft);--search-snippet-assistant-message-text:var(--fg);--search-snippet-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;--search-snippet-border-radius:8px}
 html[data-aw-theme="dark"] .chat-shell{--search-snippet-primary-color:#ddd;--search-snippet-primary-hover:#fff;--search-snippet-user-message-bg:#444;--search-snippet-user-message-text:#fff}
 chat-page-snippet{display:block;width:100%;height:640px;min-height:640px}
-.chat-note{margin:14px 2px 0;color:var(--muted);font-size:13px;line-height:1.5}
+.chat-note{margin:14px 2px 0;color:var(--muted);font-size:13px;line-height:1.65;text-align:center}
+.chat-note span{display:block}
 .footer{border-top:1px solid var(--line);padding:24px}
 .footer-inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;color:var(--muted);font-size:13px}
 .footer-links{display:flex;align-items:center;gap:12px}
@@ -57,11 +59,11 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
 <a href="/links/">Links</a>
 </nav></div></header>
 <main>
-<header class="page-header"><h1 class="sr-only">Ask Awakenology</h1><div class="visual-intro" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M18 23a14 14 0 0 1 28 0v19a6 6 0 0 1-6 6H24a6 6 0 0 1-6-6V23Z"/><path d="M32 9V5m-5 0h10M18 29h-5a5 5 0 0 0-5 5v4a5 5 0 0 0 5 5h5m28-14h5a5 5 0 0 1 5 5v4a5 5 0 0 1-5 5h-5M25 31h.1M39 31h.1M25 40c4 4 10 4 14 0"/><path d="m49 8 2.2 4.8L56 15l-4.8 2.2L49 22l-2.2-4.8L42 15l4.8-2.2L49 8Z"/></svg></div><p class="sr-only">Ask questions in your preferred language.</p></header>
+<header class="page-header"><h1 class="sr-only">Ask Awakenology</h1><div class="visual-intro" aria-hidden="true"><span class="ai-mark">AI</span></div><p class="sr-only">Ask questions in your preferred language.</p></header>
 <section class="chat-shell" aria-label="Awakenology AI conversation">
 <chat-page-snippet api-url="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/" placeholder="" theme="auto" aria-label="Ask in any language" translations='{"chatTitle":"","clearChatButton":"","sendButtonLabel":"Send","sendButtonAriaLabel":"Send","historyTitle":"History"}'></chat-page-snippet>
 </section>
-<p class="chat-note sr-only">Conversations are saved in this browser.</p>
+<p class="chat-note" aria-label="Chat with AI in English, Japanese, and Chinese"><span lang="en">Chat with AI in your language.</span><span lang="ja">あなたの言語でAIとチャットできます。</span><span lang="zh-Hant">使用你的語言與 AI 對話。</span></p>
 </main>
 <footer class="footer"><div class="footer-inner">
 <span class="footer-links">
@@ -78,7 +80,7 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
 <script>
 (function(){
   const ns='http://www.w3.org/2000/svg';
-  function icon(paths){
+  function makeIcon(paths, marker){
     const svg=document.createElementNS(ns,'svg');
     svg.setAttribute('viewBox','0 0 24 24');
     svg.setAttribute('width','22');
@@ -90,7 +92,12 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
     svg.setAttribute('stroke-width','2');
     svg.setAttribute('stroke-linecap','round');
     svg.setAttribute('stroke-linejoin','round');
-    paths.forEach(function(d){const p=document.createElementNS(ns,'path');p.setAttribute('d',d);svg.appendChild(p)});
+    paths.forEach(function(d){
+      const path=document.createElementNS(ns,'path');
+      path.setAttribute('d',d);
+      svg.appendChild(path);
+    });
+    svg.setAttribute(marker,'');
     return svg;
   }
   function install(){
@@ -102,28 +109,24 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
       if(send){
         send.setAttribute('aria-label','Send');
         send.title='Send';
-        const hasArrow=send.querySelector('svg[data-aw-send-icon]');
-        if(!hasArrow || send.children.length!==1){
-          const svg=icon(['M12 19V5','m5 12 7-7 7 7']);
-          svg.setAttribute('data-aw-send-icon','');
-          send.replaceChildren(svg);
+        if(!(send.children.length===1 && send.firstElementChild?.hasAttribute('data-aw-send-icon'))){
+          send.replaceChildren(makeIcon(['M12 19V5','m5 12 7-7 7 7'],'data-aw-send-icon'));
         }
         send.style.width='44px';
         send.style.minWidth='44px';
+        send.style.height='44px';
         send.style.padding='0';
         send.style.display='inline-flex';
         send.style.alignItems='center';
         send.style.justifyContent='center';
       }
+
       const fresh=root.querySelector('.new-chat-button');
       if(fresh){
         fresh.setAttribute('aria-label','New chat');
         fresh.setAttribute('title','New chat');
-        const hasIcon=fresh.querySelector('svg[data-aw-new-chat-icon]');
-        if(!hasIcon || fresh.children.length!==1){
-          const svg=icon(['M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v9a2.5 2.5 0 0 1-2.5 2.5H11l-5 4v-4.2a2.5 2.5 0 0 1-2-2.3z','M12 7.5v7','M8.5 11h7']);
-          svg.setAttribute('data-aw-new-chat-icon','');
-          fresh.replaceChildren(svg);
+        if(!(fresh.children.length===1 && fresh.firstElementChild?.hasAttribute('data-aw-new-chat-icon'))){
+          fresh.replaceChildren(makeIcon(['M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v9a2.5 2.5 0 0 1-2.5 2.5H11l-5 4v-4.2a2.5 2.5 0 0 1-2-2.3z','M12 7.5v7','M8.5 11h7'],'data-aw-new-chat-icon'));
         }
         fresh.style.width='44px';
         fresh.style.minWidth='44px';
@@ -135,16 +138,28 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
         fresh.style.justifyContent='center';
         fresh.style.fontSize='0';
       }
+
+      const history=root.querySelector('.sidebar-title');
+      if(history){
+        history.setAttribute('aria-label','History');
+        history.title='History';
+        if(!(history.children.length===1 && history.firstElementChild?.hasAttribute('data-aw-history-icon'))){
+          history.replaceChildren(makeIcon(['M3 12a9 9 0 1 0 2.64-6.36L3 8','M3 3v5h5','M12 7v5l3 2'],'data-aw-history-icon'));
+        }
+        history.style.display='inline-flex';
+        history.style.alignItems='center';
+        history.style.justifyContent='center';
+        history.style.width='100%';
+      }
     }
     apply();
-    if(!root.querySelector('style[data-aw-icons-v2]')){
+    if(!root.querySelector('style[data-aw-icons-v3]')){
       const style=document.createElement('style');
-      style.setAttribute('data-aw-icons-v2','');
-      style.textContent='.chat-send-button svg[data-aw-send-icon],.new-chat-button svg[data-aw-new-chat-icon]{display:block;flex:none;color:inherit}.chat-send-button:disabled{opacity:.75}';
+      style.setAttribute('data-aw-icons-v3','');
+      style.textContent='.chat-send-button svg[data-aw-send-icon],.new-chat-button svg[data-aw-new-chat-icon],.sidebar-title svg[data-aw-history-icon]{display:block;flex:none;color:inherit}.sidebar-title svg[data-aw-history-icon]{width:22px;height:22px}.chat-send-button:disabled{opacity:.75}';
       root.appendChild(style);
     }
-    const observer=new MutationObserver(apply);
-    observer.observe(root,{childList:true,subtree:true});
+    new MutationObserver(apply).observe(root,{childList:true,subtree:true});
   }
   customElements.whenDefined('chat-page-snippet').then(install);
 })();
