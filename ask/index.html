@@ -57,7 +57,7 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
 <a href="/links/">Links</a>
 </nav></div></header>
 <main>
-<header class="page-header"><h1 class="sr-only">Ask Awakenology</h1><div class="visual-intro" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M13 9h38a5 5 0 0 1 5 5v28a5 5 0 0 1-5 5H31L17 57v-10h-4a5 5 0 0 1-5-5V14a5 5 0 0 1 5-5z"/><path d="M32 17c-4-4-11-2-12 4-5 0-7 6-4 10-3 5 0 10 5 10 1 6 7 8 11 4M32 17c4-4 11-2 12 4 5 0 7 6 4 10 3 5 0 10-5 10-1 6-7 8-11 4M32 16v31M23 23c-2 3-1 6 2 7M41 23c2 3 1 6-2 7M20 34h4m16 0h4"/></svg></div><p class="sr-only">Ask questions in your preferred language.</p></header>
+<header class="page-header"><h1 class="sr-only">Ask Awakenology</h1><div class="visual-intro" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M18 23a14 14 0 0 1 28 0v19a6 6 0 0 1-6 6H24a6 6 0 0 1-6-6V23Z"/><path d="M32 9V5m-5 0h10M18 29h-5a5 5 0 0 0-5 5v4a5 5 0 0 0 5 5h5m28-14h5a5 5 0 0 1 5 5v4a5 5 0 0 1-5 5h-5M25 31h.1M39 31h.1M25 40c4 4 10 4 14 0"/><path d="m49 8 2.2 4.8L56 15l-4.8 2.2L49 22l-2.2-4.8L42 15l4.8-2.2L49 8Z"/></svg></div><p class="sr-only">Ask questions in your preferred language.</p></header>
 <section class="chat-shell" aria-label="Awakenology AI conversation">
 <chat-page-snippet api-url="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/" placeholder="" theme="auto" aria-label="Ask in any language" translations='{"chatTitle":"","clearChatButton":"","sendButtonLabel":"Send","sendButtonAriaLabel":"Send","historyTitle":"History"}'></chat-page-snippet>
 </section>
@@ -77,21 +77,79 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
 
 <script>
 (function(){
-  const icon='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"%3E%3Cpath d="M12 19V5M5 12l7-7 7 7" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E';
+  const ns='http://www.w3.org/2000/svg';
+  function icon(paths){
+    const svg=document.createElementNS(ns,'svg');
+    svg.setAttribute('viewBox','0 0 24 24');
+    svg.setAttribute('width','22');
+    svg.setAttribute('height','22');
+    svg.setAttribute('aria-hidden','true');
+    svg.setAttribute('focusable','false');
+    svg.setAttribute('fill','none');
+    svg.setAttribute('stroke','currentColor');
+    svg.setAttribute('stroke-width','2');
+    svg.setAttribute('stroke-linecap','round');
+    svg.setAttribute('stroke-linejoin','round');
+    paths.forEach(function(d){const p=document.createElementNS(ns,'path');p.setAttribute('d',d);svg.appendChild(p)});
+    return svg;
+  }
   function install(){
     const host=document.querySelector('chat-page-snippet');
     const root=host&&host.shadowRoot;
     if(!root)return;
-    if(root.querySelector('style[data-awakenology-chat-icons]'))return;
-    const style=document.createElement('style');
-    style.setAttribute('data-awakenology-chat-icons','');
-    const historyIcon='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M3%2012a9%209%200%201%200%202.64-6.36L3%208m0-5v5h5M12%207v5l3%202%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E';
-    style.textContent='.chat-send-button>span{display:inline-block!important;width:22px;height:22px;padding:0!important;overflow:hidden;font-size:0!important;line-height:0!important}.chat-send-button>span::before{content:"";display:block;width:22px;height:22px;background:currentColor;-webkit-mask:url("'+icon+'") center/contain no-repeat;mask:url("'+icon+'") center/contain no-repeat}.sidebar-title{display:inline-flex!important;align-items:center;width:22px;height:22px;overflow:hidden;font-size:0!important;line-height:0!important}.sidebar-title::before{content:"";display:block;flex:none;width:22px;height:22px;background:currentColor;-webkit-mask:url("'+historyIcon+'") center/contain no-repeat;mask:url("'+historyIcon+'") center/contain no-repeat}';
-    root.appendChild(style);
+    function apply(){
+      const send=root.querySelector('.chat-send-button');
+      if(send){
+        send.setAttribute('aria-label','Send');
+        send.title='Send';
+        const hasArrow=send.querySelector('svg[data-aw-send-icon]');
+        if(!hasArrow || send.children.length!==1){
+          const svg=icon(['M12 19V5','m5 12 7-7 7 7']);
+          svg.setAttribute('data-aw-send-icon','');
+          send.replaceChildren(svg);
+        }
+        send.style.width='44px';
+        send.style.minWidth='44px';
+        send.style.padding='0';
+        send.style.display='inline-flex';
+        send.style.alignItems='center';
+        send.style.justifyContent='center';
+      }
+      const fresh=root.querySelector('.new-chat-button');
+      if(fresh){
+        fresh.setAttribute('aria-label','New chat');
+        fresh.setAttribute('title','New chat');
+        const hasIcon=fresh.querySelector('svg[data-aw-new-chat-icon]');
+        if(!hasIcon || fresh.children.length!==1){
+          const svg=icon(['M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v9a2.5 2.5 0 0 1-2.5 2.5H11l-5 4v-4.2a2.5 2.5 0 0 1-2-2.3z','M12 7.5v7','M8.5 11h7']);
+          svg.setAttribute('data-aw-new-chat-icon','');
+          fresh.replaceChildren(svg);
+        }
+        fresh.style.width='44px';
+        fresh.style.minWidth='44px';
+        fresh.style.height='44px';
+        fresh.style.margin='12px auto';
+        fresh.style.padding='0';
+        fresh.style.display='flex';
+        fresh.style.alignItems='center';
+        fresh.style.justifyContent='center';
+        fresh.style.fontSize='0';
+      }
+    }
+    apply();
+    if(!root.querySelector('style[data-aw-icons-v2]')){
+      const style=document.createElement('style');
+      style.setAttribute('data-aw-icons-v2','');
+      style.textContent='.chat-send-button svg[data-aw-send-icon],.new-chat-button svg[data-aw-new-chat-icon]{display:block;flex:none;color:inherit}.chat-send-button:disabled{opacity:.75}';
+      root.appendChild(style);
+    }
+    const observer=new MutationObserver(apply);
+    observer.observe(root,{childList:true,subtree:true});
   }
   customElements.whenDefined('chat-page-snippet').then(install);
 })();
 </script>
+
 <script>document.querySelectorAll(".copyright-current-year").forEach(function(el){el.textContent=new Date().getFullYear()});</script>
 </body>
 </html>
