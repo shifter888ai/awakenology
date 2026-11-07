@@ -11,11 +11,16 @@ class ParityTests(unittest.TestCase):
         self.assertEqual(rules_for("/Chinese/").language, "zh-Hant")
         self.assertIsNone(rules_for("/ai-search/").canonical)
         self.assertTrue(rules_for("/ai-search/").noindex)
+        for route in ("/search/", "/ask/"):
+            self.assertIsNone(rules_for(route).canonical)
+            self.assertTrue(rules_for(route).noindex)
         self.assertEqual(rules_for("/Chinese").language, "zh-Hant")
         self.assertEqual(rules_for("/Chinese").route, "/Chinese/")
         self.assertTrue(rules_for("/ai-search").noindex)
         self.assertIsNone(rules_for("/ai-search").canonical)
         self.assertEqual(rules_for("/ai-search").route, "/ai-search/")
+        self.assertTrue(rules_for("/search").noindex)
+        self.assertTrue(rules_for("/ask").noindex)
         with self.assertRaises(ValueError):
             rules_for("relative")
 
@@ -61,15 +66,17 @@ class ParityTests(unittest.TestCase):
                          "https://images.squarespace-cdn.com/content/v1/5e46c1ddfed24d662efc3817/6e1d6965-c6b2-49d0-971e-4d42f9bcfaaa/Cosmic%2BEye.jpg")
 
     def test_search_noindex_and_no_canonical(self):
-        result = transform(SOURCE, "/ai-search/")
-        validate_metadata(result, canonical=None, noindex=True)
         from bs4 import BeautifulSoup
-        soup = BeautifulSoup(result, "html.parser")
-        self.assertEqual(
-            soup.head.find("meta", attrs={"property": "og:url"})["content"],
-            "https://awakenology.space/ai-search/",
-        )
-        self.assertTrue(validate(SOURCE, result)["pass"])
+        for route in ("/ai-search/", "/search/", "/ask/"):
+            with self.subTest(route=route):
+                result = transform(SOURCE, route)
+                validate_metadata(result, canonical=None, noindex=True)
+                soup = BeautifulSoup(result, "html.parser")
+                self.assertEqual(
+                    soup.head.find("meta", attrs={"property": "og:url"})["content"],
+                    "https://awakenology.space" + route,
+                )
+                self.assertTrue(validate(SOURCE, result)["pass"])
 
     def test_live_signature_detects_metadata_and_footer_mutations(self):
         from check_live_parity import signature
@@ -102,10 +109,11 @@ class ParityTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_metadata(result.replace("</head>", '<meta name="robots" content="noindex,follow"></head>'),
                               canonical=canonical, noindex=False)
-        search = transform(SOURCE, "/ai-search/")
-        with self.assertRaises(ValueError):
-            validate_metadata(search.replace("</head>", '<meta name="robots" content="index,follow"></head>'),
-                              canonical=None, noindex=True)
+        for route in ("/ai-search/", "/search/", "/ask/"):
+            search = transform(SOURCE, route)
+            with self.assertRaises(ValueError):
+                validate_metadata(search.replace("</head>", '<meta name="robots" content="index,follow"></head>'),
+                                  canonical=None, noindex=True)
         with self.assertRaises(ValueError):
             validate_metadata("<html><body><main>Missing head</main></body></html>",
                               canonical=None, noindex=False)
@@ -126,7 +134,7 @@ class ParityTests(unittest.TestCase):
             route = unquote(urlsplit(loc.text or "").path)
             with self.subTest(route=route):
                 self.assertFalse(any(route.startswith(prefix) for prefix in disallowed))
-                self.assertFalse(route.startswith("/ai-search/"))
+                self.assertFalse(route.startswith(("/ai-search/", "/search/", "/ask/")))
                 self.assertFalse(any(part in route.lower() for part in
                                      ("/new-page-generator/", "/word-generator/", "/html-generator/")))
         # This is a static inventory guard, not an authenticated live-host audit.
