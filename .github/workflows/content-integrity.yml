@@ -89,9 +89,11 @@ jobs:
               print("The content-loss-approved label is present; intentional large content changes are explicitly approved.")
               sys.exit(0)
 
-          changed = subprocess.check_output(
-              ["git", "diff", "--name-only", base, head], text=True
-          ).splitlines()
+          changed = [
+              path for path in subprocess.check_output(
+                  ["git", "diff", "--name-only", "-z", base, head], text=True
+              ).split("\\0") if path
+          ]
 
           def read_at(ref, path):
               result = subprocess.run(
@@ -161,6 +163,45 @@ jobs:
                       )
               return None
 
+          def removed_link_items(source):
+              if source is None:
+                  return []
+              removed = []
+              for item in re.findall(r"<li\b[^>]*>([\s\S]*?)</li\s*>", source, re.I):
+                  if not re.fullmatch(r"\s*<a\b[^>]*>[\s\S]*?</a>\s*", item, re.I):
+                      continue
+                  href = re.search(r"\bhref\s*=\s*([\\\"\'])(.*?)\1", item, re.I | re.S)
+                  if not href:
+                      continue
+                  label = re.sub(r"<[^>]+>", " ", item)
+                  label = html.unescape(re.sub(r"\s+", " ", label)).strip()
+                  removed.append((href.group(2), label))
+              return removed
+
+          def exact_link_relocation(before, after, destination_sources):
+              """Recognize only exact anchor-only list items moved to another changed HTML file."""
+              if before is None or after is None:
+                  return False
+              before_items = removed_link_items(before)
+              after_items = set(removed_link_items(after))
+              moved = [item for item in before_items if item not in after_items]
+              if not moved:
+                  return False
+              destination_items = set()
+              for source in destination_sources:
+                  destination_items.update(removed_link_items(source))
+              if any(item not in destination_items for item in moved):
+                  return False
+              _, before_text = extract_content(before)
+              _, after_text = extract_content(after)
+              remaining_text = before_text
+              for _, label in moved:
+                  if label not in remaining_text:
+                      return False
+                  remaining_text = remaining_text.replace(label, "", 1)
+              normalize = lambda value: re.sub(r"\s+", " ", value).strip()
+              return normalize(remaining_text) == normalize(after_text)
+
           # Negative/positive self-tests protect the detector itself from regressions.
           sample_article = "<article><h1>Integrity test</h1><p>" + ("Preserved article text. " * 40) + "</p></article>"
           emptied_article = '<article class="article"><p class="aw-spacer"></p></article>'
@@ -175,20 +216,29 @@ jobs:
           if content_loss_reason(partial_before, partial_after) is None:
               print("SELF-TEST FAILED: substantial partial deletion above the old 60% threshold was not detected.")
               sys.exit(1)
-          print("Content-integrity detector self-tests passed (preserved, emptied, and partial-deletion cases).")
+          relocation_before = "<main><p>Latest publication</p><ul><li><a href='/one'>Moved article title one</a></li><li><a href='/two'>Moved article title two</a></li></ul></main>"
+          relocation_after = "<main><p>Latest publication</p></main>"
+          relocation_destination = "<article><ul><li><a href='/one'>Moved article title one</a></li><li><a href='/two'>Moved article title two</a></li></ul></article>"
+          unrelated_destination = "<article><p>Different destination content</p></article>"
+          if not exact_link_relocation(relocation_before, relocation_after, [relocation_destination]):
+              print("SELF-TEST FAILED: exact cross-file link relocation was not recognized.")
+              sys.exit(1)
+          if exact_link_relocation(relocation_before, relocation_after, [unrelated_destination]):
+              print("SELF-TEST FAILED: unrelated destination content incorrectly satisfied relocation.")
+              sys.exit(1)
+          print("Content-integrity detector self-tests passed (preserved, emptied, partial-deletion, and exact link-relocation cases).")
 
           failures = []
           checked = 0
-          for path in changed:
-              if not path.lower().endswith((".html", ".htm")):
-                  continue
-              # New-Article is a generator test fixture, not a production article.
-              # Its placeholder is intentionally replaced during generator tests.
-              if path.replace("\\", "/").strip("/").lower() == "new-article/index.html":
-                  print(f"Skipping content-loss baseline comparison for test fixture: {path}")
-                  continue
+          html_paths = [
+              path for path in changed
+              if path.lower().endswith((".html", ".htm"))
+              and path.replace("\\", "/").strip("/").lower() != "new-article/index.html"
+          ]
+          after_html = {path: read_at(head, path) for path in html_paths}
+          for path in html_paths:
               before = read_at(base, path)
-              after = read_at(head, path)
+              after = after_html[path]
               if before is None or after is None:
                   continue
               before_kind, before_text = extract_content(before)
@@ -197,6 +247,13 @@ jobs:
               checked += 1
               reason = content_loss_reason(before, after)
               if reason:
+                  destinations = [
+                      source for other_path, source in after_html.items()
+                      if other_path != path and source is not None
+                  ]
+                  if exact_link_relocation(before, after, destinations):
+                      print(f"Recognized exact cross-file link relocation in {path}; every removed anchor-only list item is preserved in another changed HTML file.")
+                      continue
                   failures.append(f"{path}: {reason}")
 
           print(f"Content integrity checked {checked} changed HTML file(s).")
