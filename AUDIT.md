@@ -685,3 +685,21 @@ Reference end-to-end acceptance test: PR #160 (article whitespace correction), m
 - [ ] Ensure relevant regression tests are actually discovered and executed in CI logs; a green workflow with an undiscovered test is insufficient.
 - [ ] Treat PR live audits as checks of currently deployed production, not proof that unmerged or newly merged changes are live; verify deployment and obtain live-page visual confirmation separately.
 - [ ] Preserve Article 5's frozen text/image fixture and its three intentionally repaired bullet glyphs; fixture edits require explicit documented justification.
+
+
+## Frozen Global UI Regression Gate — Search, Ask, Header, Footer
+
+**Scope:** Apply this gate only when the site owner has explicitly approved a change to one or more frozen components listed in the Global UI Freeze section of The-Master.md. Do not change these components merely to satisfy an audit or to address an unapproved suggestion.
+
+- [ ] Confirm the owner's explicit approval and record the exact component/property/behavior authorized to change.
+- [ ] Review the complete diff and confirm that no other frozen component or unrelated page/content has changed.
+- [ ] **Search (/search/):** verify real-time search, Enter/button submission, result rendering, loading/empty/error states, and responsive operation on desktop and iPhone. Do not change the established Search endpoint or request/response handling unless explicitly included in the approval.
+- [ ] **Ask (/ask/):** verify a new chat can be started, messages can be sent, responses stream/display, History opens and functions, and the Send control remains usable; check desktop and iPhone responsive layout.
+- [ ] **Global header/navigation:** verify language navigation, Search, Ask, theme control, and return-to-top behavior on representative standard pages and standalone Search/Ask pages.
+- [ ] **Global footer:** verify Contact, all Reddit links, Disclaimer, and current-year copyright on representative standard pages and standalone Search/Ask pages.
+- [ ] Check dark and light themes and relevant mobile/desktop layouts for every component in the approved change scope.
+- [ ] Confirm all three public domains continue to serve the same approved site experience: awakenology.space, awakenology.org, and strengthofconsciousness.org.
+- [ ] Confirm accessibility labels and keyboard/touch interactions remain intact when visible text is replaced by icons.
+- [ ] After merge/deployment, verify the live canonical route(s) and obtain the site owner's confirmation before updating the frozen baseline.
+
+A green build or source-level inspection alone does not lift the freeze or prove the live UI is correct. Changes outside the approved scope are a failure of this gate and must be reverted or separately approved.
