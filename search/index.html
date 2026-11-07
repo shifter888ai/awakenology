@@ -77,6 +77,35 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
 <script type="module" src="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/assets/v0.0.40/search-snippet.es.js"></script>
 
 
+<script>
+(function(){
+  customElements.whenDefined('search-bar-snippet').then(function(){
+    const bar=document.querySelector('search-bar-snippet');
+    if(!bar || typeof bar.search!=='function' || !bar.shadowRoot)return;
+    let touchFallbackPending=false;
+    function isSubmitButton(event){
+      return event.composedPath().some(function(node){
+        return node instanceof Element && node.matches('.search-submit-button');
+      });
+    }
+    bar.addEventListener('pointerup',function(event){
+      if(event.pointerType!=='touch' || !isSubmitButton(event))return;
+      const input=bar.shadowRoot.querySelector('input[name="search-input"]');
+      const query=input && input.value.trim();
+      if(!query)return;
+      touchFallbackPending=true;
+      window.setTimeout(function(){touchFallbackPending=false},700);
+      bar.search(query);
+    },true);
+    bar.addEventListener('click',function(event){
+      if(!touchFallbackPending || !isSubmitButton(event))return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      touchFallbackPending=false;
+    },true);
+  });
+})();
+</script>
 <script>document.querySelectorAll(".copyright-current-year").forEach(function(el){el.textContent=new Date().getFullYear()});</script>
 </body>
 </html>
