@@ -121,7 +121,7 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
         fresh.setAttribute('title','New chat');
         const hasIcon=fresh.querySelector('svg[data-aw-new-chat-icon]');
         if(!hasIcon || fresh.children.length!==1){
-          const svg=icon(['M4 4.5A2.5 2.5 0 0 1 6.5 2H14l6 6v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 19.5z','M14 2v6h6','M12 11v7','M8.5 14.5h7']);
+          const svg=icon(['M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v9a2.5 2.5 0 0 1-2.5 2.5H11l-5 4v-4.2a2.5 2.5 0 0 1-2-2.3z','M12 7.5v7','M8.5 11h7']);
           svg.setAttribute('data-aw-new-chat-icon','');
           fresh.replaceChildren(svg);
         }
