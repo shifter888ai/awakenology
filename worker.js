@@ -390,6 +390,12 @@ export default {
     }
     // Never expose the editor or publishing API on the public website or temporary preview hosts.
     if (isEditorPath || isEditorApi || isPublishApi) return new Response("Not found", { status: 404 });
+    // Keep the former combined Search / Ask URL working as a permanent redirect.
+    if (url.pathname === "/ai-search" || url.pathname === "/ai-search/" || url.pathname === "/ai-search/index.html") {
+      const destination = new URL(request.url);
+      destination.pathname = "/search/";
+      return Response.redirect(destination.toString(), 301);
+    }
     const response = await env.ASSETS.fetch(request);
     const contentType = response.headers.get("content-type") || "";
     const pathname = new URL(request.url).pathname;
@@ -403,6 +409,8 @@ export default {
     const seoDescriptions = {
       "/Destruction-Occurs-in-an-Instant/": "Awakenology — an account of how 3,000 Domain team members were instantaneously captured 10,000 years ago on Earth.",
       "/ai-search/": "Search the Awakenology site or ask questions about its material using AI.",
+      "/search/": "Search Awakenology articles and explore the original source pages.",
+      "/ask/": "Ask questions about Awakenology articles and material in your preferred language.",
       "/三十六計/": "《三十六計》：中國傳統兵法三十六計的全文整理。",
       "/人の多次元複合体構造1-単重複合体/": "人の多次元複合体構造（1）----単重複合体。肉体、霊体、霊串、霊核などの構造を整理。",
       "/人の多次元複合体構造2-二重複合体霊-体/": "人の多次元複合体構造（2）----二重複合体「霊+体」。霊と体の関係と各複合体を整理。",
@@ -420,7 +428,8 @@ export default {
       "/零能量空間是什麽/": "零能量空間是什麽：介紹零能量空間及其相關概念。"
     };
     const seoDescription = seoDescriptions[decodedPathname] || "";
-    const seoNoindex = decodedPathname === "/ai-search/";
+    const isAiUtilityPage = ["/ai-search/", "/search/", "/ask/"].includes(decodedPathname);
+    const seoNoindex = isAiUtilityPage;
     var seoHasDescription = false;
     var seoHasCanonical = false;
     var seoCanonicalCount = 0;
@@ -511,7 +520,7 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle{background:#222;color:#eee;bor
           if(!seoHasOgSiteName)og.push("<meta property=\"og:site_name\" content=\"Awakenology\">");
           if(og.length)endTag.before(og.join(""),{html:true});
           if(seoDescription&&!seoHasDescription)endTag.before("<meta name=\"description\" content=\""+seoDescription.replace(/&/g,"&amp;").replace(/"/g,"&quot;")+"\">",{html:true});
-          if(!seoHasCanonical&&decodedPathname!="/ai-search/")endTag.before("<link rel=\"canonical\" href=\""+seoCanonical+"\">",{html:true});
+          if(!seoHasCanonical&&!isAiUtilityPage)endTag.before("<link rel=\"canonical\" href=\""+seoCanonical+"\">",{html:true});
           if(seoNoindex&&!seoHasRobots)endTag.before("<meta name=\"robots\" content=\"noindex,follow\">",{html:true});
           if(decodedPathname==="/")endTag.before("<script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"WebSite\",\"name\":\"Awakenology\",\"url\":\"https://awakenology.space/\"}</script>",{html:true});
           endTag.before(theme+script+chineseScript+"<link rel=\"icon\" type=\"image/png\" href=\"/gallery/favicons/favicon.png\">",{html:true});
@@ -554,7 +563,7 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle{background:#222;color:#eee;bor
           if(!ogContent)el.setAttribute("content","Awakenology");
         }
       }})
-      .on("link",{element(el){var rel=(el.getAttribute("rel")||"").toLowerCase().split(/\s+/);if(rel.includes("canonical")){seoHasCanonical=true;if(decodedPathname!=="/ai-search/"){if(seoCanonicalCount===0){el.setAttribute("href",seoCanonical);seoCanonicalCount++;}else{el.remove();}}}}})
+      .on("link",{element(el){var rel=(el.getAttribute("rel")||"").toLowerCase().split(/\s+/);if(rel.includes("canonical")){seoHasCanonical=true;if(!isAiUtilityPage){if(seoCanonicalCount===0){el.setAttribute("href",seoCanonical);seoCanonicalCount++;}else{el.remove();}}}}})
       .transform(response);
   }
 };

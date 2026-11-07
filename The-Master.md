@@ -10,7 +10,7 @@
 6. **Black / white / gray foundation** — Restrained neutral palette with limited functional color.
 7. **System fonts only** — No external fonts. Serif may be used selectively for major headings.
 8. **Responsive by default** — Desktop and mobile must work properly.
-9. **Consistent navigation** — English / 日本語 / 中文 / Search / Ask, with the active language clear.
+9. **Consistent navigation** — English / 日本語 / 中文 / Search / Ask (separate links), with the active language clear.
 10. **Consistent footer** — Contact email icon → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer, then © 2017–CURRENT_YEAR Awakenology. The Contact icon links to `mailto:contact@awakenology.org` and is a standardized global footer component, not article content.
 11. **Common lightweight article template** — All articles use the approved global structure.
 12. **Preserve intentional wording** — Never silently correct unusual English or intentional formatting.
@@ -211,11 +211,11 @@ The inventory is the **page-specific evidence of what was there**; the Audit che
       1. **Dark/Light floating button** — Worker-owned
       2. **↑ Return-to-top floating button** — Worker-owned
       3. **Chinese 简/繁 floating toggle** — Worker-owned
-      4. **Global navigation menu:** English / 日本語 / 中文 / Search / Ask — page-template-owned
+      4. **Global navigation menu:** English / 日本語 / 中文 / Search / Ask (separate links) — page-template-owned
       5. **Global footer:** Contact → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer → © 2017–CURRENT_YEAR Awakenology — Worker-delivered globally; page source must remain structurally compatible
     - Global component ownership is explicit:
       - **Cloudflare Worker:** global floating/behavioral components: Dark/Light, ↑ Return-to-top, and Chinese 简/繁 switching.
-      - **Rebuilt page template:** global structural components: English / 日本語 / 中文 / Search / Ask navigation. The Worker owns the delivered global footer; committed page markup and CSS must not conflict with or duplicate it.
+      - **Rebuilt page template:** global structural components: English / 日本語 / 中文 / Search / Ask (separate links) navigation. The Worker owns the delivered global footer; committed page markup and CSS must not conflict with or duplicate it.
     - A Worker-injected component is considered present and compliant even though it is not physically present in the committed page HTML.
     - Determine whether each component is already injected or controlled globally by the Cloudflare Worker before adding any page-local implementation.
     - Every global component must have **one source of truth**. Never create a second page-local implementation of a component already provided by `worker.js`.

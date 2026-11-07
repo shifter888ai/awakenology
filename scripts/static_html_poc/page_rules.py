@@ -4,7 +4,7 @@ from urllib.parse import quote
 
 SITE = "https://awakenology.space"
 LANGUAGE_INDEX = {"/English/": "en", "/Japanese/": "ja", "/Chinese/": "zh-Hant"}
-NOINDEX = {"/ai-search/"}
+NOINDEX = {"/ai-search/", "/search/", "/ask/"}
 
 @dataclass(frozen=True)
 class PageRules:
