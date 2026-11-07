@@ -141,6 +141,7 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
 
       const history=root.querySelector('.sidebar-title');
       if(history){
+        history.setAttribute('role','img');
         history.setAttribute('aria-label','History');
         history.title='History';
         if(!(history.children.length===1 && history.firstElementChild?.hasAttribute('data-aw-history-icon'))){
