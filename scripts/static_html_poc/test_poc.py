@@ -78,6 +78,26 @@ class ParityTests(unittest.TestCase):
                 )
                 self.assertTrue(validate(SOURCE, result)["pass"])
 
+
+    def test_ask_page_uses_full_page_chat_not_bubble(self):
+        from pathlib import Path
+        from bs4 import BeautifulSoup
+        root = Path(__file__).resolve().parents[2]
+        soup = BeautifulSoup((root / "ask/index.html").read_text(encoding="utf-8"), "html.parser")
+        self.assertEqual(len(soup.find_all("chat-page-snippet")), 1)
+        self.assertEqual(len(soup.find_all("chat-bubble-snippet")), 0)
+        self.assertEqual(len(soup.find_all("search-bar-snippet")), 0)
+        self.assertIn("v0.0.40", soup.find("script", attrs={"type": "module"})["src"])
+
+    def test_search_page_uses_search_only(self):
+        from pathlib import Path
+        from bs4 import BeautifulSoup
+        root = Path(__file__).resolve().parents[2]
+        soup = BeautifulSoup((root / "search/index.html").read_text(encoding="utf-8"), "html.parser")
+        self.assertEqual(len(soup.find_all("search-bar-snippet")), 1)
+        self.assertEqual(len(soup.find_all("chat-page-snippet")), 0)
+        self.assertEqual(len(soup.find_all("chat-bubble-snippet")), 0)
+
     def test_live_signature_detects_metadata_and_footer_mutations(self):
         from check_live_parity import signature
         baseline = transform(SOURCE, "/English/")
