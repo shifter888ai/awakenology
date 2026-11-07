@@ -632,3 +632,19 @@ The Worker must emit `© 2017–CURRENT_YEAR Awakenology` directly in the delive
 - After conversion and approval, make subsequent article edits to the authoritative HTML file. If further substantive drafting is needed, use a separate internal draft/test file only as a temporary working document, then apply approved changes to the HTML source and retire/archive the temporary draft as appropriate.
 - This rule applies prospectively to new work. Do not bulk-convert or modify existing published HTML articles just to adopt Markdown.
 - Markdown-to-HTML conversion experiments, including PR #336, must remain isolated and must not change production publishing or deployment until separately validated and explicitly approved.
+
+
+## Global UI Freeze — Approved Baseline (2026-11-07)
+
+The following user-approved production components are **FROZEN / STABLE** as of 2026-11-07:
+
+- **Search page** (/search/): the standalone real-time site search, including its native input/submit interaction, Cloudflare AI Search endpoint integration, result rendering, status/error handling, and responsive presentation. The site owner confirmed that real-time Search works on desktop and iPhone after PRs #420 and #421.
+- **Ask page** (/ask/): the standalone full-page AI chat, including responsive chat layout, multilingual guidance, History icon, New Chat icon, Send up-arrow, and the underlying chat interactions. The site owner confirmed that chat works well after PR #428; related approved changes include PRs #411, #414–#416, and #422–#428.
+- **Global header/navigation**: the shared Worker-generated header and navigation, including language links, Search and Ask links, theme control, and return-to-top control. Approved baseline established by PR #406 and subsequent approved navigation refinements.
+- **Global footer**: the shared Worker-generated footer, including Contact, Reddit links, Disclaimer, and copyright. Approved baseline established by PR #406.
+
+Do not redesign, restyle, reword, restructure, refactor, replace, or otherwise modify these frozen components by default. This restriction includes visual details, icons, labels, spacing, responsive behavior, scripts, component choice, navigation order, and interaction behavior. Do not make opportunistic changes to them as part of unrelated work, article edits, site-wide cleanup, or Worker changes.
+
+Any proposed change to a frozen component requires the site owner's **explicit, specific approval before implementation**. A suspected defect or compatibility issue may be reported with evidence and a narrowly scoped proposed fix, but must not be changed without that approval. Once approved, isolate the change, document its scope, run the corresponding checks in AUDIT.md, and obtain the owner's live confirmation before treating the revised baseline as stable.
+
+This freeze does not prevent unrelated page/content work that leaves the frozen components unchanged. It also does not authorize changes to the Search/Ask backend, Cloudflare AI Search configuration, or shared Worker implementation.
