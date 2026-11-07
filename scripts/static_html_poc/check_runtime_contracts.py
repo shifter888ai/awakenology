@@ -4,6 +4,8 @@
 No cookies, credentials, writes, or authenticated actions are used.
 """
 import json
+import os
+from pathlib import Path
 from bs4 import BeautifulSoup
 import urllib.error
 import urllib.request
@@ -52,6 +54,7 @@ def probe(url):
     }
 
 def main():
+    is_pull_request = os.environ.get("GITHUB_EVENT_NAME") == "pull_request"
     checks = []
     def add(name, url, predicate, explanation):
         result = probe(url)
