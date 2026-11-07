@@ -50,9 +50,10 @@
     "Targeted SEO remediation through PRs #68 and #69: replaced title-only meta descriptions on two dialogue pages. For each edited page, the complete <body> source was verified unchanged. SEO remains pending until delivered metadata and broader content-integrity checks are complete.",
     "Repository source asset-path check completed 2026-10-12: scanned local src/href/poster references for common image, media, font, CSS, and JS file extensions across all 115 HTML files (114 sitemap pages plus AI Search; excluding 404.html). Every matched local reference resolved to a path present in the repository. This verifies repository path existence, not remote URL availability or visual rendering.",
     "PR #69 merged 2026-10-12 (merge commit 7e1449062964d27185aa4782c13cccb2fa638f1f); targeted description remediation on 與退化派對話6 is now in main.",
-    "Private visual editor stable baseline recorded 2026-10-18 after PR #160 was squash-merged, Cloudflare build version c12c7766 reported Ready, and the site owner confirmed the live article page was OK. Future editor/publishing changes must pass the dedicated regression gate in AUDIT.md; the reference PR does not authorize automatic merging."
+    "Private visual editor stable baseline recorded 2026-10-18 after PR #160 was squash-merged, Cloudflare build version c12c7766 reported Ready, and the site owner confirmed the live article page was OK. Future editor/publishing changes must pass the dedicated regression gate in AUDIT.md; the reference PR does not authorize automatic merging.",
+    "Global UI freeze approved 2026-11-07: Search, Ask, shared global header/navigation, and shared global footer are FROZEN_STABLE. Governing rules are in The-Master.md; scoped regression checks are in AUDIT.md. Documentation-only governance update; no website HTML/CSS/JS or Worker implementation is changed."
   ],
-  "manifest_version": "2.2",
+  "manifest_version": "2.3",
   "private_visual_editor_baseline": {
     "status": "VERIFIED_STABLE",
     "verified_date": "2026-10-18",
@@ -70,5 +71,53 @@
     "governance": "The-Master.md defines approved behavior; AUDIT.md defines mandatory regression checks. Do not alter implementation as part of baseline documentation."
   },
   "snapshot_scope": "Historical migration baseline recorded on 2026-10-12; counts, commits, and audit statuses below are not a current production inventory or October 21 live audit.",
-  "audit_summary_note": "FINALIZED_BASELINE denotes the migration baseline only. PENDING audit entries remain pending until separately evidenced and explicitly updated."
+  "audit_summary_note": "FINALIZED_BASELINE denotes the migration baseline only. PENDING audit entries remain pending until separately evidenced and explicitly updated.",
+  "global_ui_freeze": {
+    "status": "FROZEN_STABLE",
+    "approved_date": "2026-11-07",
+    "components": {
+      "search": {
+        "route": "/search/",
+        "status": "USER_CONFIRMED_WORKING_DESKTOP_AND_IPHONE",
+        "reference_prs": [
+          420,
+          421
+        ]
+      },
+      "ask": {
+        "route": "/ask/",
+        "status": "USER_CONFIRMED_WORKING",
+        "reference_prs": [
+          411,
+          414,
+          415,
+          416,
+          422,
+          423,
+          424,
+          426,
+          427,
+          428
+        ]
+      },
+      "global_header_navigation": {
+        "status": "APPROVED_STABLE",
+        "reference_prs": [
+          406,
+          402,
+          403,
+          404
+        ]
+      },
+      "global_footer": {
+        "status": "APPROVED_STABLE",
+        "reference_prs": [
+          406,
+          404
+        ]
+      }
+    },
+    "change_policy": "No modification, redesign, restyling, rewording, refactoring, or behavior change without the site owner's explicit, specific prior approval. Suspected defects may be reported with a scoped proposal but not changed without approval.",
+    "verification_policy": "For any explicitly approved change, run the Frozen Global UI Regression Gate in AUDIT.md and obtain site-owner live confirmation before updating this baseline."
+  }
 }
