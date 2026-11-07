@@ -59,7 +59,7 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
 <main>
 <header class="page-header"><h1 class="sr-only">Search Awakenology</h1><div class="visual-intro" aria-hidden="true"><svg viewBox="0 0 64 64"><circle cx="27" cy="27" r="18"/><path d="m40 40 16 16"/></svg></div><p class="sr-only">Search the Awakenology library.</p></header>
 <section class="utility-panel" aria-label="Search Awakenology articles">
-<search-bar-snippet api-url="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/" placeholder="" max-results="10" aria-label="Search Awakenology" translations='{"searchButtonLabel":""}'></search-bar-snippet>
+<search-bar-snippet api-url="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/" placeholder="" max-results="10" aria-label="Search Awakenology" translations='{"searchButtonLabel":"Search"}'></search-bar-snippet>
 </section>
 </main>
 <footer class="footer"><div class="footer-inner">
@@ -73,6 +73,22 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
 <span>© 2017–<span class="copyright-current-year">2026</span> Awakenology</span>
 </div></footer>
 <script type="module" src="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/assets/v0.0.40/search-snippet.es.js"></script>
+<script>
+(function(){
+  const icon='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"%3E%3Ccircle cx="10.8" cy="10.8" r="6.8" fill="none" stroke="black" stroke-width="2.2"/%3E%3Cpath d="m16 16 5 5" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round"/%3E%3C/svg%3E';
+  function install(){
+    const host=document.querySelector('search-bar-snippet');
+    const root=host&&host.shadowRoot;
+    if(!root)return;
+    if(root.querySelector('style[data-awakenology-search-icon]'))return;
+    const style=document.createElement('style');
+    style.setAttribute('data-awakenology-search-icon','');
+    style.textContent='.search-submit-label{display:inline-block!important;width:22px;height:22px;padding:0!important;overflow:hidden;font-size:0!important;line-height:0!important}.search-submit-label::before{content:"";display:block;width:22px;height:22px;background:currentColor;-webkit-mask:url("'+icon+'") center/contain no-repeat;mask:url("'+icon+'") center/contain no-repeat}';
+    root.appendChild(style);
+  }
+  customElements.whenDefined('search-bar-snippet').then(install);
+})();
+</script>
 <script>document.querySelectorAll(".copyright-current-year").forEach(function(el){el.textContent=new Date().getFullYear()});</script>
 </body>
 </html>
