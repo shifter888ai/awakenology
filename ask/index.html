@@ -82,11 +82,19 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
 
   const mobileViewport = window.matchMedia('(max-width: 700px)');
   chat.addEventListener('ready', function () {
+    // Enlarge the History clock glyph to match the chat interface icons.
+    // The sidebar title lives inside the component's open shadow root.
+    const root = chat.shadowRoot;
+    if (root && !root.querySelector('#aw-history-icon-size')) {
+      const style = document.createElement('style');
+      style.id = 'aw-history-icon-size';
+      style.textContent = '.sidebar-title{font-size:28px!important;line-height:1!important}';
+      root.appendChild(style);
+    }
+
     if (!mobileViewport.matches) return;
 
-    // The Cloudflare chat component owns its sidebar inside an open shadow root.
-    // Use its existing toggle control so chat history remains available on demand.
-    const root = chat.shadowRoot;
+    // Use the component's existing toggle control so chat history remains available on demand.
     const sidebar = root && root.querySelector('.chat-sidebar');
     const toggle = root && root.querySelector('.toggle-sidebar-button');
     if (sidebar && toggle && !sidebar.classList.contains('collapsed')) {
