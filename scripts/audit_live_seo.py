@@ -161,7 +161,7 @@ def main():
         expected = DOMAIN + (path if path.endswith("/") or path == "/" else path + "/")
         try:
             use_local_pr_html = bool(base_urls) and url not in base_urls
-            if (use_local_pr_html or (not base_urls and url not in deployed_urls)) and not is_ai:
+            if use_local_pr_html or (not base_urls and url not in deployed_urls):
                 local = ROOT / source_path
                 if not local.is_file(): raise OSError("new route missing local HTML")
                 status, final, ctype, charset = 200, url, "text/html", "utf-8"
