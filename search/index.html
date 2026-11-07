@@ -1,82 +1,50 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Search Awakenology</title>
-<meta name="description" content="Search the Awakenology article library and find relevant source material.">
-<meta name="robots" content="noindex,follow">
-<meta property="og:title" content="Search Awakenology">
-<meta property="og:description" content="Search the Awakenology article library and find relevant source material.">
-<meta property="og:image" content="https://images.squarespace-cdn.com/content/v1/5e46c1ddfed24d662efc3817/6e1d6965-c6b2-49d0-971e-4d42f9bcfaaa/Cosmic%2BEye.jpg">
-<meta property="og:url" content="https://awakenology.space/search/">
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Search Awakenology</title><meta name="description" content="Search the Awakenology article library and find relevant source material."><meta name="robots" content="noindex,follow">
+<meta property="og:title" content="Search Awakenology"><meta property="og:description" content="Search the Awakenology article library and find relevant source material."><meta property="og:image" content="https://images.squarespace-cdn.com/content/v1/5e46c1ddfed24d662efc3817/6e1d6965-c6b2-49d0-971e-4d42f9bcfaaa/Cosmic%2BEye.jpg"><meta property="og:url" content="https://awakenology.space/search/">
 <style>
 :root{color-scheme:light;--bg:#fff;--fg:#111;--muted:#666;--line:#ddd;--soft:#f6f6f6}
 html[data-aw-theme="dark"]{color-scheme:dark;--bg:#111;--fg:#eee;--muted:#aaa;--line:#333;--soft:#1a1a1a}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;line-height:1.6}
-a{color:inherit;text-decoration:none}
-a:hover{text-decoration:underline}
-.site-header{border-bottom:1px solid var(--line)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;line-height:1.6}
+a{color:inherit;text-decoration:none}a:hover{text-decoration:underline}.site-header{border-bottom:1px solid var(--line)}
 .header-inner{max-width:900px;margin:0 auto;padding:22px 24px 18px;display:flex;align-items:center;justify-content:space-between;gap:24px}
-.brand{font-family:Georgia,"Times New Roman",serif;font-size:25px;font-weight:700}
-.nav{display:flex;flex-wrap:wrap;gap:18px;font-size:14px}
-.nav a{padding-bottom:2px}
-.nav-divider{color:var(--muted);user-select:none}
-.nav a.active{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:5px}
-main{max-width:760px;margin:0 auto;padding:58px 24px 70px}
-.page-header{text-align:center;margin-bottom:24px}
-.visual-intro{display:flex;align-items:center;justify-content:center;min-height:82px;color:var(--fg)}
-.visual-intro svg{display:block;width:58px;height:58px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.brand{font-family:Georgia,"Times New Roman",serif;font-size:25px;font-weight:700}.nav{display:flex;flex-wrap:wrap;gap:18px;font-size:14px}.nav a{padding-bottom:2px}.nav-divider{color:var(--muted);user-select:none}.nav a.active{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:5px}
+main{max-width:760px;margin:0 auto;padding:58px 24px 70px}.page-header{text-align:center;margin-bottom:24px}.visual-intro{display:flex;align-items:center;justify-content:center;min-height:82px;color:var(--fg)}.visual-intro svg{display:block;width:58px;height:58px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
-.utility-panel{border:1px solid var(--line);padding:24px;background:var(--soft)}
-.utility-label{margin:0 0 12px;font-size:14px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
-search-bar-snippet{display:block;min-height:52px}
-.utility-note{margin:18px 4px 0;color:var(--muted);font-size:13px;line-height:1.65;text-align:center}
-.utility-note span{display:block}
-.footer{border-top:1px solid var(--line);padding:24px}
-.footer-inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;color:var(--muted);font-size:13px}
-.footer-links{display:flex;align-items:center;gap:12px}
-.footer-links a{color:var(--muted)}
-.reddit-icon{display:inline-flex;width:24px;height:24px;align-items:center;justify-content:center;overflow:hidden}
-.reddit-icon img{display:block;width:24px;height:22px;object-fit:contain;transform:translateX(1px)}
-.reddit-one img{transform:translateX(1px) scale(1.08)}
-.reddit-two img{transform:translateX(1px) scale(1.08);filter:brightness(0) saturate(100%) invert(39%) sepia(82%) saturate(1030%) hue-rotate(178deg) brightness(92%) contrast(94%)}
-.reddit-three img{transform:translateX(1px) scale(.94);filter:brightness(0) saturate(100%) invert(32%) sepia(42%) saturate(1537%) hue-rotate(238deg) brightness(91%) contrast(92%)}
-html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%) invert(76%) sepia(33%) saturate(1140%) hue-rotate(218deg) brightness(103%) contrast(94%)}
-@media(max-width:700px){.header-inner{display:block;padding:18px 18px 14px}.brand{display:block;margin-bottom:12px}.nav{gap:14px}main{padding:44px 18px 55px}.page-header{margin-bottom:24px}.page-header h1{font-size:30px}.page-header p{font-size:15px}.utility-panel{padding:17px}.footer{padding:20px 14px}}
-</style>
-</head>
-<body>
-<header class="site-header"><div class="header-inner">
-<a class="brand" href="/" title="Home">Awakenology</a>
-<nav class="nav" aria-label="Site navigation">
-<a href="/English/">English</a><a href="/Japanese/">日本語</a><a href="/Chinese/">中文</a>
-<span class="nav-divider" aria-hidden="true">|</span>
-<a href="/search/" class="active" aria-current="page">Search</a>
-<a href="/ask/">Ask</a>
-<a href="/links/">Links</a>
-</nav></div></header>
-<main>
-<header class="page-header"><h1 class="sr-only">Search Awakenology</h1><div class="visual-intro" aria-hidden="true"><svg viewBox="0 0 64 64"><circle cx="27" cy="27" r="18"/><path d="m40 40 16 16"/></svg></div><p class="sr-only">Search the Awakenology library.</p></header>
-<section class="utility-panel" aria-label="Search Awakenology articles">
-<search-bar-snippet api-url="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/" placeholder="" max-results="10" aria-label="Search Awakenology"></search-bar-snippet>
-</section>
-<p class="utility-note" aria-label="Search this site in English, Japanese, and Chinese"><span lang="en">Search this site.</span><span lang="ja">このサイトを検索します。</span><span lang="zh-Hant">搜尋本網站。</span></p>
-</main>
-<footer class="footer"><div class="footer-inner">
-<span class="footer-links">
-<a href="mailto:contact@awakenology.org">Contact</a>
-<a class="reddit-icon reddit-one" href="https://www.reddit.com/r/EscapeReincarnation/" aria-label="Reddit: Escape Reincarnation"><img src="/assets/reddit-one.svg" alt=""></a>
-<a class="reddit-icon reddit-two" href="https://www.reddit.com/r/EscapePrisonPlanet/" aria-label="Reddit: Escape Prison Planet"><img src="/assets/reddit-two.svg" alt=""></a>
-<a class="reddit-icon reddit-three" href="https://www.reddit.com/user/Lower-Lingonberry-40/" aria-label="Reddit: Lower-Lingonberry-40"><img src="/assets/reddit-three.svg" alt=""></a>
-<a href="/Disclaimer/">Disclaimer</a>
-</span>
-<span>© 2017–<span class="copyright-current-year">2026</span> Awakenology</span>
-</div></footer>
-<script type="module" src="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/assets/v0.0.40/search-snippet.es.js"></script>
-
-
-<script>document.querySelectorAll(".copyright-current-year").forEach(function(el){el.textContent=new Date().getFullYear()});</script>
-</body>
-</html>
+.search-panel{border:1px solid var(--line);padding:18px;background:var(--soft)}.search-form{display:flex;align-items:stretch;gap:10px}
+.search-input{flex:1;min-width:0;height:52px;padding:0 15px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--fg);font:inherit;font-size:16px;appearance:none}
+.search-input:focus{outline:2px solid var(--fg);outline-offset:2px}.search-submit{flex:0 0 52px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:4px;background:var(--fg);color:var(--bg);cursor:pointer}
+.search-submit:focus-visible{outline:2px solid var(--fg);outline-offset:3px}.search-submit svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.utility-note{margin:18px 4px 0;color:var(--muted);font-size:13px;line-height:1.65;text-align:center}.utility-note span{display:block}
+.search-status{min-height:24px;margin:18px 2px 0;color:var(--muted);font-size:14px;text-align:center}.results{display:grid;gap:12px;margin-top:18px}
+.result{padding:16px 18px;border:1px solid var(--line);background:var(--bg);overflow-wrap:anywhere}.result-title{display:block;margin:0 0 7px;font-size:16px;font-weight:700}.result-excerpt{margin:0;color:var(--muted);font-size:14px;line-height:1.6;white-space:pre-wrap}.result-meta{margin-top:9px;color:var(--muted);font-size:12px}
+.footer{border-top:1px solid var(--line);padding:24px}.footer-inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;color:var(--muted);font-size:13px}
+.footer-links{display:flex;align-items:center;gap:12px}.footer-links a{color:var(--muted)}.reddit-icon{display:inline-flex;width:24px;height:24px;align-items:center;justify-content:center;overflow:hidden}.reddit-icon img{display:block;width:24px;height:22px;object-fit:contain;transform:translateX(1px)}
+.reddit-one img{transform:translateX(1px) scale(1.08)}.reddit-two img{transform:translateX(1px) scale(1.08);filter:brightness(0) saturate(100%) invert(39%) sepia(82%) saturate(1030%) hue-rotate(178deg) brightness(92%) contrast(94%)}
+.reddit-three img{transform:translateX(1px) scale(.94);filter:brightness(0) saturate(100%) invert(32%) sepia(42%) saturate(1537%) hue-rotate(238deg) brightness(91%) contrast(92%)}html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%) invert(76%) sepia(33%) saturate(1140%) hue-rotate(218deg) brightness(103%) contrast(94%)}
+@media(max-width:700px){.header-inner{display:block;padding:18px 18px 14px}.brand{display:block;margin-bottom:12px}.nav{gap:14px}main{padding:44px 18px 55px}.search-panel{padding:14px}.search-input,.search-submit{height:50px}.search-submit{flex-basis:50px;width:50px}.result{padding:14px}.footer{padding:20px 14px}}
+@media(prefers-reduced-motion:no-preference){.result{animation:appear .16s ease-out}@keyframes appear{from{opacity:.6;transform:translateY(3px)}to{opacity:1;transform:none}}}
+</style></head><body>
+<header class="site-header"><div class="header-inner"><a class="brand" href="/" title="Home">Awakenology</a><nav class="nav" aria-label="Site navigation">
+<a href="/English/">English</a><a href="/Japanese/">日本語</a><a href="/Chinese/">中文</a><span class="nav-divider" aria-hidden="true">|</span><a href="/search/" class="active" aria-current="page">Search</a><a href="/ask/">Ask</a><a href="/links/">Links</a></nav></div></header>
+<main><header class="page-header"><h1 class="sr-only">Search Awakenology</h1><div class="visual-intro" aria-hidden="true"><svg viewBox="0 0 64 64"><circle cx="27" cy="27" r="18"/><path d="m40 40 16 16"/></svg></div><p class="sr-only">Search the Awakenology library.</p></header>
+<section class="search-panel" aria-label="Search Awakenology articles"><form class="search-form" id="search-form" role="search"><label class="sr-only" for="search-query">Search Awakenology</label><input class="search-input" id="search-query" name="q" type="search" autocomplete="off" enterkeyhint="search" aria-label="Search Awakenology"><button class="search-submit" type="submit" aria-label="Search" title="Search"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg></button></form></section>
+<p class="utility-note"><span lang="en">Search this site.</span><span lang="ja">このサイトを検索します。</span><span lang="zh-Hant">搜尋本網站。</span></p><p class="search-status" id="search-status" role="status" aria-live="polite"></p><section class="results" id="search-results" aria-label="Search results"></section></main>
+<footer class="footer"><div class="footer-inner"><span class="footer-links"><a href="mailto:contact@awakenology.org">Contact</a><a class="reddit-icon reddit-one" href="https://www.reddit.com/r/EscapeReincarnation/" aria-label="Reddit: Escape Reincarnation"><img src="/assets/reddit-one.svg" alt=""></a><a class="reddit-icon reddit-two" href="https://www.reddit.com/r/EscapePrisonPlanet/" aria-label="Reddit: Escape Prison Planet"><img src="/assets/reddit-two.svg" alt=""></a><a class="reddit-icon reddit-three" href="https://www.reddit.com/user/Lower-Lingonberry-40/" aria-label="Reddit: Lower-Lingonberry-40"><img src="/assets/reddit-three.svg" alt=""></a><a href="/Disclaimer/">Disclaimer</a></span><span>© 2017–<span class="copyright-current-year">2026</span> Awakenology</span></div></footer>
+<script>
+(function(){
+'use strict';
+var endpoint='https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/search';
+var form=document.getElementById('search-form'),input=document.getElementById('search-query'),status=document.getElementById('search-status'),results=document.getElementById('search-results'),timer=null,controller=null,sequence=0;
+function clear(){results.replaceChildren()}function say(message){status.textContent=message}
+function sourceUrl(item){var m=item&&item.metadata||{},v=m.url||m.source_url||m.canonical_url||(item&&item.key)||'';if(typeof v!=='string')return '';if(/^https:\/\//i.test(v))return v;if(v.charAt(0)==='/')return 'https://awakenology.space'+v;return ''}
+function titleFor(item,i){var m=item&&item.metadata||{};if(m.title)return String(m.title);var k=item&&item.key||'';if(typeof k==='string'&&k){try{var u=new URL(k);return u.pathname.split('/').filter(Boolean).pop()||u.hostname}catch(e){}if(k.charAt(0)==='/')return k.split('/').filter(Boolean).pop()||'Awakenology article'}return 'Search result '+(i+1)}
+function render(chunks){clear();if(!Array.isArray(chunks)||!chunks.length){say('No results found. Try another search.');return}var frag=document.createDocumentFragment();chunks.forEach(function(c,i){var card=document.createElement('article');card.className='result';var item=c&&c.item||{},heading=document.createElement('div');heading.className='result-title';var url=sourceUrl(item);if(url){var a=document.createElement('a');a.href=url;a.textContent=titleFor(item,i);heading.appendChild(a)}else heading.textContent=titleFor(item,i);card.appendChild(heading);var excerpt=document.createElement('p');excerpt.className='result-excerpt';excerpt.textContent=c&&typeof c.text==='string'?c.text:'';card.appendChild(excerpt);frag.appendChild(card)});results.appendChild(frag);say(chunks.length+' result'+(chunks.length===1?'':'s')+' found.')}
+async function search(query){query=query.trim();var id=++sequence;if(controller){controller.abort();controller=null}if(query.length<2){clear();say('');return}controller=new AbortController();var local=controller;say('Searching…');clear();try{var response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:query}]}),signal:local.signal,mode:'cors',credentials:'omit'});if(!response.ok)throw new Error('HTTP '+response.status);var data=await response.json();if(id!==sequence)return;if(data&&Array.isArray(data.errors)&&data.errors.length)throw new Error(data.errors.map(function(e){return e.message}).filter(Boolean).join(' ')||'Search service error');render(data&&data.chunks)}catch(e){if(e&&e.name==='AbortError')return;if(id!==sequence)return;clear();say('Search could not be completed. Please try again in a moment.');console.error('Awakenology Search:',e)}finally{if(id===sequence)controller=null}}
+form.addEventListener('submit',function(e){e.preventDefault();if(timer)clearTimeout(timer);search(input.value)});
+input.addEventListener('input',function(){if(timer)clearTimeout(timer);var q=input.value.trim();if(q.length<2){if(controller)controller.abort();sequence++;clear();say('');return}timer=setTimeout(function(){search(q)},650)});
+document.querySelectorAll('.copyright-current-year').forEach(function(el){el.textContent=new Date().getFullYear()});
+var params=new URLSearchParams(window.location.search);if(params.get('q')){input.value=params.get('q');search(input.value)}
+})();
+</script></body></html>
