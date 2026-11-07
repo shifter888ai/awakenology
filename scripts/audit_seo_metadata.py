@@ -75,7 +75,7 @@ def page_scope(relative):
     """Classify private tools separately from public SEO pages."""
     if relative == "404.html":
         return "special-404"
-    if relative == "ai-search/index.html":
+    if relative in {"ai-search/index.html", "search/index.html", "ask/index.html"}:
         return "special-ai-search"
     if relative.startswith(("editor/", "github-editor/")):
         return "special-editor"
