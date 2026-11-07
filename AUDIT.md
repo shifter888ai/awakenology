@@ -121,7 +121,7 @@ Inspect the actual DOM, not only extracted text or CSS.
 
 ## 6. Global Components
 
-- [ ] Global navigation: English / 日本語 / 中文 / Search / Ask.
+- [ ] Global navigation: English / 日本語 / 中文 / Search / Ask as two separate links.
 - [ ] Global navigation appears only in the header; it is not duplicated inside the article body or TOC.
 - [ ] Footer order is exactly:
   Contact email icon → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer → © 2017–CURRENT_YEAR Awakenology
@@ -451,7 +451,7 @@ Commit-field semantics:
 - [ ] Every indexable HTML page has a meaningful meta description unless explicitly classified as non-indexable.
 - [ ] Every indexable HTML page has exactly one **absolute** canonical URL on `https://awakenology.space` that matches its actual canonical route; relative canonicals fail.
 - [ ] `html lang` is present and matches the page language.
-- [ ] `/ai-search/` is explicitly `noindex, follow`.
+- [ ] `/search/` and `/ask/` are explicitly `noindex, follow`; legacy `/ai-search/` redirects to `/search/`.
 - [ ] Existing page metadata is not duplicated by Worker injection, and malformed or empty metadata is not counted as valid merely because the tag exists.
 - [ ] On indexable pages, `og:title`, `og:description`, and `og:url` are accurate and non-empty; `og:url` is an absolute canonical URL.
 - [ ] Any supplied `og:image` is a valid, non-empty absolute image URL. The homepage specifically must have a valid social-sharing image.
