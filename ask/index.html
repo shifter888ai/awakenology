@@ -84,6 +84,26 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
   chat.addEventListener('ready', function () {
     // Replace the font glyph with a crisp SVG clock matching the chat icon scale.
     const root = chat.shadowRoot;
+    const newChatButton = root && root.querySelector('.new-chat-button');
+    if (newChatButton && !newChatButton.hasAttribute('data-aw-icon-only')) {
+      // Keep the existing New Chat action and plus icon, but remove its visible text.
+      Array.from(newChatButton.childNodes).forEach(function (node) {
+        if (node.nodeType === Node.TEXT_NODE) node.remove();
+      });
+      newChatButton.setAttribute('aria-label', 'New chat');
+      newChatButton.setAttribute('title', 'New chat');
+      newChatButton.setAttribute('data-aw-icon-only', 'true');
+      const plusIcon = newChatButton.querySelector('svg');
+      if (plusIcon) {
+        plusIcon.style.width = '22px';
+        plusIcon.style.height = '22px';
+      }
+      const style = document.createElement('style');
+      style.id = 'aw-new-chat-icon-style';
+      style.textContent = '.new-chat-button[data-aw-icon-only="true"]{width:40px!important;min-width:40px!important;height:40px!important;margin:12px 16px!important;padding:0!important;align-self:flex-start!important;gap:0!important}';
+      if (!root.querySelector('#aw-new-chat-icon-style')) root.appendChild(style);
+    }
+
     const historyTitle = root && root.querySelector('.sidebar-title');
     if (historyTitle && !historyTitle.querySelector('svg')) {
       historyTitle.textContent = '';
