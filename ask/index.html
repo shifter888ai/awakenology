@@ -61,7 +61,7 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
 <main>
 <header class="page-header"><h1 class="sr-only">Ask Awakenology</h1><div class="visual-intro" aria-hidden="true"><span class="ai-mark">AI</span></div><p class="sr-only">Ask questions in your preferred language.</p></header>
 <section class="chat-shell" aria-label="Awakenology AI conversation">
-<chat-page-snippet api-url="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/" placeholder="" theme="auto" aria-label="Ask in any language" translations='{"chatTitle":"","clearChatButton":"","sendButtonLabel":"Send","sendButtonAriaLabel":"Send","historyTitle":"◷"}'></chat-page-snippet>
+<chat-page-snippet api-url="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/" placeholder="" theme="auto" aria-label="Ask in any language" translations='{"chatTitle":"","clearChatButton":"","sendButtonLabel":"","sendButtonAriaLabel":"Send","historyTitle":"◷"}'></chat-page-snippet>
 </section>
 <p class="chat-note" aria-label="Chat with AI in English, Japanese, and Chinese"><span lang="en">Chat with AI in your language.</span><span lang="ja">あなたの言語でAIとチャットできます。</span><span lang="zh-Hant">使用你的語言與 AI 對話。</span></p>
 </main>
@@ -84,6 +84,16 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
   chat.addEventListener('ready', function () {
     // Replace the font glyph with a crisp SVG clock matching the chat icon scale.
     const root = chat.shadowRoot;
+    const sendButton = root && root.querySelector('.chat-send-button');
+    if (sendButton && !root.querySelector('#aw-send-arrow-style')) {
+      // Use an up-arrow while keeping the component's native send button and handler.
+      sendButton.setAttribute('title', 'Send');
+      const sendStyle = document.createElement('style');
+      sendStyle.id = 'aw-send-arrow-style';
+      sendStyle.textContent = '.chat-send-button{width:40px!important;min-width:40px!important;height:40px!important;padding:0!important;display:inline-flex!important;align-items:center!important;justify-content:center!important}.chat-send-button span{font-size:0!important;line-height:0!important}.chat-send-button span::after{content:"↑";display:block;font-size:27px;line-height:1;font-weight:600}';
+      root.appendChild(sendStyle);
+    }
+
     const newChatButton = root && root.querySelector('.new-chat-button');
     if (newChatButton && !newChatButton.hasAttribute('data-aw-icon-only')) {
       // Keep the existing New Chat action and plus icon, but remove its visible text.
