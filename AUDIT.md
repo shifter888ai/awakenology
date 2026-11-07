@@ -121,7 +121,7 @@ Inspect the actual DOM, not only extracted text or CSS.
 
 ## 6. Global Components
 
-- [ ] Global navigation: English / 日本語 / 中文 / Search / Ask.
+- [ ] Global navigation: English / 日本語 / 中文 / Search / Ask (separate links).
 - [ ] Global navigation appears only in the header; it is not duplicated inside the article body or TOC.
 - [ ] Footer order is exactly:
   Contact email icon → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer → © 2017–CURRENT_YEAR Awakenology
@@ -451,7 +451,7 @@ Commit-field semantics:
 - [ ] Every indexable HTML page has a meaningful meta description unless explicitly classified as non-indexable.
 - [ ] Every indexable HTML page has exactly one **absolute** canonical URL on `https://awakenology.space` that matches its actual canonical route; relative canonicals fail.
 - [ ] `html lang` is present and matches the page language.
-- [ ] `/ai-search/` is explicitly `noindex, follow`.
+- [ ] `/search/` and `/ask/` are explicitly `noindex, follow`; legacy `/ai-search/` redirects to `/search/`.
 - [ ] Existing page metadata is not duplicated by Worker injection, and malformed or empty metadata is not counted as valid merely because the tag exists.
 - [ ] On indexable pages, `og:title`, `og:description`, and `og:url` are accurate and non-empty; `og:url` is an absolute canonical URL.
 - [ ] Any supplied `og:image` is a valid, non-empty absolute image URL. The homepage specifically must have a valid social-sharing image.
@@ -525,8 +525,8 @@ The gate is designed to catch accidental body deletion/truncation during global 
 
 - The GitHub Actions workflow `.github/workflows/live-seo-runtime-audit.yml` must run after pushes to `main`, on its daily schedule, and on manual dispatch.
 - Run syntax compilation and parser unit tests before any production requests.
-- The live audit checks every sitemap URL plus `/ai-search/` against the deployed site. It validates delivered title/description, canonical, language, robots directives, and core Open Graph tags; it also verifies that `robots.txt` advertises the canonical sitemap and does not block crawling of the noindex utility page.
-- Keep `/ai-search/` out of the sitemap while verifying its delivered `noindex,follow` directive separately.
+- The live audit checks every sitemap URL plus `/search/` and `/ask/` against the deployed site, and separately verifies the legacy `/ai-search/` redirect. It validates delivered title/description, canonical, language, robots directives, and core Open Graph tags; it also verifies that `robots.txt` advertises the canonical sitemap and does not block crawling of the noindex utility page.
+- Keep `/search/` and `/ask/` out of the sitemap while verifying their delivered `noindex,follow` directives separately; `/ai-search/` remains a redirect-only compatibility route.
 - Store the source metadata inventory and runtime report as workflow artifacts. A source-only warning that is repaired by the Worker is not a live defect; report the two layers separately.
 - A green workflow is evidence for the checks it runs, not proof of visual correctness, complete content preservation, image rendering, or every internal/external link. Keep those audit dimensions independently pending until verified.
 

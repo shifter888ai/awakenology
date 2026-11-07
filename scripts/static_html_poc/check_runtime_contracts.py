@@ -59,7 +59,9 @@ def main():
     add("public missing path", PUBLIC + "/__static_html_probe_missing_20261030__/", lambda r: r.get("status") == 404, "HTTP 404 for a unique nonexistent route")
     add("public editor path denied", PUBLIC + "/editor/", lambda r: r.get("status") == 404 and "editor.awakenology.space" not in r.get("location", ""), "public host must not expose or redirect to private editor")
     add("public draft API denied", PUBLIC + "/api/editor/create-draft-pr", lambda r: r.get("status") in (404, 405) and "editor.awakenology.space" not in r.get("location", ""), "public host must not expose private publishing API")
-    add("AI Search remains noindex", PUBLIC + "/ai-search/", lambda r: r.get("status") == 200 and ("noindex" in " ".join(r.get("robots_meta", [])).lower() or "noindex" in r.get("x_robots_tag", "").lower()), "AI Search response retains noindex treatment")
+    add("legacy AI Search URL redirects to Search", PUBLIC + "/ai-search/", lambda r: r.get("status") == 301 and r.get("location", "").rstrip("/") == PUBLIC + "/search", "old combined route permanently redirects to the dedicated Search page")
+    add("Search page remains noindex", PUBLIC + "/search/", lambda r: r.get("status") == 200 and ("noindex" in " ".join(r.get("robots_meta", [])).lower() or "noindex" in r.get("x_robots_tag", "").lower()), "dedicated Search page remains crawlable but noindex")
+    add("Ask page remains noindex", PUBLIC + "/ask/", lambda r: r.get("status") == 200 and ("noindex" in " ".join(r.get("robots_meta", [])).lower() or "noindex" in r.get("x_robots_tag", "").lower()), "dedicated Ask page remains crawlable but noindex")
     add("editor root requires authentication", EDITOR + "/", lambda r: r.get("status") in (302, 303, 401, 403) and ("github.com/login/oauth/authorize" in r.get("location", "") or "/auth/github" in r.get("location", "") or r.get("status") in (401, 403)), "unauthenticated editor root redirects to OAuth or denies access")
     add("editor page requires authentication", EDITOR + "/editor/", lambda r: r.get("status") in (302, 303, 401, 403) and ("github.com/login/oauth/authorize" in r.get("location", "") or "/auth/github" in r.get("location", "") or r.get("status") in (401, 403)), "unauthenticated editor page redirects to OAuth or denies access")
     add("public query-string homepage", PUBLIC + "/?static_html_probe=1", lambda r: r.get("status") == 200 and "text/html" in r.get("content_type", ""), "query string must not break homepage")
@@ -75,7 +77,7 @@ def main():
         PUBLIC + "/%E5%A4%A7%E6%8F%AD%E9%9C%B26/",
         PUBLIC + "/%E5%A4%A7%E6%8F%AD%E9%9C%B26/?phase5=1",
         PUBLIC + "/robots.txt", PUBLIC + "/sitemap.xml",
-        PUBLIC + "/ai-search/", PUBLIC + "/editor/",
+        PUBLIC + "/ai-search/", PUBLIC + "/search/", PUBLIC + "/ask/", PUBLIC + "/editor/",
         PUBLIC + "/__static_html_phase5_missing__/",
         EDITOR + "/", EDITOR + "/editor/", EDITOR + "/robots.txt",
     ]
