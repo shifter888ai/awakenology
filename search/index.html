@@ -75,52 +75,7 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
 <span>© 2017–<span class="copyright-current-year">2026</span> Awakenology</span>
 </div></footer>
 <script type="module" src="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/assets/v0.0.40/search-snippet.es.js"></script>
-<script>
-(function(){
-  const ns='http://www.w3.org/2000/svg';
-  function install(){
-    const host=document.querySelector('search-bar-snippet');
-    const root=host&&host.shadowRoot;
-    if(!root)return;
-    function apply(){
-      const button=root.querySelector('.search-submit-button');
-      if(!button)return;
-      button.setAttribute('aria-label','Search');
-      button.title='Search';
-      if(!(button.children.length===1 && button.firstElementChild?.hasAttribute('data-aw-search-arrow'))){
-        const svg=document.createElementNS(ns,'svg');
-        svg.setAttribute('viewBox','0 0 24 24');
-        svg.setAttribute('width','22');
-        svg.setAttribute('height','22');
-        svg.setAttribute('aria-hidden','true');
-        svg.setAttribute('focusable','false');
-        svg.setAttribute('fill','none');
-        svg.setAttribute('stroke','currentColor');
-        svg.setAttribute('stroke-width','2.2');
-        svg.setAttribute('stroke-linecap','round');
-        svg.setAttribute('stroke-linejoin','round');
-        const shaft=document.createElementNS(ns,'path');
-        shaft.setAttribute('d','M12 19V5');
-        const head=document.createElementNS(ns,'path');
-        head.setAttribute('d','m5 12 7-7 7 7');
-        svg.append(shaft,head);
-        svg.setAttribute('data-aw-search-arrow','');
-        button.replaceChildren(svg);
-      }
-      button.style.width='44px';
-      button.style.minWidth='44px';
-      button.style.height='44px';
-      button.style.padding='0';
-      button.style.display='inline-flex';
-      button.style.alignItems='center';
-      button.style.justifyContent='center';
-    }
-    apply();
-    new MutationObserver(apply).observe(root,{childList:true,subtree:true});
-  }
-  customElements.whenDefined('search-bar-snippet').then(install);
-})();
-</script>
+
 
 <script>document.querySelectorAll(".copyright-current-year").forEach(function(el){el.textContent=new Date().getFullYear()});</script>
 </body>
