@@ -484,14 +484,15 @@ footer .footer-inner{max-width:760px!important;margin:0 auto!important;display:f
 :root{--aw-accent:#6366c9;--aw-bg:#ffffff;--aw-text:#0D0F12;--aw-muted:#626270}
 html[data-aw-theme="dark"]{--aw-accent:#818cf8;--aw-bg:#0D0F12;--aw-text:#ffffff;--aw-muted:#b8b8c3}
 html[data-aw-theme="dark"] #awakenology-theme-toggle,html[data-aw-theme="dark"] #awakenology-return-top{border-color:#34343b}
-.site-header a.brand{display:inline-flex!important;align-items:center!important;gap:9px!important;color:#0D0F12!important;text-decoration:none!important}
+.site-header .header-inner{box-sizing:border-box!important;min-height:70px!important;padding:20px 24px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:24px!important}
+.site-header a.brand{display:inline-flex!important;align-items:center!important;gap:9px!important;margin:0!important;padding:0!important;font-family:Georgia,"Times New Roman",serif!important;font-size:25px!important;font-weight:700!important;line-height:29px!important;color:#0D0F12!important;text-decoration:none!important;white-space:nowrap!important}
 .site-header a.brand .brand-symbol{display:block;width:29px;height:29px;flex:0 0 29px;color:inherit!important}
-.site-header .nav{display:flex!important;align-items:center!important;flex-wrap:wrap!important;gap:18px!important;font-size:14px!important;line-height:20px!important}
-.site-header .nav a{display:inline-block!important;box-sizing:border-box!important;margin:0!important;padding:0 0 2px!important;border:0!important;font:inherit!important;font-weight:400!important;line-height:20px!important;text-decoration:none!important}
+.site-header .nav{display:flex!important;align-items:center!important;flex-wrap:wrap!important;gap:18px!important;margin:0!important;padding:0!important;font-family:Arial,sans-serif!important;font-size:14px!important;font-weight:400!important;line-height:20px!important}
+.site-header .nav a{display:inline-block!important;box-sizing:border-box!important;margin:0!important;padding:0 0 2px!important;border:0!important;font-family:inherit!important;font-size:14px!important;font-weight:400!important;line-height:20px!important;text-decoration:none!important}
 .site-header .nav a[aria-current="page"]{text-decoration:underline!important;text-decoration-thickness:2px!important;text-underline-offset:5px!important}
 .site-header .nav a:hover{text-decoration:underline!important;text-underline-offset:5px!important}
-.site-header .nav .nav-divider{display:inline-block!important;margin:0!important;padding:0!important;font:inherit!important;font-weight:400!important;line-height:20px!important;color:var(--aw-muted,#626270)!important;user-select:none!important}
-@media(max-width:700px){.site-header .nav{gap:14px!important}}
+.site-header .nav .nav-divider{display:inline-block!important;margin:0!important;padding:0!important;font-family:inherit!important;font-size:14px!important;font-weight:400!important;line-height:20px!important;color:var(--aw-muted,#626270)!important;user-select:none!important}
+@media(max-width:700px){.site-header .header-inner{display:block!important;min-height:0!important;padding:18px 18px 14px!important}.site-header a.brand{margin:0 0 12px!important}.site-header .nav{gap:14px!important}}
 
 html[data-aw-theme="dark"] .site-header a.brand,html[data-aw-theme="dark"] .site-header a.brand .brand-symbol{color:#fff!important}
 </style>
