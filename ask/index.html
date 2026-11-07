@@ -57,9 +57,9 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
 <a href="/links/">Links</a>
 </nav></div></header>
 <main>
-<header class="page-header"><h1 class="sr-only">Ask Awakenology</h1><div class="visual-intro" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M31 11c-5-5-14-3-16 4-7 0-10 8-6 14-4 6-1 14 6 15 1 8 10 11 16 5M33 11c5-5 14-3 16 4 7 0 10 8 6 14 4 6 1 14-6 15-1 8-10 11-16 5M32 10v43M20 17c-3 4-2 8 2 10M44 17c3 4 2 8-2 10M16 36c4-1 7 1 8 5M48 36c-4-1-7 1-8 5"/><path d="M28 28c0-5 8-6 9-1 1 4-5 5-5 9M32 43h.1" stroke-width="2.6"/></svg><svg viewBox="0 0 64 64"><rect x="8" y="13" width="48" height="38" rx="9"/><path d="m16 13 4-6m28 6-4-6M16 51l4 6m28-6-4 6M18 32l5-8 5 8M21 29h5M34 27h12M34 35h12M34 43h8"/><path d="M12 9 14 5m38 4-2-4" /></svg></div><p class="sr-only">Ask questions in your preferred language.</p></header>
+<header class="page-header"><h1 class="sr-only">Ask Awakenology</h1><div class="visual-intro" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M13 9h38a5 5 0 0 1 5 5v28a5 5 0 0 1-5 5H31L17 57v-10h-4a5 5 0 0 1-5-5V14a5 5 0 0 1 5-5z"/><path d="M32 17c-4-4-11-2-12 4-5 0-7 6-4 10-3 5 0 10 5 10 1 6 7 8 11 4M32 17c4-4 11-2 12 4 5 0 7 6 4 10 3 5 0 10-5 10-1 6-7 8-11 4M32 16v31M23 23c-2 3-1 6 2 7M41 23c2 3 1 6-2 7M20 34h4m16 0h4"/></svg></div><p class="sr-only">Ask questions in your preferred language.</p></header>
 <section class="chat-shell" aria-label="Awakenology AI conversation">
-<chat-page-snippet api-url="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/" placeholder="" theme="auto" aria-label="Ask in any language" translations='{"chatTitle":"","clearChatButton":"","sendButtonLabel":""}'></chat-page-snippet>
+<chat-page-snippet api-url="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/" placeholder="" theme="auto" aria-label="Ask in any language" translations='{"chatTitle":"","clearChatButton":"","sendButtonLabel":"Send","sendButtonAriaLabel":"Send","historyTitle":"History"}'></chat-page-snippet>
 </section>
 <p class="chat-note sr-only">Conversations are saved in this browser.</p>
 </main>
@@ -75,6 +75,22 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
 </div></footer>
 <script type="module" src="https://4405eb88-b5c8-4f18-b2fa-cb084e6f48c7.search.ai.cloudflare.com/assets/v0.0.40/search-snippet.es.js"></script>
 
+<script>
+(function(){
+  const icon='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"%3E%3Cpath d="M12 19V5M5 12l7-7 7 7" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E';
+  function install(){
+    const host=document.querySelector('chat-page-snippet');
+    const root=host&&host.shadowRoot;
+    if(!root)return;
+    if(root.querySelector('style[data-awakenology-chat-icons]'))return;
+    const style=document.createElement('style');
+    style.setAttribute('data-awakenology-chat-icons','');
+    style.textContent='.chat-send-button>span{display:inline-block!important;width:22px;height:22px;padding:0!important;overflow:hidden;font-size:0!important;line-height:0!important}.chat-send-button>span::before{content:"";display:block;width:22px;height:22px;background:currentColor;-webkit-mask:url("'+icon+'") center/contain no-repeat;mask:url("'+icon+'") center/contain no-repeat}.sidebar-title{display:inline-flex!important;align-items:center;width:22px;height:22px;overflow:hidden;font-size:0!important;line-height:0!important}.sidebar-title::before{content:"";display:block;flex:none;width:22px;height:22px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\'%3E%3Cpath d=\'M3 12a9 9 0 1 0 2.64-6.36L3 8m0-5v5h5M12 7v5l3 2\' fill=\'none\' stroke=\'black\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\'%3E%3Cpath d=\'M3 12a9 9 0 1 0 2.64-6.36L3 8m0-5v5h5M12 7v5l3 2\' fill=\'none\' stroke=\'black\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3C/svg%3E") center/contain no-repeat}';
+    root.appendChild(style);
+  }
+  customElements.whenDefined('chat-page-snippet').then(install);
+})();
+</script>
 <script>document.querySelectorAll(".copyright-current-year").forEach(function(el){el.textContent=new Date().getFullYear()});</script>
 </body>
 </html>
