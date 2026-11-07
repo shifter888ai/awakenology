@@ -7,9 +7,11 @@ from parity_validator import validate, validate_metadata
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = {
     "/": ("index.html", "2308340cc91e8119fa276a9ff033e7ee9eb64d52"),
-    "/English/": ("English/index.html", "dba7952319a9f65e242562761d783092fcb3ea2f"),
+    "/English/": ("English/index.html", "a635db1748fcd83e580c33c30595fca9a1fbdbf6"),
     "/Japanese/": ("Japanese/index.html", "b3cac68d40b7cefd89070b4eb3d726f4a4529b8a"),
     "/Chinese/": ("Chinese/index.html", "8ccefd86d219cf0c8ecd6a49dce99d59a1cb1a0a"),
+    "/search/": ("search/index.html", "be3eb018cb7e98ccaf30b26ce000d503ad00fdd7"),
+    "/ask/": ("ask/index.html", "8e27a33704a0d59c553f378c8aec5b22d50b1273"),
     "/大揭露2/": ("大揭露2/index.html", "a76fc5282d0bb511aa75789ec77ac510efa7d2ee"),
     "/與退化派對話8/": ("與退化派對話8/index.html", "bc62b6b2266c4b826a12168237294062352a4d53"),
     "/What-Is-Hypnosis/": ("What-Is-Hypnosis/index.html", "8639f0376b704e8f3e6aed1328fd4df4bfe1abef"),
