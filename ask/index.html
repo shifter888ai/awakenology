@@ -91,8 +91,12 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
       historyTitle.setAttribute('aria-label', 'History');
       const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       icon.setAttribute('viewBox', '0 0 24 24');
-      icon.setAttribute('width', '28');
-      icon.setAttribute('height', '28');
+      icon.setAttribute('width', '36');
+      icon.setAttribute('height', '36');
+      icon.style.width = '36px';
+      icon.style.height = '36px';
+      icon.style.minWidth = '36px';
+      icon.style.flexShrink = '0';
       icon.setAttribute('fill', 'none');
       icon.setAttribute('stroke', 'currentColor');
       icon.setAttribute('stroke-width', '2');
@@ -102,7 +106,7 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
       const face = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       face.setAttribute('cx', '12');
       face.setAttribute('cy', '12');
-      face.setAttribute('r', '9');
+      face.setAttribute('r', '10.5');
       const hands = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       hands.setAttribute('d', 'M12 7v5l3 2');
       icon.append(face, hands);
