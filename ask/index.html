@@ -82,14 +82,34 @@ html[data-aw-theme="dark"] .reddit-three img{filter:brightness(0) saturate(100%)
 
   const mobileViewport = window.matchMedia('(max-width: 700px)');
   chat.addEventListener('ready', function () {
-    // Enlarge the History clock glyph to match the chat interface icons.
-    // The sidebar title lives inside the component's open shadow root.
+    // Replace the font glyph with a crisp SVG clock matching the chat icon scale.
     const root = chat.shadowRoot;
-    if (root && !root.querySelector('#aw-history-icon-size')) {
-      const style = document.createElement('style');
-      style.id = 'aw-history-icon-size';
-      style.textContent = '.sidebar-title{font-size:28px!important;line-height:1!important}';
-      root.appendChild(style);
+    const historyTitle = root && root.querySelector('.sidebar-title');
+    if (historyTitle && !historyTitle.querySelector('svg')) {
+      historyTitle.textContent = '';
+      historyTitle.setAttribute('role', 'img');
+      historyTitle.setAttribute('aria-label', 'History');
+      const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      icon.setAttribute('viewBox', '0 0 24 24');
+      icon.setAttribute('width', '28');
+      icon.setAttribute('height', '28');
+      icon.setAttribute('fill', 'none');
+      icon.setAttribute('stroke', 'currentColor');
+      icon.setAttribute('stroke-width', '2');
+      icon.setAttribute('stroke-linecap', 'round');
+      icon.setAttribute('stroke-linejoin', 'round');
+      icon.setAttribute('aria-hidden', 'true');
+      const face = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      face.setAttribute('cx', '12');
+      face.setAttribute('cy', '12');
+      face.setAttribute('r', '9');
+      const hands = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      hands.setAttribute('d', 'M12 7v5l3 2');
+      icon.append(face, hands);
+      historyTitle.appendChild(icon);
+      historyTitle.style.display = 'flex';
+      historyTitle.style.alignItems = 'center';
+      historyTitle.style.lineHeight = '1';
     }
 
     if (!mobileViewport.matches) return;
