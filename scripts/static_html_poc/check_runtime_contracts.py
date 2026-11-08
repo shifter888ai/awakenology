@@ -86,10 +86,14 @@ def main():
             "Worker source permanently redirects the legacy route to /search/")
         local_contract(
             "Search page remains noindex", "search/index.html",
-            lambda source: source.count("<search-bar-snippet") == 1
+            lambda source: 'id="search-form"' in source
+                and 'id="search-query"' in source
+                and 'class="search-submit"' in source
+                and "search.ai.cloudflare.com/search" in source
                 and "<chat-page-snippet" not in source
+                and "<chat-bubble-snippet" not in source
                 and 'name="robots" content="noindex,follow"' in source,
-            "Search source contains only the Search widget and remains noindex")
+            "Search source contains the dedicated inline search form, no chat widget, and remains noindex")
         local_contract(
             "Ask page remains noindex", "ask/index.html",
             lambda source: source.count("<chat-page-snippet") == 1
