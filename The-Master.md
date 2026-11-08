@@ -648,3 +648,28 @@ Do not redesign, restyle, reword, restructure, refactor, replace, or otherwise m
 Any proposed change to a frozen component requires the site owner's **explicit, specific approval before implementation**. A suspected defect or compatibility issue may be reported with evidence and a narrowly scoped proposed fix, but must not be changed without that approval. Once approved, isolate the change, document its scope, run the corresponding checks in AUDIT.md, and obtain the owner's live confirmation before treating the revised baseline as stable.
 
 This freeze does not prevent unrelated page/content work that leaves the frozen components unchanged. It also does not authorize changes to the Search/Ask backend, Cloudflare AI Search configuration, or shared Worker implementation.
+
+## Global Header and Footer — Locked Visual Baseline (2026-11-09)
+
+The site owner has visually confirmed the shared global header and footer after the latest refinements. Treat both as **LOCKED / STABLE** across all domains served by the Awakenology Worker.
+
+### Header
+- Keep the language navigation in this order: English → 日本語 → 中文.
+- Keep the dedicated vertical divider between the three language links and the three action links.
+- Keep the action links in this order: Search (magnifying glass) → Ask (question mark inside a circle; **not** a chat bubble) → Links (chain-link icon).
+- Preserve the approved labels, accessible names/tooltips, spacing, alignment, theme compatibility, and responsive behavior.
+- Keep the shared header styling isolated from page-level styles so page CSS cannot unintentionally alter it.
+
+### Footer
+- Keep the order: Contact → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer → © 2017–CURRENT_YEAR Awakenology.
+- Contact icon: 24px visible glyph size.
+- Reddit icons: 20px visible image size, centered in 24px alignment boxes.
+- Disclaimer icon: 20px visible glyph size, centered in a 24px alignment box.
+- Preserve the approved links, accessible names/tooltips, spacing, alignment, theme compatibility, and responsive behavior.
+- The footer is delivered globally by the Cloudflare Worker; do not add page-local duplicates.
+
+### Change control
+- Do not modify the header or footer—visually, structurally, or behaviorally—as part of unrelated work, cleanup, refactoring, or site-wide styling.
+- Any proposed change requires the site owner's explicit, specific approval before implementation.
+- If a change is approved, isolate it to the named component/property, verify both dark and light modes and desktop/mobile layouts, run the relevant checks in `AUDIT.md`, and obtain the owner's live confirmation before updating this locked baseline.
+- Do not treat a successful PR merge or deployment as visual approval; the owner's live confirmation is required.
