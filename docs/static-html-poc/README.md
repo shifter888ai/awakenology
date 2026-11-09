@@ -10,7 +10,7 @@ The ten pinned fixture fingerprints are refreshed against current `main` at `73c
 
 Ten pinned source fixtures: homepage, English/Japanese/Chinese language indexes, dedicated Search and Ask pages, two Chinese articles, one English article, and one Japanese article (including Unicode routes). Git blob fingerprints are computed from raw repository bytes, preserving legacy line endings. The source-content/markup/image and idempotence checks passed. Historical live Worker **signature** parity passed on the earlier nine-fixture set at commit `7e78d0f`; subsequent regression and metadata checks passed at `15828ce` and `3e0a5d8`. This is historical evidence, not a fresh check of the current ten-fixture set.
 
-The PoC also tests deliberate content and signature mutations, duplicate canonical and robots metadata, unexpected noindex, and static public crawl-inventory exclusions for Editor/Generator and the noindex Search/Ask utility routes. The static inventory test passed at `c2f7899`; the Live SEO runtime audit was still pending when this document was updated. No private host authentication was exercised.
+The PoC also tests deliberate content and signature mutations, duplicate canonical and robots metadata, unexpected noindex, and static public crawl-inventory exclusions for Editor/Generator. It explicitly treats `/New-Article/` as a noindex experimental route outside the sitemap, alongside the noindex Search/Ask utility routes. The static inventory test passed at `c2f7899`; the Live SEO runtime audit was still pending when this document was updated. No private host authentication was exercised.
 
 These are limited tests: a matching signature does **not** establish full HTML, JavaScript, browser, accessibility, visual, or Worker-route equivalence.
 
