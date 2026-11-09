@@ -57,6 +57,25 @@ class ParityTests(unittest.TestCase):
         self.assertEqual(len(branded_soup.select("a.brand svg.brand-symbol")), 1)
         validate_metadata(result, canonical="https://awakenology.space/English/", noindex=False)
 
+    def test_static_footer_contact_target_matches_current_worker(self):
+        from pathlib import Path
+        import re
+        from bs4 import BeautifulSoup
+
+        root = Path(__file__).resolve().parents[2]
+        worker_source = (root / "worker.js").read_text(encoding="utf-8")
+        match = re.search(
+            r'<a class="contact-icon" href="([^"]+)" aria-label="([^"]+)" title="Contact">',
+            worker_source,
+        )
+        self.assertIsNotNone(match, "current Worker footer must expose one recognizable Contact link")
+
+        generated = BeautifulSoup(transform(SOURCE, "/English/"), "html.parser")
+        contact_link = generated.footer.select_one("a.contact-icon")
+        self.assertIsNotNone(contact_link)
+        self.assertEqual(contact_link.get("href"), match.group(1))
+        self.assertEqual(contact_link.get("aria-label"), match.group(2))
+
     def test_open_graph_defaults_and_title(self):
         result = transform(SOURCE, "/English/")
         from bs4 import BeautifulSoup
