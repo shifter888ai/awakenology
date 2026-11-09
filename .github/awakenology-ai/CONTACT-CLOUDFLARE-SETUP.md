@@ -5,7 +5,7 @@ This feature keeps submissions within the existing Cloudflare Worker and Cloudfl
 ## Required Cloudflare configuration
 
 1. In Cloudflare, onboard `awakenology.org` under **Email Service → Email Sending**. Use the sender address `website@awakenology.org`. Cloudflare will provide the SPF/DKIM and bounce-subdomain DNS records. Review them before applying; this setup is for outbound sending and should not replace the existing mailbox MX records.
-2. Verify `contact@awakenology.org` as a destination address if the account is using Workers Free. The fixed Worker binding only permits delivery to that address. The Worker also hardcodes the sender as `website@awakenology.org`.
+2. Verify `contact@awakenology.org` as a destination address. The fixed Worker binding only permits delivery to that address, and the sender is hardcoded as `website@awakenology.org`. This verified-recipient restriction keeps sending eligible on Workers Free and avoids enabling arbitrary recipients.
 3. Create a Cloudflare Turnstile widget for the public site hostnames:
    - `awakenology.space`
    - `www.awakenology.space`
@@ -20,7 +20,7 @@ This feature keeps submissions within the existing Cloudflare Worker and Cloudfl
 
 - Messages are emailed to `contact@awakenology.org`.
 - File submissions are emailed as attachments to the same address.
-- Maximum attachment size is 15 MB, below Cloudflare Email Service's 25 MiB total message limit.
+- Maximum uploaded file size is 15 MB. This relies on the verified destination address, which has Cloudflare Email Service's 25 MiB total-message limit; the general unverified-recipient limit is 5 MiB.
 - Accepted file extensions: PDF, Office documents, text/Markdown, CSV, common images, and ZIP.
 - Files are not retained by the website.
 - Visitor email is used as `Reply-To`; it is never used as the sender address.
