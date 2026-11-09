@@ -361,7 +361,7 @@ async function handleContactSubmission(request, env) {
   let originHost = "";
   try { originHost = new URL(origin).hostname.toLowerCase(); } catch {}
   if (!allowedHosts.has(originHost)) return jsonResponse({ error: "Invalid request origin." }, 403);
-  if (!env.CONTACT_EMAIL || !env.CONTACT_TURNSTILE_SECRET) {
+  const declaredLength = Number(request.headers.get("Content-Length") || 0);\n  if (declaredLength > 16 * 1024 * 1024) return jsonResponse({ error: "The maximum file size is 15 MB." }, 413);\n  if (!env.CONTACT_EMAIL || !env.CONTACT_TURNSTILE_SECRET) {
     return jsonResponse({ error: "The contact service is not configured yet." }, 503);
   }
   let form;
