@@ -47,7 +47,10 @@ class ParityTests(unittest.TestCase):
         self.assertEqual(len(soup.select("#awakenology-theme-style")), 1)
         self.assertEqual(len(soup.select('link[rel="icon"][href="/gallery/favicons/favicon.png"]')), 1)
         self.assertIn("awakenology-toc-page", soup.body.get("class", []))
-        self.assertEqual(soup.footer.get("class"), ["footer", "site-footer"])
+        self.assertEqual(soup.footer.get("id"), "awakenology-site-footer")
+        self.assertEqual(soup.footer.get("class"), ["site-footer"])
+        self.assertEqual(soup.footer.div.get("id"), "awakenology-footer-inner")
+        self.assertEqual(soup.footer.select_one("#awakenology-footer-links").name, "span")
         self.assertIn("contact@awakenology.org", str(soup.footer))
         branded = transform(SOURCE.replace("<main>", '<a class="brand" href="/">Home</a><main>'), "/English/")
         branded_soup = BeautifulSoup(branded, "html.parser")
@@ -111,7 +114,7 @@ class ParityTests(unittest.TestCase):
             ('<title>Example</title>', '<title>Changed</title>', "title"),
             ('href="https://awakenology.space/English/"', 'href="https://invalid.example/"', "canonical"),
             ('content="Awakenology"', 'content="Changed"', "og_site_name"),
-            ('class="footer site-footer"', 'class="footer altered"', "footer"),
+            ('id="awakenology-site-footer"', 'id="altered-footer"', "footer"),
         )
         for before, after, field in mutations:
             with self.subTest(field=field):
