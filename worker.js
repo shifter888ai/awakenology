@@ -401,7 +401,7 @@ async function handleContactSubmission(request, env) {
     if (!(file instanceof File) || !file.size) return jsonResponse({ error: "Please choose a file first." }, 400);
     if (!email) return jsonResponse({ error: "Please provide an email address with your file submission." }, 400);
     if (file.size > 15 * 1024 * 1024) return jsonResponse({ error: "The maximum file size is 15 MB." }, 413);
-    const safeName = file.name.replace(/[\\/\\r\\n\\0]/g, "_").slice(0, 180) || "uploaded-file";
+    const safeName = file.name.replace(/[\/\r\n\0]/g, "_").slice(0, 180) || "uploaded-file";
     const allowedExtensions = /\.(pdf|doc|docx|xls|xlsx|ppt|pptx|txt|md|csv|jpg|jpeg|png|gif|webp|zip)$/i;
     if (!allowedExtensions.test(safeName)) return jsonResponse({ error: "This file type is not supported. Please use a document, image, text, spreadsheet, presentation, or ZIP file." }, 415);
     subject = "Awakenology website file submission: " + safeName;
