@@ -68,9 +68,9 @@ class ParityTests(unittest.TestCase):
         self.assertEqual(soup.head.find("meta", attrs={"property": "og:image"})["content"],
                          "https://images.squarespace-cdn.com/content/v1/5e46c1ddfed24d662efc3817/6e1d6965-c6b2-49d0-971e-4d42f9bcfaaa/Cosmic%2BEye.jpg")
 
-    def test_search_noindex_and_no_canonical(self):
+    def test_noindex_routes_have_no_canonical(self):
         from bs4 import BeautifulSoup
-        for route in ("/ai-search/", "/search/", "/ask/"):
+        for route in ("/ai-search/", "/search/", "/ask/", "/New-Article/"):
             with self.subTest(route=route):
                 result = transform(SOURCE, route)
                 validate_metadata(result, canonical=None, noindex=True)
@@ -144,6 +144,22 @@ class ParityTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_metadata("<html><body><main>Missing head</main></body></html>",
                               canonical=None, noindex=False)
+
+    def test_new_article_model_lab_is_noindex_and_excluded_from_sitemap(self):
+        from pathlib import Path
+        from urllib.parse import unquote, urlsplit
+        from xml.etree import ElementTree
+        from bs4 import BeautifulSoup
+        root = Path(__file__).resolve().parents[2]
+        source = BeautifulSoup((root / "New-Article/index.html").read_text(encoding="utf-8"), "html.parser")
+        robots = source.head.find("meta", attrs={"name": "robots"})
+        self.assertEqual(robots.get("content"), "noindex,nofollow")
+        self.assertTrue(rules_for("/New-Article/").noindex)
+        self.assertIsNone(rules_for("/New-Article/").canonical)
+        sitemap = ElementTree.parse(root / "sitemap.xml")
+        routes = {unquote(urlsplit(node.text or "").path)
+                  for node in sitemap.iter("{http://www.sitemaps.org/schemas/sitemap/0.9}loc")}
+        self.assertNotIn("/New-Article/", routes)
 
     def test_private_editor_excluded_from_public_crawl_inventory(self):
         from pathlib import Path
