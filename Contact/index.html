@@ -63,13 +63,14 @@ button:disabled{opacity:.55;cursor:wait}
 <input type="hidden" name="submissionType" value="file">
 <label>Name (optional)<input type="text" name="name" maxlength="120" autocomplete="name"></label>
 <label>Email address (required)<input type="email" name="email" maxlength="254" autocomplete="email" required></label>
-<label class="drop-zone" id="drop-zone" for="file-input">
+<div class="drop-zone" id="drop-zone" role="group" aria-label="File upload area">
 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m-5 5 5-5 5 5M4 15v5h16v-5"/></svg>
 <strong>Drag and drop your file here</strong>
-<span class="small">or choose a file from your device</span>
+<span class="small">or</span>
+<button type="button" id="choose-file">Choose File</button>
 <span class="file-hint" id="file-name">No file selected · Maximum 15 MB</span>
-<input id="file-input" type="file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.md,.csv,.jpg,.jpeg,.png,.gif,.webp,.zip" required hidden>
-</label>
+<input id="file-input" type="file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.md,.csv,.jpg,.jpeg,.png,.gif,.webp,.zip" aria-describedby="file-name" required hidden>
+</div>
 <label class="honeypot" aria-hidden="true">Leave this field empty<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
 <div class="cf-turnstile" data-sitekey="__TURNSTILE_SITE_KEY__" data-theme="auto"></div>
 <button type="submit">Submit File</button>
@@ -78,6 +79,7 @@ button:disabled{opacity:.55;cursor:wait}
 </form>
 </section>
 </main>
+<footer></footer>
 <script>
 (function(){
   const endpoint="/api/contact";
@@ -98,7 +100,8 @@ button:disabled{opacity:.55;cursor:wait}
     const form=document.getElementById(ids[0]);const status=document.getElementById(ids[1]);const button=form.querySelector('button[type="submit"]');
     form.addEventListener("submit",function(event){event.preventDefault();submitForm(form,status,button);});
   });
-  const input=document.getElementById("file-input"),zone=document.getElementById("drop-zone"),label=document.getElementById("file-name");
+  const input=document.getElementById("file-input"),zone=document.getElementById("drop-zone"),label=document.getElementById("file-name"),chooseFile=document.getElementById("choose-file");
+  chooseFile.addEventListener("click",function(){input.click();});
   function showFile(){label.textContent=input.files&&input.files.length?input.files[0].name+" · "+(input.files[0].size/1048576).toFixed(2)+" MB":"No file selected · Maximum 15 MB";}
   input.addEventListener("change",showFile);
   ["dragenter","dragover"].forEach(type=>zone.addEventListener(type,function(e){e.preventDefault();zone.classList.add("dragover");}));
