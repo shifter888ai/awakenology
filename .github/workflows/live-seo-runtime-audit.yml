@@ -10,6 +10,12 @@ on:
       - '**/*.html'
       - '**/*.css'
       - '**/*.js'
+      # Audit-only, PoC-only, and sitemap-only PRs are validated offline.
+      - '!scripts/static_html_poc/**'
+      - '!scripts/audit_live_seo.py'
+      - '!tests/test_live_seo_audit.py'
+      - '!sitemap.xml'
+      - '!.github/workflows/live-seo-runtime-audit.yml'
   push:
     branches: [main]
   workflow_dispatch:
