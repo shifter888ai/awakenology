@@ -30,7 +30,7 @@ These are limited tests: a matching signature does **not** establish full HTML, 
 - Pinned source fixtures: `python scripts/static_html_poc/check_real_pages.py` (10 current-main routes, including Search and Ask).
 - Full public route inventory and isolated temporary staging build (automatic pull-request checks).
 - Optional production checks — live Worker signature comparison, read-only HTTP runtime contract, and desktop/mobile Chromium parity — only through manual `workflow_dispatch` with `run_live_checks=true`. Skipped checks are not a pass.
-- Existing repository Content Integrity Gate, Sitemap route parity, and SEO metadata inventory. The Live SEO runtime audit remains bounded for ordinary site PRs. PoC-only, audit-only, test-only, and sitemap-only PRs are excluded from its production request path; main-branch and scheduled audits remain unchanged. PR-only source routes are labeled source-only in the report: Worker-injected Open Graph defaults are not required in raw source, and no live runtime pass is claimed.
+- Existing repository Content Integrity Gate, Sitemap route parity, and SEO metadata inventory. The Live SEO runtime audit remains bounded for ordinary site PRs. PoC-only, audit-only, test-only, and sitemap-only PRs are excluded from its production request path; main-branch and scheduled audits remain unchanged. Sitemap route parity runs only when a sitemap, public `index.html` route, `robots.txt`, or the sitemap audit script changes; main pushes and manual runs remain covered. PR-only source routes are labeled source-only in the report: Worker-injected Open Graph defaults are not required in raw source, and no live runtime pass is claimed.
 
 No Worker routing or production deployment change is authorized by this PoC.
 
