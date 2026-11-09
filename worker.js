@@ -383,7 +383,7 @@ async function handleContactSubmission(request, env) {
   } catch {
     return jsonResponse({ error: "The security check could not be verified. Please try again." }, 503);
   }
-  if (!verification.success) return jsonResponse({ error: "The security check was not accepted. Please try again." }, 400);
+  if (!verification.success || !allowedHosts.has(String(verification.hostname || "").toLowerCase())) return jsonResponse({ error: "The security check was not accepted. Please try again." }, 400);
 
   const type = String(form.get("submissionType") || "");
   const name = String(form.get("name") || "").trim().slice(0, 120);
