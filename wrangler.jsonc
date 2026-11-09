@@ -18,10 +18,7 @@
   "send_email": [
     {
       "name": "CONTACT_EMAIL",
-      "destination_address": "contact@awakenology.org",
-      "allowed_sender_addresses": [
-        "website@awakenology.org"
-      ]
+      "destination_address": "contact@awakenology.org"
     }
   ]
 }
