@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Contact | Awakenology</title>
+<meta name="description" content="Contact Awakenology by email, message, or file submission.">
+<link rel="canonical" href="https://awakenology.space/Contact/">
+<style>
+:root{color-scheme:light;--bg:#fff;--fg:#111;--muted:#666;--line:#ddd;--field:#f7f7f7}
+html[data-aw-theme="dark"]{color-scheme:dark;--bg:#111;--fg:#eee;--muted:#aaa;--line:#333;--field:#1b1b1b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 Arial,sans-serif}
+a{color:inherit}
+main{max-width:720px;margin:0 auto;padding:48px 24px 70px}
+h1{font:600 28px/1.3 Georgia,"Times New Roman",serif;margin:0 0 34px;text-align:center}
+section{padding:0 0 28px;margin:0 0 28px;border-bottom:1px solid var(--line)}
+section:last-child{border-bottom:0;margin-bottom:0}
+h2{font:600 21px/1.35 Georgia,"Times New Roman",serif;margin:0 0 16px}
+.email-link{font-size:17px;text-underline-offset:3px}
+form{display:grid;gap:12px}
+label{display:grid;gap:5px;font-size:14px}
+input[type="text"],input[type="email"],textarea{width:100%;border:1px solid var(--line);border-radius:5px;padding:11px 12px;background:var(--field);color:var(--fg);font:16px/1.5 Arial,sans-serif}
+textarea{min-height:130px;resize:vertical}
+button{justify-self:start;border:1px solid var(--fg);border-radius:5px;padding:10px 18px;background:var(--fg);color:var(--bg);font:14px Arial,sans-serif;cursor:pointer}
+button:disabled{opacity:.55;cursor:wait}
+.drop-zone{display:grid;place-items:center;gap:8px;min-height:150px;padding:24px;border:1px dashed var(--muted);border-radius:7px;text-align:center;cursor:pointer}
+.drop-zone.dragover{outline:2px solid var(--muted);outline-offset:3px}
+.drop-zone svg{width:34px;height:34px;stroke:currentColor;fill:none;stroke-width:1.6}
+.file-hint,.status,.small{font-size:13px;color:var(--muted)}
+.status{min-height:1.5em}
+.honeypot{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
+.cf-turnstile{margin:2px 0}
+@media(max-width:600px){main{padding:36px 18px 55px}h1{font-size:25px}}
+</style>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+<body>
+<header class="site-header"><div class="header-inner"><a class="brand" href="/">Awakenology</a></div></header>
+<main>
+<h1>Contact Awakenology</h1>
+<section aria-labelledby="email-heading">
+<h2 id="email-heading">Email</h2>
+<a class="email-link" href="mailto:contact@awakenology.org">contact@awakenology.org</a>
+</section>
+<section aria-labelledby="message-heading">
+<h2 id="message-heading">Leave a Message</h2>
+<form id="message-form">
+<input type="hidden" name="submissionType" value="message">
+<label>Name (optional)<input type="text" name="name" maxlength="120" autocomplete="name"></label>
+<label>Email address (optional)<input type="email" name="email" maxlength="254" autocomplete="email"></label>
+<label>Your message<textarea name="message" maxlength="10000" required></textarea></label>
+<label class="honeypot" aria-hidden="true">Leave this field empty<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+<div class="cf-turnstile" data-sitekey="__TURNSTILE_SITE_KEY__" data-theme="auto"></div>
+<button type="submit">Send Message</button>
+<p class="status" id="message-status" role="status" aria-live="polite"></p>
+</form>
+</section>
+<section aria-labelledby="upload-heading">
+<h2 id="upload-heading">Upload File</h2>
+<form id="upload-form">
+<input type="hidden" name="submissionType" value="file">
+<label>Name (optional)<input type="text" name="name" maxlength="120" autocomplete="name"></label>
+<label>Email address (required)<input type="email" name="email" maxlength="254" autocomplete="email" required></label>
+<label class="drop-zone" id="drop-zone" for="file-input">
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m-5 5 5-5 5 5M4 15v5h16v-5"/></svg>
+<strong>Drag and drop your file here</strong>
+<span class="small">or choose a file from your device</span>
+<span class="file-hint" id="file-name">No file selected · Maximum 15 MB</span>
+<input id="file-input" type="file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.md,.csv,.jpg,.jpeg,.png,.gif,.webp,.zip" required hidden>
+</label>
+<label class="honeypot" aria-hidden="true">Leave this field empty<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+<div class="cf-turnstile" data-sitekey="__TURNSTILE_SITE_KEY__" data-theme="auto"></div>
+<button type="submit">Submit File</button>
+<p class="file-hint">Accepted: documents, images, text files, spreadsheets, presentations, and ZIP files. Maximum size: 15 MB.</p>
+<p class="status" id="upload-status" role="status" aria-live="polite"></p>
+</form>
+</section>
+</main>
+<script>
+(function(){
+  const endpoint="/api/contact";
+  async function submitForm(form,status,button){
+    status.textContent="Sending…";button.disabled=true;
+    try{
+      const response=await fetch(endpoint,{method:"POST",body:new FormData(form),credentials:"same-origin"});
+      const result=await response.json();
+      if(!response.ok||!result.ok)throw new Error(result.error||"Submission failed.");
+      status.textContent="Thank you. Your submission has been sent.";
+      form.reset();
+      const fileName=document.getElementById("file-name");if(fileName)fileName.textContent="No file selected · Maximum 15 MB";
+      if(window.turnstile){const widget=form.querySelector(".cf-turnstile");if(widget){const id=widget.getAttribute("data-widget-id");if(id)turnstile.reset(id);}}
+    }catch(error){status.textContent=error.message||"Unable to send. Please try again.";}
+    finally{button.disabled=false;}
+  }
+  [["message-form","message-status"],["upload-form","upload-status"]].forEach(function(ids){
+    const form=document.getElementById(ids[0]);const status=document.getElementById(ids[1]);const button=form.querySelector('button[type="submit"]');
+    form.addEventListener("submit",function(event){event.preventDefault();submitForm(form,status,button);});
+  });
+  const input=document.getElementById("file-input"),zone=document.getElementById("drop-zone"),label=document.getElementById("file-name");
+  function showFile(){label.textContent=input.files&&input.files.length?input.files[0].name+" · "+(input.files[0].size/1048576).toFixed(2)+" MB":"No file selected · Maximum 15 MB";}
+  input.addEventListener("change",showFile);
+  ["dragenter","dragover"].forEach(type=>zone.addEventListener(type,function(e){e.preventDefault();zone.classList.add("dragover");}));
+  ["dragleave","drop"].forEach(type=>zone.addEventListener(type,function(e){e.preventDefault();zone.classList.remove("dragover");}));
+  zone.addEventListener("drop",function(e){if(e.dataTransfer.files.length){input.files=e.dataTransfer.files;showFile();}});
+})();
+</script>
+</body>
+</html>
