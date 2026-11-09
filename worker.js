@@ -358,9 +358,13 @@ async function publishReviewedPage(request, env) {
 async function handleContactSubmission(request, env) {
   const allowedHosts = new Set(["awakenology.space","www.awakenology.space","awakenology.org","www.awakenology.org","strengthofconsciousness.org"]);
   const origin = request.headers.get("Origin");
-  let originHost = "";
-  try { originHost = new URL(origin).hostname.toLowerCase(); } catch {}
-  if (!allowedHosts.has(originHost)) return jsonResponse({ error: "Invalid request origin." }, 403);
+  let originUrl = null;
+  try { originUrl = new URL(origin); } catch {}
+  const originHost = originUrl ? originUrl.hostname.toLowerCase() : "";
+  const requestHost = new URL(request.url).hostname.toLowerCase();
+  if (!originUrl || originUrl.protocol !== "https:" || originHost !== requestHost || !allowedHosts.has(originHost)) {
+    return jsonResponse({ error: "Invalid request origin." }, 403);
+  }
   const declaredLength = Number(request.headers.get("Content-Length") || 0);
   if (declaredLength > 16 * 1024 * 1024) return jsonResponse({ error: "The maximum file size is 15 MB." }, 413);
   if (!env.CONTACT_EMAIL || !env.CONTACT_TURNSTILE_SECRET) {
