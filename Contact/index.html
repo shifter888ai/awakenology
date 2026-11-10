@@ -33,7 +33,7 @@ button:disabled{opacity:.55;cursor:wait}
 .cf-turnstile{margin:2px 0}
 @media(max-width:600px){main{padding:36px 18px 55px}h1{font-size:25px}}
 </style>
-<script>window.onTurnstileLoad=function(){document.querySelectorAll(".cf-turnstile").forEach(function(el){var id=turnstile.render(el,{sitekey:el.getAttribute("data-sitekey"),theme:"auto"});el.setAttribute("data-widget-id",id);});};</script>
+<script>window.onTurnstileLoad=function(){var el=document.getElementById("contact-turnstile");if(el){window.contactTurnstileWidgetId=turnstile.render(el,{sitekey:el.getAttribute("data-sitekey"),theme:"auto"});}};</script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad&render=explicit" async defer></script>
 </head>
 <body>
@@ -44,6 +44,7 @@ button:disabled{opacity:.55;cursor:wait}
 <h2 id="email-heading">Email</h2>
 <a class="email-link" href="mailto:contact@awakenology.org">contact@awakenology.org</a>
 </section>
+<div class="cf-turnstile" id="contact-turnstile" data-sitekey="0x4AAAAAAF67wxEc43WcQJZ5" data-theme="auto"></div>
 <section aria-labelledby="message-heading">
 <h2 id="message-heading">Leave a Message</h2>
 <form id="message-form">
@@ -52,7 +53,6 @@ button:disabled{opacity:.55;cursor:wait}
 <label>Email address (optional)<input type="email" name="email" maxlength="254" autocomplete="email"></label>
 <label>Your message<textarea name="message" maxlength="10000" required></textarea></label>
 <label class="honeypot" aria-hidden="true">Leave this field empty<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
-<div class="cf-turnstile" data-sitekey="0x4AAAAAAF67wxEc43WcQJZ5" data-theme="auto"></div>
 <button type="submit">Send Message</button>
 <p class="status" id="message-status" role="status" aria-live="polite"></p>
 </form>
@@ -72,7 +72,6 @@ button:disabled{opacity:.55;cursor:wait}
 <input id="file-input" type="file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.md,.csv,.jpg,.jpeg,.png,.gif,.webp,.zip" aria-describedby="file-name" required hidden>
 </div>
 <label class="honeypot" aria-hidden="true">Leave this field empty<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
-<div class="cf-turnstile" data-sitekey="0x4AAAAAAF67wxEc43WcQJZ5" data-theme="auto"></div>
 <button type="submit">Submit File</button>
 <p class="file-hint">Accepted: documents, images, text files, spreadsheets, presentations, and ZIP files. Maximum size: 15 MB.</p>
 <p class="status" id="upload-status" role="status" aria-live="polite"></p>
@@ -83,18 +82,30 @@ button:disabled{opacity:.55;cursor:wait}
 <script>
 (function(){
   const endpoint="/api/contact";
+  let submissionInProgress=false;
   async function submitForm(form,status,button){
-    status.textContent="Sending…";button.disabled=true;
+    if(submissionInProgress)return;
+    const widgetId=window.contactTurnstileWidgetId;
+    const token=window.turnstile&&widgetId!==undefined?turnstile.getResponse(widgetId):"";
+    if(!token){status.textContent="Please complete the security check.";return;}
+    submissionInProgress=true;
+    document.querySelectorAll('form button[type="submit"]').forEach(function(item){item.disabled=true;});
+    status.textContent="Sending…";
     try{
-      const response=await fetch(endpoint,{method:"POST",body:new FormData(form),credentials:"same-origin"});
+      const data=new FormData(form);
+      data.append("cf-turnstile-response",token);
+      const response=await fetch(endpoint,{method:"POST",body:data,credentials:"same-origin"});
       const result=await response.json();
       if(!response.ok||!result.ok)throw new Error(result.error||"Submission failed.");
       status.textContent="Thank you. Your submission has been sent.";
       form.reset();
       const fileName=document.getElementById("file-name");if(fileName)fileName.textContent="No file selected · Maximum 15 MB";
-      if(window.turnstile){const widget=form.querySelector(".cf-turnstile");if(widget){const id=widget.getAttribute("data-widget-id");if(id)turnstile.reset(id);}}
     }catch(error){status.textContent=error.message||"Unable to send. Please try again.";}
-    finally{button.disabled=false;}
+    finally{
+      if(window.turnstile&&widgetId!==undefined)turnstile.reset(widgetId);
+      submissionInProgress=false;
+      document.querySelectorAll('form button[type="submit"]').forEach(function(item){item.disabled=false;});
+    }
   }
   [["message-form","message-status"],["upload-form","upload-status"]].forEach(function(ids){
     const form=document.getElementById(ids[0]);const status=document.getElementById(ids[1]);const button=form.querySelector('button[type="submit"]');
