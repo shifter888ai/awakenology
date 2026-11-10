@@ -595,6 +595,7 @@ html[data-aw-theme="dark"] #awakenology-site-header,html[data-aw-theme="dark"] #
 #awakenology-site-footer #awakenology-footer-links a[aria-current="page"]{text-decoration:underline!important;text-decoration-thickness:2px!important;text-underline-offset:4px!important}
 #awakenology-site-footer .contact-icon,#awakenology-site-footer .disclaimer-icon{display:inline-flex!important;width:24px!important;height:24px!important;flex:0 0 24px!important;align-items:center!important;justify-content:center!important;line-height:1!important}
 #awakenology-site-footer .contact-icon{font-size:24px!important}
+@media(min-width:701px){#awakenology-site-footer .contact-icon span{font-size:20px!important;line-height:1!important}}
 #awakenology-site-footer .disclaimer-icon{font-size:20px!important}
 #awakenology-site-footer .reddit-icon{display:inline-flex!important;width:24px!important;height:24px!important;flex:0 0 24px!important;align-items:center!important;justify-content:center!important;line-height:1!important}
 #awakenology-site-footer .reddit-icon img{display:block!important;width:20px!important;height:20px!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important}
