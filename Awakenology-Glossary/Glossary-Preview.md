@@ -35,6 +35,108 @@
 
 **繁體中文:** 資料依據包括 Awakenology 課程教材、實踐經驗紀錄及過往討論中記錄的術語。不得為了改善譯文而擅自修改中文原文。
 
+
+## Foundational framework and scope / 基本枠組みと対象範囲 / 基礎架構與範圍
+
+**EN:** Awakenology is exclusively dedicated to understanding and addressing the problem of Hypnotic Reincarnation. It studies hypnosis, consciousness and related mechanisms only insofar as they are relevant to understanding Hypnotic Reincarnation and developing effective methodologies for exiting it. Awakenology is not a general study of hypnosis or de-hypnosis, and it is not opposed to legitimate hypnosis or hypnotherapy.
+
+**日本語:** 催醒学と催醒法は、「催眠輪廻」の問題を理解し、その解決に取り組むことだけを目的とします。催眠、意識および関連するメカニズムについては、催眠輪廻の理解と、そこから抜け出すための有効な方法の開発に関係する範囲に限って研究します。催醒学と催醒法は、一般的な催眠や脱催眠の研究ではなく、正当な催眠や催眠療法に反対するものでもありません。
+
+**繁體中文:** 催醒學與催醒法專注於理解及解決「催眠輪迴」的問題。研究催眠、意識及相關機制，僅限於這些內容有助於理解催眠輪迴，以及發展有效的退出方法。催醒學與催醒法並非一般性的催眠或解除催眠研究，也不反對正當的催眠及催眠治療。
+
+### Core distinctions / 基本的な区別 / 核心區別
+
+| Concept | 日本語 | 繁體中文 | Agreed meaning |
+|---|---|---|---|
+| MIND | 心智システム | 心智系統 | Human Brain Operation System: the human-brain thinking and operation mechanism, involving programmed or conditioned thinking; it is not part of the soul. |
+| Consciousness | 意識 | 意識 | The soul's true consciousness in the Awakenology framework; do not use MIND as its synonym. |
+| Surface-Level Consciousness | 表層意識 | 表意識 | The level of Consciousness associated with the current focus of consciousness in the cited multidimensional-body model. |
+| Sub-Level Consciousness | 下層意識 | 潛意識 | The other levels of Consciousness outside the current focus in that model. Never translate as “Subconscious Mind.” |
+| Hypnosis | 催眠 | 催眠 | In the Awakenology framework, associated with illusion creation and entering/taking the illusion as real; its framework-specific usage does not replace general psychological definitions. |
+| Dehypnosis | 脱催眠／反催眠 | 反催眠 | 反催眠. Distinct from Awakening / 催醒. |
+| Awakening | 催醒 | 催醒 | The framework's reverse process of identifying and removing distortion and returning toward original consciousness. Do not translate as Dehypnosis. |
+| Awakenology | 催醒学／催醒法 | 催醒學／催醒法 | The umbrella concept encompassing both knowledge/principles and methods/practices. |
+| Awakenosis | 自己催醒のプロセス | 自我催醒過程 | The process of self-awakening specifically from Hypnotic Reincarnation, with the aim of achieving a successful exit. |
+
+### Hypnotic Reincarnation and exit terminology / 催眠輪廻と離脱に関する用語 / 催眠輪迴與退出相關術語
+
+| English | 日本語（作業訳） | 繁體中文 | Working definition |
+|---|---|---|---|
+| Hypnotic Reincarnation | 催眠輪廻 | 催眠輪迴 | Within the Awakenology framework, a continuing reincarnation game in which an individual enters under a Hypnotic Reincarnation Game Agreement and remains subject to a hypnotized condition across successive reincarnations. |
+| Hypnotic Reincarnation Game Agreement | 催眠輪廻ゲーム契約 | 催眠輪迴遊戲協議 | The agreement accepted upon first entry; it establishes participation and the continuing hypnotized condition and persists across subsequent reincarnations even when the individual no longer consciously remembers accepting it. |
+| Free Reincarnation | 自由輪廻 | 自由輪迴 | Reincarnation in which an individual freely chooses whether to enter or exit through freewill, without being bound by a continuing Hypnotic Reincarnation Game Agreement or its hypnotized condition. |
+| Self-awakening | 自己催醒 | 自我催醒 | The process of applying an available methodology or capability to overcome the hypnotized condition of Hypnotic Reincarnation and achieve a successful exit. |
+| Exiting Hypnotic Reincarnation | 催眠輪廻からの退出 | 退出催眠輪迴 | The successful termination of participation in the continuing reincarnation game, including its associated Game Agreement and hypnotized condition. |
+| Strength of Consciousness (SoC) | 意識強度 | 意識強度 | A capability framework used in Awakenology to assess and develop consciousness strength through AssessPoints and DevPoints; one of several possible methodologies for exiting Hypnotic Reincarnation. |
+| SoC beyond Level 16 | 意識強度レベル16超 | 意識強度超越第16級 | A capability considered useful for pursuing successful exit; it is not the only available method and does not itself guarantee exit. |
+
+The Game Agreement, the hypnotized condition, the self-awakening process and the successful exit are distinct concepts. Do not collapse them into one term.
+
+### Multidimensional Body Complex / 多次元身体複合体 / 多次元複合體
+
+**Source:** 元吾氏, *人的多次元複合體結構（1）——單重複合體* (2010). The following is the twelve-body structure described by that source. It is recorded as the author's framework and observations, not as independently established scientific anatomy or neuroscience.
+
+| No. | Source Chinese term | English rendering | Dimension |
+|---:|---|---|---|
+| 1 | 第1身肉體 | Physical Body | 肉體次元 — Physical Dimension |
+| 2 | 第2身第1靈體：藍色網光體 | First Spiritual Body — Blue Grid Light Body | 靈體次元 — Spirit Dimension |
+| 3 | 第3身第2靈體：彩虹流光體 | Second Spiritual Body — Rainbow Flowing-Light Body | 靈體次元 — Spirit Dimension |
+| 4 | 第4身第3靈體：黃色網光體 | Third Spiritual Body — Yellow Grid Light Body | 靈體次元 — Spirit Dimension |
+| 5 | 第5身第4靈體：彩虹流光蛋 | Fourth Spiritual Body — Rainbow Flowing-Light Egg | 靈體次元 — Spirit Dimension |
+| 6 | 第6身第5靈體：藍色網光蛋 | Fifth Spiritual Body — Blue Grid Light Egg | 靈體次元 — Spirit Dimension |
+| 7 | 第7身第6靈體：彩虹放光蛋 | Sixth Spiritual Body — Rainbow Radiant-Light Egg | 靈體次元 — Spirit Dimension |
+| 8 | 第8身第7靈體：金黃網光蛋 | Seventh Spiritual Body — Golden Grid Light Egg | 靈體次元 — Spirit Dimension |
+| 9 | 第9身第8靈體：透明放光蛋 | Eighth Spiritual Body — Transparent Radiant-Light Egg | 靈體次元 — Spirit Dimension |
+| 10 | 第10身第9靈體：透明網光蛋 | Ninth Spiritual Body — Transparent Grid Light Egg | 靈體次元 — Spirit Dimension |
+| 11 | 第11身靈串 | Spiritual Axis | 靈串次元 — Spiritual-Axis Dimension |
+| 12 | 第12身靈核 | Spiritual Core | 靈核次元 — Spiritual-Core Dimension |
+
+**Structure:** Level 1 is the Physical Body; Levels 2–10 are nine Spiritual Bodies; Level 11 is the Spiritual Axis; Level 12 is the Spiritual Core. The English terms “Spiritual Axis” and “Spiritual Core” follow the English source terminology supplied for comparison. The descriptive names for the nine Spiritual Bodies above are working renderings and should be checked against the source's exact English labels before final publication.
+
+The source states that the spirit body where the individual's focus of consciousness is located is experienced as 顯意識, while the other spirit bodies are experienced as 潛意識. This is a shifting relationship: the level associated with the current focus may change. It does not define these as parts of MIND.
+
+Other source terms:
+- 多次元複合體 — Multidimensional Body Complex
+- 意識焦點 — Focus of Consciousness
+- 多重出神 — Multi-layer Out-of-Body Experience (working translation)
+- 多重回神 — Multi-layer Return (working translation)
+- 肉體次元 — Physical Dimension
+- 靈體次元 — Spirit Dimension
+- 靈串次元 — Spiritual-Axis Dimension
+- 靈核次元 — Spiritual-Core Dimension
+
+### Hypnosis and Awakening mechanisms / 催眠と催醒のメカニズム / 催眠與催醒機制
+
+The course materials distinguish the forward recursive process of hypnosis from the reverse process of Awakening:
+
+- Hypnosis: distortion → predetermination → layering → recursion → fixation.
+- Awakening: identification → removal → return → openness → transformation.
+- Hypnosis proceeds from aₙ to aₙ₊₁; Awakening reverses from aₙ₊₁ toward aₙ and ultimately a₀.
+- Awakening identifies and removes existing distortion; it does not replace an old program with a new one or predetermine the final state.
+
+| English | 日本語（作業訳） | 繁體中文 | Definition / note |
+|---|---|---|---|
+| Distortion Strength Coefficient (λₙ) | 歪曲強度係数 | 扭曲強度係數 | In Lesson 19, the strength of previously formed distortion. |
+| Taking-as-Real Coefficient (κₙ) | 現実視係数 | 當真係數 | In Lesson 19, the degree to which previously formed distortion was taken as real. |
+| Core Reverse Algorithm | 中核逆方向アルゴリズム | 核心逆向算法 | The reverse sequence described for Awakening: stop taking as real → identify identification/attachment → remove distortion → return. |
+| Reverse Recursion | 逆方向再帰 | 逆向遞歸 | Reversing the layered recursive process toward the previous layer and original consciousness. |
+| Original Consciousness | 元初の意識 | 原始意識 | The reference consciousness toward which the reverse process returns in the course model. |
+| Basic Consciousness | 基本意識 | 基本意識 | The basic consciousness at a given layer before the next distortion/implantation in the course model. |
+| Hypnosis–Awakening Comparison Point | 催眠・催醒の比較点 | 催眠催醒對比點 | A comparison point used to discern the forward and reverse directions. |
+| Principle of Remaining Unnoticed | 気づかれない原則 | 不被覺察原則 | Lesson 14's stated principle for hypnosis in the course framework. |
+| Blocking Both Ends | 両端を塞ぐ | 兩頭堵死 | Lesson 15 strategy described through temptation and fear. |
+| Temptation | 誘惑 | 誘惑 | One end of the “Blocking Both Ends” strategy in Lesson 15. |
+| Fear | 恐怖 | 恐懼 | The other end of the “Blocking Both Ends” strategy in Lesson 15. |
+| Discernment | 識別力 | 辨識力 | The ability emphasized in the course for distinguishing hypnosis from Awakening. |
+
+**Formulae from Lesson 19:**
+
+- Hypnosis: \(a_n \times \lambda_n \rightarrow A_n^+/A_n^- \times \kappa_n \rightarrow a_{n+1}\)
+- Awakening: \(a_{n+1} \rightarrow A_n^+/A_n^- \rightarrow a_n\)
+
+These formulae and definitions are recorded as the course's framework-specific model.
+
+
 ## Complete glossary — alphabetical by English term (A–Z) / 英語アルファベット順 / 依英文詞目排序
 
 All entries are sorted together by the English term. Japanese and Traditional Chinese equivalents and the original usage notes stay on the same row. Repeated terms from the source inventory are retained.
@@ -50,11 +152,11 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | Autonomous Consciousness | 自律意識 | 自主意識 | Contrasted in the materials with 自动意识. |
 | Autonomous Consciousness vs Automatic Consciousness | 自律意識 対 自動意識 | 自主意識 vs 自動意識 | Preserve this explicit contrast. |
 | Average Fluctuation Range | 平均変動範囲 | 平均波動範圍 | Working translation. |
-| Awakenology | 催醒法 | 催醒法 | Name of the overall framework and body of work; distinguish it from Awakenosis, the framework-specific process/term. |
-| Awakenosis | 催醒法（催醒） | 催醒 | Framework-specific term associated with 破幻 + 出幻 and objective observation. Retain Awakenosis as the current English term. |
-| Awakenosis Cycle | 催醒法による循環 | 催醒輪迴 | Provisional; do not assume this means a cycle that is itself hypnotic. |
-| Awakenosis Mechanism | 催醒法のメカニズム | 催醒機制 | Current terminology using Awakenosis. |
-| Awakenosis Strategy | 催醒法の戦略 | 催醒策略 | Working translation. |
+| Awakenology | 催醒學／催醒法 | 催醒學／催醒法 | Umbrella concept encompassing both knowledge and principles (催醒學) and methods and practices (催醒法); neither is subordinate. |
+| Awakenosis | 催醒過程（自我催醒） | 催醒過程（自我催醒） | The process of self-awakening specifically from Hypnotic Reincarnation, working to overcome its hypnotized condition and achieve a successful exit. Objective observation is relevant but is not the complete definition. |
+| Awakenosis Cycle | 催醒プロセスの循環 | 催醒過程循環 | Provisional; use only where the source explicitly describes a recurring Awakenosis process. |
+| Awakenosis Mechanism | 催醒のメカニズム | 催醒機制 | Mechanism of the Awakening process; distinguish from Dehypnosis. |
+| Awakenosis Strategy | 催醒の戦略 | 催醒策略 | Strategies used in the process of self-awakening from Hypnotic Reincarnation. |
 | Background Person / Background Character | 背景人物 | 背景人 | Provisional. |
 | Carrier / Vessel | 媒体／器 | 載體 | Context-dependent; use the term appropriate to the specific passage. |
 | Closed-Loop Structure | 閉ループ構造 | 閉環結構 | Working translation. |
@@ -80,7 +182,7 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | Consciousness-Spectrum Expansion Point | 意識スペクトル拡張点 | 意識頻譜拓展點 | Working translation. |
 | Consciousness-Strength Measurement Point | 意識強度の測定点 | 意識強度檢測點 | Working translation. |
 | Conservation of Energy | エネルギー保存 | 能量守恒 | Standard English phrase; in source passages, preserve the author's specific framing. |
-| Counter-Hypnosis / Hypnosis Reversal | 反催眠／催眠の逆転 | 反催眠 | Provisional; choose based on the specific mechanism described. |
+| Dehypnosis | 反催眠 | 反催眠 | The distinct concept 反催眠. Do not use this term as the translation of 催醒 (Awakening). |
 | Cycle / Reincarnation | 輪廻／循環 | 輪迴 | Context-dependent. Use cycle when discussing recurring processes; use reincarnation only where the context specifically means rebirth. Do not force one English equivalent into every occurrence. |
 | Cycle Carrier / Vessel | 循環の媒体／器 | 輪迴載體 | Context-dependent. |
 | Cycle Planet / Planet of the Cycle | 循環の惑星 | 輪迴星球 | Literal working translation; polish after context review. |
@@ -90,7 +192,7 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | Degree of Autonomy | 自律性の程度 | 自主化程度 | Course term contrasted with 自动化程度. |
 | Degree of Consciousness Freedom | 意識の自由度 | 意識自由度 | Working translation for the degree/measure discussed in the materials. |
 | Destination / Target Point | 終点／目標点 | 終點 / 目標點 | When defining a process, state it explicitly. |
-| Dimension | 次元 | 維度 | Direct working equivalent. |
+| Dimension | 次元 | 次元 | Use the source term 次元 for the multidimensional body structure. |
 | Direct AI Interaction | AIとの直接的な相互作用 | AI 直接交互 | User's working phrase; keep distinct from claims about consciousness. |
 | Direction | 方向 | 方向 | When defining a process, state it explicitly. |
 | Directionality | 方向性 | 方向性 | The key distinction under discussion for hypnosis and awakenosis. |
@@ -209,7 +311,7 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | Sowing Discord / Dividing | 仲違いを起こすこと／分断 | 離間 | Context-dependent; provisional for article-subtitle usage. |
 | Spirit Body | 霊体 | 靈體 | Working translation. |
 | Starting Point | 出発点 | 起點 | When defining a process, state it explicitly. |
-| Subconscious | 潜在意識 | 潛意識 | Common English equivalent; use only where it matches the source context. |
+| Sub-Level Consciousness | 潛意識 | 潛意識 | Awakenology term for the levels of Consciousness outside the current focus of consciousness in the cited multidimensional-body model. Do not translate as “Subconscious Mind.” |
 | Subjective | 主観 | 主觀 | Direct equivalent. |
 | Subjective | 主観 | 主觀 | Core contrast term. |
 | Taking as Real | 現実として受け取る | 當真 | Treating something as real; context may call for a more natural phrase. |
