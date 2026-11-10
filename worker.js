@@ -354,6 +354,83 @@ async function publishReviewedPage(request, env) {
   }
 }
 
+
+async function handleContactSubmission(request, env) {
+  const allowedHosts = new Set(["awakenology.space","www.awakenology.space","awakenology.org","www.awakenology.org","strengthofconsciousness.org"]);
+  const origin = request.headers.get("Origin");
+  let originUrl = null;
+  try { originUrl = new URL(origin); } catch {}
+  const originHost = originUrl ? originUrl.hostname.toLowerCase() : "";
+  const requestHost = new URL(request.url).hostname.toLowerCase();
+  if (!originUrl || originUrl.protocol !== "https:" || originHost !== requestHost || !allowedHosts.has(originHost)) {
+    return jsonResponse({ error: "Invalid request origin." }, 403);
+  }
+  const declaredLength = Number(request.headers.get("Content-Length") || 0);
+  if (declaredLength > 16 * 1024 * 1024) return jsonResponse({ error: "The maximum file size is 15 MB." }, 413);
+  if (!env.CONTACT_EMAIL || !env.CONTACT_TURNSTILE_SECRET) {
+    return jsonResponse({ error: "The contact service is not configured yet." }, 503);
+  }
+  let form;
+  try { form = await request.formData(); } catch { return jsonResponse({ error: "Invalid form submission." }, 400); }
+  if (String(form.get("website") || "").trim()) return jsonResponse({ ok: true });
+  const token = String(form.get("cf-turnstile-response") || "");
+  if (!token) return jsonResponse({ error: "Please complete the security check." }, 400);
+  const verifyBody = new URLSearchParams();
+  verifyBody.set("secret", env.CONTACT_TURNSTILE_SECRET);
+  verifyBody.set("response", token);
+  const ip = request.headers.get("CF-Connecting-IP");
+  if (ip) verifyBody.set("remoteip", ip);
+  let verification;
+  try {
+    const verifyResponse = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body: verifyBody });
+    verification = await verifyResponse.json();
+  } catch {
+    return jsonResponse({ error: "The security check could not be verified. Please try again." }, 503);
+  }
+  if (!verification.success || !allowedHosts.has(String(verification.hostname || "").toLowerCase())) return jsonResponse({ error: "The security check was not accepted. Please try again." }, 400);
+
+  const type = String(form.get("submissionType") || "");
+  const name = String(form.get("name") || "").trim().slice(0, 120);
+  const email = String(form.get("email") || "").trim().slice(0, 254);
+  const message = String(form.get("message") || "").trim().slice(0, 10000);
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return jsonResponse({ error: "Please enter a valid email address." }, 400);
+
+  let subject, text, attachments;
+  if (type === "message") {
+    if (!message) return jsonResponse({ error: "Please enter a message." }, 400);
+    subject = "Awakenology website message";
+    text = "New message from the Awakenology Contact page.\n\nName: " + (name || "Not provided") + "\nEmail: " + (email || "Not provided") + "\n\nMessage:\n" + message;
+  } else if (type === "file") {
+    const file = form.get("file");
+    if (!(file instanceof File) || !file.size) return jsonResponse({ error: "Please choose a file first." }, 400);
+    if (!email) return jsonResponse({ error: "Please provide an email address with your file submission." }, 400);
+    if (file.size > 15 * 1024 * 1024) return jsonResponse({ error: "The maximum file size is 15 MB." }, 413);
+    const safeName = file.name.replace(/[\/\r\n\0]/g, "_").slice(0, 180) || "uploaded-file";
+    const allowedExtensions = /\.(pdf|doc|docx|xls|xlsx|ppt|pptx|txt|md|csv|jpg|jpeg|png|gif|webp|zip)$/i;
+    if (!allowedExtensions.test(safeName)) return jsonResponse({ error: "This file type is not supported. Please use a document, image, text, spreadsheet, presentation, or ZIP file." }, 415);
+    subject = "Awakenology website file submission: " + safeName;
+    text = "New file submitted through the Awakenology Contact page.\n\nName: " + (name || "Not provided") + "\nEmail: " + email + "\nFilename: " + safeName + "\nFile size: " + file.size + " bytes";
+    attachments = [{ content: await file.arrayBuffer(), filename: safeName, type: file.type || "application/octet-stream", disposition: "attachment" }];
+  } else {
+    return jsonResponse({ error: "Unknown submission type." }, 400);
+  }
+
+  try {
+    const result = await env.CONTACT_EMAIL.send({
+      to: "contact@awakenology.org",
+      from: "website@awakenology.org",
+      replyTo: email || "contact@awakenology.org",
+      subject,
+      text,
+      ...(attachments ? { attachments } : {})
+    });
+    return jsonResponse({ ok: true, messageId: result.messageId });
+  } catch (error) {
+    console.error("Awakenology contact email failed:", error && error.code, error && error.message);
+    return jsonResponse({ error: "Your submission could not be sent. Please try again later or use the email link above." }, 502);
+  }
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -387,6 +464,11 @@ export default {
         editorHeaders.set("Cache-Control", "private, no-store");
         return new Response(editorResponse.body, {status:editorResponse.status,statusText:editorResponse.statusText,headers:editorHeaders});
       }
+    }
+    if (url.pathname === "/api/contact") {
+      if (url.hostname === EDITOR_HOST) return new Response("Not found", { status: 404 });
+      if (request.method !== "POST") return jsonResponse({ error: "Method not allowed." }, 405);
+      return handleContactSubmission(request, env);
     }
     // Never expose the editor or publishing API on the public website or temporary preview hosts.
     if (isEditorPath || isEditorApi || isPublishApi) return new Response("Not found", { status: 404 });
@@ -529,7 +611,7 @@ html[data-aw-theme="dark"] #awakenology-cn-toggle{background:#222;color:#eee;bor
     const chineseScript = `<script type="module">\n(function(){function looksChinesePage(){var text=document.body?(document.body.innerText||""):"";var han=(text.match(/[\\u3400-\\u9fff]/g)||[]).length;var kana=(text.match(/[\\u3040-\\u30ff]/g)||[]).length;var signals=(text.match(/[的了是我你他她這这個个與与為为會会來来說说時时間间麼么沒没還还從从們们]/g)||[]).length;return han>=30&&kana===0&&signals>=2}\nfunction init(){if(!(document.body.classList.contains("awakenology-chinese-page")||looksChinesePage())||document.getElementById("awakenology-cn-toggle"))return;import("https://cdn.jsdelivr.net/npm/opencc-js@1.4.1/dist/esm/full.js").then(function(module){var OpenCC=module.default||module;var saved=localStorage.getItem("awakenology-cn-variant");var originalTitle=document.title;var originalText=new WeakMap();var activeVariant="tw";var target=saved==="cn"?"cn":"tw";var toSimplified=OpenCC.Converter({from:"tw",to:"cn"});var toTraditional=OpenCC.Converter({from:"cn",to:"tw"});\nfunction convertTextNodes(converter){var walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);var nodes=[];var node;while(node=walker.nextNode())nodes.push(node);nodes.forEach(function(n){if(n.parentElement&&n.parentElement.closest("#awakenology-cn-toggle, #awakenology-theme-toggle, #awakenology-return-top, script, style, textarea"))return;if(!originalText.has(n))originalText.set(n,n.nodeValue);var original=originalText.get(n);if(original&&original.trim())n.nodeValue=converter(original)});document.title=converter(originalTitle)}\nfunction applyVariant(variant){activeVariant=variant;if(variant==="cn")convertTextNodes(toSimplified);else convertTextNodes(toTraditional);document.documentElement.setAttribute("lang",variant==="cn"?"zh-CN":"zh-Hant");document.body.setAttribute("lang",variant==="cn"?"zh-CN":"zh-Hant");localStorage.setItem("awakenology-cn-variant",variant);button.textContent=variant==="tw"?"简":"繁";button.setAttribute("aria-label",variant==="tw"?"Convert to Simplified Chinese":"Convert to Traditional Chinese")}\nvar button=document.createElement("button");button.id="awakenology-cn-toggle";button.className="ignore-opencc ignore-translate";button.type="button";button.textContent=target==="tw"?"简":"繁";button.setAttribute("aria-label",target==="tw"?"Convert to Simplified Chinese":"Convert to Traditional Chinese");button.title="繁 / 简";button.addEventListener("click",function(){applyVariant(activeVariant==="tw"?"cn":"tw")});document.body.appendChild(button);if(target==="cn")applyVariant("cn")}).catch(function(error){console.error("Awakenology Chinese toggle failed:",error)})}\nif(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init()}());\n</script>`;
 
     return new HTMLRewriter()
-      .on("footer",{element(el){el.setAttribute("id","awakenology-site-footer");el.setAttribute("class","site-footer");el.setInnerContent('<div id="awakenology-footer-inner"><span id="awakenology-footer-links"><a class="contact-icon" href="mailto:contact@awakenology.org" aria-label="Email Awakenology" title="Contact"><span aria-hidden="true">✉</span></a><a class="reddit-icon reddit-one" href="https://www.reddit.com/r/EscapeReincarnation/" aria-label="Reddit: Escape Reincarnation"><img src="/assets/reddit-one.svg" alt=""></a><a class="reddit-icon reddit-two" href="https://www.reddit.com/r/EscapePrisonPlanet/" aria-label="Reddit: Escape Prison Planet"><img src="/assets/reddit-two.svg" alt=""></a><a class="reddit-icon reddit-three" href="https://www.reddit.com/user/Lower-Lingonberry-40/" aria-label="Reddit: Lower-Lingonberry-40"><img src="/assets/reddit-three.svg" alt=""></a><a class="disclaimer-icon" href="/Disclaimer/" aria-label="Disclaimer" title="Disclaimer"><span aria-hidden="true">ⓘ</span></a></span><span>© 2017–'+new Date().getUTCFullYear()+' Awakenology</span></div>',{html:true});}})
+      .on("footer",{element(el){el.setAttribute("id","awakenology-site-footer");el.setAttribute("class","site-footer");el.setInnerContent('<div id="awakenology-footer-inner"><span id="awakenology-footer-links"><a class="contact-icon" href="/Contact/" aria-label="Contact Awakenology" title="Contact"><span aria-hidden="true">✉</span></a><a class="reddit-icon reddit-one" href="https://www.reddit.com/r/EscapeReincarnation/" aria-label="Reddit: Escape Reincarnation"><img src="/assets/reddit-one.svg" alt=""></a><a class="reddit-icon reddit-two" href="https://www.reddit.com/r/EscapePrisonPlanet/" aria-label="Reddit: Escape Prison Planet"><img src="/assets/reddit-two.svg" alt=""></a><a class="reddit-icon reddit-three" href="https://www.reddit.com/user/Lower-Lingonberry-40/" aria-label="Reddit: Lower-Lingonberry-40"><img src="/assets/reddit-three.svg" alt=""></a><a class="disclaimer-icon" href="/Disclaimer/" aria-label="Disclaimer" title="Disclaimer"><span aria-hidden="true">ⓘ</span></a></span><span>© 2017–'+new Date().getUTCFullYear()+' Awakenology</span></div>',{html:true});}})
       .on("link",{element(el){var rel=(el.getAttribute("rel")||"").toLowerCase().split(/\\s+/);if(rel.includes("icon")||rel.includes("apple-touch-icon"))el.remove()}})
       .on("header.site-header",{element(el){const items=[["/English/","English"],["/Japanese/","日本語"],["/Chinese/","中文"]];const activePath=decodedPathname;const languageNav=items.map(item=>{const active=(activePath===item[0]||(item[0]==="/Chinese/"&&activePath==="/Coach_cn/"))?' aria-current="page"':"";return '<a href="'+item[0]+'"'+active+'>'+item[1]+'</a>';}).join("");const actionNav=[
 {path:"/search/",label:"Search",icon:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>'},

@@ -14,5 +14,12 @@
     "run_worker_first": true
   },
   "previews": {},
-  "main": "./worker.js"
+  "main": "./worker.js",
+  "send_email": [
+    {
+      "name": "CONTACT_EMAIL",
+      "destination_address": "contact@awakenology.org",
+      "allowed_sender_addresses": ["website@awakenology.org"]
+    }
+  ]
 }
