@@ -28,7 +28,7 @@ button:disabled{opacity:.55;cursor:wait}
 .drop-zone.dragover{outline:2px solid var(--muted);outline-offset:3px}
 .drop-zone svg{width:34px;height:34px;stroke:currentColor;fill:none;stroke-width:1.6}
 .file-hint,.status,.small{font-size:13px;color:var(--muted)}
-.status{min-height:1.5em}
+.status{min-height:1.5em}.status.success::before{content:"✓";display:inline-block;margin-right:8px;color:#16a34a;font-size:18px;font-weight:700;line-height:1;vertical-align:-1px}
 .honeypot{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
 .cf-turnstile{margin:2px 0}
 @media(max-width:600px){main{padding:36px 18px 55px}h1{font-size:25px}}
@@ -90,6 +90,7 @@ button:disabled{opacity:.55;cursor:wait}
     if(!token){status.textContent="Please complete the security check.";return;}
     submissionInProgress=true;
     document.querySelectorAll('form button[type="submit"]').forEach(function(item){item.disabled=true;});
+    status.classList.remove("success");
     status.textContent="Sending…";
     try{
       const data=new FormData(form);
@@ -97,10 +98,11 @@ button:disabled{opacity:.55;cursor:wait}
       const response=await fetch(endpoint,{method:"POST",body:data,credentials:"same-origin"});
       const result=await response.json();
       if(!response.ok||!result.ok)throw new Error(result.error||"Submission failed.");
+      status.classList.add("success");
       status.textContent="Thank you. Your submission has been sent.";
       form.reset();
       const fileName=document.getElementById("file-name");if(fileName)fileName.textContent="No file selected · Maximum 15 MB";
-    }catch(error){status.textContent=error.message||"Unable to send. Please try again.";}
+    }catch(error){status.classList.remove("success");status.textContent=error.message||"Unable to send. Please try again.";}
     finally{
       if(window.turnstile&&widgetId!==undefined)turnstile.reset(widgetId);
       submissionInProgress=false;
