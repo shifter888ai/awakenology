@@ -1,27 +1,35 @@
-# Contact page — Cloudflare setup
+# Contact page — Cloudflare Free-plan setup
 
-This feature keeps submissions within the existing Cloudflare Worker and Cloudflare Email Service. Uploaded files are attached directly to the notification email; they are not stored in R2 or made publicly accessible.
+This feature uses the existing Cloudflare Worker and Email Routing. It does not require Workers Paid, a third-party email provider, R2, or public file storage.
 
-## Required Cloudflare configuration
+## Email requirements
 
-1. In Cloudflare, onboard `awakenology.org` under **Email Service → Email Sending**. Use the sender address `website@awakenology.org`. Cloudflare will provide the SPF/DKIM and bounce-subdomain DNS records. Review them before applying; this setup is for outbound sending and should not replace the existing mailbox MX records.
-2. Verify `contact@awakenology.org` as a destination address. The fixed Worker binding only permits delivery to that address, and the sender is hardcoded as `website@awakenology.org`. This verified-recipient restriction keeps sending eligible on Workers Free and avoids enabling arbitrary recipients.
-3. Create a Cloudflare Turnstile widget for the public site hostnames:
+1. Keep `contact@awakenology.org` verified under **Compute → Email Service → Email Routing → Destination Addresses**. Verified destination addresses can receive Worker-sent email free of charge on Workers Free.
+2. The sender must belong to a domain configured for Cloudflare Email Routing. Confirm that Email Routing is already enabled for `awakenology.org` before testing the form. Do not enable Email Sending domain onboarding or change DNS/MX records as part of this setup.
+3. The Worker binding in `wrangler.jsonc` restricts delivery to `contact@awakenology.org`; the Worker uses `website@awakenology.org` as the sender and the visitor's address only as Reply-To.
+4. If `awakenology.org` is not already an Email Routing domain, stop and review the existing AOL/mail routing configuration before making any DNS changes. Do not replace or alter existing MX records without explicit approval.
+
+## Turnstile requirements
+
+1. Create a Cloudflare Turnstile widget for these public hostnames:
    - `awakenology.space`
    - `www.awakenology.space`
    - `awakenology.org`
    - `www.awakenology.org`
    - `strengthofconsciousness.org`
-4. Set the Turnstile site key in `Contact/index.html` in place of `__TURNSTILE_SITE_KEY__` (both occurrences).
-5. Add the Turnstile secret as a Worker secret named `CONTACT_TURNSTILE_SECRET`.
-6. Deploy the Worker after the PR is approved and merged.
+2. Replace both `__TURNSTILE_SITE_KEY__` placeholders in `Contact/index.html` with the widget's site key.
+3. Add the widget's secret as a Worker secret named `CONTACT_TURNSTILE_SECRET`.
 
 ## Submission behavior
 
-- Messages are emailed to `contact@awakenology.org`.
-- File submissions are emailed as attachments to the same address.
-- Maximum uploaded file size is 15 MB. This relies on the verified destination address, which has Cloudflare Email Service's 25 MiB total-message limit; the general unverified-recipient limit is 5 MiB.
+- Messages are sent to the verified `contact@awakenology.org` destination.
+- File submissions are sent as email attachments to the same address.
+- Maximum uploaded file size is 15 MB.
 - Accepted file extensions: PDF, Office documents, text/Markdown, CSV, common images, and ZIP.
-- Files are not retained by the website.
-- Visitor email is used as `Reply-To`; it is never used as the sender address.
-- Both forms require a successful Cloudflare Turnstile verification.
+- Files are not retained by the website and are not placed in R2.
+- Visitor email is used only as `Reply-To`; it is never used as the sender address.
+- Both forms require successful Cloudflare Turnstile verification.
+
+## Activation
+
+Do not upgrade the Workers plan. Do not deploy until the domain's existing Email Routing configuration and the Turnstile settings have been confirmed. Then test a message and a small file attachment on the live site.
