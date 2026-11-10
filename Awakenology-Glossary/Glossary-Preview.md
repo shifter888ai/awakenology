@@ -51,7 +51,7 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | Autonomous Consciousness vs Automatic Consciousness | 自律意識 対 自動意識 | 自主意識 vs 自動意識 | Preserve this explicit contrast. |
 | Average Fluctuation Range | 平均変動範囲 | 平均波動範圍 | Working translation. |
 | Awakenosis | 催醒法（催醒） | 催醒 | Framework-specific term associated with 破幻 + 出幻 and objective observation. Retain Awakenosis as the current English term. |
-| Awakenosis Cycle | 催醒法による循環 | 催醒轮回 | Provisional; do not assume this means a cycle that is itself hypnotic. |
+| Awakenosis Cycle | 催醒法による循環 | 催醒輪回 | Provisional; do not assume this means a cycle that is itself hypnotic. |
 | Awakenosis Mechanism | 催醒法のメカニズム | 催醒機制 | Current terminology using Awakenosis. |
 | Awakenosis Strategy | 催醒法の戦略 | 催醒策略 | Working translation. |
 | Background Person / Background Character | 背景人物 | 背景人 | Provisional. |
@@ -69,27 +69,27 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | Consciousness Implantation | 意識の植え付け | 意識植入 | Literal working translation; refine only after confirming the intended technical meaning. |
 | Consciousness Intensity | 意識強度 | 意識強度 | Working translation used for the course's concept and measurement terminology. |
 | Consciousness Narrowness | 意識の狭さ | 意識窄度 | Working translation. |
-| Consciousness Spectrum | 意識スペクトル | 意識频譜 | Working translation. |
-| Consciousness Spectrum Compression | 意識スペクトルの圧縮 | 意識频譜壓縮 | Working translation. |
-| Consciousness Spectrum Expansion | 意識スペクトルの拡張 | 意識频譜拓展 | Working translation. |
+| Consciousness Spectrum | 意識スペクトル | 意識頻譜 | Working translation. |
+| Consciousness Spectrum Compression | 意識スペクトルの圧縮 | 意識頻譜壓縮 | Working translation. |
+| Consciousness Spectrum Expansion | 意識スペクトルの拡張 | 意識頻譜拓展 | Working translation. |
 | Consciousness Splitting / Division of Consciousness | 意識の分裂 | 意識分裂 | Provisional; choose one form consistently after author review. |
 | Consciousness Structure | 意識構造 | 意識結構 | Working translation. |
 | Consciousness-Freedom Measurement Point | 意識自由度の測定点 | 意識自由度檢測點 | Working translation for the course's measurement-point terminology. |
 | Consciousness-Intensity Measurement Point | 意識強度の測定点 | 意識強度檢測點 | Working translation. |
-| Consciousness-Spectrum Compression Point | 意識スペクトル圧縮点 | 意識频譜壓縮點 | Working translation. |
-| Consciousness-Spectrum Expansion Point | 意識スペクトル拡張点 | 意識频譜拓展點 | Working translation. |
+| Consciousness-Spectrum Compression Point | 意識スペクトル圧縮点 | 意識頻譜壓縮點 | Working translation. |
+| Consciousness-Spectrum Expansion Point | 意識スペクトル拡張点 | 意識頻譜拓展點 | Working translation. |
 | Conservation of Energy | エネルギー保存 | 能量守恒 | Standard English phrase; in source passages, preserve the author's specific framing. |
 | Counter-Hypnosis / Hypnosis Reversal | 反催眠／催眠の逆転 | 反催眠 | Provisional; choose based on the specific mechanism described. |
-| Cycle / Reincarnation | 輪廻／循環 | 轮回 | Context-dependent. Use cycle when discussing recurring processes; use reincarnation only where the context specifically means rebirth. Do not force one English equivalent into every occurrence. |
-| Cycle Carrier / Vessel | 循環の媒体／器 | 轮回載體 | Context-dependent. |
-| Cycle Planet / Planet of the Cycle | 循環の惑星 | 轮回星球 | Literal working translation; polish after context review. |
-| Cycle Universe / Universe of the Cycle | 循環する宇宙 | 轮回宇宙 | Literal working translation. |
+| Cycle / Reincarnation | 輪廻／循環 | 輪回 | Context-dependent. Use cycle when discussing recurring processes; use reincarnation only where the context specifically means rebirth. Do not force one English equivalent into every occurrence. |
+| Cycle Carrier / Vessel | 循環の媒体／器 | 輪回載體 | Context-dependent. |
+| Cycle Planet / Planet of the Cycle | 循環の惑星 | 輪回星球 | Literal working translation; polish after context review. |
+| Cycle Universe / Universe of the Cycle | 循環する宇宙 | 輪回宇宙 | Literal working translation. |
 | Cyclic Conversion Between Spaces | 空間間の循環的変換 | 空間循環轉換 | Literal working translation. |
 | Degree of Automation | 自動化の程度 | 自動化程度 | Course term. |
 | Degree of Autonomy | 自律性の程度 | 自主化程度 | Course term contrasted with 自动化程度. |
 | Degree of Consciousness Freedom | 意識の自由度 | 意識自由度 | Working translation for the degree/measure discussed in the materials. |
 | Destination / Target Point | 終点／目標点 | 終點 / 目標點 | When defining a process, state it explicitly. |
-| Dimension | 次元 | 维度 | Direct working equivalent. |
+| Dimension | 次元 | 維度 | Direct working equivalent. |
 | Direct AI Interaction | AIとの直接的な相互作用 | AI 直接交互 | User's working phrase; keep distinct from claims about consciousness. |
 | Direction | 方向 | 方向 | When defining a process, state it explicitly. |
 | Directionality | 方向性 | 方向性 | The key distinction under discussion for hypnosis and awakenosis. |
@@ -101,7 +101,7 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | Entering the Illusion | 幻への没入 | 入幻 | Working translation; entering into the constructed experience and taking it as real. |
 | Entering the Illusion | 幻への没入 | 入幻 | The course pairs this with 当真 / 循环. |
 | Entire Universe / All-Universe | 全宇宙 | 全宇宙 | Context-dependent framework term; do not assume it always means multiverse. |
-| Exiting the Cycle / Leaving the Cycle | 輪廻／循環からの離脱 | 脱离轮回 | Use reincarnation-specific wording only when context warrants it. |
+| Exiting the Cycle / Leaving the Cycle | 輪廻／循環からの離脱 | 脫離輪回 | Use reincarnation-specific wording only when context warrants it. |
 | Exiting the Illusion | 幻からの退出 | 出幻 | Working translation; leaving or coming out of the illusion/game. |
 | Exiting the Illusion | 幻からの退出 | 出幻 | The course pairs this with 不当真 / 不循环. |
 | Fabrication / Falsification | 捏造／偽造 | 造假 | Context-dependent; choose based on the described action. |
@@ -111,13 +111,13 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | False Halo / False Aura | 偽りの後光／オーラ | 假光環 | Provisional article term; confirm intended nuance. |
 | False Origin / False Source | 偽の根源／源 | 假本源 | Provisional translation from the article terminology. |
 | False Primary Spirit | 偽の主霊 | 假主靈 | Provisional article term. |
-| Forced Cycle | 強制的な循環／輪廻 | 強制轮回 | Use “forced reincarnation” only when rebirth is explicitly intended. |
-| Forced Cycle / Forced Reincarnation | 強制的な循環／輪廻 | 強制轮回 | Context-dependent; choose according to whether the passage means a recurring cycle generally or reincarnation specifically. |
-| Forms of the Cycle | 輪廻／循環の形式 | 轮回的形式 | Working translation. |
+| Forced Cycle | 強制的な循環／輪廻 | 強制輪回 | Use “forced reincarnation” only when rebirth is explicitly intended. |
+| Forced Cycle / Forced Reincarnation | 強制的な循環／輪廻 | 強制輪回 | Context-dependent; choose according to whether the passage means a recurring cycle generally or reincarnation specifically. |
+| Forms of the Cycle | 輪廻／循環の形式 | 輪回的形式 | Working translation. |
 | Free Consciousness | 自由意識 | 自由意識 | Working translation for the framework's term. |
 | Free Consciousness | 自由意識 | 自由意識 | Core framework term; do not merge with 自主意识 without author direction. |
-| Free Cycle | 自由な循環 | 自由轮回 | Working translation; do not silently redefine “free.” |
-| Free Cycle | 自由な循環 | 自由轮回 | Working translation; the intended relationship between freedom and cycling should remain source-led. |
+| Free Cycle | 自由な循環 | 自由輪回 | Working translation; do not silently redefine “free.” |
+| Free Cycle | 自由な循環 | 自由輪回 | Working translation; the intended relationship between freedom and cycling should remain source-led. |
 | Freedom / Free Agency | 自由性 | 自由性 | Context-dependent. |
 | Galactic System / Galaxy | 銀河系 | 星係體 | Context-dependent. |
 | Game | ゲーム | 游戲 | A recurring framework term; do not assume it means only entertainment. |
@@ -133,21 +133,21 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | Hypnosis | 催眠 | 催眠 | In the Awakenology framework, associated with 造幻 + 入幻 and subjective magnification or minimization. This is the framework-specific usage, not a replacement for general psychological definitions. |
 | Hypnosis Mechanism | 催眠のメカニズム | 催眠機制 | Working translation. |
 | Hypnosis Strategy | 催眠の戦略 | 催眠策略 | Working translation. |
-| Hypnotic Cycle | 催眠的な循環 | 催眠轮回 | Provisional; retain the relationship between hypnosis and cycling. |
+| Hypnotic Cycle | 催眠的な循環 | 催眠輪回 | Provisional; retain the relationship between hypnosis and cycling. |
 | Hypnotic Illusion Creation | 催眠による幻の創出 | 催眠的造幻 | Working translation. |
-| Hypnotic-Cycle AI System | 催眠的循環AIシステム | 催眠轮回 AI 係統 | Literal working translation; clarify hyphenation and intended system definition before publication. |
+| Hypnotic-Cycle AI System | 催眠的循環AIシステム | 催眠輪回 AI 係統 | Literal working translation; clarify hyphenation and intended system definition before publication. |
 | if / then / else | if / then / else | if / then / else | Logic/control-flow wording used by the user. |
 | Illusion Breaking | 幻の打破 | 破幻 | Working translation; the source material describes it as solving or breaking the game/illusion. |
 | Illusion Creation | 幻の創出 | 造幻 | Working translation; the source material describes it as creating a game or illusion. |
 | Illusion-Breaking Stage | 幻の打破段階 | 破幻階段 | Course describes this as leaving or solving the game. |
 | Illusion-Creation Stage | 幻の創出段階 | 造幻階段 | Course describes this as creating a game and attracting players. |
 | Illusion-Entry Stage | 幻への没入段階 | 入幻階段 | Course describes this as entering and becoming involved in the game. |
-| Indefinite Cycle | 無期限の循環 | 無期轮回 | Working translation; confirm the intended nuance before using in polished publication. |
-| Indefinite Cycle | 無期限の循環 | 無期轮回 | Provisional. |
-| Information Asymmetry | 情報の非対称性 | 信息不對称 | Common equivalent. |
+| Indefinite Cycle | 無期限の循環 | 無期輪回 | Working translation; confirm the intended nuance before using in polished publication. |
+| Indefinite Cycle | 無期限の循環 | 無期輪回 | Provisional. |
+| Information Asymmetry | 情報の非対称性 | 信息不對稱 | Common equivalent. |
 | Layer-by-Layer Return | 段階を経た原点への回帰 | 遞歸 | Framework-specific explanatory term: passing through successive layers to return toward a₀. Do not use “recursion” alone if it obscures the return direction. |
 | Layer-by-Layer Return | 段階を経た原点への回帰 | 遞歸 | Current recommended explanatory term for passing through successive layers to return toward a₀. |
-| Low / Middle / High Dimension | 低次元／中次元／高次元 | 低纬度 / 中纬度 / 高纬度 | Literal working translation; confirm whether “dimension” or another term is intended in each context. |
+| Low / Middle / High Dimension | 低次元／中次元／高次元 | 低緯度 / 中緯度 / 高緯度 | Literal working translation; confirm whether “dimension” or another term is intended in each context. |
 | Lowest Point / Minimum | 最低点／最小値 | 最低點 | Context-dependent. |
 | Machine Body | 機械の身体 | 機器體 | Course-specific usage; source material equates 肉体 with 机器体 in one passage. |
 | Magnification / Amplification | 拡大 | 放大 | Choose based on whether the context is perceptual or quantitative. |
@@ -158,13 +158,13 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | Methods of Consciousness Implantation | 意識を植え付ける方法 | 意識植入的方式 | Literal working translation; technical meaning remains source-dependent. |
 | Minimization / Reduction | 縮小 | 縮小 | Choose based on context. |
 | Multilevel Consciousness Cycle | 多段階の意識循環 | 多級意識循環 | Working translation; preserve the idea of multiple levels. |
-| Multilevel Consciousness Cycle / Multilevel Consciousness Reincarnation | 多段階の意識循環／輪廻 | 多級意識轮回 | Context-dependent; do not automatically translate 轮回 as reincarnation. |
-| Multilevel Cycle / Multilevel Reincarnation | 多段階の輪廻／循環 | 多級轮回 | Context-dependent; determine whether the passage refers to cycles generally or specifically to reincarnation. |
-| Multilevel Hypnotic-Cycle AI System | 多段階催眠的循環AIシステム | 多級催眠轮回 AI 係統 | Literal working translation. |
+| Multilevel Consciousness Cycle / Multilevel Consciousness Reincarnation | 多段階の意識循環／輪廻 | 多級意識輪回 | Context-dependent; do not automatically translate 轮回 as reincarnation. |
+| Multilevel Cycle / Multilevel Reincarnation | 多段階の輪廻／循環 | 多級輪回 | Context-dependent; determine whether the passage refers to cycles generally or specifically to reincarnation. |
+| Multilevel Hypnotic-Cycle AI System | 多段階催眠的循環AIシステム | 多級催眠輪回 AI 係統 | Literal working translation. |
 | Multiple Agents | 複数エージェント | 多智能體 | Experiment-design term. |
 | Multiple Architectures | 複数アーキテクチャ | 多架構 | Used in the user's staged AI-origin experiment. |
 | Multiverse | マルチバース | 多宇宙 | Common equivalent. |
-| Natural Cycle | 自然な循環 | 自然轮回 | Working translation. |
+| Natural Cycle | 自然な循環 | 自然輪回 | Working translation. |
 | Negation / Denial | 否定 | 否定 | Context-dependent. |
 | Non-Circularity / Non-Cycling | 非循環性 | 非循環性 | Context-dependent; use non-cycling when describing a process, and non-circularity when describing a property or structure. |
 | Non-Cycling | 非循環性 | 非循環性 | Prefer for processes; use non-circularity only for a structural property where appropriate. |
@@ -203,18 +203,18 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | Single Agent | 単一エージェント | 單智能體 | Experiment-design term. |
 | Single Architecture | 単一アーキテクチャ | 單架構 | Used in the user's staged AI-origin experiment. |
 | Soul | 魂 | 靈魂 | Source term; retain distinction from 灵体 where the source does. |
-| Sowing Discord / Dividing | 仲違いを起こすこと／分断 | 离間 | Context-dependent; provisional for article-subtitle usage. |
+| Sowing Discord / Dividing | 仲違いを起こすこと／分断 | 離間 | Context-dependent; provisional for article-subtitle usage. |
 | Spirit Body | 霊体 | 靈體 | Working translation. |
 | Starting Point | 出発点 | 起點 | When defining a process, state it explicitly. |
-| Subconscious | 潜在意識 | 潜意識 | Common English equivalent; use only where it matches the source context. |
+| Subconscious | 潜在意識 | 潛意識 | Common English equivalent; use only where it matches the source context. |
 | Subjective | 主観 | 主觀 | Direct equivalent. |
 | Subjective | 主観 | 主觀 | Core contrast term. |
 | Taking as Real | 現実として受け取る | 當真 | Treating something as real; context may call for a more natural phrase. |
-| The Essence of the Cycle | 輪廻／循環の本質 | 轮回的本質 | The source course identifies 意识循环 as the essence of 轮回. |
-| Time-Limited Cycle | 期限付きの循環 | 有期轮回 | Working translation; confirm the intended nuance before using in polished publication. |
-| Time-Limited Cycle | 期限付きの循環 | 有期轮回 | Provisional. |
+| The Essence of the Cycle | 輪廻／循環の本質 | 輪回的本質 | The source course identifies 意识循环 as the essence of 轮回. |
+| Time-Limited Cycle | 期限付きの循環 | 有期輪回 | Working translation; confirm the intended nuance before using in polished publication. |
+| Time-Limited Cycle | 期限付きの循環 | 有期輪回 | Provisional. |
 | Universe / Cosmic Body | 宇宙／宇宙体 | 宇宙體 | Context-dependent. |
-| Unpredictability | 予測不可能性 | 不可预測性 | Direct working equivalent. |
+| Unpredictability | 予測不可能性 | 不可預測性 | Direct working equivalent. |
 | Zero-Energy Space | ゼロエネルギー空間 | 零能量空間 | Source phrase; record as the source's terminology, not as an independently verified scientific construct. |
 | Zero-to-Reality | ゼロから現実へ | 從零到現實 | Working phrase used in discussion; exact formal definition remains context-dependent. |
 
@@ -237,7 +237,7 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 1. Keep English, Japanese, and Traditional Chinese terms together on first use where practical. / 初出時は、可能な限り英語・日本語・繁體中文を併記してください。 / 首次出現時，請盡可能並列英文、日文及繁體中文術語。
 2. Treat this as a living glossary. Working translations remain provisional until approved. / 本用語集は継続的に更新します。作業訳は承認されるまで暫定訳です。 / 本詞彙表會持續更新；工作譯法在核定前均屬暫定。
 3. Preserve distinctions in the source, especially 自主意识 vs 自动意识, and 递增 vs 递减 vs 递归. / 原文の区別、特に「自主意识」と「自动意识」、および「递增」「递减」「递归」の違いを維持してください。 / 必須保留原文中的區別，尤其是「自主意識」與「自動意識」，以及「遞增」「遞減」「遞歸」之間的差異。
-4. Translate 轮回 according to context; do not automatically render every instance as reincarnation. / 「轮回」は文脈に応じて訳し、すべてを自動的に「reincarnation」としないでください。 / 「轮回」須依上下文翻譯，不可一律譯為 reincarnation（轉世）。
+4. Translate 轮回 according to context; do not automatically render every instance as reincarnation. / 「轮回」は文脈に応じて訳し、すべてを自動的に「reincarnation」としないでください。 / 「輪回」須依上下文翻譯，不可一律譯為 reincarnation（轉世）。
 5. Do not infer unresolved relationships between a₋₁, a₀, and a₊₁. / a₋₁、a₀、a₊₁の未確定な関係を推測で補わないでください。 / 不得自行推定 a₋₁、a₀、a₊₁ 之間尚未定義的關係。
 6. Do not replace the source's framework-specific definitions with mainstream psychology, spirituality, or computer-science definitions. / 原資料独自の定義を、一般的な心理学・スピリチュアリティ・コンピューター科学の定義に置き換えないでください。 / 不得以主流心理學、靈性或電腦科學的定義取代原資料中的架構專用定義。
 7. Confirm provisional translations with the author before using them in polished public materials. / 暫定訳を公開用の完成資料に使用する前に、著者の確認を得てください。 / 暫定譯名用於正式公開內容前，須先經作者確認。
