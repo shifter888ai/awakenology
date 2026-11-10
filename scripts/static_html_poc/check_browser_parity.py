@@ -145,11 +145,6 @@ async def main():
             browser = await p.chromium.launch(headless=True)
             try:
                 for route, (path, _) in FIXTURES.items():
-                    # Search and Ask are new routes in this PR and do not exist on production yet.
-                    # Their source structure is covered by check_real_pages.py; live browser parity
-                    # becomes meaningful after deployment.
-                    if route in {"/search/", "/ask/"}:
-                        continue
                     source = (ROOT / path).read_bytes().decode("utf-8")
                     generated = transform(source, route)
                     url = SITE + quote(route, safe="/%")
@@ -215,7 +210,7 @@ async def main():
     Path("browser-parity-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     if failures:
         raise SystemExit(f"{len(failures)} browser parity comparisons differ; no deployment authorized")
-    print("18 browser DOM, interaction and tolerance-gated screenshot comparisons passed.")
+    print(f"{len(FIXTURES) * len(VIEWPORTS)} browser DOM, interaction and tolerance-gated screenshot comparisons passed.")
 
 if __name__ == "__main__":
     asyncio.run(main())
