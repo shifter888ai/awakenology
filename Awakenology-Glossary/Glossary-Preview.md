@@ -97,7 +97,7 @@ The source states that the spirit body where the individual's focus of conscious
 
 Other source terms:
 - 多次元複合體 — Multidimensional Body Complex
-- 意識焦點 — Focus of Consciousness
+- 意識焦點 — Conscious focal point
 - 多重出神 — Multi-layer Out-of-Body Experience (working translation)
 - 多重回神 — Multi-layer Return (working translation)
 - 肉體次元 — Physical Dimension
