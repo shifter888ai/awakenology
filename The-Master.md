@@ -11,7 +11,7 @@
 7. **System fonts only** — No external fonts. Serif may be used selectively for major headings.
 8. **Responsive by default** — Desktop and mobile must work properly.
 9. **Consistent navigation** — English / 日本語 / 中文 / Search / Ask as separate links, with the active page clear.
-10. **Consistent footer** — Contact email icon → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer, then © 2017–CURRENT_YEAR Awakenology. The Contact icon links to `mailto:contact@awakenology.org` and is a standardized global footer component, not article content.
+10. **Consistent footer** — Contact icon → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer, then © 2017–CURRENT_YEAR Awakenology. The Contact icon links to the dedicated `/Contact/` page and is a standardized global footer component, not article content.
 11. **Common lightweight article template** — All articles use the approved global structure.
 12. **Preserve intentional wording** — Never silently correct unusual English or intentional formatting.
 13. **Accessibility and readability** — Maintain readable typography, spacing, contrast, links, and responsive behavior.
@@ -366,7 +366,7 @@ When an original content element is converted to a different HTML element, its o
     - Before live testing, inspect the committed page source for the actual footer element, its class names, child structure, and page-specific footer CSS.
     - Legacy footer classes such as .footer must not remain when they can conflict with the approved .site-footer / .footer-inner / .footer-links structure or page-specific CSS cascade.
     - The approved footer must be normalized at source level whenever a legacy page's footer structure or CSS can affect rendering.
-    - Verify exactly one footer, the approved footer hierarchy, the approved icon links, © 2017–CURRENT_YEAR Awakenology, and explicit no-underline rules for the Email and Disclaimer icons.
+    - Verify exactly one footer, the approved footer hierarchy, the approved icon links, © 2017–CURRENT_YEAR Awakenology, and the active-page indicator: underline only the footer link whose destination is the current page (Contact on `/Contact/`, Disclaimer on `/Disclaimer/`); neither or both must not be underlined on other pages.
     - Worker footer injection/replacement is supplementary runtime behavior and is not a substitute for source-level footer normalization.
     - A page that passes source content checks but still contains a structurally conflicting legacy footer is a hard failure before live testing.
 
@@ -662,9 +662,9 @@ The site owner has visually confirmed the shared global header and footer after 
 
 ### Footer
 - Keep the order: Contact → Reddit 1 → Reddit 2 → Reddit 3 → Disclaimer → © 2017–CURRENT_YEAR Awakenology.
-- Contact icon: 24px visible glyph size.
-- Reddit icons: 20px visible image size, centered in 24px alignment boxes.
-- Disclaimer icon: 20px visible glyph size, centered in a 24px alignment box.
+- Contact links to the dedicated `/Contact/` page, not a `mailto:` URL.
+- Contact and Disclaimer icons use 24px alignment boxes. The Contact glyph is 20px on desktop; the mobile styling remains as tested and approved. Reddit images and the Disclaimer glyph are 20px, centered in their 24px alignment boxes.
+- Underline only the footer link for the current page: Contact on `/Contact/`, Disclaimer on `/Disclaimer/`. All other footer links remain un-underlined. Never underline both Contact and Disclaimer simultaneously, and never leave both un-underlined when one of those pages is active.
 - Preserve the approved links, accessible names/tooltips, spacing, alignment, theme compatibility, and responsive behavior.
 - The footer is delivered globally by the Cloudflare Worker; do not add page-local duplicates.
 
@@ -673,3 +673,21 @@ The site owner has visually confirmed the shared global header and footer after 
 - Any proposed change requires the site owner's explicit, specific approval before implementation.
 - If a change is approved, isolate it to the named component/property, verify both dark and light modes and desktop/mobile layouts, run the relevant checks in `AUDIT.md`, and obtain the owner's live confirmation before updating this locked baseline.
 - Do not treat a successful PR merge or deployment as visual approval; the owner's live confirmation is required.
+
+
+## Contact Page and Email Delivery — Approved Baseline (2026-11-10)
+
+The dedicated `/Contact/` page and its email-submission workflow are approved and tested. Preserve this implementation unless a specific change is explicitly approved.
+
+- The global footer Contact icon links to `/Contact/`; it does not open a `mailto:` link.
+- The Contact page provides a direct email link, a message form, and a file-upload form.
+- Both forms submit through the existing Cloudflare Worker endpoint `/api/contact` and use one shared Cloudflare Turnstile widget. Do not add a second widget or separate per-form challenge.
+- The shared Turnstile token is obtained for each submission; the widget is reset after the attempt. Prevent simultaneous duplicate submissions.
+- Email is sent through Cloudflare Email Service only, using the approved sender `website@awakenology.org` and fixed recipient `contact@awakenology.org`. The visitor's email address is used only as Reply-To.
+- The Worker email binding is restricted to the approved sender and recipient. The Turnstile secret is stored only as the Worker secret `CONTACT_TURNSTILE_SECRET`; never place the secret in source code, documentation, client-side HTML, or logs.
+- File attachments are attached directly to the notification email. Maximum upload size is 15 MB. Files are not retained by the website; do not add R2, public file URLs, or other file storage.
+- Preserve HTTPS and same-host Origin checks, the approved file-type allowlist, and bot protection.
+- On successful submission, show the approved green checkmark before the success message. Keep error and success states distinct.
+- Do not introduce SMTP2GO, AOL, or another third-party email service into this workflow. Do not change existing unrelated mail-routing arrangements.
+- The message form and file-upload form have both been tested successfully. Treat their current behavior as stable; investigate a concrete defect before proposing changes.
+- Any future change must be isolated, reviewed through a PR, and tested on desktop and mobile. A PR merge alone is not proof of successful deployment; verify the live Contact page and both submission paths after an approved deployment.
