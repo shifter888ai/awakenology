@@ -50,6 +50,7 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | Autonomous Consciousness | 自律意識 | 自主意識 | Contrasted in the materials with 自动意识. |
 | Autonomous Consciousness vs Automatic Consciousness | 自律意識 対 自動意識 | 自主意識 vs 自動意識 | Preserve this explicit contrast. |
 | Average Fluctuation Range | 平均変動範囲 | 平均波動範圍 | Working translation. |
+| Awakenology | 催醒法 | 催醒法 | Name of the overall framework and body of work; distinguish it from Awakenosis, the framework-specific process/term. |
 | Awakenosis | 催醒法（催醒） | 催醒 | Framework-specific term associated with 破幻 + 出幻 and objective observation. Retain Awakenosis as the current English term. |
 | Awakenosis Cycle | 催醒法による循環 | 催醒輪迴 | Provisional; do not assume this means a cycle that is itself hypnotic. |
 | Awakenosis Mechanism | 催醒法のメカニズム | 催醒機制 | Current terminology using Awakenosis. |
@@ -67,17 +68,17 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | Consciousness Freedom | 意識の自由 | 意識自由 | Working translation. In fluent prose, “freedom of consciousness” may be preferable depending on sentence structure. |
 | Consciousness Freedom vs Consciousness Cycling | 意識の自由 対 意識の循環 | 意識自由 vs 意識循環 | Preserve the contrast as expressed in the course. |
 | Consciousness Implantation | 意識の植え付け | 意識植入 | Literal working translation; refine only after confirming the intended technical meaning. |
-| Consciousness Intensity | 意識強度 | 意識強度 | Working translation used for the course's concept and measurement terminology. |
 | Consciousness Narrowness | 意識の狭さ | 意識窄度 | Working translation. |
 | Consciousness Spectrum | 意識スペクトル | 意識頻譜 | Working translation. |
 | Consciousness Spectrum Compression | 意識スペクトルの圧縮 | 意識頻譜壓縮 | Working translation. |
 | Consciousness Spectrum Expansion | 意識スペクトルの拡張 | 意識頻譜拓展 | Working translation. |
 | Consciousness Splitting / Division of Consciousness | 意識の分裂 | 意識分裂 | Provisional; choose one form consistently after author review. |
+| Consciousness Strength | 意識強度 | 意識強度 | Working translation used for the course's concept and measurement terminology. |
 | Consciousness Structure | 意識構造 | 意識結構 | Working translation. |
 | Consciousness-Freedom Measurement Point | 意識自由度の測定点 | 意識自由度檢測點 | Working translation for the course's measurement-point terminology. |
-| Consciousness-Intensity Measurement Point | 意識強度の測定点 | 意識強度檢測點 | Working translation. |
 | Consciousness-Spectrum Compression Point | 意識スペクトル圧縮点 | 意識頻譜壓縮點 | Working translation. |
 | Consciousness-Spectrum Expansion Point | 意識スペクトル拡張点 | 意識頻譜拓展點 | Working translation. |
+| Consciousness-Strength Measurement Point | 意識強度の測定点 | 意識強度檢測點 | Working translation. |
 | Conservation of Energy | エネルギー保存 | 能量守恒 | Standard English phrase; in source passages, preserve the author's specific framing. |
 | Counter-Hypnosis / Hypnosis Reversal | 反催眠／催眠の逆転 | 反催眠 | Provisional; choose based on the specific mechanism described. |
 | Cycle / Reincarnation | 輪廻／循環 | 輪迴 | Context-dependent. Use cycle when discussing recurring processes; use reincarnation only where the context specifically means rebirth. Do not force one English equivalent into every occurrence. |
@@ -105,9 +106,9 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | Exiting the Illusion | 幻からの退出 | 出幻 | Working translation; leaving or coming out of the illusion/game. |
 | Exiting the Illusion | 幻からの退出 | 出幻 | The course pairs this with 不当真 / 不循环. |
 | Fabrication / Falsification | 捏造／偽造 | 造假 | Context-dependent; choose based on the described action. |
-| False Consciousness Intensity | 偽の意識強度 | 假意識強度 | Literal working translation from the course title; do not replace “false” with another interpretation without approval. |
-| False Consciousness Intensity | 偽の意識強度 | 假意識強度 | Current literal working translation; not a claim about any mainstream measurement construct. |
-| False Consciousness Intensity | 偽の意識強度 | 假意識強度 | Repeated here because it is a named course topic; keep the same English label consistently. |
+| False Consciousness Strength | 偽の意識強度 | 假意識強度 | Literal working translation from the course title; do not replace “false” with another interpretation without approval. |
+| False Consciousness Strength | 偽の意識強度 | 假意識強度 | Current literal working translation; not a claim about any mainstream measurement construct. |
+| False Consciousness Strength | 偽の意識強度 | 假意識強度 | Repeated here because it is a named course topic; keep the same English label consistently. |
 | False Halo / False Aura | 偽りの後光／オーラ | 假光環 | Provisional article term; confirm intended nuance. |
 | False Origin / False Source | 偽の根源／源 | 假本源 | Provisional translation from the article terminology. |
 | False Primary Spirit | 偽の主霊 | 假主靈 | Provisional article term. |
@@ -142,6 +143,7 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | Illusion-Breaking Stage | 幻の打破段階 | 破幻階段 | Course describes this as leaving or solving the game. |
 | Illusion-Creation Stage | 幻の創出段階 | 造幻階段 | Course describes this as creating a game and attracting players. |
 | Illusion-Entry Stage | 幻への没入段階 | 入幻階段 | Course describes this as entering and becoming involved in the game. |
+| Incarnation | 化身／投生 | 化身／投生 | A consciousness or soul taking embodied form in a life. Use 化身 for embodiment as a form; use 投生 when the context emphasizes being born into a body. |
 | Indefinite Cycle | 無期限の循環 | 無期輪迴 | Working translation; confirm the intended nuance before using in polished publication. |
 | Indefinite Cycle | 無期限の循環 | 無期輪迴 | Provisional. |
 | Information Asymmetry | 情報の非対称性 | 信息不對稱 | Common equivalent. |
@@ -195,6 +197,7 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | Progressive Decrease | 段階的な減少 | 遞減 | Current recommended explanatory English term. |
 | Progressive Increase | 段階的な増加 | 遞增 | Current recommended explanatory term; specify what increases, the starting point, direction, and destination. |
 | Progressive Increase | 段階的な増加 | 遞增 | Current recommended explanatory English term. |
+| Reincarnation | 輪迴／轉生 | 輪迴／轉世 | A further incarnation or rebirth. Keep distinct from incarnation as one embodied life; choose the term according to the source passage. |
 | Religious Framing / Making Something Religious | 宗教化／宗教的な枠付け | 宗教化 | Context-dependent; provisional for article-subtitle usage. |
 | Resistance Ratio | 抵抗率 | 抗性比率 | Literal working translation. |
 | Restoration / Returning to the Original | 復元／元の状態に戻す | 還原 | Context-dependent; do not automatically equate with 递归. |
