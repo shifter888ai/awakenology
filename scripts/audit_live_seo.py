@@ -148,6 +148,25 @@ def main():
                 print(f"PR base sitemap routes loaded: {len(base_urls)} ({base_ref})")
             except (subprocess.SubprocessError, ET.ParseError):
                 print("WARNING: could not read base-branch sitemap; falling back to production sitemap comparison")
+    # A PR cannot update production before it is merged. For HTML files changed
+    # by the PR, audit the checked-out candidate HTML instead of comparing the
+    # unmerged source against the currently deployed page. Unchanged routes remain
+    # live-checked so the audit still verifies production health.
+    pr_changed_html = set()
+    if os.environ.get("GITHUB_EVENT_NAME") == "pull_request":
+        base_ref = os.environ.get("GITHUB_BASE_REF", "").strip()
+        if base_ref:
+            try:
+                changed_files = subprocess.run(
+                    ["git", "diff", "--name-only", f"origin/{base_ref}...HEAD"],
+                    check=True, capture_output=True, text=True, timeout=10
+                ).stdout.splitlines()
+                pr_changed_html = {p.replace("\\\\", "/") for p in changed_files if p.lower().endswith(".html")}
+                if pr_changed_html:
+                    print(f"PR changed HTML files audited locally: {len(pr_changed_html)}")
+            except subprocess.SubprocessError:
+                print("WARNING: could not list PR-changed HTML files; using existing live/new-route behavior")
+
     total_routes = len(urls)
     if args.max_routes > 0 and args.max_routes < total_routes:
         urls = select_sample_urls(urls, args.max_routes)
@@ -160,7 +179,7 @@ def main():
         source_path = "index.html" if path == "/" else unquote(path.lstrip("/")) + "index.html"
         expected = DOMAIN + (path if path.endswith("/") or path == "/" else path + "/")
         try:
-            use_local_pr_html = bool(base_urls) and url not in base_urls
+            use_local_pr_html = source_path in pr_changed_html or (bool(base_urls) and url not in base_urls)
             if use_local_pr_html or (not base_urls and url not in deployed_urls):
                 local = ROOT / source_path
                 if not local.is_file(): raise OSError("new route missing local HTML")
