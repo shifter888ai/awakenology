@@ -68,7 +68,7 @@ def should_inventory(relative):
     parts = Path(relative).parts
     if any(part in SKIP_PARTS for part in parts):
         return False
-    return not parts or parts[0] not in NON_PUBLIC_ROOTS
+    return not parts or parts[0].casefold() not in NON_PUBLIC_ROOTS
 
 
 def page_scope(relative):
