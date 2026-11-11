@@ -3,7 +3,6 @@
 ## Workspace map
 
 - [New-Article test fixture](./New-Article/index.html) — the non-production page used by the Editor and Generator as their default test target.
-- The trilingual `Glossary-Preview.md` remains in the separate open PR #473 branch for now; it is not duplicated here.
 
 # Internal
 
@@ -12,7 +11,7 @@
 ## 1. Knowledge Base
 
 - [Awakenology directionality principles](../docs/awakenology-directionality-principles.md)
-- [Awakenology terminology glossary — Markdown working copy](./Terminology/TERMINOLOGY-GLOSSARY.md)
+- [Unified Awakenology terminology glossary](../Awakenology-Glossary/Terminology.md) — single source of truth; update this file rather than maintaining a separate internal copy.
 
 ## 2. Test Pages
 
