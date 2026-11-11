@@ -38,7 +38,7 @@
 
 ## Foundational framework and scope / 基本枠組みと対象範囲 / 基礎架構與範圍
 
-**EN:** Awakenology is exclusively dedicated to understanding and addressing the problem of Hypnotic Reincarnation. It studies hypnosis, consciousness and related mechanisms only insofar as they are relevant to understanding Hypnotic Reincarnation and developing effective methodologies for exiting it. Awakenology is not a general study of hypnosis or de-hypnosis, and it is not opposed to legitimate hypnosis or hypnotherapy.
+**EN:** Awakenology is an application of Science of Consciousness. It encompasses both practical methods (催醒法) and the knowledge and principles behind them (催醒學), with a focus on understanding and addressing Hypnotic Reincarnation. It is not a general study of hypnosis or de-hypnosis, and it is not opposed to legitimate hypnosis or hypnotherapy.
 
 **日本語:** Awakenologyは、「催眠輪廻」の問題を理解し、その解決に取り組むための知識と実践方法を含む枠組みです。Awakenologyは一般的な催眠や脱催眠の研究ではなく、正当な催眠や催眠療法に反対するものでもありません。
 
