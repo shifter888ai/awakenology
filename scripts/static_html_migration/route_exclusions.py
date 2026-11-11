@@ -9,6 +9,7 @@ EXCLUDED_HTML_PREFIXES = (
     "tests/",
     "docs/",
     ".github/",
+    "internal/",
     "new-article/",
     "ai-search/",
 )
