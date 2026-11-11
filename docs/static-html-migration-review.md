@@ -11,6 +11,7 @@ Status: PROPOSAL ONLY. This work does not authorize merging, staging activation,
 - The offline inventory distinguishes supported transformations from blockers: 139 supported routes are expected to be transformed, one public route is reported as blocked and preserved in source, and one standalone HTML resource is classified separately. CI reports these counts and keeps `migration_ready=false`; a green diagnostic is not a claim that every route is Worker-equivalent.
 - Twelve pinned fixtures cover the homepage, language indexes, Search, Ask, Contact, representative English/Chinese/Japanese articles, and the newly merged Japanese all-perspectives article. The Japanese index hash is refreshed to the current source bytes.
 - Contact runtime contracts remain source-only in PR mode: Search/Ask behavior, the legacy redirect, Contact forms, Turnstile, the Worker `/api/contact` handler, and the current Worker footer are checked locally. A regression test asserts that PR mode makes zero HTTP requests.
+- Worker-only routes under `/api/` are excluded from HTML source classification and temporary staging. The public HTML manifest validator explicitly rejects `/api/contact`, `/api/contact/`, and other `/api/` routes.
 - Latest current-main push checks at this baseline completed successfully: Deploy Awakenology, Content Integrity Gate, Sitemap route parity, SEO metadata inventory, and Live SEO runtime audit. The existing main-branch Deploy workflow was triggered by the preceding main push; this run did not initiate a deployment.
 - Live Worker signature, HTTP runtime-contract, and desktop/mobile browser-parity checks remain separate manual approval gates. Skipped checks are not represented as passes. Private Editor/Generator verification, Cloudflare secrets, staging activation, and physical iOS Safari confirmation remain outside this source-only task.
 
@@ -27,7 +28,7 @@ Status: PROPOSAL ONLY. This work does not authorize merging, staging activation,
 - Source preservation, metadata rules, deliberate mutation detection, deterministic transformation, idempotence, and local asset references are tested.
 - `/New-Article/` is explicitly treated as a noindex experimental route without a canonical URL and remains outside the sitemap.
 - The tracked public index routes are classified before transformation: supported routes are built into temporary staging; the known Roswell route blocker and standalone Roswell HTML resource are reported separately and are not transformed.
-- Pull-request runtime-contract validation is source-only and has six local contracts plus a regression test proving it makes zero HTTP requests.
+- Pull-request runtime-contract validation is source-only and has six local contracts plus a regression test proving it makes zero HTTP requests. A separate manifest guard rejects Worker-only `/api/` routes, including `/api/contact`, from static HTML output.
 
 A matching fixture or footer signature is not proof of full HTML, JavaScript, accessibility, HTTP, browser, visual, or Worker-route equivalence. A skipped job is not a pass. Historical live/browser results from earlier commits are not fresh evidence for the current head.
 
@@ -56,6 +57,6 @@ Any lost or changed article content, broken route, unexpected canonical/noindex 
 
 ## Cloudflare request-budget safeguard
 
-Automatic PoC PR validation is offline: unit tests, eleven pinned source fixtures, full source inventory, and isolated temporary staging output. Live Worker signature, HTTP runtime-contract, and browser-parity checks are manual and require explicit approval. The Live SEO workflow remains bounded for ordinary site changes; PoC/audit/test/sitemap-only changes are excluded from unnecessary production request paths, while main-branch and scheduled audits remain intact. These exclusions reduce traffic; they do not waive required checks for route-changing or production-behavior changes.
+Automatic PoC PR validation is offline: unit tests, twelve pinned source fixtures, full source inventory, and isolated temporary staging output. Live Worker signature, HTTP runtime-contract, and browser-parity checks are manual and require explicit approval. The Live SEO workflow remains bounded for ordinary site changes; PoC/audit/test/sitemap-only changes are excluded from unnecessary production request paths, while main-branch and scheduled audits remain intact. These exclusions reduce traffic; they do not waive required checks for route-changing or production-behavior changes.
 
 **Current decision:** the static HTML PoC remains review-only. Keep the existing production Cloudflare Worker and all original article content unchanged. No merge, staging activation, production cutover, or deployment is authorized.
