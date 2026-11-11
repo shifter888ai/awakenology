@@ -40,9 +40,9 @@
 
 **EN:** Awakenology is exclusively dedicated to understanding and addressing the problem of Hypnotic Reincarnation. It studies hypnosis, consciousness and related mechanisms only insofar as they are relevant to understanding Hypnotic Reincarnation and developing effective methodologies for exiting it. Awakenology is not a general study of hypnosis or de-hypnosis, and it is not opposed to legitimate hypnosis or hypnotherapy.
 
-**日本語:** Awakenologyは、「催眠輪廻」の問題を理解し、その解決に取り組むことを目的とする包括的な枠組みです。催眠、意識および関連するメカニズムは、催眠輪廻を理解し、そこからの離脱方法を開発するために必要な範囲で研究します。その主要分野がExincarnology（エクスインカルノロジー）、実践方法がExincarna（エクスインカルナ）です。Awakenologyは一般的な催眠や脱催眠の研究ではなく、正当な催眠や催眠療法に反対するものでもありません。
+**日本語:** Awakenologyは、「催眠輪廻」の問題を理解し、その解決に取り組むための知識と実践方法を含む枠組みです。Awakenologyは一般的な催眠や脱催眠の研究ではなく、正当な催眠や催眠療法に反対するものでもありません。
 
-**繁體中文:** Awakenology 是以理解及處理「催眠輪迴」問題為核心的整體架構。研究催眠、意識及相關機制，僅限於有助於理解催眠輪迴及發展脫離方法的範圍。其主要專業分支為 Exincarnology（暫譯：脫離輪迴學），實踐方法為 Exincarna（脫離輪迴法）。Awakenology 並非一般性的催眠或解除催眠研究，也不反對正當的催眠及催眠治療。
+**繁體中文:** Awakenology（催醒法／催醒學）是 Science of Consciousness 的一項應用，涵蓋催醒的實踐方法（催醒法）及相關知識與原理（催醒學）。Awakenology 並非一般性的催眠或解除催眠研究，也不反對正當的催眠及催眠治療。
 
 ### Core distinctions / 基本的な区別 / 核心區別
 
@@ -55,9 +55,9 @@
 | Hypnosis | 催眠 | 催眠 | In the Awakenology framework, associated with illusion creation and entering/taking the illusion as real; its framework-specific usage does not replace general psychological definitions. |
 | Dehypnosis | 脱催眠／反催眠 | 反催眠 | 反催眠. Distinct from Awakening / 催醒. |
 | Awakening | 催醒 | 催醒 | The framework's reverse process of identifying and removing distortion and returning toward original consciousness. Do not translate as Dehypnosis. |
-| Awakenology | 催醒学＋エクスインカルナ（作業訳） | 催醒學＋脫離輪迴法 | The umbrella concept encompassing the knowledge/principles of 催醒學 and the practical method Exincarna (脫離輪迴法); Exincarnology is its main professional discipline. |
-| Exincarnology | エクスインカルノロジー | 脫離輪迴學（暫譯） | The main professional discipline and branch of Awakenology, focused on understanding Hypnotic Reincarnation and developing the knowledge and principles needed to end participation in its cycle. |
-| Exincarna | エクスインカルナ | 脫離輪迴法 | The practical method developed within Exincarnology, intended to end participation in the Hypnotic Reincarnation cycle. |
+| Awakenology | 催醒法＋催醒学 | 催醒法＋催醒學 | An application of Science of Consciousness encompassing both practical methods (催醒法) and knowledge/principles (催醒學). |
+| Exincarnology | エクスインカルノロジー | 脫離輪迴法（脫離輪迴學） | The 1st application of Awakenology; encompasses the practical method and its knowledge/principles for ending the reincarnation cycle. |
+| Exincarnation | — | 脫離輪迴 | The process or achievement that Exincarnology aims at. |
 | Awakenosis | 自己催醒のプロセス | 自我催醒過程 | The process of self-awakening specifically from Hypnotic Reincarnation, with the aim of achieving a successful exit. |
 
 ### Hypnotic Reincarnation and exit terminology / 催眠輪廻と離脱に関する用語 / 催眠輪迴與退出相關術語
@@ -139,6 +139,34 @@ The course materials distinguish the forward recursive process of hypnosis from 
 These formulae and definitions are recorded as the course's framework-specific model.
 
 
+## Science of Consciousness framework / 意識の科学の枠組み / 意識科學架構
+
+This section records the user's current framework taxonomy. These are framework-defined terms and relationships, not a claim that this taxonomy is an established mainstream scientific classification.
+
+| English | 日本語 | 繁體中文 | Definition / relationship |
+|---|---|---|---|
+| Science of Consciousness | — | — | The foundational science, containing four fields: Frequency of Consciousness, Spectrum of Consciousness, Entropy of Consciousness, and Freedom of Consciousness. |
+| Frequency of Consciousness | — | 意識頻率 | The 1st field of Science of Consciousness. |
+| Spectrum of Consciousness | — | 意識頻譜 | The 2nd field of Science of Consciousness. Its applications are Strength of Consciousness (1st) and Spectrum of Things (2nd). |
+| Entropy of Consciousness | — | 意識熵 | The 3rd field of Science of Consciousness. |
+| Freedom of Consciousness | — | 意識自由 | The 4th field of Science of Consciousness. |
+| Awakenology | 催醒法／催醒学 | 催醒法／催醒學 | An application of Science of Consciousness; it encompasses practical methods and their knowledge/principles. |
+| Exincarnology | — | 脫離輪迴法／脫離輪迴學 | The 1st application of Awakenology; it encompasses the practical method and its knowledge/principles. |
+| Exincarnation | — | 脫離輪迴 | The process or achievement that Exincarnology aims at. |
+| Strength of Consciousness | — | 意識強度 | The 2nd application of Awakenology and, independently, the 1st application of Spectrum of Consciousness. It has two parent relationships. |
+| Spectrum of Things | — | — | The 2nd application of Spectrum of Consciousness; the wireless-sensor project exploring and measuring physical phenomena beyond ordinary human perception. |
+
+### Application relationships
+
+- Science of Consciousness is the foundational science.
+- Awakenology is an application of Science of Consciousness.
+- Exincarnology is the 1st application of Awakenology.
+- Strength of Consciousness is the 2nd application of Awakenology and the 1st application of Spectrum of Consciousness.
+- Spectrum of Things is the 2nd application of Spectrum of Consciousness.
+- Exincarnation (脫離輪迴) is the process or achievement associated with Exincarnology.
+
+**Important:** Strength of Consciousness has two parent relationships. Do not force it into a single-parent hierarchy.
+
 ## Complete glossary — alphabetical by English term (A–Z) / 英語アルファベット順 / 依英文詞目排序
 
 All entries are sorted together by the English term. Japanese and Traditional Chinese equivalents and the original usage notes stay on the same row. Repeated terms from the source inventory are retained.
@@ -154,7 +182,7 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | Autonomous Consciousness | 自律意識 | 自主意識 | Contrasted in the materials with 自动意识. |
 | Autonomous Consciousness vs Automatic Consciousness | 自律意識 対 自動意識 | 自主意識 vs 自動意識 | Preserve this explicit contrast. |
 | Average Fluctuation Range | 平均変動範囲 | 平均波動範圍 | Working translation. |
-| Awakenology | 催醒学＋エクスインカルナ（作業訳） | 催醒學＋脫離輪迴法 | The umbrella concept encompassing 催醒學 (knowledge and principles) and Exincarna (脫離輪迴法, the practical method); Exincarnology is its main professional discipline. |
+| Awakenology | 催醒法＋催醒学 | 催醒法＋催醒學 | An application of Science of Consciousness encompassing both practical methods (催醒法) and knowledge/principles (催醒學). |
 | Awakenosis | 催醒過程（自我催醒） | 催醒過程（自我催醒） | The process of self-awakening specifically from Hypnotic Reincarnation, working to overcome its hypnotized condition and achieve a successful exit. Objective observation is relevant but is not the complete definition. |
 | Awakenosis Cycle | 催醒プロセスの循環 | 催醒過程循環 | Provisional; use only where the source explicitly describes a recurring Awakenosis process. |
 | Awakenosis Mechanism | 催醒のメカニズム | 催醒機制 | Mechanism of the Awakening process; distinguish from Dehypnosis. |
@@ -205,7 +233,7 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | Energy Conversion | エネルギー変換 | 能量轉換 | Standard working equivalent. |
 | Entering the Illusion | 幻への没入 | 入幻 | Working translation; entering into the constructed experience and taking it as real. |
 | Entering the Illusion | 幻への没入 | 入幻 | The course pairs this with 当真 / 循环. |
-| Exincarna | エクスインカルナ | 脫離輪迴法 | The practical method developed within Exincarnology, intended to end participation in the Hypnotic Reincarnation cycle. |
+| Exincarnation | — | 脫離輪迴 | The process or achievement that Exincarnology aims at. |
 | Exincarnology | エクスインカルノロジー | 脫離輪迴學（暫譯） | The main professional discipline and branch of Awakenology, focused on understanding Hypnotic Reincarnation and developing the knowledge and principles needed to end participation in its cycle. |
 | Entire Universe / All-Universe | 全宇宙 | 全宇宙 | Context-dependent framework term; do not assume it always means multiverse. |
 | Exiting the Cycle / Leaving the Cycle | 輪廻／循環からの離脱 | 脫離輪迴 | Use reincarnation-specific wording only when context warrants it. |
@@ -327,6 +355,18 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | Zero-Energy Space | ゼロエネルギー空間 | 零能量空間 | Source phrase; record as the source's terminology, not as an independently verified scientific construct. |
 | Zero-to-Reality | ゼロから現実へ | 從零到現實 | Working phrase used in discussion; exact formal definition remains context-dependent. |
 
+## Additional source entries awaiting Japanese review / 日本語訳確認待ちの追加用語 / 待確認日文譯法的補充詞目
+
+The following entries are retained from the internal working inventory. Their English and Chinese wording is preserved; the Japanese column is marked “—” until reviewed. Repeated source entries are consolidated by English headword.
+
+| English | 日本語 | Original Chinese term | Usage note |
+|---|---|---|---|
+| Consciousness Intensity | — | 意识强度 | Working translation used for the course's concept and measurement terminology. |
+| False Consciousness Intensity | — | 假意识强度 | Literal working translation from the course title; do not replace “false” with another interpretation without approval. |
+| Subconscious | — | 潜意识 | Common English equivalent; use only where it matches the source context. |
+| Consciousness-Intensity Measurement Point | — | 意识强度检测点 | Working translation. |
+| Counter-Hypnosis / Hypnosis Reversal | — | 反催眠 | Provisional; choose based on the specific mechanism described. |
+
 ### Scope and confidence labels | 対象範囲と確度 | 範圍與可信度標示
 
 ### Translation and editorial rules | 翻訳・編集ルール | 翻譯與編輯規則
@@ -353,4 +393,4 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 
 ## Review note / レビュー注記 / 審閱備註
 
-The complete term inventory has been converted from the HTML draft. The usage notes remain in English in this first Markdown conversion so their original meaning is preserved. We can now review the terms in Markdown and translate the notes into Japanese and Traditional Chinese before updating the website HTML.
+This file is the unified working glossary and single terminology reference. Entries marked “—” still require Japanese translation or author review. The published website HTML has not been changed by this glossary consolidation.
