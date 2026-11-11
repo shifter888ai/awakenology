@@ -10,7 +10,9 @@ This document records the framework as currently defined by its author. The name
 
 Science of Consciousness is intended to develop practical, testable, experimentally verifiable knowledge. Its purpose is not to construct systems of belief, religion, philosophy, or abstract speculation detached from observable evidence and real-world application.
 
-Work should progress from an **idea** to a clearly defined **concept**, then to a **proof of concept (PoC) using a defined measurement method**. The measurement method must specify the observable indicators, variables, instruments or procedures, calibration, and conditions of measurement. A PoC provides an initial demonstration that the concept can be investigated or measured; it is not, by itself, proof that the broader concept or explanation is established. The work then proceeds through controlled experimental results, reproducibility or independent verification, and evaluation of practical application. Findings remain open to challenge and revision.
+Work should progress from an **idea** to a clearly defined **concept**, then to a **proof of concept (PoC)** conducted through a defined measurement method. The measurement method must specify the observable indicators, variables, instruments or procedures, calibration, and conditions of measurement. A PoC provides an initial demonstration that the concept can be operationalized and investigated; it is not, by itself, proof that the concept's underlying explanation is true. The work then proceeds through experiments, reproducibility or independent verification, and evaluation of practical application. Findings remain open to challenge and revision.
+
+Explanatory validity and practical effectiveness must be evaluated separately. A method may be practically useful even when its underlying explanation is incomplete or later proves incorrect; that usefulness does not validate the explanation. Likewise, a correct explanation does not by itself demonstrate that a method based on it works in practice. Report both what is understood about the phenomenon and what has been demonstrated to work, without treating either as proof of the other.
 
 The working methodology is guided by five principles:
 
@@ -30,11 +32,11 @@ The team must keep the following stages distinct:
 
 - **Idea:** An initial observation, question, possibility, or proposed direction for investigation.
 - **Concept:** A clearly described idea with defined meaning and scope. Naming a concept does not, by itself, demonstrate that the described phenomenon exists.
-- **Measurement method:** A defined procedure specifying what is observed, which instruments or sensors are used, how data are collected and calibrated, and how uncertainty is handled.
-- **Proof of concept (PoC):** An initial measurement-based demonstration that the concept can be operationalized or investigated using the defined method. State exactly what the PoC demonstrates and what it does not demonstrate.
+- **Proof of concept (PoC):** An initial practical test of whether the concept can be operationalized, measured, or used. A PoC must be conducted through a defined measurement method.
+- **Measurement method:** The procedure used within the PoC and subsequent experiments, specifying what is observed, which instruments or sensors are used, how data are collected and calibrated, and how uncertainty is handled.
 - **Experimental result:** An outcome obtained under stated experimental conditions. Report what was observed, including limitations and unexpected or contrary results.
 - **Reproduced or independently verified result:** A result that has been tested again, ideally by independent people or teams, using sufficiently documented methods.
-- **Practical application:** A method or finding whose real-world usefulness has been evaluated. Do not claim effectiveness beyond what the evidence supports.
+- **Practical application:** A method or finding whose real-world usefulness has been evaluated. Practical effectiveness must be assessed separately from the validity of the explanation behind the method. Do not claim effectiveness beyond what the evidence supports.
 
 ### Required practice for team work
 
@@ -47,8 +49,9 @@ Before presenting a claim as scientific knowledge, contributors should be able t
 5. Can another person or team reproduce the procedure and assess the result?
 6. What are the uncertainty, limitations, and alternative explanations?
 7. What practical use is demonstrated, if any?
+8. Is the practical result being evaluated separately from the validity of the proposed explanation?
 
-If these questions cannot yet be answered, label the work accurately as an idea, concept, measurement-method proposal, or preliminary PoC, and identify the next stage of work needed. Do not fill gaps with confident wording, invented precision, appeals to authority, or belief.
+If these questions cannot yet be answered, label the work accurately as an idea, concept, or preliminary PoC, and identify the next stage of work needed. Do not fill gaps with confident wording, invented precision, appeals to authority, or belief.
 
 The team should neither accept nor reject a claim solely because it agrees or disagrees with existing beliefs, theories, philosophies, or expectations. Evaluate it through transparent methods and evidence. Unexpected observations should be documented and investigated carefully; they should not be turned into conclusions before they have been tested.
 
