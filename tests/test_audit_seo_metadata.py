@@ -26,6 +26,7 @@ class SeoMetadataInventoryScopeTests(unittest.TestCase):
                 "English/index.html": HTML,
                 "404.html": HTML,
                 "editor/index.html": HTML,
+                "Internal/New-Article/index.html": "<html><head><title>Internal fixture</title></head><body>fixture</body></html>",
                 "docs/example.html": "<html><head></head><body>docs</body></html>",
                 "scripts/static_html_poc/assets/theme.html": "<html><head></head><body>fixture</body></html>",
                 "source/static-html-isolated-output/index.html": "<html><head></head><body>build output</body></html>",
