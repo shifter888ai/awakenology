@@ -7,10 +7,13 @@ class PublicHtmlClassificationTests(unittest.TestCase):
  def test_roswell_index_is_supported_and_pdf_rendering_remains_standalone(self):
   transformable,excluded,blocked,standalone=classify_public_html_paths([
    "index.html","Roswell/index.html","Roswell/Roswell.html","editor/index.html",
-   "editor/generator.html","editor/html-generator.html","api/contact/index.html","404.html"])
+   "editor/generator.html","editor/html-generator.html","api/contact/index.html","Internal/New-Article/index.html","internal/new-article/index.html","New-Article/index.html","404.html"])
   self.assertEqual(set(transformable),{"index.html","Roswell/index.html"})
   self.assertIn("editor/index.html",excluded)
   self.assertIn("api/contact/index.html",excluded)
+  self.assertIn("Internal/New-Article/index.html",excluded)
+  self.assertIn("internal/new-article/index.html",excluded)
+  self.assertIn("New-Article/index.html",excluded)
   self.assertNotIn("api/contact/index.html",transformable)
   self.assertEqual(blocked,[])
   self.assertEqual([x["path"] for x in standalone],["Roswell/Roswell.html"])
