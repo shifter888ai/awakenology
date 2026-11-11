@@ -6,7 +6,12 @@
 
 ## 一、已完成課程節點
 
+**[開啟全尺寸獨立大圖（SVG，可用瀏覽器繼續放大）](./map-full.svg)**
+
+SVG 是可縮放向量圖；在獨立頁面可使用瀏覽器縮放。下方 Mermaid 圖也已加大節點字體。
+
 ```mermaid
+%%{init: {"theme":"dark","flowchart":{"nodeSpacing":90,"rankSpacing":110},"themeVariables":{"fontSize":"24px"}}}%%
 flowchart LR
   L1["1｜假意識強度"]
   L2["2｜輪迴的本質"]
@@ -27,6 +32,8 @@ flowchart LR
   L17["17｜單重放大：還原／釋放"]
   L18["18｜雙重放大：逐層還原"]
   L19["19｜多層放大：逐層釋放"]
+  classDef readable font-size:24px;
+  class L1,L2,L3,L4,L5,L6,L7,L8,L9,L10,L11,L12,L13,L14,L15,L16,L17,L18,L19 readable;
 
   L1 ---|"自我觀察／意識強度檢視"| L5
   L1 ---|"檢測與觀察方向"| L11
