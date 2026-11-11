@@ -1,20 +1,28 @@
 
 """Offline classification tests for public HTML migration inputs."""
 import unittest
-from check_full_inventory import KNOWN_BLOCKED_ROUTES,KNOWN_STANDALONE_HTML,classify_public_html_paths
+from check_full_inventory import KNOWN_BLOCKED_ROUTES,KNOWN_STANDALONE_HTML,classify_public_html_paths,validate_public_html_manifest
 
 class PublicHtmlClassificationTests(unittest.TestCase):
  def test_roswell_route_is_reported_blocked_not_transformed(self):
   transformable,excluded,blocked,standalone=classify_public_html_paths([
    "index.html","Roswell/index.html","Roswell/Roswell.html","editor/index.html",
-   "editor/generator.html","editor/html-generator.html","404.html"])
+   "editor/generator.html","editor/html-generator.html","api/contact/index.html","404.html"])
   self.assertEqual(transformable,["index.html"])
   self.assertIn("editor/index.html",excluded)
+  self.assertIn("api/contact/index.html",excluded)
+  self.assertNotIn("api/contact/index.html",transformable)
   self.assertEqual([x["path"] for x in blocked],["Roswell/index.html"])
   self.assertEqual([x["route"] for x in blocked],["/Roswell/"])
   self.assertEqual([x["path"] for x in standalone],["Roswell/Roswell.html"])
   self.assertEqual(blocked[0]["source_git_blob_sha"],KNOWN_BLOCKED_ROUTES["Roswell/index.html"]["source_git_blob_sha"])
   self.assertEqual(standalone[0]["source_git_blob_sha"],KNOWN_STANDALONE_HTML["Roswell/Roswell.html"]["source_git_blob_sha"])
+
+ def test_worker_only_api_routes_never_enter_static_html_manifest(self):
+  for route in ("/api/contact","/api/contact/","/api/editor/session"):
+   with self.subTest(route=route), self.assertRaisesRegex(AssertionError,"Worker-only API routes"):
+    validate_public_html_manifest([route])
+  self.assertTrue(validate_public_html_manifest(["/Contact/"]))
 
  def test_unknown_standalone_public_html_fails_closed(self):
   with self.assertRaisesRegex(AssertionError,"Unclassified public HTML file"):
