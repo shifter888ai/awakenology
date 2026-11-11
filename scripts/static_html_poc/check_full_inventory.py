@@ -10,7 +10,7 @@ from html_transformer import transform
 from page_rules import rules_for
 from parity_validator import validate, validate_metadata, fingerprint
 
-PRIVATE_PREFIXES=("editor/","github-editor/","scripts/","tests/","docs/",".github/")
+PRIVATE_PREFIXES=("api/","editor/","github-editor/","scripts/","tests/","docs/",".github/")
 PRIVATE_NAMES={"404.html"}
 REPORT=ROOT/"static-html-full-inventory-report.json"
 KNOWN_BLOCKED_ROUTES={
@@ -29,6 +29,14 @@ KNOWN_STANDALONE_HTML={
 
 def git_blob_sha(blob):
  return hashlib.sha1(b"blob "+str(len(blob)).encode("ascii")+bytes([0])+blob).hexdigest()
+
+WORKER_ONLY_ROUTE_PREFIXES=("/api/",)
+
+def validate_public_html_manifest(routes):
+ forbidden=sorted(route for route in routes if route=="/api" or route.startswith(WORKER_ONLY_ROUTE_PREFIXES))
+ if forbidden:
+  raise AssertionError("Worker-only API routes cannot enter the static public HTML manifest: "+", ".join(forbidden))
+ return True
 
 def classify_public_html_paths(paths):
  transformable,excluded,blocked,standalone=[],[],[],[]
@@ -87,6 +95,7 @@ def main():
       detail[field+"_first_difference"]={"kind":tag,"source_context":left[max(0,i-90):min(len(left),j+90)],
        "built_context":right[max(0,x-90):min(len(right),y+90)],"source_length":len(left),"built_length":len(right)}
    failures.append(detail); print(f"FAIL {path}: {error}",flush=True)
+ validate_public_html_manifest([item["route"] for item in routes])
  report={"scope":"offline source/build validation of supported public index routes; known blockers and standalone HTML are reported, not transformed; no Worker or browser parity claim",
   "public_index_routes":len(paths)+len(blocked),"transformed_routes":len(routes),"blocked_routes":blocked,"standalone_html":standalone,
   "excluded_html":excluded,"migration_ready":not failures and not blocked and not standalone,"routes":routes,"failures":failures}
