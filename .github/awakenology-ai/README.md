@@ -15,6 +15,11 @@ This folder contains repository-local material specifically used to guide or sup
 - Engineering tests, scripts, and technical documentation remain in `tests/`, `scripts/`, and their existing documentation locations.
 - Public, approved Awakenology content remains in its existing public content folders.
 
+## Current references
+
+- [Directionality of Hypnosis and Awakenosis](./DIRECTIONALITY-PRINCIPLES.md) — working conceptual note; preserve its open questions and do not silently revise course formulas.
+- [Terminology glossary pointer](./TERMINOLOGY-GLOSSARY.md) — compatibility pointer to the unified trilingual glossary.
+
 ## Source-of-truth rule
 
 - `Awakenology-Glossary/Terminology.md` is the single source of truth for the unified trilingual terminology glossary.
