@@ -4,13 +4,13 @@ import hashlib,json,subprocess,tempfile
 from pathlib import Path
 from urllib.parse import unquote,urlparse
 from bs4 import BeautifulSoup
-from check_full_inventory import public_sources,ROOT
+from check_full_inventory import public_sources,ROOT,validate_public_html_manifest
 from html_transformer import transform
 from page_rules import rules_for
 from parity_validator import validate,validate_metadata
 
 REPORT=ROOT/"static-html-staging-report.json"
-PRIVATE_PREFIXES=("editor/","github-editor/","scripts/","tests/","docs/",".github/")
+PRIVATE_PREFIXES=("api/","editor/","github-editor/","scripts/","tests/","docs/",".github/")
 ASSET_ATTRS={"img":"src","script":"src","source":"src","video":"src","audio":"src","iframe":"src"}
 
 def tracked_files():
@@ -54,8 +54,10 @@ def main():
    if target.read_text(encoding="utf-8")!=built: raise AssertionError(f"staged file differs after write/read: {source_path}")
    if transform(source,route)!=built or transform(built,route)!=built: raise AssertionError(f"build is non-deterministic or non-idempotent: {source_path}")
    asset_failures.extend(local_asset_references(built,tracked,route))
-   built_routes.append({"source":source_path,"output":source_path,"bytes":len(built.encode("utf-8")),"sha256":hashlib.sha256(built.encode("utf-8")).hexdigest()})
+   built_routes.append({"route":route,"source":source_path,"output":source_path,"bytes":len(built.encode("utf-8")),"sha256":hashlib.sha256(built.encode("utf-8")).hexdigest()})
   staged_html=sorted(p.relative_to(output).as_posix() for p in output.rglob("*.html"))
+  staged_routes=["/" if p=="index.html" else "/"+p[:-len("index.html")] for p in staged_html]
+  validate_public_html_manifest(staged_routes)
   if staged_html!=sorted(paths): raise AssertionError("staging output route set differs from supported public source route set")
   forbidden=[p for p in staged_html if p.startswith(PRIVATE_PREFIXES) or p=="404.html"]
   if forbidden: raise AssertionError(f"private or excluded HTML entered staging output: {forbidden}")
@@ -63,7 +65,7 @@ def main():
   report={"scope":"temporary staging build of supported public routes only; known blockers and standalone HTML are not transformed; no deployment, routing, headers or runtime behavior changed",
    "public_source_routes":len(paths)+len(blocked),"transformed_source_routes":len(paths),"staged_html_routes":len(staged_html),
    "blocked_routes":blocked,"standalone_html":standalone,"excluded_html":excluded,"temporary_output_cleaned":True,
-   "non_html_assets_copied":False,"migration_ready":not blocked and not standalone,
+   "non_html_assets_copied":False,"worker_only_route_prefixes_excluded":["/api/"],"migration_ready":not blocked and not standalone,
    "asset_check":"local HTML asset references checked against tracked repository files; remote/data URLs excluded",
    "local_asset_failures":asset_failures,"routes":built_routes}
  REPORT.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
