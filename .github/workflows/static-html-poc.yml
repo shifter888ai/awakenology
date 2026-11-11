@@ -44,7 +44,7 @@ jobs:
         run: python scripts/static_html_poc/build_staging.py
       - name: Upload staging and inventory reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: static-html-staging-and-inventory
           path: |
@@ -77,7 +77,7 @@ jobs:
         run: python scripts/static_html_poc/check_runtime_contracts.py
       - name: Upload runtime contract report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: static-html-runtime-contract-report
           path: static-html-runtime-contract-report.json
@@ -97,7 +97,7 @@ jobs:
         run: python scripts/static_html_poc/check_browser_parity.py
       - name: Upload browser parity report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: static-html-browser-parity
           path: |
