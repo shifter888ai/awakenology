@@ -22,6 +22,37 @@ The working methodology is guided by five principles:
 
 Measurements should distinguish directly observed signals from estimates or interpretations derived from them. Where sensors and assessment systems are used, the operational definitions, calibration, uncertainty, and limits of inference should be made explicit. The goal is to develop methods that can be examined through real-world experiments rather than asking readers to accept claims on belief or authority.
 
+## Team operating standard
+
+Every team member, contributor, researcher, and AI assistant working on this project must follow the scientific scope and five principles above. These are working standards for the whole team, not optional writing preferences.
+
+The team must keep the following distinctions clear:
+
+- **Concept:** An idea or term proposed for investigation. A clearly named concept is not, by itself, evidence that the described phenomenon exists.
+- **Hypothesis:** A provisional explanation or prediction that can be tested. It must not be presented as a demonstrated result.
+- **Measurement method:** A defined procedure specifying what is observed, which instruments or sensors are used, how data are collected and calibrated, and how uncertainty is handled.
+- **Experimental result:** An outcome obtained under stated experimental conditions. Report what was observed, including limitations and results that do not support the hypothesis.
+- **Reproduced or independently verified result:** A result that has been tested again, ideally by independent people or teams, using sufficiently documented methods.
+- **Practical application:** A method or finding whose real-world usefulness has been evaluated. Do not claim effectiveness beyond what the evidence supports.
+
+### Required practice for team work
+
+Before presenting a claim as scientific knowledge, contributors should be able to answer:
+
+1. What exactly is being measured or tested?
+2. What observable signal or variable represents it?
+3. How is the measurement obtained, calibrated, and interpreted?
+4. What experiment could support or challenge the claim?
+5. Can another person or team reproduce the procedure and assess the result?
+6. What are the uncertainty, limitations, and alternative explanations?
+7. What practical use is demonstrated, if any?
+
+If these questions cannot yet be answered, label the work accurately as a concept, proposal, or hypothesis, and identify what needs to be developed or tested next. Do not fill gaps with confident wording, invented precision, appeals to authority, or belief.
+
+The team should neither accept nor reject a claim solely because it agrees or disagrees with existing beliefs, theories, philosophies, or expectations. Evaluate it through transparent methods and evidence. Unexpected observations should be documented and investigated carefully; they should not be turned into conclusions before they have been tested.
+
+**The standard is not whether an explanation sounds convincing. The standard is whether the claim is clearly defined, measurable, experimentally testable, reproducible, and practically useful to the extent claimed.**
+
 ## 1. Four fields of Science of Consciousness
 
 1. **Frequency of Consciousness**
