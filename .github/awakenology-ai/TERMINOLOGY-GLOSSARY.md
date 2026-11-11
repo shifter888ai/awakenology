@@ -234,6 +234,34 @@ The entries below expand coverage beyond the initial core list. Unless marked as
 | 单智能体 | Single Agent | Experiment-design term. |
 | 多智能体 | Multiple Agents | Experiment-design term. |
 
+## Science of Consciousness framework terms
+
+The following entries record the user's current framework structure. They describe the terminology and relationships defined within Awakenology; they do not claim that this framework is an established mainstream scientific taxonomy.
+
+| English | 繁體中文 | Definition / relationship | Status |
+| --- | --- | --- | --- |
+| Science of Consciousness | — | The foundational science in this framework. It contains four fields: Frequency of Consciousness, Spectrum of Consciousness, Entropy of Consciousness, and Freedom of Consciousness. | Framework term; Chinese name not yet assigned |
+| Frequency of Consciousness | 意識頻率 | One of the four fields of Science of Consciousness. | Working Chinese equivalent |
+| Spectrum of Consciousness | 意識頻譜 | One of the four fields of Science of Consciousness. It has two applications: Strength of Consciousness (1st) and Spectrum of Things (2nd). | Existing working Chinese equivalent |
+| Entropy of Consciousness | 意識熵 | One of the four fields of Science of Consciousness. | Working Chinese equivalent |
+| Freedom of Consciousness | 意識自由 | One of the four fields of Science of Consciousness. | Existing working Chinese equivalent |
+| Awakenology | 催醒法（催醒學） | An application of Science of Consciousness; the umbrella framework encompasses both practical methods (催醒法) and knowledge/principles (催醒學). | User-defined terminology |
+| Exincarnology | 脫離輪迴法（脫離輪迴學） | The 1st application of Awakenology; encompasses the practical method and its knowledge/principles. | User-defined terminology |
+| Exincarnation | 脫離輪迴 | The process or achievement that Exincarnology aims at. | User-defined terminology |
+| Strength of Consciousness | 意識強度 | The 1st application of Spectrum of Consciousness and the 2nd application of Awakenology. It therefore has two parent relationships in the framework. | User-defined application name; Chinese equivalent already present in glossary |
+| Spectrum of Things | — | The 2nd application of Spectrum of Consciousness. It refers to the wireless-sensor project exploring and measuring physical phenomena beyond ordinary human perception. | User-defined project name; Chinese name not yet assigned |
+
+### Application relationships
+
+- Science of Consciousness is the foundational science.
+- Awakenology is an application of Science of Consciousness.
+- Exincarnology is the 1st application of Awakenology.
+- Strength of Consciousness is the 2nd application of Awakenology and, independently, the 1st application of Spectrum of Consciousness.
+- Spectrum of Things is the 2nd application of Spectrum of Consciousness.
+- Exincarnation (脫離輪迴) is the process or achievement associated with Exincarnology.
+
+Strength of Consciousness must retain both relationships. Do not force the framework into a single-parent hierarchy.
+
 ## Scope and confidence labels
 
 For editorial clarity, the glossary uses three practical statuses:
