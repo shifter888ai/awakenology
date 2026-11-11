@@ -4,7 +4,6 @@ import hashlib
 import json
 import subprocess
 from pathlib import Path
-from bs4 import BeautifulSoup
 from check_real_pages import ROOT
 from html_transformer import transform
 from page_rules import rules_for
@@ -13,16 +12,9 @@ from parity_validator import validate, validate_metadata, fingerprint
 PRIVATE_PREFIXES=("api/","editor/","github-editor/","scripts/","tests/","docs/",".github/")
 PRIVATE_NAMES={"404.html"}
 REPORT=ROOT/"static-html-full-inventory-report.json"
-KNOWN_BLOCKED_ROUTES={
- "Roswell/index.html":{
-  "route":"/Roswell/",
-  "source_git_blob_sha":"840860c1392aa236558dd23871ab9840f070a8c5",
-  "reason":"Legacy Alien Interview HTML has no <article> or <main> content scope; keep source bytes unchanged and exclude from PoC transformation."
- }
-}
 KNOWN_STANDALONE_HTML={
  "Roswell/Roswell.html":{
-  "source_git_blob_sha":"4480744a5f4b12ba3ec0cfd53f842b2b633673ed",
+  "source_git_blob_sha":"8c61758277760518346d95cbb1dcab465f7a0c28",
   "reason":"Standalone PDF-derived HTML resource, not an index route or canonical sitemap route; preserve unchanged and exclude from page transformation."
  }
 }
@@ -42,7 +34,6 @@ def classify_public_html_paths(paths):
  transformable,excluded,blocked,standalone=[],[],[],[]
  for path in sorted(filter(None,paths)):
   if path.startswith(PRIVATE_PREFIXES) or path in PRIVATE_NAMES: excluded.append(path)
-  elif path in KNOWN_BLOCKED_ROUTES: blocked.append({"path":path,**KNOWN_BLOCKED_ROUTES[path]})
   elif path in KNOWN_STANDALONE_HTML: standalone.append({"path":path,**KNOWN_STANDALONE_HTML[path]})
   elif path=="index.html" or path.endswith("/index.html"): transformable.append(path)
   else: raise AssertionError(f"Unclassified public HTML file: {path}")
@@ -58,9 +49,6 @@ def public_sources():
   actual=git_blob_sha((ROOT/record["path"]).read_bytes())
   if actual!=record["source_git_blob_sha"]:
    raise AssertionError(f"Known Roswell source changed; review classification: {record['path']}: {actual}")
- blocked_source=BeautifulSoup((ROOT/"Roswell/index.html").read_text(encoding="utf-8"),"html.parser")
- if blocked_source.select_one("article.article, .article, main") is not None:
-  raise AssertionError("Roswell source now has a content scope; review and reclassify it")
  sitemap=(ROOT/"sitemap.xml").read_text(encoding="utf-8")
  if blocked and "https://awakenology.space/Roswell/" not in sitemap:
   raise AssertionError("Known blocked /Roswell/ route is no longer in the canonical sitemap")
