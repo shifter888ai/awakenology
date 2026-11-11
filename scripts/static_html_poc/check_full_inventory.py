@@ -9,7 +9,7 @@ from html_transformer import transform
 from page_rules import rules_for
 from parity_validator import validate, validate_metadata, fingerprint
 
-PRIVATE_PREFIXES=("api/","editor/","github-editor/","scripts/","tests/","docs/",".github/")
+PRIVATE_PREFIXES=("api/","editor/","github-editor/","scripts/","tests/","docs/",".github/","internal/","new-article/")
 PRIVATE_NAMES={"404.html"}
 REPORT=ROOT/"static-html-full-inventory-report.json"
 KNOWN_STANDALONE_HTML={
@@ -33,12 +33,13 @@ def validate_public_html_manifest(routes):
 def classify_public_html_paths(paths):
  transformable,excluded,blocked,standalone=[],[],[],[]
  for path in sorted(filter(None,paths)):
-  if path.startswith(PRIVATE_PREFIXES) or path in PRIVATE_NAMES: excluded.append(path)
+  normalized=path.replace("\\","/").casefold()
+  if normalized.startswith(PRIVATE_PREFIXES) or normalized in {name.casefold() for name in PRIVATE_NAMES}: excluded.append(path)
   elif path in KNOWN_STANDALONE_HTML: standalone.append({"path":path,**KNOWN_STANDALONE_HTML[path]})
   elif path=="index.html" or path.endswith("/index.html"): transformable.append(path)
   else: raise AssertionError(f"Unclassified public HTML file: {path}")
  if not transformable or "index.html" not in transformable: raise AssertionError("Public route inventory is empty or missing homepage")
- required={"editor/index.html","editor/generator.html","editor/html-generator.html"}
+ required={"editor/index.html","editor/generator.html","editor/html-generator.html","Internal/New-Article/index.html"}
  if not required.issubset(set(excluded)): raise AssertionError("Expected private editor/generator files absent from exclusions")
  return transformable,excluded,blocked,standalone
 
