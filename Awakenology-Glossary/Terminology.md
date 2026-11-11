@@ -150,6 +150,7 @@ This section records the user's current framework taxonomy. These are framework-
 | Spectrum of Consciousness | — | 意識頻譜 | The 2nd field of Science of Consciousness. Its applications are Strength of Consciousness (1st) and Spectrum of Things (2nd). |
 | Entropy of Consciousness | — | 意識熵 | The 3rd field of Science of Consciousness. |
 | Freedom of Consciousness | — | 意識自由 | The 4th field of Science of Consciousness. |
+| Freedomality of Consciousness | — | — | A framework-defined property describing the degree to which an individual's inherent free will is actually expressed through their Soul Characteristics. Its operational definition and measurement require further development and validation. |
 | Awakenology | 催醒法／催醒学 | 催醒法／催醒學 | An application of Science of Consciousness; it encompasses practical methods and their knowledge/principles. |
 | Exincarnology | — | 脫離輪迴法／脫離輪迴學 | The 1st application of Awakenology; it encompasses the practical method and its knowledge/principles. |
 | Exincarnation | — | 脫離輪迴 | The process or achievement that Exincarnology aims at. |
@@ -254,6 +255,9 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | Free Cycle | 自由な循環 | 自由輪迴 | Working translation; do not silently redefine “free.” |
 | Free Cycle | 自由な循環 | 自由輪迴 | Working translation; the intended relationship between freedom and cycling should remain source-led. |
 | Freedom / Free Agency | 自由性 | 自由性 | Context-dependent. |
+| Freedomality of Consciousness | — | — | A framework-defined property: the degree to which an individual's inherent free will is actually expressed through their Soul Characteristics. The operational definition remains to be developed and validated. |
+| Freedomality Index (FI) | — | — | A quantified representation or estimate of Freedomality of Consciousness. The scale, calculation, and interpretation remain to be operationally defined and validated. |
+| Freedometry | — | — | A proposed measurement methodology for operationalizing and estimating Freedomality of Consciousness and its Freedomality Index (FI). It is not yet an established or validated measurement method. |
 | Galactic System / Galaxy | 銀河系 | 星係體 | Context-dependent. |
 | Game | ゲーム | 游戲 | A recurring framework term; do not assume it means only entertainment. |
 | Game Designer | ゲーム設計者 | 游戲設計者 | Course term for a role in the described game framework. |
