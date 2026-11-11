@@ -278,7 +278,7 @@ async function createReviewedDraftPR(request, env) {
         if (String(error.message).includes("GitHub API 404:")) return null;
         throw error;
       });
-      if (existing && !asset.path.startsWith("New-Article/assets/")) throw new Error("Asset path already exists: " + asset.path);
+      if (existing && !asset.path.startsWith("Internal/New-Article/assets/")) throw new Error("Asset path already exists: " + asset.path);
       const blob = await githubApi("/repos/" + GITHUB_REPO + "/git/blobs", token, { method: "POST", body: JSON.stringify({ content: asset.contentBase64, encoding: "base64" }) });
       treeItems.push({ path: asset.path, mode: "100644", type: "blob", sha: blob.sha });
     }

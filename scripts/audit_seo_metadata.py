@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "seo-metadata-report.csv"
-NON_PUBLIC_ROOTS = {".github", "docs", "poc", "scripts", "source", "tests"}
+NON_PUBLIC_ROOTS = {".github", "docs", "internal", "poc", "scripts", "source", "tests"}
 SKIP_PARTS = {".git", "node_modules", ".venv", "__pycache__"}
 
 
@@ -68,7 +68,7 @@ def should_inventory(relative):
     parts = Path(relative).parts
     if any(part in SKIP_PARTS for part in parts):
         return False
-    return not parts or parts[0] not in NON_PUBLIC_ROOTS
+    return not parts or parts[0].casefold() not in NON_PUBLIC_ROOTS
 
 
 def page_scope(relative):
