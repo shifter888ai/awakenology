@@ -11,9 +11,9 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[2]
-EXCLUDED = {"404.html", "ai-search/index.html", "editor/index.html",
+EXCLUDED = {"404.html", "ai-search/index.html", "search/index.html", "ask/index.html", "editor/index.html",
             "github-editor/index.html", "Internal/New-Article/index.html"}
-PREFIXES = ("editor/", "github-editor/", "Internal/", "scripts/", "tests/", "docs/", ".github/")
+PREFIXES = ("editor/", "github-editor/", "Internal/", "search/", "ask/", "scripts/", "tests/", "docs/", ".github/")
 DOMAIN = "https://awakenology.space"
 errors = []
 
