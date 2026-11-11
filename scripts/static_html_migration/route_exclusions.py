@@ -12,6 +12,8 @@ EXCLUDED_HTML_PREFIXES = (
     "internal/",
     "new-article/",
     "ai-search/",
+    "search/",
+    "ask/",
 )
 
 
