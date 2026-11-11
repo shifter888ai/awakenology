@@ -7,7 +7,7 @@ from parity_validator import validate, validate_metadata
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = {
     "/": ("index.html", "7f980bc8a382e0c00bd8c550b95210a56f3dd826"),
-    "/English/": ("English/index.html", "59973d7dcc1dff7b979ad424bd6e4aa2191de90b"),
+    "/English/": ("English/index.html", "dd79a99fe5925c9f4596ce5bf4baaa95f77dc034"),
     "/Japanese/": ("Japanese/index.html", "5f9e17385932ef160fd395e92e5e6e868a25e2f7"),
     "/本源全視点vs個我単一視点/": ("本源全視点vs個我単一視点/index.html", "6c2c161716987d1662764d97422de6aaf19257f8"),
     "/Chinese/": ("Chinese/index.html", "aaa841648fed2f1828aa2d15c76599fd16a84eb3"),
