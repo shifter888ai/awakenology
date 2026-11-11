@@ -10,7 +10,7 @@ This document records the framework as currently defined by its author. The name
 
 Science of Consciousness is intended to develop practical, testable, experimentally verifiable knowledge. Its purpose is not to construct systems of belief, religion, philosophy, or abstract speculation detached from observable evidence and real-world application.
 
-Concepts and proposed explanations must be made operational wherever possible: their meaning, observable indicators, measurement methods, and conditions for testing should be defined. A hypothesis may be used as a provisional, testable starting point, but it is not an established finding merely because it has been proposed. Claims should remain open to testing, independent verification, challenge, and revision.
+Work should progress from an **idea** to a clearly defined **concept**, then to a **proof of concept (PoC) using a defined measurement method**. The measurement method must specify the observable indicators, variables, instruments or procedures, calibration, and conditions of measurement. A PoC provides an initial demonstration that the concept can be investigated or measured; it is not, by itself, proof that the broader concept or explanation is established. The work then proceeds through controlled experimental results, reproducibility or independent verification, and evaluation of practical application. Findings remain open to challenge and revision.
 
 The working methodology is guided by five principles:
 
@@ -26,12 +26,13 @@ Measurements should distinguish directly observed signals from estimates or inte
 
 Every team member, contributor, researcher, and AI assistant working on this project must follow the scientific scope and five principles above. These are working standards for the whole team, not optional writing preferences.
 
-The team must keep the following distinctions clear:
+The team must keep the following stages distinct:
 
-- **Concept:** An idea or term proposed for investigation. A clearly named concept is not, by itself, evidence that the described phenomenon exists.
-- **Hypothesis:** A provisional explanation or prediction that can be tested. It must not be presented as a demonstrated result.
+- **Idea:** An initial observation, question, possibility, or proposed direction for investigation.
+- **Concept:** A clearly described idea with defined meaning and scope. Naming a concept does not, by itself, demonstrate that the described phenomenon exists.
 - **Measurement method:** A defined procedure specifying what is observed, which instruments or sensors are used, how data are collected and calibrated, and how uncertainty is handled.
-- **Experimental result:** An outcome obtained under stated experimental conditions. Report what was observed, including limitations and results that do not support the hypothesis.
+- **Proof of concept (PoC):** An initial measurement-based demonstration that the concept can be operationalized or investigated using the defined method. State exactly what the PoC demonstrates and what it does not demonstrate.
+- **Experimental result:** An outcome obtained under stated experimental conditions. Report what was observed, including limitations and unexpected or contrary results.
 - **Reproduced or independently verified result:** A result that has been tested again, ideally by independent people or teams, using sufficiently documented methods.
 - **Practical application:** A method or finding whose real-world usefulness has been evaluated. Do not claim effectiveness beyond what the evidence supports.
 
@@ -47,7 +48,7 @@ Before presenting a claim as scientific knowledge, contributors should be able t
 6. What are the uncertainty, limitations, and alternative explanations?
 7. What practical use is demonstrated, if any?
 
-If these questions cannot yet be answered, label the work accurately as a concept, proposal, or hypothesis, and identify what needs to be developed or tested next. Do not fill gaps with confident wording, invented precision, appeals to authority, or belief.
+If these questions cannot yet be answered, label the work accurately as an idea, concept, measurement-method proposal, or preliminary PoC, and identify the next stage of work needed. Do not fill gaps with confident wording, invented precision, appeals to authority, or belief.
 
 The team should neither accept nor reject a claim solely because it agrees or disagrees with existing beliefs, theories, philosophies, or expectations. Evaluate it through transparent methods and evidence. Unexpected observations should be documented and investigated carefully; they should not be turned into conclusions before they have been tested.
 
