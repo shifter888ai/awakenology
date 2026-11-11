@@ -42,6 +42,21 @@ class LiveSeoParserTests(unittest.TestCase):
         self.assertEqual(parser.desc, [""])
         self.assertEqual(parser.og["og:image"], ["", "https://example.com/image.jpg"])
 
+    def test_pr_source_only_route_does_not_require_worker_injected_open_graph_tags(self):
+        parser = self.parse(
+            '<html lang="ja"><head><title>破壊は一瞬</title>'
+            '<meta name="description" content="記事の説明">'
+            '<link rel="canonical" href="https://awakenology.space/example/">'
+            '</head><body></body></html>'
+        )
+        self.assertEqual(
+            AUDIT.open_graph_errors(parser, "https://awakenology.space/example/", source_only=True),
+            [],
+        )
+        live_errors = AUDIT.open_graph_errors(parser, "https://awakenology.space/example/")
+        self.assertIn("og:title-count-0", live_errors)
+        self.assertIn("og:image-not-absolute", live_errors)
+
     def test_ignores_metadata_after_head(self):
         parser = self.parse(
             '<html lang="en"><head><title>Page</title></head>'
