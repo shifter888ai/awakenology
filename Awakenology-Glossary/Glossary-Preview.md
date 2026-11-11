@@ -40,9 +40,9 @@
 
 **EN:** Awakenology is exclusively dedicated to understanding and addressing the problem of Hypnotic Reincarnation. It studies hypnosis, consciousness and related mechanisms only insofar as they are relevant to understanding Hypnotic Reincarnation and developing effective methodologies for exiting it. Awakenology is not a general study of hypnosis or de-hypnosis, and it is not opposed to legitimate hypnosis or hypnotherapy.
 
-**日本語:** 催醒学と催醒法は、「催眠輪廻」の問題を理解し、その解決に取り組むことだけを目的とします。催眠、意識および関連するメカニズムについては、催眠輪廻の理解と、そこから抜け出すための有効な方法の開発に関係する範囲に限って研究します。催醒学と催醒法は、一般的な催眠や脱催眠の研究ではなく、正当な催眠や催眠療法に反対するものでもありません。
+**日本語:** Awakenologyは、「催眠輪廻」の問題を理解し、その解決に取り組むことを目的とする包括的な枠組みです。催眠、意識および関連するメカニズムは、催眠輪廻を理解し、そこからの離脱方法を開発するために必要な範囲で研究します。その主要分野がExincarnology（エクスインカルノロジー）、実践方法がExincarna（エクスインカルナ）です。Awakenologyは一般的な催眠や脱催眠の研究ではなく、正当な催眠や催眠療法に反対するものでもありません。
 
-**繁體中文:** 催醒學與催醒法專注於理解及解決「催眠輪迴」的問題。研究催眠、意識及相關機制，僅限於這些內容有助於理解催眠輪迴，以及發展有效的退出方法。催醒學與催醒法並非一般性的催眠或解除催眠研究，也不反對正當的催眠及催眠治療。
+**繁體中文:** Awakenology 是以理解及處理「催眠輪迴」問題為核心的整體架構。研究催眠、意識及相關機制，僅限於有助於理解催眠輪迴及發展脫離方法的範圍。其主要專業分支為 Exincarnology（暫譯：脫離輪迴學），實踐方法為 Exincarna（脫離輪迴法）。Awakenology 並非一般性的催眠或解除催眠研究，也不反對正當的催眠及催眠治療。
 
 ### Core distinctions / 基本的な区別 / 核心區別
 
@@ -55,7 +55,9 @@
 | Hypnosis | 催眠 | 催眠 | In the Awakenology framework, associated with illusion creation and entering/taking the illusion as real; its framework-specific usage does not replace general psychological definitions. |
 | Dehypnosis | 脱催眠／反催眠 | 反催眠 | 反催眠. Distinct from Awakening / 催醒. |
 | Awakening | 催醒 | 催醒 | The framework's reverse process of identifying and removing distortion and returning toward original consciousness. Do not translate as Dehypnosis. |
-| Awakenology | 催醒学／催醒法 | 催醒學／催醒法 | The umbrella concept encompassing both knowledge/principles and methods/practices. |
+| Awakenology | 催醒学／脱輪廻法（作業訳） | 催醒學／脫離輪迴法 | The umbrella concept encompassing the knowledge/principles of 催醒學 and the practical method Exincarna (脫離輪迴法); Exincarnology is its main professional discipline. |
+| Exincarnology | エクスインカルノロジー | 脫離輪迴學（暫譯） | The main professional discipline and branch of Awakenology, focused on understanding Hypnotic Reincarnation and developing the knowledge and principles needed to end participation in its cycle. |
+| Exincarna | エクスインカルナ | 脫離輪迴法 | The practical method developed within Exincarnology, intended to end participation in the Hypnotic Reincarnation cycle. |
 | Awakenosis | 自己催醒のプロセス | 自我催醒過程 | The process of self-awakening specifically from Hypnotic Reincarnation, with the aim of achieving a successful exit. |
 
 ### Hypnotic Reincarnation and exit terminology / 催眠輪廻と離脱に関する用語 / 催眠輪迴與退出相關術語
@@ -203,6 +205,8 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | Energy Conversion | エネルギー変換 | 能量轉換 | Standard working equivalent. |
 | Entering the Illusion | 幻への没入 | 入幻 | Working translation; entering into the constructed experience and taking it as real. |
 | Entering the Illusion | 幻への没入 | 入幻 | The course pairs this with 当真 / 循环. |
+| Exincarna | エクスインカルナ | 脫離輪迴法 | The practical method developed within Exincarnology, intended to end participation in the Hypnotic Reincarnation cycle. |
+| Exincarnology | エクスインカルノロジー | 脫離輪迴學（暫譯） | The main professional discipline and branch of Awakenology, focused on understanding Hypnotic Reincarnation and developing the knowledge and principles needed to end participation in its cycle. |
 | Entire Universe / All-Universe | 全宇宙 | 全宇宙 | Context-dependent framework term; do not assume it always means multiverse. |
 | Exiting the Cycle / Leaving the Cycle | 輪廻／循環からの離脱 | 脫離輪迴 | Use reincarnation-specific wording only when context warrants it. |
 | Exiting the Illusion | 幻からの退出 | 出幻 | Working translation; leaving or coming out of the illusion/game. |
