@@ -6,6 +6,22 @@
 
 This document records the framework as currently defined by its author. The names and relationships below are framework terminology, not a claim that this is an established mainstream scientific taxonomy.
 
+## Scientific scope and methodology
+
+Science of Consciousness is intended to develop practical, testable, experimentally verifiable knowledge. Its purpose is not to construct systems of belief, religion, philosophy, or abstract speculation detached from observable evidence and real-world application.
+
+Concepts and proposed explanations must be made operational wherever possible: their meaning, observable indicators, measurement methods, and conditions for testing should be defined. A hypothesis may be used as a provisional, testable starting point, but it is not an established finding merely because it has been proposed. Claims should remain open to testing, independent verification, challenge, and revision.
+
+The working methodology is guided by five principles:
+
+1. **Quantifiable:** Define what is being measured.
+2. **Measurable:** Identify observable signals and measurable variables.
+3. **Experimental:** Design experiments that can test the proposed relationships.
+4. **Reproducible:** Allow independent experiments to verify or challenge results.
+5. **Practical:** Produce knowledge that can be applied in the real world.
+
+Measurements should distinguish directly observed signals from estimates or interpretations derived from them. Where sensors and assessment systems are used, the operational definitions, calibration, uncertainty, and limits of inference should be made explicit. The goal is to develop methods that can be examined through real-world experiments rather than asking readers to accept claims on belief or authority.
+
 ## 1. Four fields of Science of Consciousness
 
 1. **Frequency of Consciousness**
