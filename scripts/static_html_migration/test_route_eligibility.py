@@ -13,7 +13,7 @@ def xml(*paths):
 class RouteEligibilityTests(unittest.TestCase):
     def setUp(self):
         self.config = {"schema": 1, "mode": "report-only", "routes": []}
-        self.tracked = ["index.html", "Chinese/index.html", "New-Article/index.html",
+        self.tracked = ["index.html", "Chinese/index.html", "Internal/New-Article/index.html",
                         "ai-search/index.html", "editor/index.html", "editor/generator.html", "404.html"]
         self.sitemap = {"/", "/Chinese/"}
 
@@ -38,14 +38,15 @@ class RouteEligibilityTests(unittest.TestCase):
             classify(self.tracked, self.sitemap, self.config)
 
     def test_shared_exclusion_policy_covers_draft_and_dynamic_routes(self):
-        for path in ("New-Article/index.html", "new-article/index.html",
+        for path in ("Internal/New-Article/index.html", "internal/new-article/index.html",
+                     "New-Article/index.html", "new-article/index.html",
                      "ai-search/index.html", "AI-SEARCH/index.html"):
             with self.subTest(path=path):
                 self.assertTrue(is_excluded_html_path(path))
         self.assertFalse(is_excluded_html_path("Chinese/index.html"))
 
     def test_private_and_dynamic_routes_fail(self):
-        for route in ("/editor/", "/github-editor/", "/New-Article/", "/ai-search/",
+        for route in ("/editor/", "/github-editor/", "/Internal/New-Article/", "/New-Article/", "/ai-search/",
                       "/api/", "/oauth/", "/Editor/", "/404/"):
             with self.subTest(route=route), self.assertRaises(ValueError):
                 validate_route(route)
