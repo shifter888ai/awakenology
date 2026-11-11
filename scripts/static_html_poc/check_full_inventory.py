@@ -52,7 +52,7 @@ def classify_public_html_paths(paths):
  return transformable,excluded,blocked,standalone
 
 def public_sources():
- raw=subprocess.check_output(["git","ls-files","-z","--","*.html"],cwd=ROOT).decode("utf-8").split("\\0")
+ raw=subprocess.check_output(["git","ls-files","-z","--","*.html"],cwd=ROOT).decode("utf-8").split("\0")
  transformable,excluded,blocked,standalone=classify_public_html_paths(raw)
  for record in blocked+standalone:
   actual=git_blob_sha((ROOT/record["path"]).read_bytes())
