@@ -18,21 +18,21 @@ permissions:
   contents: read
 jobs:
   parity:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
       - run: python -m pip install beautifulsoup4
       - run: python -m unittest discover -s scripts/static_html_poc -p 'test_*.py' -v
       - run: python scripts/static_html_poc/check_real_pages.py
   full-inventory:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: parity
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
       - run: python -m pip install beautifulsoup4
@@ -54,10 +54,10 @@ jobs:
   live-worker-signature:
     if: github.event_name == 'workflow_dispatch' && inputs.run_live_checks == true
     needs: parity
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
       - run: python -m pip install beautifulsoup4
@@ -66,10 +66,10 @@ jobs:
   runtime-contract:
     if: github.event_name == 'workflow_dispatch' && inputs.run_live_checks == true
     needs: full-inventory
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
       - run: python -m pip install beautifulsoup4
@@ -84,11 +84,11 @@ jobs:
           if-no-files-found: warn
   browser-parity:
     if: github.event_name == 'workflow_dispatch' && inputs.run_live_checks == true
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: parity
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
       - run: python -m pip install beautifulsoup4 playwright pillow numpy
