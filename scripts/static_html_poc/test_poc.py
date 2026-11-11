@@ -202,7 +202,7 @@ class ParityTests(unittest.TestCase):
         from xml.etree import ElementTree
         from bs4 import BeautifulSoup
         root = Path(__file__).resolve().parents[2]
-        source = BeautifulSoup((root / "New-Article/index.html").read_text(encoding="utf-8"), "html.parser")
+        source = BeautifulSoup((root / "Internal/New-Article/index.html").read_text(encoding="utf-8"), "html.parser")
         robots = source.head.find("meta", attrs={"name": "robots"})
         self.assertEqual(robots.get("content"), "noindex,nofollow")
         self.assertTrue(rules_for("/New-Article/").noindex)
