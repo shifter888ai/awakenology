@@ -14,7 +14,7 @@ PRIVATE_PREFIXES=("api/","editor/","github-editor/","scripts/","tests/","docs/",
 ASSET_ATTRS={"img":"src","script":"src","source":"src","video":"src","audio":"src","iframe":"src"}
 
 def tracked_files():
- return {p for p in subprocess.check_output(["git","ls-files","-z"],cwd=ROOT).decode("utf-8").split("\\0") if p}
+ return {p for p in subprocess.check_output(["git","ls-files","-z"],cwd=ROOT).decode("utf-8").split("\0") if p}
 
 def local_asset_references(html,tracked,route):
  soup=BeautifulSoup(html,"html.parser"); refs=[]
