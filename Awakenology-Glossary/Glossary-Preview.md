@@ -55,7 +55,7 @@
 | Hypnosis | 催眠 | 催眠 | In the Awakenology framework, associated with illusion creation and entering/taking the illusion as real; its framework-specific usage does not replace general psychological definitions. |
 | Dehypnosis | 脱催眠／反催眠 | 反催眠 | 反催眠. Distinct from Awakening / 催醒. |
 | Awakening | 催醒 | 催醒 | The framework's reverse process of identifying and removing distortion and returning toward original consciousness. Do not translate as Dehypnosis. |
-| Awakenology | 催醒学／脱輪廻法（作業訳） | 催醒學／脫離輪迴法 | The umbrella concept encompassing the knowledge/principles of 催醒學 and the practical method Exincarna (脫離輪迴法); Exincarnology is its main professional discipline. |
+| Awakenology | 催醒学＋エクスインカルナ（作業訳） | 催醒學＋脫離輪迴法 | The umbrella concept encompassing the knowledge/principles of 催醒學 and the practical method Exincarna (脫離輪迴法); Exincarnology is its main professional discipline. |
 | Exincarnology | エクスインカルノロジー | 脫離輪迴學（暫譯） | The main professional discipline and branch of Awakenology, focused on understanding Hypnotic Reincarnation and developing the knowledge and principles needed to end participation in its cycle. |
 | Exincarna | エクスインカルナ | 脫離輪迴法 | The practical method developed within Exincarnology, intended to end participation in the Hypnotic Reincarnation cycle. |
 | Awakenosis | 自己催醒のプロセス | 自我催醒過程 | The process of self-awakening specifically from Hypnotic Reincarnation, with the aim of achieving a successful exit. |
@@ -154,7 +154,7 @@ All entries are sorted together by the English term. Japanese and Traditional Ch
 | Autonomous Consciousness | 自律意識 | 自主意識 | Contrasted in the materials with 自动意识. |
 | Autonomous Consciousness vs Automatic Consciousness | 自律意識 対 自動意識 | 自主意識 vs 自動意識 | Preserve this explicit contrast. |
 | Average Fluctuation Range | 平均変動範囲 | 平均波動範圍 | Working translation. |
-| Awakenology | 催醒學／催醒法 | 催醒學／催醒法 | Umbrella concept encompassing both knowledge and principles (催醒學) and methods and practices (催醒法); neither is subordinate. |
+| Awakenology | 催醒学＋エクスインカルナ（作業訳） | 催醒學＋脫離輪迴法 | The umbrella concept encompassing 催醒學 (knowledge and principles) and Exincarna (脫離輪迴法, the practical method); Exincarnology is its main professional discipline. |
 | Awakenosis | 催醒過程（自我催醒） | 催醒過程（自我催醒） | The process of self-awakening specifically from Hypnotic Reincarnation, working to overcome its hypnotized condition and achieve a successful exit. Objective observation is relevant but is not the complete definition. |
 | Awakenosis Cycle | 催醒プロセスの循環 | 催醒過程循環 | Provisional; use only where the source explicitly describes a recurring Awakenosis process. |
 | Awakenosis Mechanism | 催醒のメカニズム | 催醒機制 | Mechanism of the Awakening process; distinguish from Dehypnosis. |
