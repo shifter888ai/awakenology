@@ -12,8 +12,8 @@ from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[2]
 EXCLUDED = {"404.html", "ai-search/index.html", "editor/index.html",
-            "github-editor/index.html", "New-Article/index.html"}
-PREFIXES = ("editor/", "github-editor/", "scripts/", "tests/", "docs/", ".github/")
+            "github-editor/index.html", "Internal/New-Article/index.html"}
+PREFIXES = ("editor/", "github-editor/", "Internal/", "scripts/", "tests/", "docs/", ".github/")
 DOMAIN = "https://awakenology.space"
 errors = []
 
@@ -35,7 +35,7 @@ tracked = subprocess.check_output(["git", "ls-files", "-z", "--", "*.html"], cwd
 public = sorted(p for p in tracked if p and p.endswith("/index.html") or p == "index.html")
 public = [p for p in public if p not in EXCLUDED and not p.startswith(PREFIXES)]
 require("index.html" in public, "Homepage missing")
-require("New-Article/index.html" in tracked, "Draft exclusion must remain explicit")
+require("Internal/New-Article/index.html" in tracked, "Internal test fixture must remain tracked but excluded")
 require("editor/index.html" in tracked, "Private editor exclusion must remain explicit")
 routes = {"/" if p == "index.html" else "/" + p[:-len("index.html")] for p in public}
 try:
