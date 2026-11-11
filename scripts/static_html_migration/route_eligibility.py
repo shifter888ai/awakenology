@@ -13,7 +13,7 @@ SITE = "https://awakenology.space"
 CONFIG = ROOT / "scripts/static_html_migration/static-route-allowlist.json"
 REPORT = ROOT / "static-route-eligibility-report.json"
 BLOCKED_PREFIXES = (
-    "/editor/", "/github-editor/", "/internal/", "/new-article/", "/ai-search/",
+    "/editor/", "/github-editor/", "/internal/", "/new-article/", "/ai-search/", "/search/", "/ask/",
     "/api/", "/auth/", "/oauth/", "/callback/", "/scripts/",
     "/tests/", "/docs/", "/.github/", "/404/",
 )
