@@ -10,7 +10,7 @@ from page_rules import rules_for
 from parity_validator import validate,validate_metadata
 
 REPORT=ROOT/"static-html-staging-report.json"
-PRIVATE_PREFIXES=("api/","editor/","github-editor/","scripts/","tests/","docs/",".github/")
+PRIVATE_PREFIXES=("api/","editor/","github-editor/","scripts/","tests/","docs/",".github/","internal/","new-article/")
 ASSET_ATTRS={"img":"src","script":"src","source":"src","video":"src","audio":"src","iframe":"src"}
 
 def tracked_files():
@@ -59,9 +59,9 @@ def main():
   staged_routes=["/" if p=="index.html" else "/"+p[:-len("index.html")] for p in staged_html]
   validate_public_html_manifest(staged_routes)
   if staged_html!=sorted(paths): raise AssertionError("staging output route set differs from supported public source route set")
-  forbidden=[p for p in staged_html if p.startswith(PRIVATE_PREFIXES) or p=="404.html"]
+  forbidden=[p for p in staged_html if p.casefold().startswith(PRIVATE_PREFIXES) or p.casefold()=="404.html"]
   if forbidden: raise AssertionError(f"private or excluded HTML entered staging output: {forbidden}")
-  if any(p.startswith(("editor/","github-editor/")) for p in staged_html): raise AssertionError("Editor/Generator HTML leaked into public staging output")
+  if any(p.casefold().startswith(("editor/","github-editor/")) for p in staged_html): raise AssertionError("Editor/Generator HTML leaked into public staging output")
   report={"scope":"temporary staging build of supported public routes only; known blockers and standalone HTML are not transformed; no deployment, routing, headers or runtime behavior changed",
    "public_source_routes":len(paths)+len(blocked),"transformed_source_routes":len(paths),"staged_html_routes":len(staged_html),
    "blocked_routes":blocked,"standalone_html":standalone,"excluded_html":excluded,"temporary_output_cleaned":True,
