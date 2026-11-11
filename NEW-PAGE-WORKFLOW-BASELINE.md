@@ -63,3 +63,8 @@ Acceptance evidence: Generator fix PR #293 and existing-page fix PR #294 were me
 - An upstream Generator correction does not retroactively repair published pages. Patch affected existing pages separately and minimally; do not silently regenerate approved content.
 - Regression verification must include representative imported dark-blue runs in both themes, preview and generated HTML, and confirm other text/colors remain unchanged. The site owner's live visual acceptance is the final check.
 - Keep the Generator/Editor workflow and the existing publishing approval gates unchanged.
+
+
+## Internal workspace migration (2026-11-11)
+
+The non-production generator fixture has been moved from `New-Article/index.html` to `Internal/New-Article/index.html`. The Editor, Word Generator, and HTML Generator now use the internal path as their default target. `Internal/` and the legacy `New-Article/` path are excluded from Cloudflare asset deployment. This changes only the test-fixture location; the one-document/one-page preview and draft-PR publishing workflow remains unchanged. The historical acceptance record above documents the former `/New-Article/` test route.
