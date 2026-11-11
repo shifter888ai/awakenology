@@ -132,7 +132,17 @@ flowchart TB
 
 Exincarnology names the discipline and practical framework; Exincarnation names the process or achievement it aims at. The term Exincarna is superseded in this terminology structure.
 
-## 5. Naming notes
+## 5. Freedomality terminology and measurement direction
+
+Within the author's current framework, **Soul Nature** is understood as inherently 100% free will, while **Soul Characteristics** may express only a portion of that free will. The terms below describe this proposed framework and research direction; they are not presented as independently validated scientific findings.
+
+- **Freedomality of Consciousness** — The concept/property describing the degree to which an individual's inherent free will is actually expressed through their Soul Characteristics.
+- **Freedomality Index (FI)** — The quantified representation or estimate of Freedomality of Consciousness. Its scale, calculation, aggregation rules, and interpretation remain to be operationally defined and validated; no fixed numerical scale is assumed here.
+- **Freedometry** — A proposed measurement methodology for operationalizing and estimating Freedomality of Consciousness and its Freedomality Index (FI).
+
+A possible research approach is to examine observable signals and derived indicators using Spectrum of Consciousness assessment or sensor systems. The relationship between those measurements and the actualization of free will must be explicitly defined, tested, and independently validated. Direct observations must remain distinct from derived estimates and interpretations. The measurement method, calibration, uncertainty, and limits of inference must be documented before an FI value is treated as a reliable measurement.
+
+## 6. Naming notes
 
 - The Chinese terminology explicitly established so far is retained as written above.
 - No Chinese name is assigned here to **Science of Consciousness** or **Spectrum of Things**; do not invent or standardize one without the author's direction.
@@ -140,7 +150,7 @@ Exincarnology names the discipline and practical framework; Exincarnation names 
 - Keep **Strength of Consciousness** connected to both parent branches in diagrams, indexes, and explanatory text.
 - The four fields are presented as the author's proposed structure within this framework.
 
-## 6. Current structure at a glance
+## 7. Current structure at a glance
 
 - **Foundational science:** Science of Consciousness
 - **Fields:** Frequency, Spectrum, Entropy, and Freedom of Consciousness
