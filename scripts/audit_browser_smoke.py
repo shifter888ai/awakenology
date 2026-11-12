@@ -64,7 +64,7 @@ def source_language(url):
         source = source_path.read_text(encoding="utf-8")
     except (OSError, UnicodeError):
         return ""
-    match = re.search(r"<html\\b[^>]*\\blang\\s*=\\s*['\\\"]?([a-zA-Z0-9-]+)", source, re.I)
+    match = re.search(r"<html\b[^>]*\blang\s*=\s*['\"]?([a-zA-Z0-9-]+)", source, re.I)
     return match.group(1).lower() if match else ""
 
 def is_chinese_content_route(url):
