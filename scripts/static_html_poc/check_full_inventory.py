@@ -33,7 +33,7 @@ def classify_public_html_paths(paths):
  return transformable,excluded
 
 def public_sources():
- raw=subprocess.check_output(["git","ls-files","-z","--","*.html"],cwd=ROOT).decode("utf-8").split("\\0")
+ raw=subprocess.check_output(["git","ls-files","-z","--","*.html"],cwd=ROOT).decode("utf-8").split("\0")
  return classify_public_html_paths(raw)
 
 def main():
