@@ -12,16 +12,6 @@ from parity_validator import validate, validate_metadata, fingerprint
 PRIVATE_PREFIXES=("api/","editor/","github-editor/","scripts/","tests/","docs/",".github/","internal/","new-article/")
 PRIVATE_NAMES={"404.html"}
 REPORT=ROOT/"static-html-full-inventory-report.json"
-KNOWN_STANDALONE_HTML={
- "Roswell/Roswell.html":{
-  "source_git_blob_sha":"8c61758277760518346d95cbb1dcab465f7a0c28",
-  "reason":"Standalone PDF-derived HTML resource, not an index route or canonical sitemap route; preserve unchanged and exclude from page transformation."
- }
-}
-
-def git_blob_sha(blob):
- return hashlib.sha1(b"blob "+str(len(blob)).encode("ascii")+bytes([0])+blob).hexdigest()
-
 WORKER_ONLY_ROUTE_PREFIXES=("/api/",)
 
 def validate_public_html_manifest(routes):
@@ -31,34 +21,23 @@ def validate_public_html_manifest(routes):
  return True
 
 def classify_public_html_paths(paths):
- transformable,excluded,blocked,standalone=[],[],[],[]
+ transformable,excluded=[],[]
  for path in sorted(filter(None,paths)):
   normalized=path.replace("\\","/").casefold()
   if normalized.startswith(PRIVATE_PREFIXES) or normalized in {name.casefold() for name in PRIVATE_NAMES}: excluded.append(path)
-  elif path in KNOWN_STANDALONE_HTML: standalone.append({"path":path,**KNOWN_STANDALONE_HTML[path]})
   elif path=="index.html" or path.endswith("/index.html"): transformable.append(path)
   else: raise AssertionError(f"Unclassified public HTML file: {path}")
  if not transformable or "index.html" not in transformable: raise AssertionError("Public route inventory is empty or missing homepage")
  required={"editor/index.html","editor/generator.html","editor/html-generator.html","Internal/New-Article/index.html"}
  if not required.issubset(set(excluded)): raise AssertionError("Expected private editor/generator files absent from exclusions")
- return transformable,excluded,blocked,standalone
+ return transformable,excluded
 
 def public_sources():
- raw=subprocess.check_output(["git","ls-files","-z","--","*.html"],cwd=ROOT).decode("utf-8").split("\0")
- transformable,excluded,blocked,standalone=classify_public_html_paths(raw)
- for record in blocked+standalone:
-  actual=git_blob_sha((ROOT/record["path"]).read_bytes())
-  if actual!=record["source_git_blob_sha"]:
-   raise AssertionError(f"Known Roswell source changed; review classification: {record['path']}: {actual}")
- sitemap=(ROOT/"sitemap.xml").read_text(encoding="utf-8")
- if blocked and "https://awakenology.space/Roswell/" not in sitemap:
-  raise AssertionError("Known blocked /Roswell/ route is no longer in the canonical sitemap")
- if standalone and "https://awakenology.space/Roswell/Roswell.html" in sitemap:
-  raise AssertionError("Roswell/Roswell.html became a sitemap route; review classification")
- return transformable,excluded,blocked,standalone
+ raw=subprocess.check_output(["git","ls-files","-z","--","*.html"],cwd=ROOT).decode("utf-8").split("\\0")
+ return classify_public_html_paths(raw)
 
 def main():
- paths,excluded,blocked,standalone=public_sources()
+ paths,excluded=public_sources()
  routes,failures=[],[]
  for path in paths:
   route="/" if path=="index.html" else "/"+path[:-len("index.html")]
@@ -85,11 +64,11 @@ def main():
        "built_context":right[max(0,x-90):min(len(right),y+90)],"source_length":len(left),"built_length":len(right)}
    failures.append(detail); print(f"FAIL {path}: {error}",flush=True)
  validate_public_html_manifest([item["route"] for item in routes])
- report={"scope":"offline source/build validation of supported public index routes; known blockers and standalone HTML are reported, not transformed; no Worker or browser parity claim",
-  "public_index_routes":len(paths)+len(blocked),"transformed_routes":len(routes),"blocked_routes":blocked,"standalone_html":standalone,
-  "excluded_html":excluded,"migration_ready":not failures and not blocked and not standalone,"routes":routes,"failures":failures}
+ report={"scope":"offline source/build validation of supported public index routes; unclassified public HTML fails closed; no Worker or browser parity claim",
+  "public_index_routes":len(paths),"transformed_routes":len(routes),
+  "excluded_html":excluded,"supported_route_build_complete":not failures and len(routes)==len(paths),"routes":routes,"failures":failures}
  REPORT.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
  if failures: raise SystemExit(f"{len(failures)} of {len(paths)} supported public routes failed; report written; no deployment authorized")
- print(f"PASS: {len(routes)}/{len(paths)} supported routes validated; {len(blocked)} known public route blocker(s) and {len(standalone)} standalone HTML resource(s) remain explicitly untransformed.")
+ print(f"PASS: {len(routes)}/{len(paths)} supported public index routes validated.")
 
 if __name__=="__main__": main()

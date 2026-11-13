@@ -42,7 +42,7 @@ def local_asset_references(html,tracked,route):
  return failures
 
 def main():
- paths,excluded,blocked,standalone=public_sources(); tracked=tracked_files()
+ paths,excluded=public_sources(); tracked=tracked_files()
  built_routes,asset_failures=[],[]
  with tempfile.TemporaryDirectory(prefix="awakenology-static-staging-") as temp:
   output=Path(temp)
@@ -62,14 +62,14 @@ def main():
   forbidden=[p for p in staged_html if p.casefold().startswith(PRIVATE_PREFIXES) or p.casefold()=="404.html"]
   if forbidden: raise AssertionError(f"private or excluded HTML entered staging output: {forbidden}")
   if any(p.casefold().startswith(("editor/","github-editor/")) for p in staged_html): raise AssertionError("Editor/Generator HTML leaked into public staging output")
-  report={"scope":"temporary staging build of supported public routes only; known blockers and standalone HTML are not transformed; no deployment, routing, headers or runtime behavior changed",
-   "public_source_routes":len(paths)+len(blocked),"transformed_source_routes":len(paths),"staged_html_routes":len(staged_html),
-   "blocked_routes":blocked,"standalone_html":standalone,"excluded_html":excluded,"temporary_output_cleaned":True,
-   "non_html_assets_copied":False,"worker_only_route_prefixes_excluded":["/api/"],"migration_ready":not blocked and not standalone,
+  report={"scope":"temporary staging build of supported public index routes only; unclassified public HTML fails closed; no deployment, routing, headers or runtime behavior changed",
+   "public_source_routes":len(paths),"transformed_source_routes":len(paths),"staged_html_routes":len(staged_html),
+   "excluded_html":excluded,"temporary_output_cleaned":True,
+   "non_html_assets_copied":False,"worker_only_route_prefixes_excluded":["/api/"],"supported_route_build_complete":not asset_failures and len(staged_html)==len(paths),
    "asset_check":"local HTML asset references checked against tracked repository files; remote/data URLs excluded",
    "local_asset_failures":asset_failures,"routes":built_routes}
  REPORT.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
  if asset_failures: raise SystemExit(f"{len(asset_failures)} local asset references failed; report written; no deployment authorized")
- print(f"PASS: {len(staged_html)}/{len(paths)} supported routes staged; {len(blocked)} known public route blocker(s) and {len(standalone)} standalone HTML resource(s) remain untransformed.")
+ print(f"PASS: {len(staged_html)}/{len(paths)} supported public index routes staged.")
 
 if __name__=="__main__": main()

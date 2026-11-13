@@ -2,11 +2,11 @@
 
 This draft branch is isolated from production. It explores moving deterministic HTMLRewriter output to build time. It is **not Worker-equivalent and must not be merged or deployed** as a routing change without explicit approval.
 
-## Current verification baseline (2026-11-11)
+## Current verification baseline (2026-11-13)
 
-This refresh is based on `main` at `a21f339ff5f4cba8f09ddab8dcf8a1e149a23005`. It ports the offline-first validation and Worker-aligned Contact/Disclaimer footer from PR #474, refreshes the Japanese TOC fingerprint, and adds the newly merged `/本源全視点vs個我単一視点/` article as a twelfth pinned fixture.
+This refresh is synchronized with `main` at `e1065236394357cf3910139275bb8d2f744e4bf1`. It ports the offline-first validation and Worker-aligned Contact/Disclaimer footer from PR #474, refreshes the Japanese TOC fingerprint, and adds the newly merged `/本源全視点vs個我単一視点/` article as a twelfth pinned fixture.
 
-The current source tree contains 139 supported public `index.html` routes plus one standalone HTML resource. The latest main change added a semantic `<main>` content scope to `/Roswell/`, so it is now included in the supported-route inventory rather than treated as a blocker. `Roswell/Roswell.html` remains separately classified as a standalone PDF-derived HTML resource, not an index route or sitemap entry; its current raw Git blob fingerprint is pinned and the file remains untouched. The offline diagnostic now validates all 139 supported public index routes and reports the standalone resource separately; `migration_ready=false` remains in place because the standalone resource is intentionally not transformed. Green diagnostic checks do not imply full Worker equivalence.
+The current source tree contains 139 supported public `index.html` routes. PR #494 removed the obsolete standalone `Roswell/Roswell.html` file after `Roswell/index.html` had been separately published; the `/Roswell/` index remains in the 139-route inventory. The offline diagnostic validates all 139 supported public index routes. Its `supported_route_build_complete` flag reports only offline inventory/staging completeness and does not imply Worker equivalence, production readiness, or approval to migrate.
 
 The Contact page remains a twelfth-fixture companion to the source-only `/api/contact` and Turnstile checks. A Worker-only `/api/` prefix is excluded from HTML source classification and temporary staging; the public HTML manifest validator explicitly rejects `/api/contact`, `/api/contact/`, and other `/api/` routes. The Japanese article fixture verifies its `lang=ja`, article Open Graph type, canonical URL, description, hreflang links, and sitemap entry. No original article content, `worker.js`, `wrangler.jsonc`, DNS, or production routing is changed.
 
@@ -14,11 +14,11 @@ The Contact page remains a twelfth-fixture companion to the source-only `/api/co
 
 Twelve pinned source fixtures: homepage, English/Japanese/Chinese language indexes, dedicated Search and Ask pages, Contact, representative Chinese and English articles, the Einstein Protocol Japanese article, and the new Japanese all-perspectives article. Git blob fingerprints are computed from raw repository bytes, preserving legacy line endings. The source-content, image, markup, metadata, reproducibility, and idempotence checks remain fail-closed.
 
-The supported-route inventory transforms `/Roswell/` now that the current source has a semantic `<main>` content scope. `Roswell/Roswell.html` remains a standalone HTML resource rather than an index route; its raw Git blob SHA is pinned and it is reported separately, never transformed. Unknown standalone HTML paths or changes to the known standalone Roswell source fail closed.
+The supported-route inventory transforms `/Roswell/` now that current `main` includes a semantic `<main>` content scope. The obsolete `Roswell/Roswell.html` file is deleted and is not part of the route inventory. Any unclassified public HTML path—including that legacy path if reintroduced—fails closed.
 
 The PoC also tests deliberate content and signature mutations, duplicate canonical and robots metadata, unexpected noindex, Contact/Worker submission boundaries, rejection of Worker-only API routes from the static HTML manifest, and public crawl-inventory exclusions for Editor/Generator. It explicitly treats `/New-Article/` as a noindex experimental route outside the sitemap, alongside Search/Ask utility routes. No private host authentication or production HTTP request is performed by PR-mode checks.
 
-These are limited source/build diagnostics: a matching fixture or footer signature does **not** establish full HTML, JavaScript, HTTP, browser, accessibility, visual, or Worker-route equivalence. The standalone Roswell HTML resource keeps `migration_ready=false`; it remains excluded until a separately reviewed preservation strategy exists.
+These are limited source/build diagnostics: a matching fixture or footer signature does **not** establish full HTML, JavaScript, HTTP, browser, accessibility, visual, or Worker-route equivalence. The `supported_route_build_complete` flag only records offline route inventory/staging completeness; it does not establish Worker, runtime, or browser equivalence and does not authorize migration.
 
 ## Remaining release blockers
 

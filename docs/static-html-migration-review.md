@@ -2,17 +2,17 @@
 
 Status: PROPOSAL ONLY. This work does not authorize merging, staging activation, production cutover, or deployment.
 
-## Current repository baseline (2026-11-12)
+## Current repository baseline (2026-11-13)
 
-- Current `main`: `a21f339ff5f4cba8f09ddab8dcf8a1e149a23005`, including merged PR #482 and the latest Japanese content changes through PR #491.
+- Current `main`: `e1065236394357cf3910139275bb8d2f744e4bf1`, after PR #494 removed the separately published standalone Roswell HTML page; the baseline also includes merged PR #482 and the latest Japanese content changes through PR #491.
 - The offline inventory validates **139 supported public `index.html` routes**. The `/Roswell/` index route is included: current `main` added a semantic `<main>` content scope and SEO metadata, so it is no longer a route blocker.
-- `Roswell/Roswell.html` is one separate standalone PDF-derived HTML resource, not an index route or sitemap entry. Its raw Git blob fingerprint is pinned. The source file remains unchanged and is not passed through the transformer.
-- The inventory reports 139 supported routes, **zero known public index-route blockers**, and the one standalone HTML resource separately. The standalone resource remains outside the index-route staging build, so `migration_ready=false`; a green diagnostic is not a claim that every route is Worker-equivalent.
+- PR #494 deleted `Roswell/Roswell.html` after the separately published `Roswell/index.html` page was confirmed as the retained route. The deleted file is no longer tracked; `Roswell/index.html` remains included in the 139-route inventory.
+- The inventory reports 139 supported public index routes and excludes repository-only/private utility HTML. Its `supported_route_build_complete` flag reports only offline source/build completeness; it is not a claim of Worker equivalence, migration approval, or production readiness.
 - This refresh ports PR #474's offline-first checks and Worker-aligned Contact/Disclaimer footer. It refreshes the Japanese TOC fixture and adds the new Japanese all-perspectives article as a twelfth pinned source fixture.
 - Twelve pinned fixtures cover the homepage, language indexes, Search, Ask, Contact, representative English/Chinese/Japanese articles, and the newly merged Japanese all-perspectives article. The Japanese index hash is refreshed to the current source bytes.
 - Contact runtime contracts remain source-only in PR mode: Search/Ask behavior, the legacy redirect, Contact forms, Turnstile, the Worker `/api/contact` handler, and the current Worker footer are checked locally. A regression test asserts that PR mode makes zero HTTP requests.
 - Worker-only routes under `/api/` are excluded from HTML source classification and temporary staging. The public HTML manifest validator explicitly rejects `/api/contact`, `/api/contact/`, and other `/api/` routes.
-- Latest PR-head validation — `d3cac276b26f8861a3e27a8319dbd66457527e67` (2026-11-12): Static HTML PoC unit tests **34/34 passed**; pinned source fixtures **12/12 passed**; supported-route inventory **139/139 passed**; temporary staging **139/139 routes built**; Content Integrity Gate passed; SEO metadata inventory passed. The Static HTML PoC run is [#270](https://github.com/shifter888ai/awakenology/actions/runs/43197514849), Content Integrity run [#1366](https://github.com/shifter888ai/awakenology/actions/runs/43197514713), and SEO inventory run [#1263](https://github.com/shifter888ai/awakenology/actions/runs/43197515018).
+- The previous PR #492 head passed 34/34 PoC tests, 12/12 pinned fixtures, 139/139 route inventory/staging, Content Integrity Gate, and SEO metadata inventory before PR #494 changed `main`. Those results are historical only; synchronized-branch validation is pending and must be rerun.
 - Live Worker signature, HTTP runtime-contract, and desktop/mobile browser-parity jobs were **skipped by design**, not passed. No production crawl or live parity claim is made. Private Editor/Generator verification, Cloudflare secrets, staging activation, and physical iOS Safari confirmation remain outside this source-only task.
 
 ## Current related PRs and dependencies
@@ -26,7 +26,7 @@ Status: PROPOSAL ONLY. This work does not authorize merging, staging activation,
 
 - Twelve pinned source fixtures are checked against raw Git blob fingerprints, including homepage, language indexes, Search, Ask, and representative English, Japanese, and Traditional Chinese articles.
 - Source preservation, metadata rules, deliberate mutation detection, deterministic transformation, idempotence, and local asset references are tested.
-- The supported public index routes, including `/Roswell/`, are classified before transformation and built into temporary staging. The standalone `Roswell/Roswell.html` resource is reported separately and is not transformed.
+- All supported public index routes, including `/Roswell/`, are classified before transformation and built into temporary staging. The deleted `Roswell/Roswell.html` path is not part of the source tree; if reintroduced as an unclassified public HTML file, the inventory fails closed.
 - `/New-Article/` is explicitly treated as a noindex experimental route without a canonical URL and remains outside the sitemap. Repository-only `Internal/` and legacy `New-Article/` generator fixtures are excluded from the public route inventory and staging.
 - Pull-request runtime-contract validation is source-only and has six local contracts plus a regression test proving it makes zero HTTP requests. A separate manifest guard rejects Worker-only `/api/` routes, including `/api/contact`, from static HTML output.
 
