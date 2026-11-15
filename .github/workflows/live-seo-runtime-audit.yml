@@ -13,6 +13,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      run_full_audit:
+        description: 'Run all production routes and resources instead of the default bounded sample'
+        required: false
+        default: false
+        type: boolean
   schedule:
     - cron: "17 3 * * *"
 permissions:
@@ -48,7 +54,7 @@ jobs:
       - name: Audit live references and assets
         if: always() && hashFiles('site-integrity-report.csv') != ''
         env:
-          FULL_LIVE_AUDIT: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+          FULL_LIVE_AUDIT: ${{ github.event_name == 'workflow_dispatch' && inputs.run_full_audit == true }}
         run: |
           if [ "$FULL_LIVE_AUDIT" = "true" ]; then
             python3 scripts/audit_live_links_assets.py
@@ -64,7 +70,7 @@ jobs:
       - name: Audit production-rendered metadata
         if: always()
         env:
-          FULL_LIVE_AUDIT: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+          FULL_LIVE_AUDIT: ${{ github.event_name == 'workflow_dispatch' && inputs.run_full_audit == true }}
         run: |
           if [ "$FULL_LIVE_AUDIT" = "true" ]; then
             python3 scripts/audit_live_seo.py
@@ -74,7 +80,7 @@ jobs:
       - name: Audit live pages in Chromium
         if: always()
         env:
-          FULL_LIVE_AUDIT: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+          FULL_LIVE_AUDIT: ${{ github.event_name == 'workflow_dispatch' && inputs.run_full_audit == true }}
         run: |
           if [ "$FULL_LIVE_AUDIT" = "true" ]; then
             python3 scripts/audit_browser_smoke.py --screenshots
@@ -84,7 +90,7 @@ jobs:
       - name: Audit rendered accessibility and keyboard focus
         if: always()
         env:
-          FULL_LIVE_AUDIT: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+          FULL_LIVE_AUDIT: ${{ github.event_name == 'workflow_dispatch' && inputs.run_full_audit == true }}
         run: |
           if [ "$FULL_LIVE_AUDIT" = "true" ]; then
             python3 scripts/audit_browser_accessibility.py
