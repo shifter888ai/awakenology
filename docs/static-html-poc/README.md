@@ -1,3 +1,7 @@
+## Synchronization refresh (2026-11-15)
+
+This branch now includes the current `main` at `76da108efdd330152d692a4ef4a929c57fbacecf` (PRs #493 and #495 merged), plus the isolated static-HTML PoC changes. The synchronization commit is `7a254863df3526ba8b1efa68a16acc5dc4f5907b`; the branch is 29 commits ahead and 0 behind `main`. The Live SEO workflow retains PR #495's bounded defaults and explicit manual full-scan opt-in while preserving this PoC's offline-only path filters. PR #492 CI on this synchronized head passed Content Integrity, SEO metadata inventory, and the isolated Static HTML PoC workflow. These checks do not authorize Worker replacement, deployment, or production cutover.
+
 # Static HTML build-parity PoC (non-deployed)
 
 This draft branch is isolated from production. It explores moving deterministic HTMLRewriter output to build time. It is **not Worker-equivalent and must not be merged or deployed** as a routing change without explicit approval.
