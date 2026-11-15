@@ -1,3 +1,11 @@
+## Repository synchronization (2026-11-15)
+
+- Current `main`: `76da108efdd330152d692a4ef4a929c57fbacecf` (PRs #493 and #495 merged).
+- PR #492 synchronization commit: `7a254863df3526ba8b1efa68a16acc5dc4f5907b`; 29 commits ahead, 0 behind `main`.
+- The merged baseline includes the TC/ST and theme-toggle regression checks from #493 and bounded scheduled Live SEO audits with explicit manual full-scan opt-in from #495.
+- PR #492 CI on the synchronized head passed Content Integrity, SEO metadata inventory, and isolated Static HTML PoC checks.
+- This remains an offline, review-only PoC. No production cutover or deployment is authorized by these results.
+
 # Static HTML migration — review-only gate
 
 Status: PROPOSAL ONLY. This work does not authorize merging, staging activation, production cutover, or deployment.
