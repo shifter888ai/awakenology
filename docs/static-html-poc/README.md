@@ -1,3 +1,10 @@
+## Offline fixture expansion (2026-11-16)
+
+- Expanded the pinned real-source fixture set from 12 to 15 routes.
+- Added both legacy opaque-article routes, `SoC-AssessPoints-3-Spiritual-Connection-Area/` and `SoC-AssessPoints-4-Thought-Expansion-Area/`, plus the large Traditional Chinese article `意識強度是什麽/`.
+- Each added fixture is pinned to its current-main Git blob SHA and passes through the existing content, image, markup, metadata, reproducibility, and idempotence checks.
+- This remains offline source/build validation only. It does not establish live Worker, browser, private-host, visual, or production equivalence.
+
 ## Synchronization refresh (2026-11-15)
 
 This branch now includes the current `main` at `76da108efdd330152d692a4ef4a929c57fbacecf` (PRs #493 and #495 merged), plus the isolated static-HTML PoC changes. The synchronization commit is `7a254863df3526ba8b1efa68a16acc5dc4f5907b`; the branch is 29 commits ahead and 0 behind `main`. The Live SEO workflow retains PR #495's bounded defaults and explicit manual full-scan opt-in while preserving this PoC's offline-only path filters. PR #492 CI on this synchronized head passed Content Integrity, SEO metadata inventory, and the isolated Static HTML PoC workflow. These checks do not authorize Worker replacement, deployment, or production cutover.
