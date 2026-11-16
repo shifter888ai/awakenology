@@ -19,7 +19,13 @@ class ProductionDeployApprovalPolicyTests(unittest.TestCase):
         self.assertIn("confirm_production_deploy:", self.source)
         self.assertIn("default: false", self.source)
         self.assertIn("type: boolean", self.source)
-        self.assertIn("if: ${{ inputs.confirm_production_deploy == true }}", self.source)
+        self.assertIn("if: ${{ github.event_name == 'workflow_dispatch' && inputs.confirm_production_deploy == true }}", self.source)
+
+    def test_deployment_policy_tests_run_on_relevant_pull_requests(self):
+        self.assertIn("pull_request:", self.source)
+        self.assertIn("policy-test:", self.source)
+        self.assertIn("if: github.event_name == 'pull_request'", self.source)
+        self.assertIn("python -m unittest discover -s tests -p 'test_deploy_workflow_policy.py' -v", self.source)
 
     def test_cloudflare_deploy_action_is_retained(self):
         self.assertIn("cloudflare/wrangler-action@v4", self.source)
