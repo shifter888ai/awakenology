@@ -4,6 +4,7 @@
 - Added both legacy opaque-article routes, `SoC-AssessPoints-3-Spiritual-Connection-Area/` and `SoC-AssessPoints-4-Thought-Expansion-Area/`, plus the large Traditional Chinese article `意識強度是什麽/`.
 - Each added fixture is pinned to its current-main Git blob SHA and passes through the existing content, image, markup, metadata, reproducibility, and idempotence checks.
 - This remains offline source/build validation only. It does not establish live Worker, browser, private-host, visual, or production equivalence.
+- Validation on code commit `eea32a861ae3389b477a7428e67e60dc43d1ffb2`: 34 unit tests, 15/15 pinned fixtures, 139/139 supported-route inventory, and 139/139 temporary staging routes passed; Content Integrity and SEO metadata checks also passed. Live Worker signature, HTTP runtime-contract, and browser-parity jobs were skipped by design.
 
 ## Synchronization refresh (2026-11-15)
 
