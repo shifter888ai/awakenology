@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - '.github/workflows/deploy.yml'
+      - '.github/workflows/live-seo-runtime-audit.yml'
       - 'tests/test_deploy_workflow_policy.py'
   workflow_dispatch:
     inputs:
