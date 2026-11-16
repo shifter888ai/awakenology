@@ -18,6 +18,9 @@ FIXTURES = {
     "/與退化派對話8/": ("與退化派對話8/index.html", "bc62b6b2266c4b826a12168237294062352a4d53"),
     "/What-Is-Hypnosis/": ("What-Is-Hypnosis/index.html", "dfd2e93bdfc9ce51d05e59423f071cc98a3d8220"),
     "/アインシュタイン協議百年催眠実験/": ("アインシュタイン協議百年催眠実験/index.html", "29cfb52a5143ceb42f966b9c525d5340de9b8095"),
+    "/SoC-AssessPoints-3-Spiritual-Connection-Area/": ("SoC-AssessPoints-3-Spiritual-Connection-Area/index.html", "0de56be232edf950fe94a864ce09793cb099dc3d"),
+    "/SoC-AssessPoints-4-Thought-Expansion-Area/": ("SoC-AssessPoints-4-Thought-Expansion-Area/index.html", "6a4cf9972e976f51d79485e019b479ed2d9e28f8"),
+    "/意識強度是什麽/": ("意識強度是什麽/index.html", "c594ffc508642d49525f5b455c3d68af6ac3ea28"),
 }
 
 def main():
