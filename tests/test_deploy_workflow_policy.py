@@ -21,6 +21,12 @@ class ProductionDeployApprovalPolicyTests(unittest.TestCase):
         self.assertIn("type: boolean", self.source)
         self.assertIn("if: ${{ github.event_name == 'workflow_dispatch' && inputs.confirm_production_deploy == true }}", self.source)
 
+    def test_production_deploys_are_serialized_without_gating_policy_tests(self):
+        deploy_block = self.source.split("  deploy:", 1)[1]
+        self.assertIn("group: awakenology-production-deploy", deploy_block)
+        self.assertIn("cancel-in-progress: false", deploy_block)
+        self.assertNotIn("concurrency:", self.source.split("jobs:", 1)[0])
+
     def test_deployment_policy_tests_run_on_relevant_pull_requests(self):
         self.assertIn("pull_request:", self.source)
         self.assertIn("policy-test:", self.source)
