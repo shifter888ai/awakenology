@@ -109,35 +109,11 @@ class ParityTests(unittest.TestCase):
         self.assertEqual(soup.footer.select_one("a.contact-icon").get("aria-current"), "page")
 
     def test_contact_email_stays_hidden_until_visitor_requests_it(self):
+        from pathlib import Path
         from bs4 import BeautifulSoup
 
-        # Pinned source fragment from the current Contact email-reveal interaction.
-        source = """<!doctype html>
-<html lang="en">
-<head><title>Contact | Awakenology</title></head>
-<body>
-<main>
-<section aria-labelledby="email-heading">
-<h2 id="email-heading">Email</h2>
-<button class="email-link email-reveal" id="reveal-email" type="button">Show email address</button>
-</section>
-</main>
-<script>
-(function(){
-  const revealButton=document.getElementById("reveal-email");
-  if(!revealButton)return;
-  revealButton.addEventListener("click",function(){
-    const address=String.fromCharCode(99,111,110,116,97,99,116,64,97,119,97,107,101,110,111,108,111,103,121,46,111,114,103);
-    const link=document.createElement("a");
-    link.className="email-link";
-    link.href="mailto:"+address;
-    link.textContent=address;
-    revealButton.replaceWith(link);
-  },{once:true});
-})();
-</script>
-</body>
-</html>"""
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "Contact" / "index.html").read_text(encoding="utf-8")
         generated = transform(source, "/Contact/")
         soup = BeautifulSoup(generated, "html.parser")
 
