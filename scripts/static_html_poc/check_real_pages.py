@@ -13,7 +13,7 @@ FIXTURES = {
     "/Chinese/": ("Chinese/index.html", "aaa841648fed2f1828aa2d15c76599fd16a84eb3"),
     "/search/": ("search/index.html", "46f2c58649a305df6c660d65d8014c59347f3980"),
     "/ask/": ("ask/index.html", "e78865a2896455f602550def70af35353b4374bf"),
-    "/Contact/": ("Contact/index.html", "dfa05c03447c2d6b89af21b37e46bd3280bc8195"),
+    "/Contact/": ("Contact/index.html", "ef139acf56ae461562ed595a23f6077d6fd80aea"),
     "/大揭露2/": ("大揭露2/index.html", "508ecaa0fdda1252d20b9f788e52b494b7b1c9a8"),
     "/與退化派對話8/": ("與退化派對話8/index.html", "bc62b6b2266c4b826a12168237294062352a4d53"),
     "/What-Is-Hypnosis/": ("What-Is-Hypnosis/index.html", "dfd2e93bdfc9ce51d05e59423f071cc98a3d8220"),
