@@ -108,6 +108,25 @@ class ParityTests(unittest.TestCase):
         self.assertEqual(soup.footer.select_one("a.contact-icon").get("href"), "/Contact/")
         self.assertEqual(soup.footer.select_one("a.contact-icon").get("aria-current"), "page")
 
+    def test_contact_email_stays_hidden_until_visitor_requests_it(self):
+        from pathlib import Path
+        from bs4 import BeautifulSoup
+
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "Contact" / "index.html").read_text(encoding="utf-8")
+        generated = transform(source, "/Contact/")
+        soup = BeautifulSoup(generated, "html.parser")
+
+        reveal = soup.select_one("button#reveal-email.email-reveal[type='button']")
+        self.assertIsNotNone(reveal)
+        self.assertEqual(reveal.get_text(strip=True), "Show email address")
+        self.assertEqual(soup.select('a[href^="mailto:"]'), [])
+        self.assertNotIn("contact@awakenology.org", source)
+        self.assertNotIn("contact@awakenology.org", generated)
+        self.assertIn("String.fromCharCode(", generated)
+        self.assertIn('link.href="mailto:"+address;', generated)
+        self.assertIn("link.textContent=address;", generated)
+
     def test_open_graph_defaults_and_title(self):
         result = transform(SOURCE, "/English/")
         from bs4 import BeautifulSoup
