@@ -55,7 +55,7 @@ class LiveSeoParserTests(unittest.TestCase):
         )
         live_errors = AUDIT.open_graph_errors(parser, "https://awakenology.space/example/")
         self.assertIn("og:title-count-0", live_errors)
-        self.assertIn("og:image-not-absolute", live_errors)
+        self.assertIn("og-image-not-absolute", live_errors)
 
     def test_ignores_metadata_after_head(self):
         parser = self.parse(
