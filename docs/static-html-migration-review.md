@@ -68,3 +68,14 @@ Any lost or changed article content, broken route, unexpected canonical/noindex 
 Automatic PoC PR validation is offline: unit tests, twelve pinned source fixtures, full source inventory, and isolated temporary staging output. Live Worker signature, HTTP runtime-contract, and browser-parity checks are manual and require explicit approval. The Live SEO workflow remains bounded for ordinary site changes; PoC/audit/test/sitemap-only changes are excluded from unnecessary production request paths, while main-branch and scheduled audits remain intact. These exclusions reduce traffic; they do not waive required checks for route-changing or production-behavior changes.
 
 **Current decision:** the static HTML PoC remains review-only. Keep the existing production Cloudflare Worker and all original article content unchanged. No merge, staging activation, production cutover, or deployment is authorized.
+
+
+## Latest review checkpoint — 2026-11-17
+
+- Main now includes PR #498's Contact email click-to-reveal behavior. The PoC pins that current Contact source and tests that the transformation preserves the reveal control without exposing the address in initial markup.
+- PR #492 latest head: `465841c6a869e21c2754c0b26ee8be5360b50c32`. GitHub reports the PR mergeable; the branch is 41 commits ahead and 2 commits behind the current main tip. Its review scope remains 18 files and does not change `Contact/index.html`.
+- Offline validation passed: 35 unit tests, 15/15 real-page fixtures, 139/139 supported public routes, 139/139 temporary staging routes, Content Integrity Gate, and SEO metadata inventory. Live Worker signature, runtime-contract, and browser-parity jobs were skipped by design.
+- The latest head did not trigger a Live SEO runtime audit. An intermediate bounded audit (#1209) sampled 12 production metadata routes and 100 live resources successfully; it reported no high-severity findings, but left three accessibility warnings and one informational heading-level finding for review. See the PoC README for the issue summary.
+- The next migration gates are still manual: inspect those accessibility findings against the intended page content, verify TC/ST and Dark/Light behavior in real iOS Safari, and approve a staging-only deployment/rollback rehearsal. Chromium emulation and offline staging do not replace those checks.
+- Deployment safety remains separate: PR #496 is still open, and current `main` still has a push-to-main Cloudflare deploy trigger. Do not assume the manual-confirmation gate is active until PR #496 is reviewed and merged by the user.
+- No merge, staging activation, production cutover, or deployment is authorized by this review checkpoint. PR #255 remains frozen and untouched.
