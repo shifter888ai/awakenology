@@ -101,3 +101,16 @@ The read-only probe now extracts robots meta tags from the complete sampled HTML
 ## Phase 5: HTTP baseline matrix (review-only)
 
 The optional manual runtime-contract report also records 15 unauthenticated public/private URL observations, including index aliases, query strings, encoded Unicode, robots, sitemap, the legacy Search route, dedicated Search/Ask pages, missing routes and Editor access. It captures status, Location, Content-Type, Cache-Control, Vary, CSP, HSTS, ETag and extracted robots tags. The matrix fails only on transport errors; existing explicit security/routing contracts remain hard gates. A staging host must later be compared to this baseline and discrepancies reviewed before any cutover. No staging Worker, DNS, custom domain or production routing is created by this PR.
+
+
+## Current checkpoint — 2026-11-17
+
+- Current `main` includes PR #498, merge commit `e332cfe290efd1026c5dda222fd2629c2b22d64d`, which changed the Contact email from an initial plaintext mailto link to a click-to-reveal control.
+- Refreshed the pinned Contact source fixture to current-main blob `ef139acf56ae461562ed595a23f6077d6fd80aea`.
+- Added a regression test proving the transformed Contact source retains the “Show email address” button and click handler, while exposing neither the plaintext address nor an initial mailto anchor.
+- Corrected the Live SEO parser test to assert the existing `og-image-not-absolute` diagnostic spelling.
+- Latest PR head `465841c6a869e21c2754c0b26ee8be5360b50c32`: **35/35 unit tests**, **15/15 pinned source fixtures**, **139/139 public routes**, and **139/139 temporary staging routes** passed. Content Integrity Gate and SEO metadata inventory passed.
+- Live Worker signature, runtime-contract, and browser-parity jobs were skipped by design. The latest head did not trigger the Live SEO runtime audit.
+- An intermediate sync head triggered bounded Live SEO run [#1209](https://github.com/shifter888ai/awakenology/actions/runs/44069959625): 12/12 sampled production metadata routes and 100/100 sampled live resources passed; 2,395 local references had no broken/read errors. Its parser unit test failed because the expected diagnostic spelling was wrong; that assertion is corrected on the latest head.
+- The intermediate audit issue register contains three accessibility warnings for triage (the Roswell `@.jpg` image has no alt text; two links on `links/index.html` have no accessible name) and one informational heading-level skip on a Traditional Chinese SoC page. These are review prompts, not authorization to alter original content. No automatic article edits were made.
+- No Worker, Wrangler, sitemap, DNS, or production routing changes are part of this PoC. PR #255 remains frozen and unmerged.
