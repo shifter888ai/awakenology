@@ -6,12 +6,12 @@ from parity_validator import validate, validate_metadata
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = {
-    "/": ("index.html", "2308340cc91e8119fa276a9ff033e7ee9eb64d52"),
-    "/English/": ("English/index.html", "a635db1748fcd83e580c33c30595fca9a1fbdbf6"),
-    "/Japanese/": ("Japanese/index.html", "9e15acf25bc0cc1ada36cc07ae3ec07c752be906"),
-    "/Chinese/": ("Chinese/index.html", "98edbd8e2580988d2faf8bf32e9ba33f00b2eccf"),
-    "/search/": ("search/index.html", "62f97709ad90423e57d47941ced8cb6f3b02dd2b"),
-    "/ask/": ("ask/index.html", "169073c8a3da449d0287d0cecdfbb79d624485da"),
+    "/": ("index.html", "7f980bc8a382e0c00bd8c550b95210a56f3dd826"),
+    "/English/": ("English/index.html", "59973d7dcc1dff7b979ad424bd6e4aa2191de90b"),
+    "/Japanese/": ("Japanese/index.html", "1635ea482f4803eb39876bc9e5a3b742d8441c82"),
+    "/Chinese/": ("Chinese/index.html", "aaa841648fed2f1828aa2d15c76599fd16a84eb3"),
+    "/search/": ("search/index.html", "46f2c58649a305df6c660d65d8014c59347f3980"),
+    "/ask/": ("ask/index.html", "e78865a2896455f602550def70af35353b4374bf"),
     "/大揭露2/": ("大揭露2/index.html", "508ecaa0fdda1252d20b9f788e52b494b7b1c9a8"),
     "/與退化派對話8/": ("與退化派對話8/index.html", "bc62b6b2266c4b826a12168237294062352a4d53"),
     "/What-Is-Hypnosis/": ("What-Is-Hypnosis/index.html", "dfd2e93bdfc9ce51d05e59423f071cc98a3d8220"),
