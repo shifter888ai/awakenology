@@ -10,6 +10,9 @@ on:
       - '**/*.html'
       - '**/*.css'
       - '**/*.js'
+      # Deployment-policy tests and audit-workflow edits are verified offline.
+      - '!tests/test_deploy_workflow_policy.py'
+      - '!.github/workflows/live-seo-runtime-audit.yml'
   push:
     branches: [main]
   workflow_dispatch:
