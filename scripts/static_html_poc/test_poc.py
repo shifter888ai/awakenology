@@ -94,9 +94,13 @@ class ParityTests(unittest.TestCase):
         from bs4 import BeautifulSoup
         root = Path(__file__).resolve().parents[2]
         soup = BeautifulSoup((root / "search/index.html").read_text(encoding="utf-8"), "html.parser")
-        self.assertEqual(len(soup.find_all("search-bar-snippet")), 1)
+        self.assertEqual(len(soup.select("form#search-form")), 1)
+        self.assertEqual(len(soup.select('input#search-query[type="search"]')), 1)
+        self.assertEqual(len(soup.select("button.search-submit[type='submit']")), 1)
+        self.assertEqual(len(soup.find_all("search-bar-snippet")), 0)
         self.assertEqual(len(soup.find_all("chat-page-snippet")), 0)
         self.assertEqual(len(soup.find_all("chat-bubble-snippet")), 0)
+        self.assertIn("search.ai.cloudflare.com/search", str(soup))
 
     def test_live_signature_detects_metadata_and_footer_mutations(self):
         from check_live_parity import signature
