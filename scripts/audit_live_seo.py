@@ -78,6 +78,23 @@ def select_sample_urls(urls, limit):
     return [url for url in urls if url in selected_set]
 
 
+def open_graph_errors(parser, expected, homepage=False, source_only=False):
+    """Validate runtime Open Graph tags; the Worker supplies defaults for PR-only source pages."""
+    if source_only:
+        return []
+    errors = []
+    for prop in ("og:title", "og:description", "og:url", "og:image"):
+        vals = parser.og.get(prop, [])
+        if len(vals) != 1: errors.append(prop + "-count-" + str(len(vals)))
+        if not vals or not vals[0]: errors.append(prop + "-empty")
+    if parser.og.get("og:url", [""])[0] != expected: errors.append("og-url-mismatch")
+    img = urlsplit(parser.og.get("og:image", [""])[0])
+    if img.scheme not in ("http", "https") or not img.netloc: errors.append("og-image-not-absolute")
+    if homepage and parser.og.get("og:type", [""])[0] != "website":
+        errors.append("homepage-og-type-not-website")
+    return errors
+
+
 def main():
     parser = argparse.ArgumentParser(description="Audit deployed metadata; --max-routes bounds production requests.")
     parser.add_argument("--max-routes", type=int, default=0, help="maximum routes to fetch after sitemap validation; 0 means all")
@@ -155,6 +172,7 @@ def main():
     opener, rows = urllib.request.build_opener(), []
     for i, url in enumerate(urls, 1):
         errors, status, title, desc, canonical, robots, lang = [], "", "", "", "", "", ""
+        use_local_pr_html = False
         path = urlsplit(url).path or "/"
         is_ai = path.rstrip("/") in {"/search", "/ask"}
         source_path = "index.html" if path == "/" else unquote(path.lstrip("/")) + "index.html"
@@ -162,6 +180,7 @@ def main():
         try:
             use_local_pr_html = bool(base_urls) and url not in base_urls
             if use_local_pr_html or (not base_urls and url not in deployed_urls):
+                use_local_pr_html = True
                 local = ROOT / source_path
                 if not local.is_file(): raise OSError("new route missing local HTML")
                 status, final, ctype, charset = 200, url, "text/html", "utf-8"
@@ -189,19 +208,14 @@ def main():
             directives = {d.strip() for x in p.robots for d in x.replace(" ", ",").split(",") if d.strip()}
             if is_ai and not {"noindex", "follow"}.issubset(directives): errors.append("utility-page-not-noindex-follow")
             if not is_ai and "noindex" in directives: errors.append("unexpected-noindex")
-            for prop in ("og:title", "og:description", "og:url", "og:image"):
-                vals = p.og.get(prop, [])
-                if len(vals) != 1: errors.append(prop + "-count-" + str(len(vals)))
-                if not vals or not vals[0]: errors.append(prop + "-empty")
-            if p.og.get("og:url", [""])[0] != expected: errors.append("og-url-mismatch")
-            img = urlsplit(p.og.get("og:image", [""])[0])
-            if img.scheme not in ("http", "https") or not img.netloc: errors.append("og-image-not-absolute")
-            if path == "/" and p.og.get("og:type", [""])[0] != "website": errors.append("homepage-og-type-not-website")
+            errors.extend(open_graph_errors(p, expected, homepage=(path == "/"), source_only=use_local_pr_html))
         except (urllib.error.URLError, TimeoutError, OSError, UnicodeError) as e:
             errors.append("fetch-error-" + type(e).__name__)
         src = source.get(source_path, "")
-        comparison = "RUNTIME_FAILURE" if errors else ("SOURCE_WARNING_RUNTIME_PASS" if src else "PASS")
-        rows.append({"url":url,"source_path":source_path,"http_status":status,"lang":lang,
+        comparison = ("PR_SOURCE_ONLY_WORKER_METADATA_NOT_TESTED" if use_local_pr_html else
+                      ("RUNTIME_FAILURE" if errors else ("SOURCE_WARNING_RUNTIME_PASS" if src else "PASS")))
+        metadata_source = "checked_out_pr_source" if use_local_pr_html else "production_http"
+        rows.append({"url":url,"source_path":source_path,"metadata_source":metadata_source,"http_status":status,"lang":lang,
           "title":title,"description":desc,"canonical":canonical,"robots":robots,
           "source_flags":src,"runtime_flags":";".join(sorted(set(errors))),
           "source_runtime_comparison":comparison,"result":"FAIL" if errors else "PASS"})
@@ -211,7 +225,9 @@ def main():
         w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
     failed = sum(r["result"] == "FAIL" for r in rows)
     warnings = sum(r["source_runtime_comparison"] == "SOURCE_WARNING_RUNTIME_PASS" for r in rows)
-    print(f"Production URLs checked: {len(rows)} including /search/ and /ask/; failed: {failed}; passed: {len(rows)-failed}")
+    live_checked = sum(r["metadata_source"] == "production_http" for r in rows)
+    source_only = len(rows) - live_checked
+    print(f"Live production URLs checked: {live_checked}; PR source-only routes: {source_only}; failed: {failed}; passed: {len(rows)-failed}")
     print(f"Source warnings with passing runtime metadata: {warnings}")
     print(f"Report: {OUT.name}")
     return 1 if failed else 0

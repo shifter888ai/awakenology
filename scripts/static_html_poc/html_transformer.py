@@ -135,10 +135,12 @@ def _replace_footer(soup):
     footer = soup.find("footer")
     if not footer:
         return
-    footer["class"] = ["footer", "site-footer"]
+    # Match the current Worker HTMLRewriter footer structure exactly.
+    footer["id"] = "awakenology-site-footer"
+    footer["class"] = ["site-footer"]
     footer.clear()
     inner = BeautifulSoup(
-        '<div class="footer-inner"><span class="footer-links">'
+        '<div id="awakenology-footer-inner"><span id="awakenology-footer-links">'
         '<a class="contact-icon" href="mailto:contact@awakenology.org" aria-label="Email Awakenology" title="Contact"><span aria-hidden="true">✉</span></a>'
         '<a class="reddit-icon reddit-one" href="https://www.reddit.com/r/EscapeReincarnation/" aria-label="Reddit: Escape Reincarnation"><img src="/assets/reddit-one.svg" alt=""></a>'
         '<a class="reddit-icon reddit-two" href="https://www.reddit.com/r/EscapePrisonPlanet/" aria-label="Reddit: Escape Prison Planet"><img src="/assets/reddit-two.svg" alt=""></a>'
