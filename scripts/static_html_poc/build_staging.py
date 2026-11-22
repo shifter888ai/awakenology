@@ -1,6 +1,6 @@
 
 """Build supported public HTML into temporary staging; known blockers are not transformed."""
-import hashlib,json,subprocess,tempfile
+import hashlib,json,posixpath,subprocess,tempfile
 from pathlib import Path
 from urllib.parse import unquote,urlparse
 from bs4 import BeautifulSoup
@@ -30,13 +30,16 @@ def local_asset_references(html,tracked,route):
   if parsed.scheme or parsed.netloc or value.startswith(("data:","blob:","#")): continue
   path=unquote(parsed.path)
   if not path: continue
-  candidate=path.lstrip("/") if path.startswith("/") else str((Path(route.lstrip("/"))/path).as_posix())
-  candidate=str(Path(candidate))
-  if candidate.startswith("../") or candidate=="..":
+  directory_reference=path.endswith("/")
+  raw_candidate=path.lstrip("/") if path.startswith("/") else posixpath.join(route.lstrip("/"),path)
+  candidate=posixpath.normpath(raw_candidate)
+  if candidate==".." or candidate.startswith("../"):
    failures.append({"route":route,"tag":tag,"attribute":attr,"value":value,"error":"path escapes site root"}); continue
   options={candidate}
-  if candidate.endswith("/"): options.add(candidate+"index.html")
-  elif not Path(candidate).suffix: options.update({candidate+"/index.html",candidate+".html"})
+  if directory_reference:
+   options.add(posixpath.join(candidate,"index.html"))
+  elif not posixpath.splitext(candidate)[1]:
+   options.update({posixpath.join(candidate,"index.html"),candidate+".html"})
   if not any(p in tracked for p in options):
    failures.append({"route":route,"tag":tag,"attribute":attr,"value":value,"checked":sorted(options)})
  return failures
