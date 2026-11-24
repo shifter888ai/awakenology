@@ -3,6 +3,7 @@ import unittest
 
 from build_staging import (
     css_import_paths,
+    image_set_references,
     local_asset_references,
     local_css_references,
     srcset_urls,
@@ -105,6 +106,57 @@ class LocalAssetReferenceTests(unittest.TestCase):
         )
         self.assertEqual(len(failures), 1)
         self.assertEqual(failures[0]["error"], "path escapes site root")
+
+    def test_image_set_string_candidates_are_checked_and_keep_embedded_commas(self):
+        css = (
+            '.hero{background-image:image-set('
+            '"/img/hero,wide.png" 1x, "/img/hero-2x.png" 2x)}'
+        )
+        self.assertEqual(
+            local_css_references(
+                css,
+                {"img/hero,wide.png", "img/hero-2x.png"},
+                "css/site.css",
+            ),
+            [],
+        )
+        failures = local_css_references(
+            css,
+            {"img/hero,wide.png"},
+            "css/site.css",
+        )
+        self.assertEqual(len(failures), 1)
+        self.assertEqual(failures[0]["value"], "/img/hero-2x.png")
+        self.assertEqual(failures[0]["attribute"], "css-image-set")
+
+    def test_webkit_image_set_and_nested_url_candidates_are_checked(self):
+        css = (
+            '-webkit-image-set("/img/legacy.png" 1x, '
+            'url("/img/modern.png") 2x)'
+        )
+        self.assertEqual(
+            local_css_references(
+                css,
+                {"img/legacy.png", "img/modern.png"},
+                "css/site.css",
+            ),
+            [],
+        )
+        failures = local_css_references(
+            css,
+            {"img/legacy.png"},
+            "css/site.css",
+        )
+        self.assertEqual(len(failures), 1)
+        self.assertEqual(failures[0]["value"], "/img/modern.png")
+        self.assertEqual(failures[0]["attribute"], "css-url")
+
+    def test_image_set_string_data_urls_are_skipped(self):
+        css = '.hero{background:image-set("data:image/svg+xml,%3Csvg%3E" 1x)}'
+        self.assertEqual(
+            local_css_references(css, set(), "css/site.css"),
+            [],
+        )
 
     def test_css_comments_do_not_create_false_asset_references(self):
         failures = local_css_references(
