@@ -75,6 +75,106 @@ def srcset_urls(value):
             index += 1
 
 
+
+def _split_css_function_arguments(value):
+    """Split function arguments on commas outside strings and nested functions."""
+    parts = []
+    start = 0
+    depth = 0
+    quote = None
+    escaped = False
+    for index, char in enumerate(value):
+        if quote:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = None
+            continue
+        if char in ("'", '"'):
+            quote = char
+        elif char == "(":
+            depth += 1
+        elif char == ")":
+            depth = max(0, depth - 1)
+        elif char == "," and depth == 0:
+            parts.append(value[start:index])
+            start = index + 1
+    parts.append(value[start:])
+    return parts
+
+
+def _decode_css_escapes(value):
+    """Decode simple CSS escapes in a quoted image-set URL."""
+    def replace(match):
+        hexadecimal = match.group(1)
+        if hexadecimal:
+            codepoint = int(hexadecimal, 16)
+            if codepoint == 0 or codepoint > 0x10FFFF:
+                return "\uFFFD"
+            return chr(codepoint)
+        return match.group(2) or ""
+
+    return re.sub(r"\\([0-9a-fA-F]{1,6})\s?|\\(.)", replace, value)
+
+
+def image_set_references(css):
+    """Return quoted local image candidates from image-set() and its WebKit form."""
+    refs = []
+    pattern = re.compile(r"(?<![\w-])(?:-webkit-)?image-set\s*\(", re.IGNORECASE)
+    for match in pattern.finditer(css):
+        opening = match.end() - 1
+        depth = 1
+        quote = None
+        escaped = False
+        closing = None
+        for index in range(opening + 1, len(css)):
+            char = css[index]
+            if quote:
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == quote:
+                    quote = None
+                continue
+            if char in ("'", '"'):
+                quote = char
+            elif char == "(":
+                depth += 1
+            elif char == ")":
+                depth -= 1
+                if depth == 0:
+                    closing = index
+                    break
+        if closing is None:
+            continue
+
+        body = css[opening + 1:closing]
+        for option in _split_css_function_arguments(body):
+            option = option.lstrip()
+            if not option or option[0] not in ("'", '"'):
+                continue
+            quote = option[0]
+            escaped = False
+            end = None
+            for index in range(1, len(option)):
+                char = option[index]
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == quote:
+                    end = index
+                    break
+            if end is not None:
+                value = _decode_css_escapes(option[1:end])
+                if value:
+                    refs.append(value)
+    return refs
+
+
 def css_references(css):
     """Return local-reference candidates from CSS url() and @import syntax."""
     css = re.sub(r"/\*.*?\*/", "", css, flags=re.DOTALL)
@@ -90,6 +190,11 @@ def css_references(css):
         value = (match.group(2) if match.group(1) else match.group(3) or "").strip()
         if value and value not in import_values:
             refs.append((value, "css-url"))
+    refs.extend(
+        (value, "css-image-set")
+        for value in image_set_references(css)
+        if value not in import_values
+    )
     return refs
 
 
@@ -366,7 +471,7 @@ def main():
                 not asset_failures and len(staged_html) == len(paths)
             ),
             "asset_check": (
-                "HTML src/srcset, linked stylesheets, inline CSS url()/@import, "
+                "HTML src/srcset, linked stylesheets, inline CSS url()/@import/image-set(), "
                 "and recursively imported CSS references checked against tracked "
                 "repository files; remote/data URLs excluded"
             ),
