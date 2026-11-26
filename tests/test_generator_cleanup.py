@@ -8,7 +8,7 @@ SOURCE = (Path(__file__).resolve().parents[1] / "editor" / "generator.html").rea
 class GeneratorCleanupTests(unittest.TestCase):
     def test_cleanup_runs_after_word_formatting_restoration(self):
         self.assertIn(
-            "await restoreWordFormatting(buffer,article);\\n  cleanGeneratedArticle(article);",
+            "await restoreWordFormatting(buffer,article);\n  cleanGeneratedArticle(article);",
             SOURCE,
         )
         self.assertIn("if(article.textContent!==before", SOURCE)
