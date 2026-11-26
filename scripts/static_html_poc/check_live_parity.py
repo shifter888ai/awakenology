@@ -41,7 +41,8 @@ def signature(html):
         "cn_styles": len(soup.select("#awakenology-cn-style")),
         "favicon": sorted(x.get("href") for x in soup.head.find_all("link") if "icon" in (x.get("rel") or [])),
         "body_classes": sorted(soup.body.get("class", [])),
-        "footer": semantic_node(soup.footer) if soup.footer else None,
+        "header": semantic_node(soup.select_one("header#awakenology-site-header")) if soup.select_one("header#awakenology-site-header") else None,
+        "footer": semantic_node(soup.select_one("footer#awakenology-site-footer")) if soup.select_one("footer#awakenology-site-footer") else None,
     }
 
 def main():
