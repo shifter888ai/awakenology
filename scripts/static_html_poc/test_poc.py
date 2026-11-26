@@ -57,7 +57,7 @@ class ParityTests(unittest.TestCase):
         self.assertEqual(soup.footer.select_one("a.contact-icon").get("href"), "/Contact/")
         branded = transform(SOURCE.replace("<main>", '<a class="brand" href="/">Home</a><main>'), "/English/")
         branded_soup = BeautifulSoup(branded, "html.parser")
-        self.assertEqual(len(branded_soup.select("a.brand svg.brand-symbol")), 1)
+        self.assertEqual(len(branded_soup.select("#awakenology-brand svg.brand-symbol")), 1)
         validate_metadata(result, canonical="https://awakenology.space/English/", noindex=False)
 
 
