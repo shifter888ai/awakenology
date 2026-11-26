@@ -47,12 +47,22 @@ class ParityTests(unittest.TestCase):
         self.assertEqual(len(soup.select("#awakenology-theme-style")), 1)
         self.assertEqual(len(soup.select('link[rel="icon"][href="/gallery/favicons/favicon.png"]')), 1)
         self.assertIn("awakenology-toc-page", soup.body.get("class", []))
-        self.assertEqual(soup.footer.get("class"), ["footer", "site-footer"])
-        self.assertIn("contact@awakenology.org", str(soup.footer))
+        self.assertEqual(soup.footer.get("id"), "awakenology-site-footer")
+        self.assertEqual(soup.footer.get("class"), ["site-footer"])
+        self.assertEqual(soup.footer.select_one("#awakenology-footer-inner") is not None, True)
+        self.assertEqual(soup.footer.select_one("a.contact-icon").get("href"), "/Contact/")
         branded = transform(SOURCE.replace("<main>", '<a class="brand" href="/">Home</a><main>'), "/English/")
         branded_soup = BeautifulSoup(branded, "html.parser")
         self.assertEqual(len(branded_soup.select("a.brand svg.brand-symbol")), 1)
         validate_metadata(result, canonical="https://awakenology.space/English/", noindex=False)
+
+
+    def test_footer_active_page_links(self):
+        from bs4 import BeautifulSoup
+        for route, selector in (("/Contact/", "a.contact-icon"), ("/Disclaimer/", "a.disclaimer-icon")):
+            with self.subTest(route=route):
+                soup = BeautifulSoup(transform(SOURCE, route), "html.parser")
+                self.assertEqual(soup.footer.select_one(selector).get("aria-current"), "page")
 
     def test_open_graph_defaults_and_title(self):
         result = transform(SOURCE, "/English/")
