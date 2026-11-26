@@ -11,6 +11,8 @@ from bs4 import BeautifulSoup, NavigableString
 from page_rules import SITE, rules_for
 
 ASSETS = Path(__file__).parent / "assets"
+HEADER_TEMPLATE = (ASSETS / "header.html").read_text(encoding="utf-8")
+FOOTER_TEMPLATE = (ASSETS / "footer.html").read_text(encoding="utf-8")
 DEFAULT_OG_IMAGE = (
     "https://images.squarespace-cdn.com/content/v1/5e46c1ddfed24d662efc3817/"
     "6e1d6965-c6b2-49d0-971e-4d42f9bcfaaa/Cosmic%2BEye.jpg"
@@ -157,42 +159,34 @@ def _replace_header(soup, route):
         )
 
     markup = (
-        '<div id="awakenology-header-inner">'
-        '<a id="awakenology-brand" href="/" title="Home" aria-label="Awakenology home">'
-        + BRAND_SVG + '<span>Awakenology</span></a>'
-        '<nav id="awakenology-nav" aria-label="Site navigation">'
-        '<span id="awakenology-language-nav">' + "".join(language_links) + '</span>'
-        '<span class="nav-divider" aria-hidden="true"></span>'
-        '<span id="awakenology-action-nav">' + "".join(action_links) + '</span>'
-        '</nav></div>'
+        HEADER_TEMPLATE
+        .replace("{{BRAND_SVG}}", BRAND_SVG)
+        .replace("{{LANGUAGE_LINKS}}", "".join(language_links))
+        .replace("{{ACTION_LINKS}}", "".join(action_links))
     )
-    header = headers[0]
-    header.attrs = {"id": "awakenology-site-header", "class": ["site-header"]}
-    header.clear()
-    inner = BeautifulSoup(markup, "html.parser").div
-    header.append(inner)
+    if "{{" in markup or "}}" in markup:
+        raise ValueError("Unresolved shared header template placeholder")
+    generated_header = BeautifulSoup(markup, "html.parser").header
+    headers[0].replace_with(generated_header)
 
 
 def _replace_footer(soup, route):
     footer = soup.find("footer")
     if not footer:
         return
-    footer.attrs = {"id": "awakenology-site-footer", "class": ["site-footer"]}
     contact_active = ' aria-current="page"' if route == "/Contact/" else ""
     disclaimer_active = ' aria-current="page"' if route == "/Disclaimer/" else ""
     year = __import__("datetime").datetime.now(__import__("datetime").timezone.utc).year
     markup = (
-        '<div id="awakenology-footer-inner"><span id="awakenology-footer-links">'
-        '<a class="contact-icon"' + contact_active + ' href="/Contact/" aria-label="Contact Awakenology" title="Contact"><span aria-hidden="true">✉</span></a>'
-        '<a class="reddit-icon reddit-one" href="https://www.reddit.com/r/EscapeReincarnation/" aria-label="Reddit: Escape Reincarnation"><img src="/assets/reddit-one.svg" alt=""></a>'
-        '<a class="reddit-icon reddit-two" href="https://www.reddit.com/r/EscapePrisonPlanet/" aria-label="Reddit: Escape Prison Planet"><img src="/assets/reddit-two.svg" alt=""></a>'
-        '<a class="reddit-icon reddit-three" href="https://www.reddit.com/user/Lower-Lingonberry-40/" aria-label="Reddit: Lower-Lingonberry-40"><img src="/assets/reddit-three.svg" alt=""></a>'
-        '<a class="disclaimer-icon"' + disclaimer_active + ' href="/Disclaimer/" aria-label="Disclaimer" title="Disclaimer"><span aria-hidden="true">ⓘ</span></a>'
-        '</span><span>© 2017–' + str(year) + ' Awakenology</span></div>'
+        FOOTER_TEMPLATE
+        .replace("{{CONTACT_ACTIVE}}", contact_active)
+        .replace("{{DISCLAIMER_ACTIVE}}", disclaimer_active)
+        .replace("{{YEAR}}", str(year))
     )
-    inner = BeautifulSoup(markup, "html.parser").div
-    footer.clear()
-    footer.append(inner)
+    if "{{" in markup or "}}" in markup:
+        raise ValueError("Unresolved shared footer template placeholder")
+    generated_footer = BeautifulSoup(markup, "html.parser").footer
+    footer.replace_with(generated_footer)
 
 
 # These two legacy articles contain markup that BeautifulSoup rewrites on serialization.
