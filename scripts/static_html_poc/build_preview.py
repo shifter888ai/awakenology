@@ -33,7 +33,7 @@ def tracked_files():
     raw = subprocess.check_output(
         ["git", "ls-files", "-z"], cwd=ROOT
     ).decode("utf-8")
-    return sorted(path for path in raw.split("\\0") if path)
+    return sorted(path for path in raw.split("\0") if path)
 
 
 def is_public_asset(path):
@@ -99,12 +99,12 @@ def main():
     # Do not publish the production sitemap on a temporary preview host.
     # Let crawlers fetch pages and see the explicit noindex directives.
     (DIST / "robots.txt").write_text(
-        "User-agent: *\\nAllow: /\\n", encoding="utf-8", newline=""
+        "User-agent: *\nAllow: /\n", encoding="utf-8", newline=""
     )
     (DIST / "_headers").write_text(
-        "/*\\n  X-Robots-Tag: noindex, nofollow, noarchive\\n"
-        "  X-Content-Type-Options: nosniff\\n"
-        "  Referrer-Policy: strict-origin-when-cross-origin\\n",
+        "/*\n  X-Robots-Tag: noindex, nofollow, noarchive\n"
+        "  X-Content-Type-Options: nosniff\n"
+        "  Referrer-Policy: strict-origin-when-cross-origin\n",
         encoding="utf-8", newline=""
     )
 
