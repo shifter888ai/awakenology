@@ -166,6 +166,7 @@ def _replace_header(soup, route):
     )
     if "{{" in markup or "}}" in markup:
         raise ValueError("Unresolved shared header template placeholder")
+    markup = re.sub(r">\\s+<", "><", markup).strip()
     generated_header = BeautifulSoup(markup, "html.parser").header
     headers[0].replace_with(generated_header)
 
@@ -185,6 +186,7 @@ def _replace_footer(soup, route):
     )
     if "{{" in markup or "}}" in markup:
         raise ValueError("Unresolved shared footer template placeholder")
+    markup = re.sub(r">\\s+<", "><", markup).strip()
     generated_footer = BeautifulSoup(markup, "html.parser").footer
     footer.replace_with(generated_footer)
 
