@@ -131,23 +131,25 @@ def _inject_runtime_fragments(soup, route):
                 anchor.insert(0, BeautifulSoup(BRAND_SVG, "html.parser").svg)
 
 
-def _replace_footer(soup):
+def _replace_footer(soup, route):
     footer = soup.find("footer")
     if not footer:
         return
-    footer["class"] = ["footer", "site-footer"]
-    footer.clear()
-    inner = BeautifulSoup(
-        '<div class="footer-inner"><span class="footer-links">'
-        '<a class="contact-icon" href="mailto:contact@awakenology.org" aria-label="Email Awakenology" title="Contact"><span aria-hidden="true">✉</span></a>'
+    footer.attrs = {"id": "awakenology-site-footer", "class": ["site-footer"]}
+    contact_active = ' aria-current="page"' if route == "/Contact/" else ""
+    disclaimer_active = ' aria-current="page"' if route == "/Disclaimer/" else ""
+    year = __import__("datetime").datetime.now(__import__("datetime").timezone.utc).year
+    markup = (
+        '<div id="awakenology-footer-inner"><span id="awakenology-footer-links">'
+        '<a class="contact-icon"' + contact_active + ' href="/Contact/" aria-label="Contact Awakenology" title="Contact"><span aria-hidden="true">✉</span></a>'
         '<a class="reddit-icon reddit-one" href="https://www.reddit.com/r/EscapeReincarnation/" aria-label="Reddit: Escape Reincarnation"><img src="/assets/reddit-one.svg" alt=""></a>'
         '<a class="reddit-icon reddit-two" href="https://www.reddit.com/r/EscapePrisonPlanet/" aria-label="Reddit: Escape Prison Planet"><img src="/assets/reddit-two.svg" alt=""></a>'
         '<a class="reddit-icon reddit-three" href="https://www.reddit.com/user/Lower-Lingonberry-40/" aria-label="Reddit: Lower-Lingonberry-40"><img src="/assets/reddit-three.svg" alt=""></a>'
-        '<a class="disclaimer-icon" href="/Disclaimer/" aria-label="Disclaimer" title="Disclaimer"><span aria-hidden="true">ⓘ</span></a>'
-        '</span><span>© 2017–YEAR Awakenology</span></div>', "html.parser").div
-    copyright = inner.find("span", string=lambda text: text and "© 2017–YEAR" in text)
-    if copyright:
-        copyright.string.replace_with("© 2017–" + __import__("datetime").datetime.now(__import__("datetime").timezone.utc).year.__str__() + " Awakenology")
+        '<a class="disclaimer-icon"' + disclaimer_active + ' href="/Disclaimer/" aria-label="Disclaimer" title="Disclaimer"><span aria-hidden="true">ⓘ</span></a>'
+        '</span><span>© 2017–' + str(year) + ' Awakenology</span></div>'
+    )
+    inner = BeautifulSoup(markup, "html.parser").div
+    footer.clear()
     footer.append(inner)
 
 
@@ -215,7 +217,7 @@ def transform(source: str, route: str) -> str:
         _dedupe_meta(soup, "name", "robots", "noindex,follow")
 
     _inject_runtime_fragments(soup, rules.route)
-    _replace_footer(soup)
+    _replace_footer(soup, rules.route)
     if rules.route == "/" and not soup.find("script", string=lambda text: text and '"@type":"WebSite"' in text):
         soup.head.append(BeautifulSoup(
             '<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Awakenology","url":"https://awakenology.space/"}</script>',
