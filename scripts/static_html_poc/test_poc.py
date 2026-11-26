@@ -153,6 +153,16 @@ class ParityTests(unittest.TestCase):
             validate_metadata("<html><body><main>Missing head</main></body></html>",
                               canonical=None, noindex=False)
 
+    def test_internal_and_draft_html_excluded_from_public_inventory(self):
+        from check_full_inventory import public_sources
+        from build_staging import PRIVATE_PREFIXES
+        paths, excluded = public_sources()
+        self.assertIn("Internal/", PRIVATE_PREFIXES)
+        self.assertIn("New-Article/", PRIVATE_PREFIXES)
+        self.assertNotIn("Internal/New-Article/index.html", paths)
+        self.assertIn("Internal/New-Article/index.html", excluded)
+        self.assertFalse(any(path.startswith(("Internal/", "New-Article/")) for path in paths))
+
     def test_private_editor_excluded_from_public_crawl_inventory(self):
         from pathlib import Path
         from urllib.parse import urlsplit, unquote
