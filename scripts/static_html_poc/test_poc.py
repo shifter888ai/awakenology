@@ -89,12 +89,17 @@ class ParityTests(unittest.TestCase):
         self.assertEqual(len(soup.find_all("search-bar-snippet")), 0)
         self.assertIn("v0.0.40", soup.find("script", attrs={"type": "module"})["src"])
 
-    def test_search_page_uses_search_only(self):
+    def test_search_page_uses_dedicated_search_form(self):
         from pathlib import Path
         from bs4 import BeautifulSoup
         root = Path(__file__).resolve().parents[2]
         soup = BeautifulSoup((root / "search/index.html").read_text(encoding="utf-8"), "html.parser")
-        self.assertEqual(len(soup.find_all("search-bar-snippet")), 1)
+        form = soup.find("form", id="search-form", attrs={"role": "search"})
+        self.assertIsNotNone(form)
+        self.assertIsNotNone(form.find("input", id="search-query", attrs={"type": "search"}))
+        self.assertIsNotNone(form.find("button", attrs={"type": "submit", "aria-label": "Search"}))
+        self.assertIsNotNone(soup.find(id="search-status", attrs={"aria-live": "polite"}))
+        self.assertIsNotNone(soup.find(id="search-results"))
         self.assertEqual(len(soup.find_all("chat-page-snippet")), 0)
         self.assertEqual(len(soup.find_all("chat-bubble-snippet")), 0)
 
