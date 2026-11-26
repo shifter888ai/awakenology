@@ -131,6 +131,48 @@ def _inject_runtime_fragments(soup, route):
                 anchor.insert(0, BeautifulSoup(BRAND_SVG, "html.parser").svg)
 
 
+def _replace_header(soup, route):
+    headers = soup.select("header.site-header")
+    if len(headers) != 1:
+        raise ValueError(f"Expected exactly one global header.site-header; found {len(headers)}")
+
+    language_items = (("/English/", "English"), ("/Japanese/", "日本語"), ("/Chinese/", "中文"))
+    language_links = []
+    for href, label in language_items:
+        active = route == href or (href == "/Chinese/" and route == "/Coach_cn/")
+        current = ' aria-current="page"' if active else ""
+        language_links.append(f'<a href="{href}"{current}>{label}</a>')
+
+    action_items = (
+        ("/search/", "Search", '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>'),
+        ("/ask/", "Ask", '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.6 9a2.5 2.5 0 1 1 4.2 1.8c-1.1 1-1.8 1.3-1.8 2.7"></path><path d="M12 17.2h.01"></path></svg>'),
+        ("/links/", "Links", '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13.5a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.7 1.7"></path><path d="M14 10.5a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.7-1.7"></path></svg>'),
+    )
+    action_links = []
+    for href, label, icon in action_items:
+        active = route == href or (href == "/search/" and route == "/ai-search/")
+        current = ' aria-current="page"' if active else ""
+        action_links.append(
+            f'<a class="nav-icon-link" href="{href}" aria-label="{label}" title="{label}"{current}>{icon}</a>'
+        )
+
+    markup = (
+        '<div id="awakenology-header-inner">'
+        '<a id="awakenology-brand" href="/" title="Home" aria-label="Awakenology home">'
+        + BRAND_SVG + '<span>Awakenology</span></a>'
+        '<nav id="awakenology-nav" aria-label="Site navigation">'
+        '<span id="awakenology-language-nav">' + "".join(language_links) + '</span>'
+        '<span class="nav-divider" aria-hidden="true"></span>'
+        '<span id="awakenology-action-nav">' + "".join(action_links) + '</span>'
+        '</nav></div>'
+    )
+    header = headers[0]
+    header.attrs = {"id": "awakenology-site-header", "class": ["site-header"]}
+    header.clear()
+    inner = BeautifulSoup(markup, "html.parser").div
+    header.append(inner)
+
+
 def _replace_footer(soup, route):
     footer = soup.find("footer")
     if not footer:
@@ -217,6 +259,7 @@ def transform(source: str, route: str) -> str:
         _dedupe_meta(soup, "name", "robots", "noindex,follow")
 
     _inject_runtime_fragments(soup, rules.route)
+    _replace_header(soup, rules.route)
     _replace_footer(soup, rules.route)
     if rules.route == "/" and not soup.find("script", string=lambda text: text and '"@type":"WebSite"' in text):
         soup.head.append(BeautifulSoup(
