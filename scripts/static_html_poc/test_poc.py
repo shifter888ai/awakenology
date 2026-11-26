@@ -38,9 +38,18 @@ class ParityTests(unittest.TestCase):
             with self.subTest(invalid=invalid), self.assertRaises(ValueError):
                 rules_for(invalid)
 
+    def test_shared_html_template_slots(self):
+        from html_transformer import HEADER_TEMPLATE, FOOTER_TEMPLATE
+        for token in ("{{BRAND_SVG}}", "{{LANGUAGE_LINKS}}", "{{ACTION_LINKS}}"):
+            self.assertEqual(HEADER_TEMPLATE.count(token), 1)
+        for token in ("{{CONTACT_ACTIVE}}", "{{DISCLAIMER_ACTIVE}}", "{{YEAR}}"):
+            self.assertEqual(FOOTER_TEMPLATE.count(token), 1)
+
     def test_content_preservation_and_idempotence(self):
         result = transform(SOURCE, "/English/")
         self.assertTrue(validate(SOURCE, result)["pass"])
+        self.assertNotIn("{{", result)
+        self.assertNotIn("}}", result)
         self.assertEqual(result, transform(result, "/English/"))
         from bs4 import BeautifulSoup
         soup = BeautifulSoup(result, "html.parser")
