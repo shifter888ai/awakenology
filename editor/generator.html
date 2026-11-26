@@ -10,7 +10,7 @@
 <p class="step">One-page publishing workflow</p><p>Choose one Word document, generate one page, inspect the preview, then publish explicitly.</p>
 <section class="panel"><h2 style="font-size:17px;margin:0 0 12px">1. Page settings</h2><div class="fields">
 <label>Page language<select id="lang"><option value="zh">Traditional Chinese</option><option value="ja">Japanese</option><option value="en">English</option></select></label>
-<label>Final page URL path<input id="path" value="Internal/New-Article/index.html" placeholder="Folder/index.html" autocomplete="off"></label>
+<label>Final page URL path<input id="path" value="" placeholder="e.g. 大揭露9/index.html" autocomplete="off"></label>
 </div>
 <label>Word document (.docx)<input id="docx" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"></label>
 <label>Page title<input id="title" placeholder="Article title"></label></section>
@@ -166,7 +166,7 @@ async function loadTarget(){
  say('Checking whether the final URL already exists…');
  try{
   const response=await fetch('https://raw.githubusercontent.com/shifter888ai/awakenology/main/'+p.split('/').map(encodeURIComponent).join('/'),{cache:'no-store'});
-  if(response.ok){const current=await response.text();if(request!==targetRequest)return;if(!new DOMParser().parseFromString(current,'text/html').querySelector('.article'))throw Error('The existing target is not a standard article page.');baselineSha256=await sha(current);templateHtml=current;targetLoaded=true;checkedPath=p;const existingLang=new DOMParser().parseFromString(current,'text/html').documentElement.lang;if(existingLang==='ja'||existingLang==='en'||existingLang==='zh-Hant'||existingLang==='zh-CN'){lang.value=existingLang==='ja'?'ja':existingLang==='en'?'en':'zh';}lang.disabled=true;say('Existing page loaded. Publishing will replace this one page after a version check.')}
+  if(response.ok){const current=await response.text();if(request!==targetRequest)return;if(!new DOMParser().parseFromString(current,'text/html').querySelector('.article'))throw Error('This path already exists, but it is not a standard article page. Choose a new article path instead; the existing file will not be overwritten.');baselineSha256=await sha(current);templateHtml=current;targetLoaded=true;checkedPath=p;const existingLang=new DOMParser().parseFromString(current,'text/html').documentElement.lang;if(existingLang==='ja'||existingLang==='en'||existingLang==='zh-Hant'||existingLang==='zh-CN'){lang.value=existingLang==='ja'?'ja':existingLang==='en'?'en':'zh';}lang.disabled=true;say('Existing page loaded. Publishing will replace this one page after a version check.')}
   else if(response.status===404){if(request!==targetRequest)return;baselineSha256='NEW';targetLoaded=true;checkedPath=p;templateHtml='';lang.disabled=false;say('New page path confirmed. A matching site template will be used.')}
   else throw Error('GitHub returned HTTP '+response.status);
  }catch(e){if(request!==targetRequest)return;say('Could not check target: '+e.message);targetLoaded=false}
