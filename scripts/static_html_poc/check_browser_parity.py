@@ -25,7 +25,8 @@ JS = """() => {
    brokenImages: imgs.filter(x => x.complete && x.naturalWidth === 0).map(x => x.getAttribute('src')),
    title: document.title,
    bodyClasses: [...document.body.classList].sort(),
-   footer: document.querySelector('footer') ? JSON.stringify(semantic(document.querySelector('footer'))) : null,
+   header: document.querySelector('header#awakenology-site-header') ? JSON.stringify(semantic(document.querySelector('header#awakenology-site-header'))) : null,
+   footer: document.querySelector('footer#awakenology-site-footer') ? JSON.stringify(semantic(document.querySelector('footer#awakenology-site-footer'))) : null,
    horizontalOverflow: document.documentElement.scrollWidth > innerWidth + 2,
    mainVisible: rect.width > 0 && rect.height > 0,
    theme: document.documentElement.getAttribute('data-theme'),
@@ -188,7 +189,7 @@ async def main():
                                              "differences": ["visual mismatch exceeds tolerance"],
                                              "details": observation})
                         # Browser serialization normalizes HTML independently of BeautifulSoup.
-                        fields = ("article", "text", "images", "title", "bodyClasses", "footer", "links", "mainVisible", "theme", "themeRoundTrip", "returnTop", "chineseRoundTrip")
+                        fields = ("article", "text", "images", "title", "bodyClasses", "header", "footer", "links", "mainVisible", "theme", "themeRoundTrip", "returnTop", "chineseRoundTrip")
                         diff = [field for field in fields if live.get(field) != built.get(field)]
                         if built["brokenImages"]:
                             diff.append("generated brokenImages: " + str(built["brokenImages"]))
