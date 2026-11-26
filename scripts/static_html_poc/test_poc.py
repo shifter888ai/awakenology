@@ -46,6 +46,7 @@ class ParityTests(unittest.TestCase):
             self.assertEqual(FOOTER_TEMPLATE.count(token), 1)
 
     def test_content_preservation_and_idempotence(self):
+        from bs4 import BeautifulSoup
         result = transform(SOURCE, "/English/")
         self.assertTrue(validate(SOURCE, result)["pass"])
         self.assertNotIn("{{", str(BeautifulSoup(result, "html.parser").select_one("header#awakenology-site-header")))
