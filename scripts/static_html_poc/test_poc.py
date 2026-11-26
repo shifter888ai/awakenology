@@ -4,7 +4,7 @@ from page_rules import rules_for
 from parity_validator import validate, validate_metadata
 from html_transformer import transform
 
-SOURCE = '<!doctype html><html lang="en"><head><title>Example</title><link rel="canonical" href="https://old.invalid/"></head><body><main><p style="color:red"><b>Original</b></p><img src="/gallery/a.jpg" width="250" alt="A"></main><footer>Old</footer></body></html>'
+SOURCE = '<!doctype html><html lang="en"><head><title>Example</title><link rel="canonical" href="https://old.invalid/"></head><body><header class="site-header"><a class="brand" href="/">Old brand</a><nav aria-label="Site navigation"><a href="/">Home</a></nav></header><main><p style="color:red"><b>Original</b></p><img src="/gallery/a.jpg" width="250" alt="A"></main><footer>Old</footer></body></html>'
 
 class ParityTests(unittest.TestCase):
     def test_route_rules(self):
@@ -47,6 +47,10 @@ class ParityTests(unittest.TestCase):
         self.assertEqual(len(soup.select("#awakenology-theme-style")), 1)
         self.assertEqual(len(soup.select('link[rel="icon"][href="/gallery/favicons/favicon.png"]')), 1)
         self.assertIn("awakenology-toc-page", soup.body.get("class", []))
+        self.assertEqual(soup.select_one("header#awakenology-site-header").get("class"), ["site-header"])
+        self.assertIsNotNone(soup.select_one("#awakenology-brand svg.brand-symbol"))
+        self.assertEqual(len(soup.select("#awakenology-language-nav a")), 3)
+        self.assertEqual(len(soup.select("#awakenology-action-nav a")), 3)
         self.assertEqual(soup.footer.get("id"), "awakenology-site-footer")
         self.assertEqual(soup.footer.get("class"), ["site-footer"])
         self.assertEqual(soup.footer.select_one("#awakenology-footer-inner") is not None, True)
@@ -56,6 +60,27 @@ class ParityTests(unittest.TestCase):
         self.assertEqual(len(branded_soup.select("a.brand svg.brand-symbol")), 1)
         validate_metadata(result, canonical="https://awakenology.space/English/", noindex=False)
 
+
+    def test_header_active_language_and_action_links(self):
+        from bs4 import BeautifulSoup
+        cases = (
+            ("/Chinese/", '#awakenology-language-nav a[href="/Chinese/"]'),
+            ("/Coach_cn/", '#awakenology-language-nav a[href="/Chinese/"]'),
+            ("/search/", '#awakenology-action-nav a[href="/search/"]'),
+            ("/ai-search/", '#awakenology-action-nav a[href="/search/"]'),
+            ("/ask/", '#awakenology-action-nav a[href="/ask/"]'),
+            ("/links/", '#awakenology-action-nav a[href="/links/"]'),
+        )
+        for route, selector in cases:
+            with self.subTest(route=route):
+                soup = BeautifulSoup(transform(SOURCE, route), "html.parser")
+                self.assertEqual(soup.select_one(selector).get("aria-current"), "page")
+
+    def test_missing_global_header_fails_closed(self):
+        import re
+        source = re.sub(r'<header class="site-header">[\s\S]*?</header>', "", SOURCE, count=1)
+        with self.assertRaises(ValueError):
+            transform(source, "/English/")
 
     def test_footer_active_page_links(self):
         from bs4 import BeautifulSoup
@@ -119,6 +144,7 @@ class ParityTests(unittest.TestCase):
         reference = signature(baseline)
         self.assertEqual(reference, signature(baseline))
         mutations = (
+            ('id="awakenology-site-header"', 'id="altered-site-header"', "header"),
             ('<title>Example</title>', '<title>Changed</title>', "title"),
             ('href="https://awakenology.space/English/"', 'href="https://invalid.example/"', "canonical"),
             ('content="Awakenology"', 'content="Changed"', "og_site_name"),
