@@ -122,7 +122,7 @@ class ParityTests(unittest.TestCase):
             ('<title>Example</title>', '<title>Changed</title>', "title"),
             ('href="https://awakenology.space/English/"', 'href="https://invalid.example/"', "canonical"),
             ('content="Awakenology"', 'content="Changed"', "og_site_name"),
-            ('class="footer site-footer"', 'class="footer altered"', "footer"),
+            ('class="site-footer"', 'class="footer altered"', "footer"),
         )
         for before, after, field in mutations:
             with self.subTest(field=field):
