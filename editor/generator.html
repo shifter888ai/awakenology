@@ -201,6 +201,7 @@ generate.addEventListener('click',async()=>{
   // An empty Word paragraph is a deliberate line, not an ordinary collapsed HTML paragraph.
   if(!parsed.querySelector('#word-blank-style')){const style=parsed.createElement('style');style.id='word-blank-style';style.textContent='.article p.word-blank-paragraph{min-height:1.7em;margin:0;white-space:normal}';parsed.head.append(style);}
   await restoreWordFormatting(buffer,article);
+  cleanGeneratedArticle(article);
   // Preserve Word's exact color in Light mode; improve only dark-blue contrast in Dark mode.
   if(!parsed.querySelector('#word-theme-color-style')){const style=parsed.createElement('style');style.id='word-theme-color-style';style.textContent='html[data-aw-theme="dark"] .article .word-dark-blue{color:#83baff !important}';parsed.head.append(style);}
 
@@ -214,8 +215,7 @@ generate.addEventListener('click',async()=>{
   const canonicalUrl='https://awakenology.space/'+finalPath.split('/').filter(Boolean).map(encodeURIComponent).join('/')+(/index\.html?$/i.test(rawFinalPath)&&finalPath?'/':'');
   if(canonical)canonical.href=canonicalUrl;
   const og=parsed.querySelector('meta[property="og:url"]');if(og)og.content=canonicalUrl;
-  const desc=parsed.querySelector('meta[name="description"]');if(desc&&(suppliedTitle||!isExisting))desc.content=suppliedTitle?suppliedTitle+'。Awakenology article.':'Awakenology article.';
-  const ogTitle=parsed.querySelector('meta[property="og:title"]');if(ogTitle&&(suppliedTitle||!isExisting))ogTitle.content=parsed.title;
+  if(suppliedTitle||!isExisting)updateGeneratedMetadata(parsed,article,suppliedTitle);
   if(generatingPath!==validPath()||generatingBaseline!==baselineSha256||generatingRequest!==targetRequest||generatingRevision!==previewRevision||!targetLoaded)throw Error('Target changed during generation. Check the path and generate again.');
   generatedHtml='<!doctype html>\n'+parsed.documentElement.outerHTML;
   preview.srcdoc=generatedHtml;preview.onload=()=>{selectImage(null);preview.contentDocument?.addEventListener('click',imageDocumentClick);};
@@ -243,6 +243,15 @@ publish.addEventListener('click',async()=>{
    const assetPath=folder+name;
    assets.push({path:assetPath,contentBase64:match[2]});
    imageNodes[i].setAttribute('src','/'+assetPath.split('/').map(encodeURIComponent).join('/'));
+  }
+  if(title.value.trim()||baselineSha256==='NEW'){
+   const firstImage=reviewed.querySelector('.article img[src]');
+   if(firstImage){
+    let social=reviewed.querySelector('meta[property="og:image"]');
+    if(!social){social=reviewed.createElement('meta');social.setAttribute('property','og:image');reviewed.head.append(social);}
+    const imageSrc=firstImage.getAttribute('src')||'';
+    social.content=/^https?:\/\//i.test(imageSrc)?imageSrc:'https://awakenology.space'+(imageSrc.startsWith('/')?imageSrc:'/'+imageSrc);
+   }
   }
   const reviewedHtml='<!doctype html>\n'+reviewed.documentElement.outerHTML;
   const payload=JSON.stringify({path:validPath(),reviewedHtml,baselineSha256,assets});
