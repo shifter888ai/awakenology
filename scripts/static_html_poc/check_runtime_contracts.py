@@ -4,6 +4,7 @@
 No cookies, credentials, writes, or authenticated actions are used.
 """
 import json
+import os
 from bs4 import BeautifulSoup
 import urllib.error
 import urllib.request
@@ -12,6 +13,7 @@ from datetime import datetime, timezone
 PUBLIC = "https://awakenology.space"
 EDITOR = "https://editor.awakenology.space"
 REPORT = "static-html-runtime-contract-report.json"
+is_pull_request = os.environ.get("GITHUB_EVENT_NAME") == "pull_request"
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
