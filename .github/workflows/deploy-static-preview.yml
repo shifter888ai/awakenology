@@ -45,3 +45,21 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '4.159.0'
           command: deploy --config wrangler.preview.jsonc
+
+      - name: Smoke-test deployed preview routes and noindex headers
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://awakenology-static-preview-521.shifter888.workers.dev"
+          curl --fail --silent --show-error -D /tmp/preview-home.headers "$BASE/" -o /tmp/preview-home.html
+          grep -qi '^x-robots-tag: noindex, nofollow, noarchive' /tmp/preview-home.headers
+          grep -qi 'Awakenology' /tmp/preview-home.html
+          curl --fail --silent --show-error "$BASE/Chinese/" -o /tmp/preview-chinese.html
+          grep -qi 'noindex,nofollow,noarchive' /tmp/preview-chinese.html
+          curl --fail --silent --show-error "$BASE/大揭露9/" -o /tmp/preview-unicode.html
+          grep -qi 'noindex,nofollow,noarchive' /tmp/preview-unicode.html
+          curl --fail --silent --show-error "$BASE/css/common-bundle.css" -o /tmp/preview-common.css
+          curl --fail --silent --show-error "$BASE/gallery/favicons/favicon.png" -o /tmp/preview-favicon.png
+          STATUS="$(curl --silent --output /dev/null --write-out '%{http_code}' "$BASE/__preview_missing_route_check__")"
+          test "$STATUS" = "404"
+          echo "PASS: homepage, Chinese route, Unicode article, CSS, favicon, 404 and noindex response header"
