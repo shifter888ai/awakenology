@@ -17,7 +17,7 @@ from page_rules import rules_for
 from parity_validator import validate, validate_metadata
 
 REPORT = ROOT / "static-html-staging-report.json"
-PRIVATE_PREFIXES = ("editor/", "github-editor/", "scripts/", "tests/", "docs/", ".github/")
+PRIVATE_PREFIXES = ("editor/", "github-editor/", "Internal/", "New-Article/", "scripts/", "tests/", "docs/", ".github/")
 ASSET_ATTRS = {"img": "src", "script": "src", "source": "src", "video": "src",
                "audio": "src", "iframe": "src"}
 
