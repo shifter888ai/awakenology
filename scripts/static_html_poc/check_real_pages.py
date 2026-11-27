@@ -6,16 +6,21 @@ from parity_validator import validate, validate_metadata
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = {
-    "/": ("index.html", "2308340cc91e8119fa276a9ff033e7ee9eb64d52"),
-    "/English/": ("English/index.html", "a635db1748fcd83e580c33c30595fca9a1fbdbf6"),
-    "/Japanese/": ("Japanese/index.html", "9e15acf25bc0cc1ada36cc07ae3ec07c752be906"),
-    "/Chinese/": ("Chinese/index.html", "98edbd8e2580988d2faf8bf32e9ba33f00b2eccf"),
-    "/search/": ("search/index.html", "62f97709ad90423e57d47941ced8cb6f3b02dd2b"),
-    "/ask/": ("ask/index.html", "169073c8a3da449d0287d0cecdfbb79d624485da"),
+    "/": ("index.html", "7f980bc8a382e0c00bd8c550b95210a56f3dd826"),
+    "/English/": ("English/index.html", "dd79a99fe5925c9f4596ce5bf4baaa95f77dc034"),
+    "/Japanese/": ("Japanese/index.html", "5f9e17385932ef160fd395e92e5e6e868a25e2f7"),
+    "/本源全視点vs個我単一視点/": ("本源全視点vs個我単一視点/index.html", "6c2c161716987d1662764d97422de6aaf19257f8"),
+    "/Chinese/": ("Chinese/index.html", "aaa841648fed2f1828aa2d15c76599fd16a84eb3"),
+    "/search/": ("search/index.html", "46f2c58649a305df6c660d65d8014c59347f3980"),
+    "/ask/": ("ask/index.html", "e78865a2896455f602550def70af35353b4374bf"),
+    "/Contact/": ("Contact/index.html", "ef139acf56ae461562ed595a23f6077d6fd80aea"),
     "/大揭露2/": ("大揭露2/index.html", "508ecaa0fdda1252d20b9f788e52b494b7b1c9a8"),
     "/與退化派對話8/": ("與退化派對話8/index.html", "bc62b6b2266c4b826a12168237294062352a4d53"),
     "/What-Is-Hypnosis/": ("What-Is-Hypnosis/index.html", "dfd2e93bdfc9ce51d05e59423f071cc98a3d8220"),
     "/アインシュタイン協議百年催眠実験/": ("アインシュタイン協議百年催眠実験/index.html", "29cfb52a5143ceb42f966b9c525d5340de9b8095"),
+    "/SoC-AssessPoints-3-Spiritual-Connection-Area/": ("SoC-AssessPoints-3-Spiritual-Connection-Area/index.html", "0de56be232edf950fe94a864ce09793cb099dc3d"),
+    "/SoC-AssessPoints-4-Thought-Expansion-Area/": ("SoC-AssessPoints-4-Thought-Expansion-Area/index.html", "6a4cf9972e976f51d79485e019b479ed2d9e28f8"),
+    "/意識強度是什麽/": ("意識強度是什麽/index.html", "c594ffc508642d49525f5b455c3d68af6ac3ea28"),
 }
 
 def main():

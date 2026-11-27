@@ -131,19 +131,21 @@ def _inject_runtime_fragments(soup, route):
                 anchor.insert(0, BeautifulSoup(BRAND_SVG, "html.parser").svg)
 
 
-def _replace_footer(soup):
+def _replace_footer(soup, route):
     footer = soup.find("footer")
     if not footer:
         return
-    footer["class"] = ["footer", "site-footer"]
+    # Match the current Worker HTMLRewriter footer structure exactly.
+    footer["id"] = "awakenology-site-footer"
+    footer["class"] = ["site-footer"]
     footer.clear()
     inner = BeautifulSoup(
-        '<div class="footer-inner"><span class="footer-links">'
-        '<a class="contact-icon" href="mailto:contact@awakenology.org" aria-label="Email Awakenology" title="Contact"><span aria-hidden="true">✉</span></a>'
+        '<div id="awakenology-footer-inner"><span id="awakenology-footer-links">'
+        '<a class="contact-icon"' + (' aria-current="page"' if route == "/Contact/" else "") + ' href="/Contact/" aria-label="Contact Awakenology" title="Contact"><span aria-hidden="true">✉</span></a>'
         '<a class="reddit-icon reddit-one" href="https://www.reddit.com/r/EscapeReincarnation/" aria-label="Reddit: Escape Reincarnation"><img src="/assets/reddit-one.svg" alt=""></a>'
         '<a class="reddit-icon reddit-two" href="https://www.reddit.com/r/EscapePrisonPlanet/" aria-label="Reddit: Escape Prison Planet"><img src="/assets/reddit-two.svg" alt=""></a>'
         '<a class="reddit-icon reddit-three" href="https://www.reddit.com/user/Lower-Lingonberry-40/" aria-label="Reddit: Lower-Lingonberry-40"><img src="/assets/reddit-three.svg" alt=""></a>'
-        '<a class="disclaimer-icon" href="/Disclaimer/" aria-label="Disclaimer" title="Disclaimer"><span aria-hidden="true">ⓘ</span></a>'
+        '<a class="disclaimer-icon"' + (' aria-current="page"' if route == "/Disclaimer/" else "") + ' href="/Disclaimer/" aria-label="Disclaimer" title="Disclaimer"><span aria-hidden="true">ⓘ</span></a>'
         '</span><span>© 2017–YEAR Awakenology</span></div>', "html.parser").div
     copyright = inner.find("span", string=lambda text: text and "© 2017–YEAR" in text)
     if copyright:
@@ -215,7 +217,7 @@ def transform(source: str, route: str) -> str:
         _dedupe_meta(soup, "name", "robots", "noindex,follow")
 
     _inject_runtime_fragments(soup, rules.route)
-    _replace_footer(soup)
+    _replace_footer(soup, route)
     if rules.route == "/" and not soup.find("script", string=lambda text: text and '"@type":"WebSite"' in text):
         soup.head.append(BeautifulSoup(
             '<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Awakenology","url":"https://awakenology.space/"}</script>',
