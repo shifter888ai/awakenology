@@ -65,6 +65,43 @@ html[data-aw-theme="dark"] .site-header a.brand,html[data-aw-theme="dark"] .site
  #awakenology-action-nav .nav-icon-link svg{width:15px;height:15px;max-width:15px;max-height:15px}
  #awakenology-site-footer{padding:20px 14px}
 }
+
+/* Canonical Worker header/footer CSS synchronized with worker.js. */
+/* Canonical shared header: page CSS cannot alter its structure or geometry. */
+#awakenology-site-header{--ao-header-text:#0D0F12;--ao-header-muted:#626270;--ao-header-divider:rgba(98,98,112,.45);display:block!important;box-sizing:border-box!important;width:100%!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-bottom:1px solid var(--ao-header-divider)!important;background:transparent!important;color:var(--ao-header-text)!important;font-family:Arial,sans-serif!important;font-size:14px!important;font-weight:400!important;line-height:20px!important;text-align:left!important}
+#awakenology-site-header:before,#awakenology-site-header:after{content:none!important;display:none!important}
+#awakenology-site-header #awakenology-header-inner{box-sizing:border-box!important;width:100%!important;max-width:900px!important;min-height:70px!important;margin:0 auto!important;padding:20px 24px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:24px!important}
+#awakenology-site-header #awakenology-brand{box-sizing:border-box!important;display:inline-flex!important;flex:0 0 auto!important;align-items:center!important;gap:9px!important;margin:0!important;padding:0!important;border:0!important;background:none!important;color:var(--ao-header-text)!important;font-family:Georgia,"Times New Roman",serif!important;font-size:25px!important;font-weight:700!important;line-height:29px!important;text-decoration:none!important;white-space:nowrap!important}
+#awakenology-site-header #awakenology-brand .brand-symbol{display:block!important;width:29px!important;height:29px!important;flex:0 0 29px!important;color:inherit!important}
+#awakenology-site-header #awakenology-nav{box-sizing:border-box!important;display:flex!important;flex:0 1 auto!important;align-items:center!important;justify-content:flex-end!important;flex-wrap:wrap!important;gap:16px!important;margin:0!important;padding:0!important;border:0!important;background:none!important;color:var(--ao-header-text)!important;font-family:Arial,sans-serif!important;font-size:14px!important;font-weight:400!important;line-height:20px!important}
+#awakenology-site-header #awakenology-nav a{box-sizing:border-box!important;display:inline-block!important;margin:0!important;padding:0 0 2px!important;border:0!important;background:none!important;color:inherit!important;font-family:inherit!important;font-size:14px!important;font-weight:400!important;line-height:20px!important;text-decoration:none!important}
+#awakenology-site-header #awakenology-nav a[aria-current="page"]{text-decoration:underline!important;text-decoration-thickness:2px!important;text-underline-offset:5px!important}
+#awakenology-site-header #awakenology-nav a:hover{color:inherit!important;text-decoration:underline!important;text-underline-offset:5px!important}
+#awakenology-site-header #awakenology-nav a.nav-icon-link{display:inline-flex!important;width:24px!important;height:26px!important;flex:0 0 24px!important;align-items:center!important;justify-content:center!important;padding:0 0 2px!important}
+#awakenology-site-header #awakenology-nav a.nav-icon-link svg{display:block!important;width:19px!important;height:19px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+#awakenology-site-header #awakenology-nav a.nav-icon-link[aria-current="page"]{border-bottom:2px solid currentColor!important;text-decoration:none!important;padding-bottom:0!important}
+#awakenology-site-header #awakenology-language-nav,#awakenology-site-header #awakenology-action-nav{box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;gap:18px!important;margin:0!important;padding:0!important;border:0!important;background:none!important;color:inherit!important;font:inherit!important}
+#awakenology-site-header #awakenology-action-nav{gap:14px!important}
+#awakenology-site-header #awakenology-nav .nav-divider{display:block!important;width:1px!important;height:22px!important;flex:0 0 1px!important;margin:0 2px!important;padding:0!important;border:0!important;background:var(--ao-header-divider)!important;user-select:none!important}
+html[data-aw-theme="dark"] #awakenology-site-header{--ao-header-text:#fff;--ao-header-muted:#b8b8c3;--ao-header-divider:rgba(184,184,195,.5)}
+html[data-aw-theme="dark"] #awakenology-site-header,html[data-aw-theme="dark"] #awakenology-site-header #awakenology-brand,html[data-aw-theme="dark"] #awakenology-site-header #awakenology-nav{color:var(--ao-header-text)!important}
+@media(max-width:700px){#awakenology-site-header #awakenology-header-inner{display:block!important;min-height:0!important;padding:18px 18px 14px!important}#awakenology-site-header #awakenology-brand{margin:0 0 12px!important}#awakenology-site-header #awakenology-nav{justify-content:flex-start!important;gap:12px!important}#awakenology-site-header #awakenology-language-nav{gap:12px!important}#awakenology-site-header #awakenology-action-nav{gap:12px!important}#awakenology-site-header #awakenology-nav .nav-divider{height:20px!important;margin:0!important}}
+
+/* Canonical shared footer: fixed outer spacing and typography on every page. */
+#awakenology-site-footer{display:block!important;box-sizing:border-box!important;width:100%!important;margin:0!important;padding:20px 14px!important;border:0!important;border-top:1px solid var(--line,#ddd)!important;background:transparent!important;color:var(--aw-muted,#626270)!important;font-family:Arial,sans-serif!important;font-size:13px!important;font-weight:400!important;line-height:18px!important;text-align:center!important}
+#awakenology-site-footer #awakenology-footer-inner{box-sizing:border-box!important;width:100%!important;max-width:760px!important;margin:0 auto!important;padding:0!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;gap:10px!important;color:inherit!important;font-family:Arial,sans-serif!important;font-size:13px!important;font-weight:400!important;line-height:18px!important}
+#awakenology-site-footer #awakenology-footer-links{box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:12px!important;flex-wrap:wrap!important;margin:0!important;padding:0!important;font-family:Arial,sans-serif!important;font-size:13px!important;font-weight:400!important;line-height:18px!important}
+#awakenology-site-footer #awakenology-footer-links a{color:inherit!important;font-family:Arial,sans-serif!important;font-size:13px!important;font-weight:400!important;line-height:18px!important;text-decoration:none!important}
+#awakenology-site-footer #awakenology-footer-links a:hover{text-decoration:none!important}
+#awakenology-site-footer #awakenology-footer-links a[aria-current="page"]{text-decoration:underline!important;text-decoration-thickness:2px!important;text-underline-offset:4px!important}
+#awakenology-site-footer .contact-icon,#awakenology-site-footer .disclaimer-icon{display:inline-flex!important;width:24px!important;height:24px!important;flex:0 0 24px!important;align-items:center!important;justify-content:center!important;line-height:1!important}
+#awakenology-site-footer .contact-icon{font-size:24px!important}
+@media(min-width:701px){#awakenology-site-footer .contact-icon span{font-size:20px!important;line-height:1!important}}
+#awakenology-site-footer .disclaimer-icon{font-size:20px!important}
+#awakenology-site-footer .reddit-icon{display:inline-flex!important;width:24px!important;height:24px!important;flex:0 0 24px!important;align-items:center!important;justify-content:center!important;line-height:1!important}
+#awakenology-site-footer .reddit-icon img{display:block!important;width:20px!important;height:20px!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important}
+html[data-aw-theme="dark"] #awakenology-site-footer{color:#b8b8c3!important}
+
 </style>
 <style id="awakenology-cn-style">
 #awakenology-cn-toggle{position:fixed;top:10px;right:54px;z-index:2147483647;border:1px solid #888;border-radius:14px;min-width:30px;height:30px;padding:4px 7px;font:14px/20px Arial,sans-serif;cursor:pointer;background:#fff;color:#222;box-shadow:0 1px 4px #0004}
