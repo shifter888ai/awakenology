@@ -248,5 +248,16 @@ class ParityTests(unittest.TestCase):
                 self.assertIn(rule, css)
         self.assertNotIn("#awakenology-action-nav .nav-icon-link svg{display:block;width:300px", css)
 
+    def test_worker_header_footer_css_is_synchronized(self):
+        from pathlib import Path
+        root = Path(__file__).resolve().parents[2]
+        worker = (root / "worker.js").read_text(encoding="utf-8")
+        theme = (root / "scripts/static_html_poc/assets/theme.html").read_text(encoding="utf-8")
+        start = worker.index("/* Canonical shared header: page CSS cannot alter its structure or geometry. */")
+        end = worker.index("</style>", start)
+        canonical = worker[start:end]
+        self.assertEqual(theme.count(canonical), 1)
+        self.assertIn("/* Canonical Worker header/footer CSS synchronized with worker.js. */", theme)
+
 if __name__ == "__main__":
     unittest.main()
