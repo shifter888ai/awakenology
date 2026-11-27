@@ -228,5 +228,25 @@ class ParityTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate(SOURCE, SOURCE.replace('style="color:red"', 'style="color:blue"'))
 
+
+    def test_shared_header_footer_layout_and_svg_bounds(self):
+        from pathlib import Path
+        root = Path(__file__).resolve().parent
+        css = (root / "assets" / "theme.html").read_text(encoding="utf-8")
+        required = (
+            "#awakenology-header-inner{",
+            "#awakenology-brand{",
+            "#awakenology-nav{",
+            "#awakenology-language-nav,#awakenology-action-nav{",
+            "#awakenology-action-nav .nav-icon-link svg{display:block;width:16px;height:16px",
+            "#awakenology-footer-inner{",
+            "#awakenology-footer-links{",
+            "@media(max-width:700px)",
+        )
+        for rule in required:
+            with self.subTest(rule=rule):
+                self.assertIn(rule, css)
+        self.assertNotIn("#awakenology-action-nav .nav-icon-link svg{display:block;width:300px", css)
+
 if __name__ == "__main__":
     unittest.main()
