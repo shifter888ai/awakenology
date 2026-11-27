@@ -1,10 +1,13 @@
 name: Deploy isolated Awakenology static preview
 
 on:
-  push:
-    branches:
-      - plan/awakenology-build-time-html-migration
   workflow_dispatch:
+    inputs:
+      confirm_preview_deploy:
+        description: "Confirm deployment to the isolated workers.dev preview only"
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -15,6 +18,7 @@ concurrency:
 
 jobs:
   build-and-deploy:
+    if: github.event_name == 'workflow_dispatch' && inputs.confirm_preview_deploy == true
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
