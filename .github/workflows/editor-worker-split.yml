@@ -1,0 +1,37 @@
+name: Editor Worker split checks
+
+on:
+  pull_request:
+    paths:
+      - "worker.js"
+      - "editor-worker.js"
+      - "src/editor-runtime.js"
+      - "wrangler.editor.jsonc"
+      - "editor/**"
+      - "scripts/static_html_poc/build_editor.py"
+      - "tests/test_editor_worker_split.py"
+      - ".github/workflows/editor-worker-split.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check Worker module syntax
+        run: |
+          node --input-type=module --check < worker.js
+          node --input-type=module --check < src/editor-runtime.js
+          node --input-type=module --check < editor-worker.js
+      - name: Run Editor split tests
+        run: python -m unittest discover -s tests -p "test_editor_worker_split.py" -v
+      - name: Build allow-listed Editor assets
+        run: python scripts/static_html_poc/build_editor.py --output "$RUNNER_TEMP/dist-editor"
