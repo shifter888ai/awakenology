@@ -10,7 +10,7 @@ from check_real_pages import FIXTURES, ROOT
 from html_transformer import transform
 from page_rules import SITE
 
-VIEWPORTS = {"desktop": (1440, 900), "iphone": (390, 844)}
+VIEWPORTS = {"desktop": (1440, 900), "narrow-desktop": (500, 900), "iphone": (390, 844)}
 JS = """() => {
  const node = document.querySelector('article.article, .article, main');
  if (!node) throw new Error('Missing article/main');
