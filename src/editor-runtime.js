@@ -169,7 +169,7 @@ async function createGitHubInstallationToken(env) {
   const now = Math.floor(Date.now() / 1000);
   const header = toBase64Url(new TextEncoder().encode(JSON.stringify({ alg: "RS256", typ: "JWT" })));
   const claims = toBase64Url(new TextEncoder().encode(JSON.stringify({ iat: now - 30, exp: now + 540, iss: String(env.GITHUB_APP_ID) })));
-  const keyBytes = pemPrivateKeyBytes(env.GITHUB_APP_PRIVATE_KEY.replace(/\\n/g, "\n"));
+  const keyBytes = pemPrivateKeyBytes(env.GITHUB_APP_PRIVATE_KEY.replace(/\n/g, "\n"));
   const key = await crypto.subtle.importKey("pkcs8", keyBytes, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]);
   const signature = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(header + "." + claims));
   const appJwt = header + "." + claims + "." + toBase64Url(new Uint8Array(signature));
@@ -356,7 +356,7 @@ export async function handleEditorRequest(request, env, editorHost) {
   const isEditorApi = url.pathname === "/api/editor/create-draft-pr";
   const isPublishApi = url.pathname === "/api/editor/publish-page";
   if (url.pathname === "/robots.txt") {
-    return new Response("User-agent: *\\nDisallow: /\\n", {
+    return new Response("User-agent: *\nDisallow: /\n", {
       headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "public, max-age=3600", "X-Robots-Tag": "noindex, nofollow, noarchive" }
     });
   }
