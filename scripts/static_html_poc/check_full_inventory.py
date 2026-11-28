@@ -14,7 +14,7 @@ from html_transformer import transform
 from page_rules import rules_for
 from parity_validator import validate, validate_metadata, fingerprint
 
-PRIVATE_PREFIXES = ("editor/", "github-editor/", "scripts/", "tests/", "docs/", ".github/")
+PRIVATE_PREFIXES = ("editor/", "github-editor/", "Internal/", "New-Article/", "scripts/", "tests/", "docs/", ".github/")
 PRIVATE_NAMES = {"404.html"}
 REPORT = ROOT / "static-html-full-inventory-report.json"
 

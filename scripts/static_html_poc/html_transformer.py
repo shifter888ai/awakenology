@@ -11,6 +11,8 @@ from bs4 import BeautifulSoup, NavigableString
 from page_rules import SITE, rules_for
 
 ASSETS = Path(__file__).parent / "assets"
+HEADER_TEMPLATE = (ASSETS / "header.html").read_text(encoding="utf-8")
+FOOTER_TEMPLATE = (ASSETS / "footer.html").read_text(encoding="utf-8")
 DEFAULT_OG_IMAGE = (
     "https://images.squarespace-cdn.com/content/v1/5e46c1ddfed24d662efc3817/"
     "6e1d6965-c6b2-49d0-971e-4d42f9bcfaaa/Cosmic%2BEye.jpg"
@@ -131,24 +133,62 @@ def _inject_runtime_fragments(soup, route):
                 anchor.insert(0, BeautifulSoup(BRAND_SVG, "html.parser").svg)
 
 
-def _replace_footer(soup):
+def _replace_header(soup, route):
+    headers = soup.select("header.site-header")
+    if len(headers) != 1:
+        raise ValueError(f"Expected exactly one global header.site-header; found {len(headers)}")
+
+    language_items = (("/English/", "English"), ("/Japanese/", "日本語"), ("/Chinese/", "中文"))
+    language_links = []
+    for href, label in language_items:
+        active = route == href or (href == "/Chinese/" and route == "/Coach_cn/")
+        current = ' aria-current="page"' if active else ""
+        language_links.append(f'<a href="{href}"{current}>{label}</a>')
+
+    action_items = (
+        ("/search/", "Search", '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>'),
+        ("/ask/", "Ask", '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.6 9a2.5 2.5 0 1 1 4.2 1.8c-1.1 1-1.8 1.3-1.8 2.7"></path><path d="M12 17.2h.01"></path></svg>'),
+        ("/links/", "Links", '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13.5a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.7 1.7"></path><path d="M14 10.5a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.7-1.7"></path></svg>'),
+    )
+    action_links = []
+    for href, label, icon in action_items:
+        active = route == href or (href == "/search/" and route == "/ai-search/")
+        current = ' aria-current="page"' if active else ""
+        action_links.append(
+            f'<a class="nav-icon-link" href="{href}" aria-label="{label}" title="{label}"{current}>{icon}</a>'
+        )
+
+    markup = (
+        HEADER_TEMPLATE
+        .replace("{{BRAND_SVG}}", BRAND_SVG)
+        .replace("{{LANGUAGE_LINKS}}", "".join(language_links))
+        .replace("{{ACTION_LINKS}}", "".join(action_links))
+    )
+    if "{{" in markup or "}}" in markup:
+        raise ValueError("Unresolved shared header template placeholder")
+    markup = re.sub(r">\s+<", "><", markup).strip()
+    generated_header = BeautifulSoup(markup, "html.parser").header
+    headers[0].replace_with(generated_header)
+
+
+def _replace_footer(soup, route):
     footer = soup.find("footer")
     if not footer:
         return
-    footer["class"] = ["footer", "site-footer"]
-    footer.clear()
-    inner = BeautifulSoup(
-        '<div class="footer-inner"><span class="footer-links">'
-        '<a class="contact-icon" href="mailto:contact@awakenology.org" aria-label="Email Awakenology" title="Contact"><span aria-hidden="true">✉</span></a>'
-        '<a class="reddit-icon reddit-one" href="https://www.reddit.com/r/EscapeReincarnation/" aria-label="Reddit: Escape Reincarnation"><img src="/assets/reddit-one.svg" alt=""></a>'
-        '<a class="reddit-icon reddit-two" href="https://www.reddit.com/r/EscapePrisonPlanet/" aria-label="Reddit: Escape Prison Planet"><img src="/assets/reddit-two.svg" alt=""></a>'
-        '<a class="reddit-icon reddit-three" href="https://www.reddit.com/user/Lower-Lingonberry-40/" aria-label="Reddit: Lower-Lingonberry-40"><img src="/assets/reddit-three.svg" alt=""></a>'
-        '<a class="disclaimer-icon" href="/Disclaimer/" aria-label="Disclaimer" title="Disclaimer"><span aria-hidden="true">ⓘ</span></a>'
-        '</span><span>© 2017–YEAR Awakenology</span></div>', "html.parser").div
-    copyright = inner.find("span", string=lambda text: text and "© 2017–YEAR" in text)
-    if copyright:
-        copyright.string.replace_with("© 2017–" + __import__("datetime").datetime.now(__import__("datetime").timezone.utc).year.__str__() + " Awakenology")
-    footer.append(inner)
+    contact_active = ' aria-current="page"' if route == "/Contact/" else ""
+    disclaimer_active = ' aria-current="page"' if route == "/Disclaimer/" else ""
+    year = __import__("datetime").datetime.now(__import__("datetime").timezone.utc).year
+    markup = (
+        FOOTER_TEMPLATE
+        .replace("{{CONTACT_ACTIVE}}", contact_active)
+        .replace("{{DISCLAIMER_ACTIVE}}", disclaimer_active)
+        .replace("{{YEAR}}", str(year))
+    )
+    if "{{" in markup or "}}" in markup:
+        raise ValueError("Unresolved shared footer template placeholder")
+    markup = re.sub(r">\s+<", "><", markup).strip()
+    generated_footer = BeautifulSoup(markup, "html.parser").footer
+    footer.replace_with(generated_footer)
 
 
 # These two legacy articles contain markup that BeautifulSoup rewrites on serialization.
@@ -215,7 +255,8 @@ def transform(source: str, route: str) -> str:
         _dedupe_meta(soup, "name", "robots", "noindex,follow")
 
     _inject_runtime_fragments(soup, rules.route)
-    _replace_footer(soup)
+    _replace_header(soup, rules.route)
+    _replace_footer(soup, rules.route)
     if rules.route == "/" and not soup.find("script", string=lambda text: text and '"@type":"WebSite"' in text):
         soup.head.append(BeautifulSoup(
             '<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Awakenology","url":"https://awakenology.space/"}</script>',

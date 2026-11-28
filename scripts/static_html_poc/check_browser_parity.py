@@ -10,12 +10,30 @@ from check_real_pages import FIXTURES, ROOT
 from html_transformer import transform
 from page_rules import SITE
 
-VIEWPORTS = {"desktop": (1440, 900), "iphone": (390, 844)}
+VIEWPORTS = {"desktop": (1440, 900), "narrow-desktop": (500, 900), "iphone": (390, 844)}
 JS = """() => {
  const node = document.querySelector('article.article, .article, main');
  if (!node) throw new Error('Missing article/main');
  const rect = node.getBoundingClientRect();
  const imgs = [...node.querySelectorAll('img')];
+ const box = el => {
+   if (!el) return null;
+   const r = el.getBoundingClientRect();
+   const s = getComputedStyle(el);
+   return {x: Math.round(r.x * 10) / 10, y: Math.round(r.y * 10) / 10,
+           width: Math.round(r.width * 10) / 10, height: Math.round(r.height * 10) / 10,
+           display: s.display};
+ };
+ const headerElement = document.querySelector('#awakenology-site-header');
+ const headerLayout = headerElement ? {
+   header: box(headerElement),
+   inner: box(headerElement.querySelector('#awakenology-header-inner')),
+   brand: box(headerElement.querySelector('#awakenology-brand')),
+   nav: box(headerElement.querySelector('#awakenology-nav')),
+   language: box(headerElement.querySelector('#awakenology-language-nav')),
+   actions: box(headerElement.querySelector('#awakenology-action-nav')),
+   icons: [...headerElement.querySelectorAll('#awakenology-action-nav svg')].map(box)
+ } : null;
  const semantic = n => n.nodeType === 3 ? (n.textContent.trim() ? ["text", n.textContent] : null) :
    n.nodeType === 1 ? [n.tagName.toLowerCase(), [...n.attributes].map(a => [a.name, a.value]).sort((a,b) => a[0].localeCompare(b[0])), [...n.childNodes].map(semantic).filter(x => x !== null)] : null;
  return {
@@ -25,8 +43,10 @@ JS = """() => {
    brokenImages: imgs.filter(x => x.complete && x.naturalWidth === 0).map(x => x.getAttribute('src')),
    title: document.title,
    bodyClasses: [...document.body.classList].sort(),
-   footer: document.querySelector('footer') ? JSON.stringify(semantic(document.querySelector('footer'))) : null,
+   header: document.querySelector('header#awakenology-site-header') ? JSON.stringify(semantic(document.querySelector('header#awakenology-site-header'))) : null,
+   footer: document.querySelector('footer#awakenology-site-footer') ? JSON.stringify(semantic(document.querySelector('footer#awakenology-site-footer'))) : null,
    horizontalOverflow: document.documentElement.scrollWidth > innerWidth + 2,
+   headerLayout,
    mainVisible: rect.width > 0 && rect.height > 0,
    theme: document.documentElement.getAttribute('data-theme'),
    links: [...document.querySelectorAll('header a[href], nav a[href]')].map(x => [x.textContent.trim(), x.getAttribute('href')]),
@@ -55,6 +75,32 @@ async def snapshot(browser, html, url, width, height, label, output, route):
                 raise AssertionError(f"{label}: generated document did not load")
         await page.wait_for_timeout(1200)
         data = await page.evaluate(JS)
+        # Guard the exact failure mode seen in the isolated preview: unbounded inline SVG
+        # icons and missing flex layout can turn the three header controls into giant shapes.
+        layout = data.get("headerLayout")
+        required_layout = ("header", "inner", "brand", "nav", "language", "actions")
+        if not layout or any(layout.get(key) is None for key in required_layout):
+            raise AssertionError(f"{label}: incomplete shared-header layout")
+        if layout["header"]["width"] > width + 2 or layout["inner"]["width"] > width + 2:
+            raise AssertionError(f"{label}: shared header exceeds viewport: {layout}")
+        if layout["nav"]["display"] != "flex":
+            raise AssertionError(f"{label}: shared navigation is not flex: {layout['nav']}")
+        # Flex items are blockified by CSSOM, so browsers may report "flex"
+        # instead of the authored "inline-flex" for these span children.
+        allowed_group_display = {"flex", "inline-flex"}
+        if layout["language"]["display"] not in allowed_group_display or layout["actions"]["display"] not in allowed_group_display:
+            raise AssertionError(f"{label}: language/action groups lost flex layout: {layout}")
+        if len(layout["icons"]) != 3:
+            raise AssertionError(f"{label}: expected three bounded action icons, found {len(layout['icons'])}")
+        for index, icon in enumerate(layout["icons"], start=1):
+            if not (0 < icon["width"] <= 40 and 0 < icon["height"] <= 40):
+                raise AssertionError(f"{label}: header SVG {index} has unsafe dimensions: {icon}")
+        if width >= 701:
+            brand_center = layout["brand"]["y"] + layout["brand"]["height"] / 2
+            nav_center = layout["nav"]["y"] + layout["nav"]["height"] / 2
+            if abs(brand_center - nav_center) > 20:
+                raise AssertionError(f"{label}: desktop brand/navigation are vertically misaligned: {layout}")
+        data["headerLayoutCheck"] = "passed"
         # Responsive headers may duplicate this legacy ID; target the visible control.
         theme_button = page.locator("#awakenology-theme-toggle:visible").first
         if await page.locator("#awakenology-theme-toggle:visible").count() < 1:
@@ -188,7 +234,7 @@ async def main():
                                              "differences": ["visual mismatch exceeds tolerance"],
                                              "details": observation})
                         # Browser serialization normalizes HTML independently of BeautifulSoup.
-                        fields = ("article", "text", "images", "title", "bodyClasses", "footer", "links", "mainVisible", "theme", "themeRoundTrip", "returnTop", "chineseRoundTrip")
+                        fields = ("article", "text", "images", "title", "bodyClasses", "header", "footer", "links", "mainVisible", "theme", "themeRoundTrip", "returnTop", "chineseRoundTrip")
                         diff = [field for field in fields if live.get(field) != built.get(field)]
                         if built["brokenImages"]:
                             diff.append("generated brokenImages: " + str(built["brokenImages"]))
@@ -215,7 +261,7 @@ async def main():
     Path("browser-parity-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     if failures:
         raise SystemExit(f"{len(failures)} browser parity comparisons differ; no deployment authorized")
-    print("18 browser DOM, interaction and tolerance-gated screenshot comparisons passed.")
+    print(f"{len(visual)} browser DOM, interaction and tolerance-gated screenshot comparisons passed.")
 
 if __name__ == "__main__":
     asyncio.run(main())

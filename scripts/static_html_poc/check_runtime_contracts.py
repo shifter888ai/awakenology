@@ -4,14 +4,17 @@
 No cookies, credentials, writes, or authenticated actions are used.
 """
 import json
+import os
 from bs4 import BeautifulSoup
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
+from pathlib import Path
 
 PUBLIC = "https://awakenology.space"
 EDITOR = "https://editor.awakenology.space"
 REPORT = "static-html-runtime-contract-report.json"
+is_pull_request = os.environ.get("GITHUB_EVENT_NAME") == "pull_request"
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
@@ -83,10 +86,12 @@ def main():
             "Worker source permanently redirects the legacy route to /search/")
         local_contract(
             "Search page remains noindex", "search/index.html",
-            lambda source: source.count("<search-bar-snippet") == 1
+            lambda source: source.count('id="search-form"') == 1
+                and source.count('id="search-query"') == 1
+                and source.count('id="search-results"') == 1
                 and "<chat-page-snippet" not in source
                 and 'name="robots" content="noindex,follow"' in source,
-            "Search source contains only the Search widget and remains noindex")
+            "Search source contains its dedicated search interface and remains noindex")
         local_contract(
             "Ask page remains noindex", "ask/index.html",
             lambda source: source.count("<chat-page-snippet") == 1
