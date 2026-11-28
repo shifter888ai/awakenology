@@ -1,6 +1,6 @@
 # Editor Worker dependency inventory and implementation boundary
 
-**Status:** design and inventory only  
+**Status:** shared-runtime extraction implemented on this branch; isolated staging not deployed  
 **Branch:** `plan/awakenology-build-time-html-migration`  
 **Production impact:** none  
 **Deployment authorization:** isolated `workers.dev` staging only, after a separate explicit go-ahead; no production hostname, route, DNS, OAuth, or secret changes.
@@ -55,7 +55,7 @@ Recommended shape:
 1. Extract the Editor-only authentication, GitHub API, draft-PR, publish-page, and route-handler code into a shared module (for example `src/editor-runtime.js`). Keep the implementation behavior unchanged during extraction.
 2. Have the existing public `worker.js` import and call that shared module for the existing Editor hostname. The public Worker continues to deny Editor paths on all non-Editor hostnames.
 3. Add a dedicated `editor-worker.js` that imports the same shared module and serves only the Editor hostname / isolated staging hostname. It must return deliberate 404s for unrelated paths and must never fall through to public site assets or Contact/AI routes.
-4. Replace the hard-coded host constant inside the extracted runtime with a validated environment value (for example `EDITOR_HOST`), with the current production hostname retained as the production default. Callback URLs, redirects, and same-origin checks must all use the same resolved host.
+4. Pass the Editor hostname into the shared runtime. The production Worker supplies its existing fixed `editor.awakenology.space` hostname; the dedicated staging entry point accepts only its own `*.workers.dev` request hostname. Callback URLs, redirects, and same-origin checks all use that same resolved host.
 5. Give the dedicated Editor Worker its own Wrangler config and an Editor-only asset directory mounted at `/editor` using `assets.base_path`. Keep the existing browser paths unchanged.
 6. Use a unique `workers.dev` name for staging, with no `routes`, `custom_domain`, production secrets, production OAuth credentials, or production GitHub App private key.
 
@@ -77,6 +77,8 @@ Without staging OAuth/session/GitHub App secrets, staging can safely test:
 A successful OAuth round-trip and a real draft-PR/publish operation cannot be proven without a separately registered staging OAuth application and isolated GitHub App credentials. Do not point staging at the production OAuth callback or copy production secrets into staging.
 
 ## 6. Implementation gates
+
+The branch now contains `src/editor-runtime.js`, the public Worker integration, a dedicated `editor-worker.js`, an Editor-only Wrangler config, an allow-list build script, and a focused CI workflow. The dedicated staging Worker has not been deployed. The new CI workflow is validating syntax, route/config isolation, and the four-file bundle.
 
 Before any isolated deployment:
 
