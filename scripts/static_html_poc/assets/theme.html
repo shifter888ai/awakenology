@@ -35,37 +35,6 @@ html[data-aw-theme="dark"] #awakenology-theme-toggle,html[data-aw-theme="dark"] 
 .site-header a.brand .brand-symbol{display:block;width:29px;height:29px;flex:0 0 29px;color:inherit!important}
 html[data-aw-theme="dark"] .site-header a.brand,html[data-aw-theme="dark"] .site-header a.brand .brand-symbol{color:#fff!important}
 
-/* Shared static header/footer templates: explicit layout and icon sizing. */
-#awakenology-site-header{width:100%;border-bottom:1px solid var(--line,#34343b)}
-#awakenology-header-inner{max-width:900px;margin:0 auto;padding:22px 24px 18px;display:flex;align-items:center;justify-content:space-between;gap:24px}
-#awakenology-brand{display:inline-flex;align-items:center;gap:9px;flex:0 0 auto;font-family:Georgia,"Times New Roman",serif;font-size:25px;font-weight:700;line-height:1.2;color:var(--aw-text,#fff)!important;text-decoration:none!important}
-#awakenology-brand .brand-symbol{display:block;width:29px;height:29px;min-width:29px;flex:0 0 29px;color:inherit}
-#awakenology-nav{display:flex;align-items:center;justify-content:flex-end;gap:16px;min-width:0;font-size:14px}
-#awakenology-language-nav,#awakenology-action-nav{display:flex;align-items:center;gap:16px}
-#awakenology-nav a{display:inline-flex;align-items:center;justify-content:center;color:var(--aw-text,#fff);text-decoration:none;white-space:nowrap}
-#awakenology-nav a:hover{text-decoration:underline;text-underline-offset:4px}
-#awakenology-nav a[aria-current="page"]{text-decoration:underline;text-underline-offset:4px}
-#awakenology-nav .nav-divider{display:block;width:1px;height:20px;background:var(--aw-muted,#777);opacity:.5}
-#awakenology-action-nav .nav-icon-link{width:28px;height:28px;flex:0 0 28px;border:1px solid currentColor;border-radius:50%;opacity:.88}
-#awakenology-action-nav .nav-icon-link svg{display:block;width:16px;height:16px;max-width:16px;max-height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;overflow:visible}
-#awakenology-site-footer{border-top:1px solid var(--line,#34343b);padding:24px;color:var(--aw-muted,#b8b8c3)}
-#awakenology-footer-inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;font-size:13px;text-align:center}
-#awakenology-footer-links{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
-#awakenology-site-footer a{color:inherit}
-#awakenology-site-footer .contact-icon,#awakenology-site-footer .disclaimer-icon{display:inline-flex;width:24px;height:24px;align-items:center;justify-content:center;font-size:20px;line-height:1;text-decoration:none}
-#awakenology-site-footer .reddit-icon{display:inline-flex;width:24px;height:24px;flex:0 0 24px;align-items:center;justify-content:center;overflow:hidden}
-#awakenology-site-footer .reddit-icon img{display:block;width:20px;height:20px;max-width:100%;max-height:100%;object-fit:contain}
-@media(max-width:700px){
- #awakenology-header-inner{display:block;padding:18px 18px 14px}
- #awakenology-brand{margin-bottom:12px;font-size:23px}
- #awakenology-nav{justify-content:flex-start;flex-wrap:wrap;gap:10px 14px}
- #awakenology-language-nav,#awakenology-action-nav{gap:12px}
- #awakenology-nav .nav-divider{height:18px}
- #awakenology-action-nav .nav-icon-link{width:26px;height:26px;flex-basis:26px}
- #awakenology-action-nav .nav-icon-link svg{width:15px;height:15px;max-width:15px;max-height:15px}
- #awakenology-site-footer{padding:20px 14px}
-}
-
 /* Canonical Worker header/footer CSS synchronized with worker.js. */
 /* Canonical shared header: page CSS cannot alter its structure or geometry. */
 #awakenology-site-header{--ao-header-text:#0D0F12;--ao-header-muted:#626270;--ao-header-divider:rgba(98,98,112,.45);display:block!important;box-sizing:border-box!important;width:100%!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-bottom:1px solid var(--ao-header-divider)!important;background:transparent!important;color:var(--ao-header-text)!important;font-family:Arial,sans-serif!important;font-size:14px!important;font-weight:400!important;line-height:20px!important;text-align:left!important}
