@@ -85,8 +85,11 @@ async def snapshot(browser, html, url, width, height, label, output, route):
             raise AssertionError(f"{label}: shared header exceeds viewport: {layout}")
         if layout["nav"]["display"] != "flex":
             raise AssertionError(f"{label}: shared navigation is not flex: {layout['nav']}")
-        if layout["language"]["display"] != "inline-flex" or layout["actions"]["display"] != "inline-flex":
-            raise AssertionError(f"{label}: language/action groups lost inline-flex layout: {layout}")
+        # Flex items are blockified by CSSOM, so browsers may report "flex"
+        # instead of the authored "inline-flex" for these span children.
+        allowed_group_display = {"flex", "inline-flex"}
+        if layout["language"]["display"] not in allowed_group_display or layout["actions"]["display"] not in allowed_group_display:
+            raise AssertionError(f"{label}: language/action groups lost flex layout: {layout}")
         if len(layout["icons"]) != 3:
             raise AssertionError(f"{label}: expected three bounded action icons, found {len(layout['icons'])}")
         for index, icon in enumerate(layout["icons"], start=1):
