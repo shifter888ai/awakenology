@@ -234,19 +234,17 @@ class ParityTests(unittest.TestCase):
         root = Path(__file__).resolve().parent
         css = (root / "assets" / "theme.html").read_text(encoding="utf-8")
         required = (
-            "#awakenology-header-inner{",
-            "#awakenology-brand{",
-            "#awakenology-nav{",
-            "#awakenology-language-nav,#awakenology-action-nav{",
-            "#awakenology-action-nav .nav-icon-link svg{display:block;width:16px;height:16px",
-            "#awakenology-footer-inner{",
-            "#awakenology-footer-links{",
+            "#awakenology-site-header #awakenology-header-inner{",
+            "display:flex!important;align-items:center!important;justify-content:space-between!important",
+            "#awakenology-site-header #awakenology-nav a.nav-icon-link svg{display:block!important;width:19px!important;height:19px!important",
+            "#awakenology-site-footer #awakenology-footer-inner{",
+            "#awakenology-site-footer #awakenology-footer-links{",
             "@media(max-width:700px)",
         )
         for rule in required:
             with self.subTest(rule=rule):
                 self.assertIn(rule, css)
-        self.assertNotIn("#awakenology-action-nav .nav-icon-link svg{display:block;width:300px", css)
+        self.assertNotIn("width:300px!important;height:300px!important", css)
 
     def test_worker_header_footer_css_is_synchronized(self):
         from pathlib import Path
