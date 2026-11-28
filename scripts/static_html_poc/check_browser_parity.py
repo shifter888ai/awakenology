@@ -261,7 +261,7 @@ async def main():
     Path("browser-parity-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     if failures:
         raise SystemExit(f"{len(failures)} browser parity comparisons differ; no deployment authorized")
-    print("18 browser DOM, interaction and tolerance-gated screenshot comparisons passed.")
+    print(f"{len(visual)} browser DOM, interaction and tolerance-gated screenshot comparisons passed.")
 
 if __name__ == "__main__":
     asyncio.run(main())
