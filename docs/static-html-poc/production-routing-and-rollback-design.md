@@ -149,37 +149,157 @@ The desired result is a measured reduction in public-site Worker invocations wit
 
 ## 7. Rollback plan
 
-### Before activation
+Rollback is three separate operations. Do not confuse restoring a Worker version with restoring hostname assignments, and do not confuse deleting an isolated staging Worker with rolling back production.
 
-Record and retain:
+### 7.1 Before any activation: create a recovery snapshot
 
-- Known-good production Git commit and Worker version identifier.
-- Current production Wrangler configuration and asset binding settings.
-- Existing custom-domain/route assignments for every public hostname and the Editor hostname.
-- Required Worker secret/binding names (never secret values in logs or documentation).
-- Previous public and Editor asset manifests, if any.
-- Exact deployment and rollback commands, verified in staging.
+Record and retain in the release record (never record secret values):
 
-### Staged activation
+- Known-good production Git commit and production Worker version ID.
+- Output of the production Worker's version/deployment listing, captured immediately before activation.
+- Current production Wrangler configuration, asset directory, asset binding settings, compatibility date, and relevant non-secret variable names.
+- Exact custom-domain and route assignments for every public hostname and the Editor hostname, including which Worker owns each hostname.
+- Required Worker secret/binding names and the service/resource identifiers they reference. Never copy secret values into Git, issue comments, logs, or this document.
+- Previous public and Editor asset manifests, content hashes, and a retained copy of the known-good build artifacts.
+- Current behavior evidence for the acceptance matrix in Section 5.
+- Exact pinned Wrangler version and the tested commands for the affected Worker names.
 
-1. Build the public and Editor artifacts independently and deterministically.
-2. Deploy both only to isolated Workers.dev staging names with no production custom domains/routes.
-3. Run all acceptance tests in Sections 4–6.
-4. Exercise rollback in staging and prove that the old Worker/configuration restores the previous behavior.
-5. Present test evidence, measured invocation change, and the rollback rehearsal for review.
-6. Obtain explicit approval before any production domain/route reassignment or production deployment.
+A version ID, Git commit, or Wrangler configuration by itself is not a complete recovery snapshot. The hostname-to-Worker mapping and external bindings must also be recorded.
 
-### If production cutover is later approved and fails
+### 7.2 Isolated Editor staging Worker: rollback or remove
 
-1. Stop further rollout immediately.
-2. Restore the previous known-good public Worker version/configuration and original domain/route assignments.
-3. Restore the previous Editor Worker/domain assignment if it was changed.
-4. Confirm all public hostnames resolve to the known-good service.
-5. Smoke-test homepage, English/Japanese/Chinese routes, CSS/images, Search, Ask, Contact, legacy redirect/query preservation, public Editor denial, 404, Editor robots, OAuth, logout and authenticated Editor access.
-6. Check Worker errors, 429s, Contact submissions and Editor authentication.
-7. Keep the migration candidate isolated until the cause is understood; do not retry cutover by weakening gates.
+The current isolated Editor Worker is:
+
+- Worker name: `awakenology-editor-staging`
+- Config: `wrangler.editor.jsonc`
+- Workers.dev hostname: `awakenology-editor-staging.shifter888.workers.dev`
+- Last known deployed version ID: `f7b80049-a820-4517-a5f7-fa5e67a11c20`
+
+This staging Worker has no production custom domain or route. Its current OAuth configuration is intentionally absent. The version ID above is a recorded deployment checkpoint; confirm it in the live version list before using it as a rollback target.
+
+**Inspect versions (read-only):**
+
+```powershell
+npx.cmd --yes wrangler@4.159.0 versions list --name awakenology-editor-staging
+```
+
+**Rollback to a previously recorded staging version (changes the staging deployment):**
+
+```powershell
+npx.cmd --yes wrangler@4.159.0 rollback <KNOWN_GOOD_VERSION_ID> --name awakenology-editor-staging
+```
+
+Only use a version ID confirmed in the version list. After rollback, repeat the Editor staging checks: root/login behavior, private robots response, protected Editor assets, both unauthenticated API responses, unrelated-path 404s, and production-host isolation.
+
+**If the staging Worker is no longer needed, inspect the deletion target first:**
+
+```powershell
+npx.cmd --yes wrangler@4.159.0 delete --dry-run --config wrangler.editor.jsonc
+```
+
+The dry run must identify only `awakenology-editor-staging`. If it identifies another Worker or the name is unclear, stop. Actual deletion is a separate, explicit action:
+
+```powershell
+npx.cmd --yes wrangler@4.159.0 delete --config wrangler.editor.jsonc
+```
+
+After deletion, verify that the staging Worker is absent and that all production hostnames still resolve to their pre-existing services. Deletion is cleanup, not a rollback rehearsal, and is not required to keep the staging proof available.
+
+### 7.3 Isolated static preview Worker: restore or remove
+
+The existing static preview uses:
+
+- Worker name: `awakenology-static-preview-521`
+- Config: `wrangler.preview.jsonc`
+- Workers.dev hostname: `awakenology-static-preview-521.shifter888.workers.dev`
+- Static-only asset directory: `dist/`
+
+Inspect its recent versions:
+
+```powershell
+npx.cmd --yes wrangler@4.159.0 versions list --name awakenology-static-preview-521
+```
+
+If a preview deployment needs to be reverted, select the previously recorded known-good preview version and restore it explicitly:
+
+```powershell
+npx.cmd --yes wrangler@4.159.0 rollback <KNOWN_GOOD_PREVIEW_VERSION_ID> --name awakenology-static-preview-521
+```
+
+Then repeat the preview smoke tests for the homepage, language route, Unicode article route, CSS, favicon, 404 response and noindex headers. Check the rendered desktop and mobile layouts again.
+
+Cloudflare notes that rollback can take time to propagate, and pages already loaded in a browser may continue requesting assets from the newer version. Keep the required assets compatible across the rollback window and retest after propagation.
+
+Removing this preview Worker, if it is no longer needed, is a separate cleanup decision. Use a dry-run deletion first and confirm that only the preview Worker is targeted. Never use the production `wrangler.jsonc` for staging cleanup.
+
+### 7.4 Staging rollback rehearsal: required sequence
+
+A real rehearsal needs at least two known versions for each staging Worker being tested: a recorded baseline and a later candidate. The current Editor staging deployment is the first recorded checkpoint; it has not yet demonstrated a rollback to an earlier version.
+
+For each isolated staging Worker:
+
+1. Record its currently active version ID and verify the Worker name and Workers.dev hostname.
+2. Deploy a new, harmless candidate version to that same staging Worker only, after confirming the configuration has no custom domains or routes.
+3. Verify the candidate with the relevant staging smoke tests.
+4. Roll back explicitly to the recorded baseline version ID.
+5. Wait for propagation, then rerun the same smoke tests and compare results with the baseline evidence.
+6. Record both version IDs, command output, timestamps, and test results in the PR.
+7. Stop if the baseline cannot be restored or any smoke test regresses.
+
+Do not rehearse by changing production routes, domains, DNS, secrets, or OAuth settings. A staging rollback rehearsal does not authorize a production cutover.
+
+### 7.5 If a future production cutover is separately approved and fails
+
+First identify which production Worker and hostname assignments were actually changed. Stop further rollout and use the recovery snapshot from Section 7.1.
+
+**A. Restore the previous code/asset version for each affected Worker**
+
+For the existing public Worker, use its recorded known-good version ID:
+
+```powershell
+npx.cmd --yes wrangler@4.159.0 rollback <KNOWN_GOOD_PUBLIC_WORKER_VERSION_ID> --name awakenology
+```
+
+If the Editor Worker or another production Worker was separately changed, restore that Worker to its own recorded known-good version. Never substitute one Worker's version ID for another.
+
+A Wrangler version rollback creates a new deployment using the selected Worker version. It does not restore local Git files. Confirm that the selected version still has compatible bindings and required assets before relying on it.
+
+**B. Restore the original hostname assignments**
+
+If any custom domain or route was reassigned to a new Worker, restore the exact pre-cutover assignment from the recovery snapshot in the Cloudflare dashboard. Verify all public hostnames and the Editor hostname individually. A Worker version rollback alone does not move a hostname back from a different Worker.
+
+Do not change DNS unless the approved cutover actually changed DNS and the recovery snapshot shows the previous value. Prefer restoring the exact previous configuration over making speculative DNS edits.
+
+**C. Verify external resources and configuration**
+
+Confirm that required bindings, secrets, variables, email configuration, and other external resources still exist and are attached to the correct Worker. A code-version rollback does not recreate deleted resources or restore changed external data. Never print or copy secret values during verification.
+
+**D. Verify service recovery**
+
+After Cloudflare propagation, smoke-test:
+
+- Every public hostname: homepage, English/Japanese/Traditional Chinese routes, CSS, JavaScript, images, fonts and representative documents.
+- Search and Ask pages and their client-side behavior.
+- Contact form validation, Turnstile and a controlled successful submission where safe.
+- Both legacy AI Search redirects, including query-string preservation.
+- Public-host Editor and publishing denial paths.
+- Missing-page and missing-asset 404 behavior.
+- Editor robots response, OAuth, logout, authenticated assets, draft PR and publishing workflow.
+- Worker errors, 429s, Contact delivery and Editor authentication.
+
+Keep the migration candidate isolated until the incident is understood. Do not retry the cutover by weakening acceptance gates.
+
+### 7.6 Rollback limitations and stop conditions
+
+- Cloudflare Worker rollback changes the active deployment for that Worker; it does not automatically restore a hostname that was reassigned to a different Worker.
+- Bindings and connected resources are not generally rewound by a code rollback. Do not delete or mutate resources needed by the known-good version.
+- Cloudflare documents that rollback can take time to propagate and that older pages may still request newer assets. Asset compatibility must be considered.
+- Only the most recent 100 published Worker versions are available for rollback; preserve the release snapshot and do not assume an old version remains available indefinitely.
+- Deleting a staging Worker is irreversible cleanup of that Worker and its associated resources; it is not equivalent to restoring an earlier version.
+- If the target Worker, version ID, hostname mapping, or resource state cannot be positively identified, stop and do not execute a rollback or deletion.
 
 Rollback must restore the complete host-to-Worker/asset mapping, not merely revert a source-code commit. A code rollback alone may not restore changed custom-domain assignments or static asset bindings.
+
 
 ## 8. Stop conditions
 
