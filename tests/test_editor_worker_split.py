@@ -33,7 +33,7 @@ class EditorWorkerSplitTests(unittest.TestCase):
         self.assertIn("verifyEditorSession(request, env)", RUNTIME)
         self.assertIn('url.pathname === "/api/editor/create-draft-pr"', RUNTIME)
         self.assertIn('url.pathname === "/api/editor/publish-page"', RUNTIME)
-        self.assertIn("status: 401", RUNTIME)
+        self.assertIn("}, 401)", RUNTIME)
         self.assertIn('editorHeaders.set("Cache-Control", "private, no-store")', RUNTIME)
         self.assertIn('return new Response("Not found", { status: 404', RUNTIME)
 
