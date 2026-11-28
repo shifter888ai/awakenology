@@ -34,4 +34,6 @@ jobs:
       - name: Run Editor split tests
         run: python -m unittest discover -s tests -p "test_editor_worker_split.py" -v
       - name: Build allow-listed Editor assets
-        run: python scripts/static_html_poc/build_editor.py --output "$RUNNER_TEMP/dist-editor"
+        run: python scripts/static_html_poc/build_editor.py
+      - name: Validate isolated Wrangler bundle without deploying
+        run: npx --yes wrangler@4.159.0 deploy --dry-run --config wrangler.editor.jsonc
